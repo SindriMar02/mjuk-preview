@@ -18,6 +18,10 @@
   const px = (u, w) => (u ? u + '?w=' + w + '&ssl=1' : '');
   const usd = n => '$' + (n || 0).toLocaleString('en-US');
   const byHandle = {}; CM.all.forEach(p => (byHandle[p.h] = p));
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  /* a price that changes should be seen to change: a 220ms blur crossfade, the shell's ease */
+  const pulse = el => { if (reduced || !el.animate) return;
+    el.animate([{ filter: 'blur(3px)', opacity: .55 }, { filter: 'blur(0)', opacity: 1 }], { duration: 220, easing: 'cubic-bezier(.19,1,.22,1)' }); };
 
   /* ── the real pompoms, from her own catalogue: 25 photographed colours ── */
   // one typo on her live shop ("Grapefrui0") corrected here for the swatch label only
@@ -36,7 +40,7 @@
     let hat = null, count = 0, active = 0, chosen = [null, null];
 
     grid.innerHTML = POMS.map((s, i) =>
-      `<button type="button" class="sw" data-i="${i}" aria-pressed="false" title="${s.kind}, ${s.name}, ${usd(s.price)}">
+      `<button type="button" class="sw" data-i="${i}" style="--i:${i}" aria-pressed="false" title="${s.kind}, ${s.name}, ${usd(s.price)}">
          <img src="${px(s.img, 160)}" alt="" loading="lazy"/><span>${s.name}</span></button>`).join('');
 
     const price = () => (hat ? hat.p : 0) + chosen.slice(0, count).reduce((n, s) => n + (s ? s.price : 0), 0);
@@ -52,7 +56,8 @@
       });
       $('#pomPick').hidden = count === 0;
       $$('.sw', grid).forEach(b => b.setAttribute('aria-pressed', String(chosen.slice(0, count).some(s => s && s.h === POMS[+b.dataset.i].h))));
-      total.innerHTML = `${usd(price())}<small>${count === 0 ? 'hat only' : count === 1 ? 'hat and one pompom' : 'hat and two pompoms'}</small>`;
+      const nextTotal = `${usd(price())}<small>${count === 0 ? 'hat only' : count === 1 ? 'hat and one pompom' : 'hat and two pompoms'}</small>`;
+      if (total.innerHTML !== nextTotal) { total.innerHTML = nextTotal; if (hat) pulse(total); }
       add.disabled = !ready();
       add.textContent = count === 0 ? 'Add the hat as it is' : ready() ? 'Add to bag' : 'Pick a colour first';
     };
@@ -131,7 +136,8 @@
     const priceEl = $('#cfgPrice'), noteEl = $('#cfgNote'), lenEl = $('#cfgLen'), done = $('#cfgDone');
     const total = () => SHAPE[v('shape')].base + FABRIC[v('fabric')].up + (v('trim') === 'yes' ? TRIM : 0);
     const paint = () => {
-      priceEl.textContent = usd(total());
+      const next = usd(total());
+      if (priceEl.textContent !== next) { priceEl.textContent = next; pulse(priceEl); }
       const adj = v('len') === 'adjusted';   // never name a field "length": form.elements.length is the control count
       lenEl.hidden = !adj;
       noteEl.textContent = adj ? 'Indicative. We confirm the price with the length.' : 'The whole price. Ready within two hours in the shop.';
@@ -151,6 +157,22 @@
       done.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'nearest' });
     });
     paint();
+
+    /* ── scroll reveals for the section, on the shell's .rv grammar ──
+       app.js reveals .head already; the copy, the image and each fieldset follow it, 70ms apart,
+       and the lead comes up word by word inside line masks. */
+    const lead = $('.made__lead');
+    if (lead) {
+      lead.innerHTML = lead.textContent.trim().split(/\s+/).map((w, i) => `<span class="w"><span style="--i:${i}">${w}</span></span>`).join(' ');
+    }
+    const items = [lead, ...$$('.made__copy > p:not(.made__lead), .made__im, .cfg > fieldset, .cfg__sum')].filter(Boolean);
+    items.forEach((el, i) => { el.classList.add('rv'); el.style.setProperty('--d', `${Math.min(i, 6) * 70}ms`); });
+    if (reduced || !('IntersectionObserver' in window)) items.forEach(el => el.classList.add('in'));
+    else {
+      const io = new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } }),
+        { rootMargin: '0px 0px -10% 0px', threshold: .05 });
+      items.forEach(el => io.observe(el));
+    }
   }
 
   /* ════════════════════ 3 · LANGUAGE SWITCH (demo of the shape) ════════════════════

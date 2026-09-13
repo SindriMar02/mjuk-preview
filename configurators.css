@@ -11,7 +11,8 @@
 .seg input{position:absolute;inset:0;opacity:0;pointer-events:none}
 .seg span{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border:1px solid var(--line);
   font-family:var(--ff-m);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);
-  background:transparent;transition:border-color .32s var(--ease),background .32s var(--ease),color .32s var(--ease)}
+  background:transparent;transition:border-color .24s var(--ease),background .24s var(--ease),color .24s var(--ease),transform .16s var(--ease)}
+.seg label:active span{transform:scale(.98)}
 .seg span small{font-size:10px;letter-spacing:.04em;text-transform:none;color:var(--dim)}
 .seg input:checked+span{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .seg input:checked+span small{color:var(--faint)}
@@ -25,18 +26,22 @@ fieldset{border:0;padding:0;margin:0;min-width:0}
 .pom{border:0;padding:0;margin:auto;background:var(--bg);color:var(--ink);
   width:min(560px,calc(100vw - 32px));max-height:min(92vh,880px);overflow:auto;
   box-shadow:0 8px 24px rgba(23,18,26,.14)}
-.pom::backdrop{background:rgba(23,18,26,.38)}
 @media(min-width:720px){.pom{border-radius:2px}}
 @media(max-width:719px){.pom{width:100vw;max-width:none;max-height:none;height:100dvh;margin:0}}
-.pom[open]{animation:pomIn .42s var(--ease) both}
-.pom[open]::backdrop{animation:pomFade .42s var(--ease) both}
-@keyframes pomIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-@keyframes pomFade{from{opacity:0}to{opacity:1}}
-@media(prefers-reduced-motion:reduce){.pom[open],.pom[open]::backdrop{animation-duration:.01s}}
+.pom{opacity:0;transform:translateY(12px) scale(.985);
+  transition:opacity .2s var(--ease),transform .2s var(--ease),overlay .2s allow-discrete,display .2s allow-discrete}
+.pom[open]{opacity:1;transform:none;transition-duration:.38s}
+@starting-style{.pom[open]{opacity:0;transform:translateY(12px) scale(.985)}}
+.pom::backdrop{background:rgba(23,18,26,0);transition:background .2s var(--ease),overlay .2s allow-discrete,display .2s allow-discrete}
+.pom[open]::backdrop{background:rgba(23,18,26,.38);transition-duration:.38s}
+@starting-style{.pom[open]::backdrop{background:rgba(23,18,26,0)}}
+@media(prefers-reduced-motion:reduce){.pom,.pom[open]{transform:none}}
 
 .pom__form{display:grid;gap:22px;padding:22px clamp(18px,4vw,30px) 26px}
 .pom__x{position:absolute;top:10px;right:10px;width:40px;height:40px;border:0;background:transparent;color:var(--ink);
-  font-size:22px;line-height:1;cursor:pointer}
+  font-size:22px;line-height:1;cursor:pointer;transition:transform .16s var(--ease),color .2s}
+.pom__x:active{transform:scale(.92)}
+@media(hover:hover){.pom__x:hover{color:var(--accent)}}
 .pom__x:focus-visible{outline:2px solid var(--accent);outline-offset:-4px}
 .pom__hat{display:grid;grid-template-columns:96px 1fr;gap:16px;align-items:center;padding-right:36px}
 .pom__hat img{width:96px;aspect-ratio:3/4;object-fit:cover;background:var(--panel)}
@@ -47,14 +52,18 @@ fieldset{border:0;padding:0;margin:0;min-width:0}
 .pom__slots{display:flex;gap:8px;flex-wrap:wrap}
 .pom__slot{display:inline-flex;align-items:center;gap:10px;padding:8px 12px 8px 8px;border:1px solid var(--line);cursor:pointer;
   font-family:var(--ff-m);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);background:transparent;
-  transition:border-color .32s var(--ease)}
+  transition:border-color .24s var(--ease),color .24s var(--ease),transform .16s var(--ease)}
+.pom__slot:active{transform:scale(.98)}
 .pom__slot.is-active{border-color:var(--ink);color:var(--ink)}
-.pom__slot .dot{width:22px;height:22px;border-radius:50%;background:var(--panel);object-fit:cover;flex:0 0 auto}
-.pom__slot.is-set .dot{outline:1px solid var(--line)}
+.pom__slot .dot{width:22px;height:22px;border-radius:50%;background:var(--panel);flex:0 0 auto;transform:scale(.72);transition:transform .28s var(--ease)}
+.pom__slot.is-set .dot{outline:1px solid var(--line);transform:scale(1)}
 .pom__grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:10px}
-.sw{position:relative;border:0;padding:0;background:transparent;cursor:pointer;display:grid;gap:6px;justify-items:center}
+.sw{position:relative;border:0;padding:0;background:transparent;cursor:pointer;display:grid;gap:6px;justify-items:center;
+  animation:swIn .32s var(--ease) both;animation-delay:calc(var(--i,0) * 14ms)}
+@keyframes swIn{from{opacity:0;transform:translateY(6px)}}
 .sw img{width:56px;height:56px;border-radius:50%;object-fit:cover;object-position:center;background:var(--panel);
-  transition:transform .32s var(--ease),box-shadow .32s var(--ease)}
+  transition:transform .24s var(--ease),box-shadow .24s var(--ease)}
+.sw:active img{transform:scale(.94)}
 .sw span{font-family:var(--ff-m);font-size:9px;letter-spacing:.04em;text-transform:uppercase;color:var(--dim);text-align:center;line-height:1.25;max-width:64px}
 .sw[aria-pressed="true"] img{box-shadow:0 0 0 2px var(--bg),0 0 0 3.5px var(--ink)}
 .sw[aria-pressed="true"] span{color:var(--ink)}
@@ -65,9 +74,10 @@ fieldset{border:0;padding:0;margin:0;min-width:0}
 .pom__total{font-family:var(--ff-s);font-size:24px;line-height:1}
 .pom__total small{display:block;font-family:var(--ff-m);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-top:6px}
 .pom__add{border:0;background:var(--ink);color:var(--bg);padding:14px 22px;font-family:var(--ff-m);font-size:11px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;
-  transition:background .32s var(--ease),opacity .32s var(--ease)}
+  transition:background .2s var(--ease),opacity .2s var(--ease),transform .16s var(--ease)}
+.pom__add:not(:disabled):active{transform:scale(.97)}
 .pom__add:disabled{opacity:.35;cursor:not-allowed}
-.pom__add:not(:disabled):hover{background:var(--accent)}
+@media(hover:hover){.pom__add:not(:disabled):hover{background:var(--accent)}}
 .pom__add:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 
 /* the card button that asks, so a plain hat is never added silently */
@@ -88,9 +98,11 @@ fieldset{border:0;padding:0;margin:0;min-width:0}
 .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
 .tile{position:relative;cursor:pointer}
 .tile input{position:absolute;inset:0;opacity:0;pointer-events:none}
-.tile .t{display:block;border:1px solid var(--line);transition:border-color .32s var(--ease)}
+.tile .t{display:block;border:1px solid var(--line);transition:border-color .24s var(--ease),transform .16s var(--ease)}
+.tile:active .t{transform:scale(.985)}
 .tile .t__im{display:block;aspect-ratio:1;overflow:hidden;background:var(--panel)}
-.tile img{display:block;width:100%;height:100%;object-fit:cover;transform:scale(1.55);transform-origin:50% 45%}
+.tile img{display:block;width:100%;height:100%;object-fit:cover;transform:scale(1.55);transform-origin:50% 45%;transition:transform .5s var(--ease)}
+.tile input:checked+.t img{transform:scale(1.64)}
 .tile .t__m{display:flex;justify-content:space-between;gap:8px;padding:9px 10px;font-family:var(--ff-m);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
 .tile .t__m small{color:var(--dim);letter-spacing:.02em;text-transform:none}
 .tile input:checked+.t{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
@@ -101,12 +113,14 @@ fieldset{border:0;padding:0;margin:0;min-width:0}
 .cfg__price{font-family:var(--ff-s);font-size:clamp(30px,3.4vw,44px);line-height:1;letter-spacing:-.01em}
 .cfg__note{grid-column:1;font-family:var(--ff-m);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
 .cfg__go{grid-column:2;grid-row:1/3;align-self:center;border:0;background:var(--ink);color:var(--bg);padding:16px 24px;
-  font-family:var(--ff-m);font-size:11px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:background .32s var(--ease)}
-.cfg__go:hover{background:var(--accent)}
+  font-family:var(--ff-m);font-size:11px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:background .2s var(--ease),transform .16s var(--ease)}
+.cfg__go:active{transform:scale(.97)}
+@media(hover:hover){.cfg__go:hover{background:var(--accent)}}
 .cfg__go:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 .cfg__len{font-size:13px;line-height:1.55;color:var(--ink);max-width:48ch}
 .cfg__len[hidden]{display:none}
-.cfg__done{border:1px solid var(--ink);padding:22px;display:grid;gap:10px}
+.cfg__done{border:1px solid var(--ink);padding:22px;display:grid;gap:10px;transition:opacity .38s var(--ease),transform .38s var(--ease)}
+@starting-style{.cfg__done{opacity:0;transform:translateY(10px)}}
 .cfg__done[hidden]{display:none}
 .cfg__done h3{font-family:var(--ff-s);font-size:22px;font-weight:500;line-height:1.15}
 .cfg__done p{font-size:13px;line-height:1.55;max-width:52ch}
@@ -122,4 +136,13 @@ fieldset{border:0;padding:0;margin:0;min-width:0}
 
 .seg span em,.t__m em{font-style:normal}
 #pomPick{display:grid;gap:14px}
+#pomPick[hidden]{display:none}
 .pom__slot .dot{display:inline-block;background-size:cover;background-position:center}
+
+/* ── reveals, on the shell's own .rv grammar (22px rise, 1s, --ease), staggered per element ── */
+.made .rv{transition-delay:var(--d,0ms)}
+.made__lead .w{display:inline-block;overflow:hidden;vertical-align:bottom;padding-bottom:.08em;margin-bottom:-.08em}
+.made__lead .w>span{display:inline-block;transform:translateY(110%);transition:transform .8s var(--ease);transition-delay:calc(var(--i,0) * 14ms)}
+.made__lead.in .w>span{transform:none}
+.made__lead.rv{transform:none}   /* the words carry this reveal, not the block */
+@media(prefers-reduced-motion:reduce){.made__lead .w>span{transform:none}.sw{animation:none}}
