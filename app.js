@@ -56,7 +56,8 @@
           const label = String(v.s).split('/')[0].trim() || v.s;
           return `<button class="sz" data-h="${esc(p.h)}" data-s="${esc(label)}" title="${esc(v.s)}${v.a ? '' : ' — sold out'}"${v.a ? '' : ' disabled'}>${label}</button>`;
         }).join('')
-      : `<button class="sz sz--solo" data-h="${esc(p.h)}" data-s="">Add to bag</button>`;
+      // a plain hat (no pompom in its name) asks about pompoms instead of being added silently
+      : `<button class="sz sz--solo${p.tyk === 'hats' && !/pom ?pom/i.test(p.t) ? ' pom-ask' : ''}" data-h="${esc(p.h)}" data-s="">Add to bag</button>`;
     return `<article class="prod rv${hasAlt ? ' has-alt' : ''}">
       <div class="prod__im">
         <span class="prod__ix">${String(i + 1).padStart(2, '0')}</span>
@@ -116,7 +117,7 @@
   });
 
   const totalCount = $('#totalCount');
-  if (totalCount) totalCount.textContent = (CM.totalCount || 0) + ' pieces in stock';
+  if (totalCount) totalCount.textContent = (CM.totalCount || 0) + ' pieces';
 
   /* ── editorial stills that live in the markup rather than a rail ── */
   const campImg = $('#campImg');
@@ -192,12 +193,13 @@
     if (bagGo) bagGo.disabled = n === 0;
     if (!bagItems) return;
     bagItems.innerHTML = n === 0
-      ? `<p class="bag__empty">Your bag is empty.<br>Pick a size on any piece to add it.</p>`
+      ? `<p class="bag__empty">Your bag is empty.<br>Add any piece to it.</p>`
       : lines.map((l, i) => `<div class="bag__it">
           <div class="bag__im"><img src="${px(l.img, 240)}" alt="${esc(l.t)}"/></div>
           <div>
             <div class="bag__n">${l.t}</div>
             ${l.s ? `<div class="bag__sz">Size ${l.s}</div>` : ''}
+            ${l.x ? `<div class="bag__x2">${l.x.label}</div>` : ''}
             <div class="bag__qty">
               <button data-q="-1" data-i="${i}" aria-label="Decrease quantity">−</button>
               <span>${l.q}</span>
@@ -216,27 +218,28 @@
     document.documentElement.style.overflow = on ? 'hidden' : '';
     if (lenis) { on ? lenis.stop() : lenis.start(); }
   };
-  function addToBag(handle, size, btn) {
+  function addToBag(handle, size, btn, extra) {
     const p = byHandle[handle]; if (!p) return;
-    const key = handle + '|' + size;
+    const key = handle + '|' + size + (extra ? '|' + extra.k : '');
     const hit = lines.find(l => l.k === key);
-    if (hit) hit.q++; else lines.push({ k: key, h: handle, t: p.t, s: size, p: p.p, img: p.img[0], q: 1 });
+    if (hit) hit.q++; else lines.push({ k: key, h: handle, t: p.t, s: size, p: p.p + (extra ? extra.price : 0), img: p.img[0], q: 1, x: extra || null });
     save(); renderBag(); openBag(true);
     if (btn) { btn.classList.add('added'); setTimeout(() => btn.classList.remove('added'), 700); }
   }
   document.addEventListener('click', e => {
     const sz = e.target.closest('.sz');
-    if (sz && !sz.disabled) { e.preventDefault(); addToBag(sz.dataset.h, sz.dataset.s || '', sz); return; }
+    if (sz && !sz.disabled && !sz.classList.contains('pom-ask')) { e.preventDefault(); addToBag(sz.dataset.h, sz.dataset.s || '', sz); return; }
     if (e.target.closest('#bagBtn')) { openBag(true); return; }
     if (e.target.closest('#bagClose') || e.target.closest('#bagScrim')) { openBag(false); return; }
     const q = e.target.closest('[data-q]');
     if (q) { const l = lines[+q.dataset.i]; if (l) { l.q += +q.dataset.q; if (l.q < 1) lines.splice(+q.dataset.i, 1); save(); renderBag(); } return; }
     const rm = e.target.closest('[data-rm]');
     if (rm) { lines.splice(+rm.dataset.rm, 1); save(); renderBag(); return; }
-    if (e.target.closest('#bagGo')) { if (bagItems) bagItems.innerHTML = `<p class="bag__empty">Checkout is not wired up in this prototype.<br>It would hand off to Shopify checkout here.</p>`; }
+    if (e.target.closest('#bagGo')) { if (bagItems) bagItems.innerHTML = `<p class="bag__empty">Checkout is not wired up in this prototype.<br>It would hand off to your WooCommerce checkout here, on the same address.</p>`; }
   });
   addEventListener('keydown', e => { if (e.key === 'Escape' && bagEl && bagEl.getAttribute('aria-hidden') === 'false') openBag(false); });
   renderBag();
+  window.CMBag = { add: addToBag, open: openBag };
 
   const nf = $('#newsForm');
   if (nf) nf.addEventListener('submit', e => { e.preventDefault(); const v = $('#newsEmail').value.trim(), m = $('#newsMsg'); const ok = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v); m.textContent = ok ? 'You’re in. See you at Laugavegur 7.' : 'Enter a valid email.'; if (ok) nf.reset(); });

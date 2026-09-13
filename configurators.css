@@ -1,0 +1,125 @@
+/* ══════════════════════════════════════════════════════════════
+   MJÚK — the two configurators
+   1. Pompom chooser: a <dialog> opened when a plain hat goes in the bag.
+   2. Made for you: shape → fabric → trim → one price.
+   Uses the shell's own tokens; adds nothing to the palette.
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── shared field primitives ─────────────────────────────────── */
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg label{position:relative;cursor:pointer}
+.seg input{position:absolute;inset:0;opacity:0;pointer-events:none}
+.seg span{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border:1px solid var(--line);
+  font-family:var(--ff-m);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);
+  background:transparent;transition:border-color .32s var(--ease),background .32s var(--ease),color .32s var(--ease)}
+.seg span small{font-size:10px;letter-spacing:.04em;text-transform:none;color:var(--dim)}
+.seg input:checked+span{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.seg input:checked+span small{color:var(--faint)}
+.seg input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
+@media(hover:hover){.seg input:not(:checked)+span:hover{border-color:var(--ink)}}
+
+.legend{font-family:var(--ff-m);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin:0 0 10px}
+fieldset{border:0;padding:0;margin:0;min-width:0}
+
+/* ── 1 · pompom dialog ───────────────────────────────────────── */
+.pom{border:0;padding:0;margin:auto;background:var(--bg);color:var(--ink);
+  width:min(560px,calc(100vw - 32px));max-height:min(92vh,880px);overflow:auto;
+  box-shadow:0 8px 24px rgba(23,18,26,.14)}
+.pom::backdrop{background:rgba(23,18,26,.38)}
+@media(min-width:720px){.pom{border-radius:2px}}
+@media(max-width:719px){.pom{width:100vw;max-width:none;max-height:none;height:100dvh;margin:0}}
+.pom[open]{animation:pomIn .42s var(--ease) both}
+.pom[open]::backdrop{animation:pomFade .42s var(--ease) both}
+@keyframes pomIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes pomFade{from{opacity:0}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){.pom[open],.pom[open]::backdrop{animation-duration:.01s}}
+
+.pom__form{display:grid;gap:22px;padding:22px clamp(18px,4vw,30px) 26px}
+.pom__x{position:absolute;top:10px;right:10px;width:40px;height:40px;border:0;background:transparent;color:var(--ink);
+  font-size:22px;line-height:1;cursor:pointer}
+.pom__x:focus-visible{outline:2px solid var(--accent);outline-offset:-4px}
+.pom__hat{display:grid;grid-template-columns:96px 1fr;gap:16px;align-items:center;padding-right:36px}
+.pom__hat img{width:96px;aspect-ratio:3/4;object-fit:cover;background:var(--panel)}
+.pom__name{font-family:var(--ff-s);font-size:20px;line-height:1.15;text-wrap:balance}
+.pom__why{font-size:13px;line-height:1.5;color:var(--ink);max-width:40ch;margin-top:8px}
+.pom__why b{font-weight:400;color:var(--accent)}
+
+.pom__slots{display:flex;gap:8px;flex-wrap:wrap}
+.pom__slot{display:inline-flex;align-items:center;gap:10px;padding:8px 12px 8px 8px;border:1px solid var(--line);cursor:pointer;
+  font-family:var(--ff-m);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);background:transparent;
+  transition:border-color .32s var(--ease)}
+.pom__slot.is-active{border-color:var(--ink);color:var(--ink)}
+.pom__slot .dot{width:22px;height:22px;border-radius:50%;background:var(--panel);object-fit:cover;flex:0 0 auto}
+.pom__slot.is-set .dot{outline:1px solid var(--line)}
+.pom__grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:10px}
+.sw{position:relative;border:0;padding:0;background:transparent;cursor:pointer;display:grid;gap:6px;justify-items:center}
+.sw img{width:56px;height:56px;border-radius:50%;object-fit:cover;object-position:center;background:var(--panel);
+  transition:transform .32s var(--ease),box-shadow .32s var(--ease)}
+.sw span{font-family:var(--ff-m);font-size:9px;letter-spacing:.04em;text-transform:uppercase;color:var(--dim);text-align:center;line-height:1.25;max-width:64px}
+.sw[aria-pressed="true"] img{box-shadow:0 0 0 2px var(--bg),0 0 0 3.5px var(--ink)}
+.sw[aria-pressed="true"] span{color:var(--ink)}
+@media(hover:hover){.sw:hover img{transform:scale(1.06)}}
+.sw:focus-visible{outline:0}.sw:focus-visible img{box-shadow:0 0 0 2px var(--bg),0 0 0 3.5px var(--accent)}
+
+.pom__foot{position:sticky;bottom:0;background:var(--bg);display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 0 4px;margin-bottom:-4px;border-top:1px solid var(--line)}
+.pom__total{font-family:var(--ff-s);font-size:24px;line-height:1}
+.pom__total small{display:block;font-family:var(--ff-m);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-top:6px}
+.pom__add{border:0;background:var(--ink);color:var(--bg);padding:14px 22px;font-family:var(--ff-m);font-size:11px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;
+  transition:background .32s var(--ease),opacity .32s var(--ease)}
+.pom__add:disabled{opacity:.35;cursor:not-allowed}
+.pom__add:not(:disabled):hover{background:var(--accent)}
+.pom__add:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+
+/* the card button that asks, so a plain hat is never added silently */
+.sz.pom-ask::after{content:" +";color:var(--accent)}
+
+/* ── 2 · made for you ────────────────────────────────────────── */
+.made{padding:clamp(56px,9vw,120px) var(--pad)}
+.made__grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(28px,5vw,72px);align-items:start}
+@media(max-width:900px){.made__grid{grid-template-columns:1fr}}
+.made__lead{font-family:var(--ff-s);font-size:clamp(22px,2.6vw,34px);line-height:1.2;text-wrap:balance;max-width:24ch}
+.made__copy p{max-width:52ch;margin-top:18px;font-size:14px;line-height:1.6}
+.made__aside{margin-top:26px;max-width:46ch;font-size:13px;line-height:1.6;color:var(--dim)}
+.made__im{margin-top:28px;aspect-ratio:4/5;background:var(--panel);overflow:hidden}
+.made__im img{width:100%;height:100%;object-fit:cover;display:block}
+
+.cfg{display:grid;gap:30px;border-top:1px solid var(--line);padding-top:26px}
+.cfg fieldset{display:grid;gap:12px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.tile{position:relative;cursor:pointer}
+.tile input{position:absolute;inset:0;opacity:0;pointer-events:none}
+.tile .t{display:block;border:1px solid var(--line);transition:border-color .32s var(--ease)}
+.tile .t__im{display:block;aspect-ratio:1;overflow:hidden;background:var(--panel)}
+.tile img{display:block;width:100%;height:100%;object-fit:cover;transform:scale(1.55);transform-origin:50% 45%}
+.tile .t__m{display:flex;justify-content:space-between;gap:8px;padding:9px 10px;font-family:var(--ff-m);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
+.tile .t__m small{color:var(--dim);letter-spacing:.02em;text-transform:none}
+.tile input:checked+.t{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.tile input:focus-visible+.t{outline:2px solid var(--accent);outline-offset:2px}
+@media(hover:hover){.tile input:not(:checked)+.t:hover{border-color:var(--ink)}}
+
+.cfg__sum{display:grid;grid-template-columns:1fr auto;gap:8px 20px;align-items:end;padding-top:22px;border-top:1px solid var(--line)}
+.cfg__price{font-family:var(--ff-s);font-size:clamp(30px,3.4vw,44px);line-height:1;letter-spacing:-.01em}
+.cfg__note{grid-column:1;font-family:var(--ff-m);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.cfg__go{grid-column:2;grid-row:1/3;align-self:center;border:0;background:var(--ink);color:var(--bg);padding:16px 24px;
+  font-family:var(--ff-m);font-size:11px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:background .32s var(--ease)}
+.cfg__go:hover{background:var(--accent)}
+.cfg__go:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.cfg__len{font-size:13px;line-height:1.55;color:var(--ink);max-width:48ch}
+.cfg__len[hidden]{display:none}
+.cfg__done{border:1px solid var(--ink);padding:22px;display:grid;gap:10px}
+.cfg__done[hidden]{display:none}
+.cfg__done h3{font-family:var(--ff-s);font-size:22px;font-weight:500;line-height:1.15}
+.cfg__done p{font-size:13px;line-height:1.55;max-width:52ch}
+.cfg__done dl{display:grid;grid-template-columns:auto 1fr;gap:4px 16px;font-size:12px}
+.cfg__done dt{font-family:var(--ff-m);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);padding-top:2px}
+
+/* the bag line for a configured hat */
+.bag__x2{font-family:var(--ff-m);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin-top:3px}
+
+/* language switch */
+.nav__lang{font-family:var(--ff-m);font-size:11px;letter-spacing:.1em;text-transform:uppercase;background:transparent;border:0;color:var(--ink);cursor:pointer;padding:6px 8px}
+.nav__lang b{font-weight:400;color:var(--dim)}
+
+.seg span em,.t__m em{font-style:normal}
+#pomPick{display:grid;gap:14px}
+.pom__slot .dot{display:inline-block;background-size:cover;background-position:center}
