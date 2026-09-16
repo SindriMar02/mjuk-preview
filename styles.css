@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════════════════════════
-   HJÁ HRAFNHILDI — porcelain fashion shell (Hildur Yeoman recipe)
+   MJÚK ICELAND — porcelain shell (the studio's fashion recipe, tuned for a maker whose product is colour)
    Porcelain ground · ONE deep petrol accent, sampled from stock.
    ══════════════════════════════════════════════════════════════ */
 
@@ -485,3 +485,11 @@ section{padding:clamp(70px,12vw,180px) 0;position:relative}
 .fcar__btn--l{left:clamp(4px,3vw,40px)}
 .fcar__btn--r{right:clamp(4px,3vw,40px)}
 @media(max-width:640px){.fcar__btn{display:none}}
+
+/* ══ FOOTER CREDIT — the studio's standard markup, set in this shell's own faces ══ */
+.sndr{display:inline-flex;align-items:baseline;gap:9px;min-height:44px;color:var(--dim);text-decoration:none;transition:color .3s}
+.sndr .mono{margin-right:2px}
+.sndr__mark{font-family:var(--ff-s);font-size:15px;letter-spacing:.02em;line-height:1;color:var(--ink)}
+.sndr__mark i{font-style:normal;color:var(--accent);font-size:11px;vertical-align:.12em}
+.sndr__studio{font-family:var(--ff-m);font-size:10px;letter-spacing:.12em;line-height:1;color:var(--dim)}
+@media(hover:hover){.sndr:hover .sndr__mark,.sndr:hover .sndr__studio{color:var(--accent)}}

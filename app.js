@@ -1,6 +1,6 @@
 /* ══════════════════════════════════════════════════════════════
-   COPPERMINE — app.js
-   Vertical-bars bg + rolling-list ported from 21st.dev to vanilla.
+   MJÚK ICELAND — app.js
+   Porcelain shell: vertical-bars bg + rolling-list ported from 21st.dev to vanilla.
    ══════════════════════════════════════════════════════════════ */
 (() => {
   const CM = window.CM || { all: [] };
@@ -33,7 +33,8 @@
      `w=`, not Shopify's `width=`. Stored URLs are kept bare so this is the one
      place that decides a resolution. */
   const px = (u, w) => (u ? u + '?w=' + w + '&ssl=1' : '');
-  const isk = n => '$' + (n || 0).toLocaleString('en-US');
+  // her shop prices in USD; the name says what it prints
+  const usd = n => '$' + (n || 0).toLocaleString('en-US');
   // the fibre is the product story here, so the card states the real composition
   const catLabel = p => (p.comp || p.v || p.ty || '');
   const editorial = (CM.campaign || []);
@@ -46,7 +47,7 @@
     // otherwise the card zooms on hover rather than swapping in another product.
     const hasAlt = !!(p.img[1] && p.img[1] !== p.img[0]);
     const main = px(p.img[0], 620), alt = px(p.img[1] || p.img[0], 620);
-    const price = p.cp ? `<span class="prod__price"><s>${isk(p.cp)}</s>${isk(p.p)}</span>` : `<span class="prod__price">${isk(p.p)}</span>`;
+    const price = p.cp ? `<span class="prod__price"><s>${usd(p.cp)}</s>${usd(p.p)}</span>` : `<span class="prod__price">${usd(p.p)}</span>`;
     // chip shows just the size token ("S / Navy Blue" → "S"); full variant kept for the bag.
     // MJÚK's pieces are one-size, so the sized branch is unused here — and the "Add"
     // rubric only earns its place when it labels a ROW of chips. With a single
@@ -180,8 +181,8 @@
   const bagEl = $('#bag'), bagItems = $('#bagItems'), bagCount = $('#bagCount'),
         bagQtyEl = $('#bagQty'), bagTotal = $('#bagTotal'), bagGo = $('#bagGo');
   let lines = [];
-  try { lines = JSON.parse(localStorage.getItem('cm_bag') || '[]'); } catch (e) { lines = []; }
-  const save = () => { try { localStorage.setItem('cm_bag', JSON.stringify(lines)); } catch (e) {} };
+  try { lines = JSON.parse(localStorage.getItem('mjuk_bag') || '[]'); } catch (e) { lines = []; }
+  const save = () => { try { localStorage.setItem('mjuk_bag', JSON.stringify(lines)); } catch (e) {} };
   const bagN = () => lines.reduce((n, l) => n + l.q, 0);
   const bagSum = () => lines.reduce((n, l) => n + l.q * l.p, 0);
 
@@ -189,7 +190,7 @@
     const n = bagN();
     if (bagCount) bagCount.textContent = '(' + n + ')';
     if (bagQtyEl) bagQtyEl.textContent = '(' + n + ')';
-    if (bagTotal) bagTotal.textContent = isk(bagSum());
+    if (bagTotal) bagTotal.textContent = usd(bagSum());
     if (bagGo) bagGo.disabled = n === 0;
     if (!bagItems) return;
     bagItems.innerHTML = n === 0
@@ -207,7 +208,7 @@
             </div>
           </div>
           <div class="bag__right">
-            <span class="bag__p">${isk(l.q * l.p)}</span>
+            <span class="bag__p">${usd(l.q * l.p)}</span>
             <button class="bag__x" data-rm="${i}">Remove</button>
           </div>
         </div>`).join('');
@@ -240,9 +241,11 @@
   addEventListener('keydown', e => { if (e.key === 'Escape' && bagEl && bagEl.getAttribute('aria-hidden') === 'false') openBag(false); });
   renderBag();
   window.CMBag = { add: addToBag, open: openBag };
+  // the card renderer and helpers, so inner pages draw the same cards as the front page
+  window.CMUI = { prod, px, usd, byHandle, pick, catLabel };
 
   const nf = $('#newsForm');
-  if (nf) nf.addEventListener('submit', e => { e.preventDefault(); const v = $('#newsEmail').value.trim(), m = $('#newsMsg'); const ok = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v); m.textContent = ok ? 'You’re in. See you at Laugavegur 7.' : 'Enter a valid email.'; if (ok) nf.reset(); });
+  if (nf) nf.addEventListener('submit', e => { e.preventDefault(); const v = $('#newsEmail').value.trim(), m = $('#newsMsg'); const ok = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v); m.textContent = ok ? 'You’re in. New colours reach you first.' : 'Enter a valid email.'; if (ok) nf.reset(); });
   /* ══ MOBILE MENU + the sndr-studio toggle animation ══ */
   const burger = $('#burger'), menu = $('#menu');
   if (burger) {
@@ -297,7 +300,7 @@
        so these links did nothing at all. */
     $$('#menu a').forEach(a => a.addEventListener('click', e => {
       const id = a.getAttribute('href');
-      if (!id || id.length < 2) return;
+      if (!id || id[0] !== '#' || id.length < 2) return;   // inner pages link back with index.html#… — leave those to the browser
       e.preventDefault(); e.stopPropagation();
       const t = document.querySelector(id);
       setMenu(false);
@@ -354,7 +357,7 @@
   $$('a[href^="#"]').forEach(a => {
     if (a.closest('#menu')) return;                 // menu links handle themselves
     a.addEventListener('click', e => {
-      const id = a.getAttribute('href'); if (!id || id.length < 2) return;
+      const id = a.getAttribute('href'); if (!id || id[0] !== '#' || id.length < 2) return;   // inner pages link back with index.html#… — leave those to the browser
       const t = document.querySelector(id); if (!t) return;
       e.preventDefault(); goTo(t);
     });
@@ -818,6 +821,8 @@ void main() {
   const boot = () => { if (booted) return; booted = true; document.body.classList.add('ready'); shaderBackground(); choreograph(); heroIn(); if (hasGsap) ScrollTrigger.refresh(); };
   setTimeout(boot, 3600);   // fail-safe: the loader can never stick
 
+  // inner pages (body[data-page]) carry no preloader, so nothing to hold for
+  const hold = document.body.dataset.page ? 0.05 : 2.5;
   if (reduced || !hasGsap) boot();
-  else gsap.delayedCall(2.5, boot);                // hold on the glitch, then wipe
+  else gsap.delayedCall(hold, boot);               // hold on the glitch, then wipe
 })();

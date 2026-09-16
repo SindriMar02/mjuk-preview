@@ -200,10 +200,10 @@
       document.documentElement.lang = lang;
       btn.innerHTML = lang === 'is' ? '<b>EN</b> / ÍS' : 'EN / <b>ÍS</b>';
       btn.setAttribute('aria-label', lang === 'is' ? 'Switch to English' : 'Skipta yfir í íslensku');
-      try { localStorage.setItem('cm_lang', lang); } catch (e) {}
+      try { localStorage.setItem('mjuk_lang', lang); } catch (e) {}
     };
     btn.addEventListener('click', () => apply(document.documentElement.lang === 'is' ? 'en' : 'is'));
-    let saved = 'en'; try { saved = localStorage.getItem('cm_lang') || 'en'; } catch (e) {}
+    let saved = 'en'; try { saved = localStorage.getItem('mjuk_lang') || 'en'; } catch (e) {}
     if (saved === 'is') apply('is');
   }
 })();
