@@ -312,5 +312,8 @@
  "js:this piece": "þessari flík",
  "js:whether one is left on a shelf in Reykjavík.": "hvort eintak sé eftir í hillu í Reykjavík.",
  "js:{fabric}, cut from one of our blankets": "{fabric}, sniðið úr einu af teppunum okkar",
- "js:{name} is one of one, and it is already in your bag.": "{name} er eina eintakið og það er þegar í körfunni."
+ "js:{name} is one of one, and it is already in your bag.": "{name} er eina eintakið og það er þegar í körfunni.",
+ "js:Pick a colour first": "Veldu lit fyrst",
+ "js:Salmon leather at the edges": "Laxaleður í köntum",
+ "js:None": "Ekkert"
 }

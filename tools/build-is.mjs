@@ -68,6 +68,9 @@ for (const file of PAGES) {
     .replace('<html lang="en">', '<html lang="is" data-root="../">')
     // one level down: shared files come from the site root
     .replace(/(src|href)="(?!https?:|mailto:|tel:|#|\.\.\/|data:|is\/)((?:assets\/|styles\.css|pages\.css|configurators\.css|app\.js|pages\.js|configurators\.js)[^"]*)"/g, '$1="../$2"')
+    // the same for every candidate in a srcset and for inline url(), so no asset resolves under is/
+    .replace(/srcset="([^"]*)"/g, (m, v) => `srcset="${v.replace(/(^|,\s*)(assets\/)/g, '$1../$2')}"`)
+    .replace(/url\((['"]?)(assets\/)/g, 'url($1../$2')
     .replace(/<a class="nav__lang" id="langBtn"[^>]*>[\s\S]*?<\/a>/,
       `<a class="nav__lang" id="langBtn" href="../${file}" hreflang="en" lang="en" aria-label="In English"><b>EN</b> / &Iacute;S</a>`)
     // the dictionary for strings the scripts write, before the scripts that use it
@@ -79,9 +82,34 @@ for (const file of PAGES) {
     written++;
   }
 }
+// every string the scripts pass to t()/fmt() (literals, and both sides of a ternary inside one)
+// must have an Icelandic entry, or it shows in English on the Icelandic pages
+const used = new Set();
+for (const f of ['app.js', 'pages.js', 'configurators.js']) {
+  const src = fs.readFileSync(path.join(ROOT, f), 'utf8');
+  // walk each t( / fmt( call to its matching bracket, skipping strings, then keep the string
+  // literals that are results: the first argument, or a branch right after ? or :
+  for (const m of src.matchAll(/(?<![\w.$])(?:t|fmt)\(/g)) {
+    let i = m.index + m[0].length, depth = 1, prev = '(';
+    while (i < src.length && depth) {
+      const c = src[i];
+      if (c === "'" || c === '"' || c === '`') {
+        let j = i + 1; while (j < src.length && src[j] !== c) j += src[j] === '\\' ? 2 : 1;
+        if (c === "'" && (prev === '(' || prev === '?' || prev === ':') && depth === 1) used.add(src.slice(i + 1, j).replace(/\\'/g, "'"));
+        i = j + 1; prev = 'str'; continue;
+      }
+      if (c === '(') depth++; else if (c === ')') depth--;
+      if (!/\s/.test(c)) prev = c;
+      i++;
+    }
+  }
+}
+const jsMissing = [...used].filter(k => !(('js:' + k) in dict));
 // the run-time dictionary: only entries marked for scripts ("js:" keys), stripped of the prefix
 const js = Object.fromEntries(Object.entries(dict).filter(([k]) => k.startsWith('js:')).map(([k, v]) => [k.slice(3), v]));
 if (!REPORT) fs.writeFileSync(path.join(ROOT, 'assets/i18n-is.js'), 'window.CMI18N = ' + JSON.stringify(js) + ';\n');
 
-console.log(`${REPORT ? 'report only' : `wrote ${written} English + ${written} Icelandic pages, assets/i18n-is.js (${Object.keys(js).length} run-time strings)`}; untranslated static strings: ${missing.size}`);
+console.log(`${REPORT ? 'report only' : `wrote ${written} English + ${written} Icelandic pages, assets/i18n-is.js (${Object.keys(js).length} run-time strings)`}; untranslated static strings: ${missing.size}; script strings without Icelandic: ${jsMissing.length}`);
 if (missing.size) for (const [k, where] of missing) console.log(`  [${where}] ${JSON.stringify(k)}`);
+for (const k of jsMissing) console.log(`  [script] ${JSON.stringify(k)}`);
+if (missing.size || jsMissing.length) process.exitCode = 1;
