@@ -12,14 +12,16 @@
   if (!U || !page) return;
   if (window.gsap) gsap.config({ nullTargetWarn: false });   // the shell's hero choreography has no targets here
   const { prod, px, usd, byHandle } = U;
+  // Icelandic pages load window.CMI18N (tools/build-is.mjs); English pages fall through to the key
+  const t = U.t || (s => s), pieces = U.pieces || (n => `${n} piece${n === 1 ? '' : 's'}`), isIS = document.documentElement.lang === 'is';
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const Q = new URLSearchParams(location.search);
   const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
   const purl = p => 'product.html?p=' + encodeURIComponent(p.h);
-  const typeName = k => ((CM.types || []).find(t => t.key === k) || {}).name || '';
-  const fibName = k => ((CM.cats || []).find(t => t.key === k) || {}).name || '';
+  const typeName = k => t(((CM.types || []).find(x => x.key === k) || {}).name || '');
+  const fibName = k => t(((CM.cats || []).find(x => x.key === k) || {}).name || '');
   const isNew = p => (p.cats || []).includes('new');
 
   /* ── reveal: same .rv grammar as the shell, observed here because app.js
@@ -50,14 +52,14 @@
 
   /* ── the shell's card, with a link on it and an honest sold-out state ── */
   const card = (p, i, opt = {}) => {
-    const t = document.createElement('template'); t.innerHTML = prod(p, i).trim();
-    const el = t.content.firstElementChild;
+    const tpl = document.createElement('template'); tpl.innerHTML = prod(p, i).trim();
+    const el = tpl.content.firstElementChild;
     el.style.setProperty('--i', String(i % 4));
     const im = $('.prod__im', el);
     const go = document.createElement('a'); go.className = 'prod__go'; go.href = purl(p); go.setAttribute('aria-label', p.t);
     im.insertBefore(go, $('.prod__sizes', el));
     const name = $('.prod__name', el); name.innerHTML = `<a href="${purl(p)}">${esc(p.t)}</a>`;
-    if (p.oos) { el.classList.add('prod--oos'); $('.prod__sizes', el).innerHTML = '<span class="mono">Sold out</span>'; }
+    if (p.oos) { el.classList.add('prod--oos'); $('.prod__sizes', el).innerHTML = `<span class="mono">${t('Sold out')}</span>`; }
     if (opt.index === false) { const ix = $('.prod__ix', el); if (ix) ix.remove(); }
     return el;
   };
@@ -81,7 +83,7 @@
     };
     const grid = $('#pgrid'), title = $('#shopTitle'), count = $('#shopCount'), more = $('#more'), empty = $('#pgEmpty');
     const chips = (host, list, key) => {
-      host.innerHTML = list.map(c => `<button class="chip" type="button" data-v="${esc(c.key)}" aria-pressed="${st[key] === c.key}">${esc(c.name)}<small>${c.count}</small></button>`).join('');
+      host.innerHTML = list.map(c => `<button class="chip" type="button" data-v="${esc(c.key)}" aria-pressed="${st[key] === c.key}">${esc(t(c.name))}<small>${c.count}</small></button>`).join('');
       host.addEventListener('click', e => {
         const b = e.target.closest('.chip'); if (!b) return;
         st[key] = st[key] === b.dataset.v ? '' : b.dataset.v;
@@ -113,13 +115,13 @@
       else L.sort((a, b) => ((a.h in featuredRank ? featuredRank[a.h] : 1e6) - (b.h in featuredRank ? featuredRank[b.h] : 1e6)) || (a.oos - b.oos));
       return L;
     };
-    const heading = () => st.q ? `“${st.q}”` : st.sale ? 'Last of the line' : st.nw ? 'New this season' : st.type ? typeName(st.type) : st.fibre ? fibName(st.fibre) : 'Everything';
+    const heading = () => st.q ? (isIS ? `„${st.q}“` : `“${st.q}”`) : st.sale ? t('Last of the line') : st.nw ? t('New this season') : st.type ? typeName(st.type) : st.fibre ? fibName(st.fibre) : t('Everything');
     const apply = reset => {
       if (reset) st.n = 24;
       const L = list();
       title.textContent = heading();
-      document.title = heading() + ' — Shop — MJÚK Iceland';
-      count.textContent = `${L.length} piece${L.length === 1 ? '' : 's'}` + (st.stock ? '' : ' incl. sold out');
+      document.title = heading() + ' — ' + t('Shop') + ' — MJÚK Iceland';
+      count.textContent = pieces(L.length) + (st.stock ? '' : ' ' + t('incl. sold out'));
       const shown = L.slice(0, st.n);
       if (reset) fill(grid, shown);
       else { const have = grid.children.length; const add = shown.slice(have).map((p, i) => card(p, have + i)); grid.append(...add); reveal(grid); }
@@ -142,38 +144,38 @@
     const fam = familyKey(p);
     const imgs = [...new Set((p.img || []).filter(Boolean))];
 
-    $('#crumb').innerHTML = `<a href="shop.html">Shop</a><i>/</i>${p.tyk ? `<a href="shop.html?type=${esc(p.tyk)}">${esc(typeName(p.tyk))}</a><i>/</i>` : ''}<span>${esc(p.t)}</span>`;
+    $('#crumb').innerHTML = `<a href="shop.html">${t('Shop')}</a><i>/</i>${p.tyk ? `<a href="shop.html?type=${esc(p.tyk)}">${esc(typeName(p.tyk))}</a><i>/</i>` : ''}<span>${esc(p.t)}</span>`;
     const gal = $('#gal');
     gal.classList.toggle('two', imgs.length > 1);
-    gal.innerHTML = imgs.map((u, i) => `<figure class="pdp__fig rv"><img src="${px(u, 1200)}" alt="${esc(p.t)}${i ? ', detail' : ''}" ${i ? 'loading="lazy"' : 'fetchpriority="high"'}/></figure>`).join('');
+    gal.innerHTML = imgs.map((u, i) => `<figure class="pdp__fig rv"><img src="${px(u, 1200)}" alt="${esc(p.t)}${i ? ', ' + t('detail') : ''}" ${i ? 'loading="lazy"' : 'fetchpriority="high"'}/></figure>`).join('');
 
     const plainHat = p.tyk === 'hats' && !/pom ?pom/i.test(p.t);
     const price = p.cp
-      ? `<s>${usd(p.cp)}</s><span>${usd(p.p)}</span><span class="pdp__save">Save ${Math.round((1 - p.p / p.cp) * 100)}%</span>`
+      ? `<s>${usd(p.cp)}</s><span>${usd(p.p)}</span><span class="pdp__save">${t('Save')} ${Math.round((1 - p.p / p.cp) * 100)}%</span>`
       : `<span>${usd(p.p)}</span>`;
     const facts = [
-      ['Fibre', p.fib ? fibName(p.fib) : ''],
-      ['Composition', p.comp || ''],
+      [t('Fibre'), p.fib ? fibName(p.fib) : ''],
+      [t('Composition'), p.comp || ''],
       /* facts only where her own text states them: size and origin come from it, never a default */
-      ['Size', /\bone[- ]size\b/i.test(c.short + ' ' + c.long) ? 'One size' : ''],
-      ['Made', p.mi || ''],
-      ['Care', c.care ? c.care.replace(/-\s/g, ': ').replace(/\s+/g, ' ') : ''],
+      [t('Size'), /\bone[- ]size\b/i.test(c.short + ' ' + c.long) ? t('One size') : ''],
+      [t('Made'), t(p.mi || '')],
+      [t('Care'), c.care ? c.care.replace(/-\s/g, ': ').replace(/\s+/g, ' ') : ''],
       /* from her own shipping zones (tools/pull-woo.mjs), never a number written here */
-      ['Delivery', (CM.ship && CM.ship.delivery) || ''],
+      [t('Delivery'), (CM.ship && (isIS && CM.ship.deliveryIs || CM.ship.delivery)) || ''],
     ].filter(f => f[1]);
     $('#info').innerHTML = `
-      <div class="pdp__kick mono">${p.fib ? `<span>${esc(fibName(p.fib))}</span>` : ''}${p.tyk ? `<span>${esc(typeName(p.tyk))}</span>` : ''}${isNew(p) ? '<span class="is-new">New</span>' : ''}${p.cp ? '<span class="is-new">Sale</span>' : ''}</div>
+      <div class="pdp__kick mono">${p.fib ? `<span>${esc(fibName(p.fib))}</span>` : ''}${p.tyk ? `<span>${esc(typeName(p.tyk))}</span>` : ''}${isNew(p) ? `<span class="is-new">${t('New')}</span>` : ''}${p.cp ? `<span class="is-new">${t('Sale')}</span>` : ''}</div>
       <h1 class="pdp__t" id="pdpT">${esc(p.t)}</h1>
       <div class="pdp__price">${price}</div>
       ${c.short ? `<div class="pdp__short">${clean(c.short)}</div>` : ''}
       <div class="pdp__add">
         ${p.oos
-          ? `<div class="pdp__oos"><span class="mono">Sold out online</span><span>Every colourway is a limited edition. <a href="mailto:customersupport@mjukiceland.com?subject=${encodeURIComponent(p.t)}">Ask the store</a> whether one is left on a shelf in Reykjavík.</span></div>`
-          : `<button class="sz sz--solo${plainHat ? ' pom-ask' : ''}" data-h="${esc(p.h)}" data-s="">Add to bag</button>`}
-        ${plainHat && !p.oos ? `<p class="pdp__hint mono">A plain hat. <b>Pompoms are chosen in the next step</b>, none, one or two.</p>` : ''}
+          ? `<div class="pdp__oos"><span class="mono">${t('Sold out online')}</span><span>${t('Every colourway is a limited edition.')} <a href="mailto:customersupport@mjukiceland.com?subject=${encodeURIComponent(p.t)}">${t('Ask the store')}</a> ${t('whether one is left on a shelf in Reykjavík.')}</span></div>`
+          : `<button class="sz sz--solo${plainHat ? ' pom-ask' : ''}" data-h="${esc(p.h)}" data-s="">${t('Add to bag')}</button>`}
+        ${plainHat && !p.oos ? `<p class="pdp__hint mono">${t('A plain hat.')} <b>${t('Pompoms are chosen in the next step')}</b>${t(', none, one or two.')}</p>` : ''}
       </div>
       <dl class="pdp__facts">${facts.map(f => `<dt>${f[0]}</dt><dd>${esc(f[1])}</dd>`).join('')}</dl>
-      ${c.long && text(c.long) !== text(c.short) ? `<details class="pdp__desc" open><summary>Description</summary><div class="pdp__body">${clean(c.long)}</div></details>` : ''}`;
+      ${c.long && text(c.long) !== text(c.short) ? `<details class="pdp__desc" open><summary>${t('Description')}</summary><div class="pdp__body">${clean(c.long)}</div></details>` : ''}`;
     splitWords($('#pdpT'));
     $$('.pdp__info > *').forEach((el, i) => { if (!el.classList.contains('tr')) { el.classList.add('rv'); el.style.transitionDelay = (i * 60) + 'ms'; } });
 
@@ -181,12 +183,12 @@
     const sib = fam ? CM.all.filter(x => x !== p && (x.cats || []).includes(fam)) : CM.all.filter(x => x !== p && x.tyk === p.tyk && x.fib === p.fib);
     sib.sort((a, b) => a.oos - b.oos);
     const famSec = $('#family');
-    if (sib.length) { $('#famName').textContent = fam ? familyName(fam) : (typeName(p.tyk) || 'this piece'); fill($('#famT'), sib.slice(0, 12)); }
+    if (sib.length) { $('#famName').textContent = fam ? familyName(fam) : (typeName(p.tyk) || t('this piece')); fill($('#famT'), sib.slice(0, 12)); }
     else famSec.remove();
     const withL = CM.all.filter(x => x !== p && !x.oos && x.fib === p.fib && x.tyk && x.tyk !== p.tyk);
     withL.sort((a, b) => (isNew(b) - isNew(a)));
     const withSec = $('#with');
-    if (withL.length) { $('#withName').textContent = fibName(p.fib) || 'the same fibre'; fill($('#withT'), withL.slice(0, 12)); }
+    if (withL.length) { $('#withName').textContent = fibName(p.fib) || t('the same fibre'); fill($('#withT'), withL.slice(0, 12)); }
     else withSec.remove();
     rails();
   }
@@ -213,19 +215,19 @@
      itself shows (compositions, counts). Nothing here is invented. */
   const FIBRES = [
     { key: 'angora', lead: 'The fibre most of the shop is knitted from: light, warm, and impossibly soft.',
-      p: 'Angora is blended so it holds its shape: with silk and wool, or with merino, and in the chunkier knits with a little polyamide for structure. It is the fibre behind the Marshmallow, Roots, Tenderness and Ragnar designs.',
+      p: 'Angora is always blended so it holds its shape, with wool, viscose, nylon or merino. It is the fibre behind the Marshmallow, Roots and Tenderness designs.',
       q: ['“Fluffy and soft angora wool blend. Flexible adjustable fit.”', '“Crafted from fluffy angora for a delightfully soft finish.”'] },
     { key: 'merino', lead: 'Superfine merino, smooth against the skin and never scratchy.',
-      p: 'Used on its own in the Arctic and aviator hats and the merino scarves, and as the backbone of the cashmere blends.',
+      p: 'Used on its own in the Arctic beanies, the Ragnar designs and the merino aviator hats, and as the backbone of the cashmere blends.',
       q: ['“This is superfine Merino wool in its truest form: smooth, clean, and refined.”', '“Merino is nature’s own regulator. It traps heat when you’re out in the frost but breathes the moment you step into a warm café.”'] },
     { key: 'cashmere', lead: 'Pure cashmere, and cashmere carried on merino at ten, twenty and thirty percent.',
-      p: 'The Viking beanies and the Explorer scarves. A small part of the range, and the part that sells out first, so a colour that is here now is usually not here next season.',
+      p: 'The Viking and Greenland beanies are cashmere; the Explorer scarves and the Akureyri and Konungur blankets carry it on merino.',
       q: [] },
     { key: 'alpaca-silk', lead: 'Baby suri alpaca with silk, a yarn developed for MJÚK in Italy.',
       p: 'Eighty-eight percent baby suri alpaca, twelve percent silk. The Lia scarves are made from it, named after the daughter it was first made for.',
       q: ['“After more than one year, our designer in Iceland, Anna, and our yarn supplier in Italy have developed a totally new raw material: Alpaca with silk. Anna developed it for her baby daughter Lia.”', '“Hypoallergenic: extra soft scarf that will keep you warm and give the weightless feeling on your shoulders and around the neck.”'] },
     { key: 'icelandic-wool', lead: 'Icelandic wool, softened with a little angora and merino.',
-      p: 'Ninety percent Icelandic wool, five percent angora, five percent superfine merino. The Greenland and Guðmundur beanies, and the blankets the capes and ponchos are cut from.',
+      p: 'Ninety percent Icelandic wool, five percent angora, five percent superfine merino: the Guðmundur beanies.',
       q: ['“90% top quality Icelandic wool, 5% angora, 5% superfine merino wool.”'] },
   ];
   function fibresPage() {
@@ -236,13 +238,13 @@
       const pick = pool.slice(0, 3);
       const im = pool[0] ? px(pool[0].img[0], 900) : '';
       return `<article class="fib__ch" id="${esc(f.key)}">
-        <div class="fib__im rv"><span class="head__n">0${i + 1}.</span>${im ? `<img src="${im}" alt="${esc(cat.name)}" loading="${i ? 'lazy' : 'eager'}"/>` : ''}</div>
+        <div class="fib__im rv"><span class="head__n">0${i + 1}.</span>${im ? `<img src="${im}" alt="${esc(t(cat.name))}" loading="${i ? 'lazy' : 'eager'}"/>` : ''}</div>
         <div class="fib__body">
-          <h2 class="fib__name tr" data-name>${esc(cat.name)}</h2>
-          <p class="fib__lead rv">${esc(f.lead)}</p>
-          <p class="fib__p rv">${esc(f.p)}</p>
+          <h2 class="fib__name tr" data-name>${esc(t(cat.name))}</h2>
+          <p class="fib__lead rv">${esc(t(f.lead))}</p>
+          <p class="fib__p rv">${esc(t(f.p))}</p>
           ${f.q.map(q => `<p class="fib__q rv">${esc(q)}</p>`).join('')}
-          <div class="fib__meta rv"><span class="mono">${cat.count} pieces</span><a class="link" href="shop.html?fibre=${esc(f.key)}">[ Shop ${esc(cat.name.toLowerCase())} ]</a></div>
+          <div class="fib__meta rv"><span class="mono">${pieces(cat.count)}</span><a class="link" href="shop.html?fibre=${esc(f.key)}">[ ${t('Shop')} ${esc(t(cat.name).toLowerCase())} ]</a></div>
           <div class="fib__mini" data-mini></div>
         </div>
       </article>`;
@@ -275,11 +277,11 @@
     const rows = () => {
       const s = q.value.trim().toLowerCase();
       const L = CM.all.filter(p => !s || p.t.toLowerCase().includes(s) || String(p.id) === s);
-      cnt.textContent = `${L.length} products · ${L.filter(oos).length} sold out`;
+      cnt.textContent = `${L.length} ${t('products')} · ${L.filter(oos).length} ${t('sold out')}`;
       list.innerHTML = L.slice(0, n).map(p => `<div class="stf__row${oos(p) ? ' is-oos' : ''}" data-id="${p.id}">
         <img src="${px(p.img[0], 160)}" alt="" loading="lazy"/>
         <div class="stf__nm">${esc(p.t)}<small>${esc(p.comp || p.v || '')} · ${usd(p.p)}</small></div>
-        <button class="stf__btn" type="button">${oos(p) ? 'Back in stock' : 'Sold out'}</button>
+        <button class="stf__btn" type="button">${oos(p) ? t('Back in stock') : t('Sold out')}</button>
       </div>`).join('');
       more.hidden = L.length <= n;
     };
@@ -288,16 +290,16 @@
       const b = e.target.closest('.stf__btn'); if (!b) return;
       const row = b.closest('.stf__row'), id = +row.dataset.id, p = CM.all.find(x => x.id === id);
       if (arm !== b) {                                  // tap one: arm
-        if (arm) { arm.classList.remove('is-arm'); arm.textContent = oos(CM.all.find(x => x.id === +arm.closest('.stf__row').dataset.id)) ? 'Back in stock' : 'Sold out'; }
-        arm = b; b.classList.add('is-arm'); b.textContent = 'Tap again to confirm';
-        clearTimeout(armT); armT = setTimeout(() => { if (arm === b) { b.classList.remove('is-arm'); b.textContent = oos(p) ? 'Back in stock' : 'Sold out'; arm = null; } }, 3000);
+        if (arm) { arm.classList.remove('is-arm'); arm.textContent = oos(CM.all.find(x => x.id === +arm.closest('.stf__row').dataset.id)) ? t('Back in stock') : t('Sold out'); }
+        arm = b; b.classList.add('is-arm'); b.textContent = t('Tap again to confirm');
+        clearTimeout(armT); armT = setTimeout(() => { if (arm === b) { b.classList.remove('is-arm'); b.textContent = oos(p) ? t('Back in stock') : t('Sold out'); arm = null; } }, 3000);
         return;
       }
       clearTimeout(armT); arm = null;                    // tap two: do it
       local[id] = !oos(p); try { localStorage.setItem(KEY, JSON.stringify(local)); } catch (e) {}
-      row.classList.toggle('is-oos', local[id]); b.classList.remove('is-arm'); b.textContent = local[id] ? 'Back in stock' : 'Sold out';
-      cnt.textContent = cnt.textContent.replace(/\d+ sold out/, `${CM.all.filter(oos).length} sold out`);
-      say(local[id] ? 'Marked sold out' : 'Back in stock');
+      row.classList.toggle('is-oos', local[id]); b.classList.remove('is-arm'); b.textContent = local[id] ? t('Back in stock') : t('Sold out');
+      cnt.textContent = `${CM.all.filter(p => { const s = q.value.trim().toLowerCase(); return !s || p.t.toLowerCase().includes(s) || String(p.id) === s; }).length} ${t('products')} · ${CM.all.filter(oos).length} ${t('sold out')}`;
+      say(local[id] ? t('Marked sold out') : t('Back in stock'));
     });
     let qt; q.addEventListener('input', () => { clearTimeout(qt); qt = setTimeout(() => { n = 40; rows(); }, 150); });
     more.addEventListener('click', () => { n += 40; rows(); });

@@ -8,6 +8,13 @@
   const fine = matchMedia('(hover:hover) and (pointer:fine)').matches;
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  /* two languages: Icelandic pages (is/, tools/build-is.mjs) load window.CMI18N, keyed by the
+     English text; English pages fall through to the key. ROOT is where the site's root is. */
+  const I18N = window.CMI18N || null, isIS = document.documentElement.lang === 'is';
+  const t = s => (I18N && s && I18N[s]) || s;
+  const fmt = (s, v) => t(s).replace(/\{(\w+)\}/g, (m, k) => (k in v ? v[k] : m));
+  const pieces = n => (isIS ? `${n} ${n % 10 === 1 && n % 100 !== 11 ? 'flík' : 'flíkur'}` : `${n} piece${n === 1 ? '' : 's'}`);
+  const ROOT = document.documentElement.dataset.root || '';
 
   /* ── TRUE viewport size ──
      In-app browsers (and this preview pane) can report `innerWidth` wider than
@@ -36,7 +43,7 @@
   // her shop prices in USD; the name says what it prints
   const usd = n => '$' + (n || 0).toLocaleString('en-US');
   // the fibre is the product story here, so the card states the real composition
-  const catLabel = p => (p.comp || p.v || p.ty || '');
+  const catLabel = p => (p.comp || t(p.v) || t(p.ty) || '');
   const editorial = (CM.campaign || []);
 
   /* ── designed product card, with real size chips that add to bag ── */
@@ -58,7 +65,7 @@
           return `<button class="sz" data-h="${esc(p.h)}" data-s="${esc(label)}" title="${esc(v.s)}${v.a ? '' : ' — sold out'}"${v.a ? '' : ' disabled'}>${label}</button>`;
         }).join('')
       // a plain hat (no pompom in its name) asks about pompoms instead of being added silently
-      : `<button class="sz sz--solo${p.tyk === 'hats' && !/pom ?pom/i.test(p.t) ? ' pom-ask' : ''}" data-h="${esc(p.h)}" data-s="">Add to bag</button>`;
+      : `<button class="sz sz--solo${p.tyk === 'hats' && !/pom ?pom/i.test(p.t) ? ' pom-ask' : ''}" data-h="${esc(p.h)}" data-s="">${t('Add to bag')}</button>`;
     return `<article class="prod rv${hasAlt ? ' has-alt' : ''}">
       <div class="prod__im">
         <span class="prod__ix">${String(i + 1).padStart(2, '0')}</span>
@@ -84,8 +91,8 @@
       const p = pick(c.pool)[0];
       const img = p ? px(p.img[0], 620) : '';
       return `<a class="cat rv" href="${href}" data-cat="${esc(c.key)}">
-        <div class="cat__im">${img ? `<img src="${img}" alt="${esc(c.name)}" loading="lazy"/>` : ''}</div>
-        <div class="cat__meta"><span class="cat__name">${c.name}</span><span class="cat__n mono">${c.count} pieces</span></div>
+        <div class="cat__im">${img ? `<img src="${img}" alt="${esc(t(c.name))}" loading="lazy"/>` : ''}</div>
+        <div class="cat__meta"><span class="cat__name">${t(c.name)}</span><span class="cat__n mono">${pieces(c.count)}</span></div>
       </a>`;
     }).join('');
   };
@@ -99,7 +106,7 @@
     types.insertAdjacentHTML('beforeend',
       `<a class="cat cat--all rv" href="#new">
          <div class="cat__im cat__im--all"><span class="cat__allmark" aria-hidden="true">&rarr;</span></div>
-         <div class="cat__meta"><span class="cat__name">Everything</span><span class="cat__n mono">${CM.totalCount || 0} pieces</span></div>
+         <div class="cat__meta"><span class="cat__name">${t('Everything')}</span><span class="cat__n mono">${pieces(CM.totalCount || 0)}</span></div>
        </a>`);
   }
 
@@ -118,7 +125,7 @@
   });
 
   const totalCount = $('#totalCount');
-  if (totalCount) totalCount.textContent = (CM.totalCount || 0) + ' pieces';
+  if (totalCount) totalCount.textContent = pieces(CM.totalCount || 0);
 
   /* ── editorial stills that live in the markup rather than a rail ── */
   const campImg = $('#campImg');
@@ -181,7 +188,7 @@
   const bagEl = $('#bag'), bagItems = $('#bagItems'), bagCount = $('#bagCount'),
         bagQtyEl = $('#bagQty'), bagTotal = $('#bagTotal'), bagGo = $('#bagGo');
   // the shipping line under the total comes from her shipping zones, like the product page's
-  const bagNote = $('.bag__note'); if (bagNote && CM.ship && CM.ship.bag) bagNote.textContent = CM.ship.bag;
+  const bagNote = $('.bag__note'); if (bagNote && CM.ship && CM.ship.bag) bagNote.textContent = (isIS && CM.ship.bagIs) || CM.ship.bag;
   const MAX_EACH = 20, MAX_LINES = 40; // what functions/bag.js accepts, so a bag never fails there
   let lines = [];
   try { const saved = JSON.parse(localStorage.getItem('mjuk_bag') || '[]');
@@ -193,7 +200,6 @@
   const say = (() => { const el = document.createElement('p'); el.setAttribute('aria-live', 'polite');
     el.style.cssText = 'position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap';
     document.body.appendChild(el); return t => { el.textContent = ''; setTimeout(() => { el.textContent = t; }, 60); }; })();
-  const isIS = () => document.documentElement.lang === 'is';
   // the bag is rebuilt from localStorage, so its text is escaped, not trusted
   const html = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
@@ -206,6 +212,9 @@
   const pomsLive = l => poms(l).every(pm => byHandle[pm.h] && !byHandle[pm.h].oos);
   const live = l => pieceLive(l) && pomsLive(l);
   const priceOf = l => byHandle[l.h].p + poms(l).reduce((n, pm) => n + byHandle[pm.h].p, 0);
+  // the pompom line is written in the page's language when drawn, not in whichever it was added on
+  const pomLabel = l => { const ps = poms(l); if (!ps.length) return (l.x && l.x.label) || '';
+    return ps.length === 1 ? fmt('With a {a} pompom', { a: ps[0].name.toLowerCase() }) : fmt('With two pompoms, {a} and {b}', { a: ps[0].name.toLowerCase(), b: ps[1].name.toLowerCase() }); };
   const itemCount = () => lines.reduce((n, l) => n + 1 + poms(l).length, 0);
   let notices = [];
   { const left = {}, trimmed = [];
@@ -214,7 +223,7 @@
       if (left[l.h] < 1) { trimmed.push(p.t); return false; }
       if (l.q > left[l.h]) { trimmed.push(p.t); l.q = left[l.h]; }
       left[l.h] -= l.q; return true; });
-    if (trimmed.length) { save(); notices.push(`Fewer are left now of ${[...new Set(trimmed)].join(', ')}, so your bag holds what there is.`); } }
+    if (trimmed.length) { save(); notices.push(fmt('Fewer are left now of {names}, so your bag holds what there is.', { names: [...new Set(trimmed)].join(', ') })); } }
   /* A bag that went to checkout may have been ordered. The link back from her order-received page
      (?ordered=1) empties it; otherwise the drawer asks, for a day. */
   if (new URLSearchParams(location.search).has('ordered')) { lines = []; save(); keep('mjuk_bag_out', null); }
@@ -231,34 +240,34 @@
     if (!bagItems) return;
     const out = lines.length && wentOut();
     const top = notices.map(t => `<p class="bag__notice" role="status">${html(t)}</p>`).join('')
-      + (out ? `<div class="bag__notice" role="status">This bag went to checkout at ${out.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}. If you placed the order, <button class="bag__clear" data-clear>empty the bag</button>.</div>` : '');
+      + (out ? `<div class="bag__notice" role="status">${fmt('This bag went to checkout at {time}. If you placed the order,', { time: out.toLocaleTimeString(isIS ? 'is-IS' : 'en-GB', { hour: '2-digit', minute: '2-digit' }) })} <button class="bag__clear" data-clear>${t('empty the bag')}</button>.</div>` : '');
     bagItems.innerHTML = top + (!lines.length
-      ? `<p class="bag__empty">Your bag is empty.<br>Add any piece to it.</p>`
+      ? `<p class="bag__empty">${t('Your bag is empty.')}<br>${t('Add any piece to it.')}</p>`
       : lines.map((l, i) => live(l) ? `<div class="bag__it">
           <div class="bag__im"><img src="${px(l.img, 240)}" alt="${esc(l.t)}"/></div>
           <div>
             <div class="bag__n">${html(l.t)}</div>
             ${l.s ? `<div class="bag__sz">Size ${html(l.s)}</div>` : ''}
-            ${l.x ? `<div class="bag__x2">${html(l.x.label)}</div>` : ''}
+            ${l.x ? `<div class="bag__x2">${html(pomLabel(l))}</div>` : ''}
             <div class="bag__qty">
-              <button data-q="-1" data-i="${i}" aria-label="Decrease quantity">−</button>
+              <button data-q="-1" data-i="${i}" aria-label="${t('Decrease quantity')}">−</button>
               <span>${l.q}</span>
-              <button data-q="1" data-i="${i}" aria-label="${roomFor(byHandle[l.h]) < 1 ? 'No more in stock' : 'Increase quantity'}"${roomFor(byHandle[l.h]) < 1 ? ' disabled' : ''}>+</button>
+              <button data-q="1" data-i="${i}" aria-label="${roomFor(byHandle[l.h]) < 1 ? t('No more in stock') : t('Increase quantity')}"${roomFor(byHandle[l.h]) < 1 ? ' disabled' : ''}>+</button>
             </div>
           </div>
           <div class="bag__right">
             <span class="bag__p">${usd(l.q * priceOf(l))}</span>
-            <button class="bag__x" data-rm="${i}">Remove</button>
+            <button class="bag__x" data-rm="${i}">${t('Remove')}</button>
           </div>
         </div>` : `<div class="bag__it bag__it--gone">
           <div class="bag__im"><img src="${px(l.img, 240)}" alt="${esc(l.t)}"/></div>
           <div>
             <div class="bag__n">${html(l.t)}</div>
-            ${l.x ? `<div class="bag__x2">${html(l.x.label)}</div>` : ''}
-            <div class="bag__sz">${pieceLive(l) ? 'Its pompom has sold since. Remove it and choose again' : 'Sold since you added it'}</div>
+            ${l.x ? `<div class="bag__x2">${html(pomLabel(l))}</div>` : ''}
+            <div class="bag__sz">${pieceLive(l) ? t('Its pompom has sold since. Remove it and choose again') : t('Sold since you added it')}</div>
           </div>
           <div class="bag__right">
-            <button class="bag__x" data-rm="${i}">Remove</button>
+            <button class="bag__x" data-rm="${i}">${t('Remove')}</button>
           </div>
         </div>`).join(''));
   }
@@ -284,20 +293,20 @@
     const p = byHandle[handle]; if (!p) return;
     if (roomFor(p) < 1) {
       // short enough for a card chip; the drawer opens on the piece to show where it is
-      if (btn && !btn.dataset.was) { btn.dataset.was = btn.textContent; btn.textContent = isIS() ? 'Í körfunni' : 'In your bag';
+      if (btn && !btn.dataset.was) { btn.dataset.was = btn.textContent; btn.textContent = t('In your bag');
         setTimeout(() => { btn.textContent = btn.dataset.was; delete btn.dataset.was; }, 1800); }
-      say(p.q === 1 ? `${p.t} is one of one, and it is already in your bag.` : `Every ${p.t} there is, is already in your bag.`);
+      say(fmt(p.q === 1 ? '{name} is one of one, and it is already in your bag.' : 'Every {name} there is, is already in your bag.', { name: p.t }));
       openBag(true); return;
     }
     const key = handle + '|' + size + (extra ? '|' + extra.k : '');
     const hit = lines.find(l => l.k === key);
     if (!hit && itemCount() + 1 + ((extra && extra.pompoms) || []).length > MAX_LINES) {
-      notices = [`A bag carries up to ${MAX_LINES} pieces at once. Check out these first, then start a second bag.`];
+      notices = [fmt('A bag carries up to {n} pieces at once. Check out these first, then start a second bag.', { n: MAX_LINES })];
       renderBag(); openBag(true); say(notices[0]); return;
     }
     notices = [];
     if (hit) hit.q++; else lines.push({ k: key, h: handle, t: p.t, s: size, p: p.p + (extra ? extra.price : 0), img: p.img[0], q: 1, x: extra || null });
-    save(); renderBag(); openBag(true); say(`Added to your bag: ${p.t}${extra ? ', ' + extra.label.toLowerCase() : ''}.`);
+    save(); renderBag(); openBag(true); say(fmt('Added to your bag: {name}.', { name: p.t + (extra ? ', ' + extra.label.toLowerCase() : '') }));
     if (btn) { btn.classList.add('added'); setTimeout(() => btn.classList.remove('added'), 700); }
   }
   document.addEventListener('click', e => {
@@ -309,7 +318,7 @@
     if (q) { const l = lines[+q.dataset.i]; if (l) { const p = byHandle[l.h]; if (+q.dataset.q > 0 && p && roomFor(p) < 1) return; notices = []; l.q += +q.dataset.q; if (l.q < 1) lines.splice(+q.dataset.i, 1); save(); renderBag(); } return; }
     const rm = e.target.closest('[data-rm]');
     if (rm) { notices = []; lines.splice(+rm.dataset.rm, 1); save(); renderBag(); return; }
-    if (e.target.closest('[data-clear]')) { lines = []; notices = []; save(); keep('mjuk_bag_out', null); renderBag(); say('Your bag is empty.'); const c = $('#bagClose'); if (c) c.focus(); return; }
+    if (e.target.closest('[data-clear]')) { lines = []; notices = []; save(); keep('mjuk_bag_out', null); renderBag(); say(t('Your bag is empty.')); const c = $('#bagClose'); if (c) c.focus(); return; }
     if (e.target.closest('#bagGo')) checkout();
   });
   /* Checkout: the bag goes to the edge function (functions/bag.js), which signs it and sends the
@@ -325,23 +334,23 @@
       poms(l).forEach(pm => { items.push({ id: byHandle[pm.h].id, q: l.q, note: 'Attach to ' + p.t, for: p.id }); });
     });
     if (!items.length) return;
-    if (bagGo) { bagGo.disabled = true; bagGo.textContent = 'Opening checkout…'; }
+    if (bagGo) { bagGo.disabled = true; bagGo.textContent = t('Opening checkout…'); }
     // only a host that runs functions/bag.js can take the bag; a static preview says so instead
-    fetch('bag', { cache: 'no-store' }).then(r => r.status === 204).catch(() => false).then(ready => {
+    fetch(ROOT + 'bag', { cache: 'no-store' }).then(r => r.status === 204).catch(() => false).then(ready => {
       if (!ready) {
-        if (bagGo) bagGo.textContent = 'Go to checkout';
-        notices = ['Checkout is not connected in this preview. On the live shop this button opens your WooCommerce checkout with this bag.'];
+        if (bagGo) bagGo.textContent = t('Go to checkout');
+        notices = [t('Checkout is not connected in this preview. On the live shop this button opens your WooCommerce checkout with this bag.')];
         renderBag(); say(notices[0]);
         return;
       }
       keep('mjuk_bag_out', String(Date.now()));
-      const f = document.createElement('form'); f.method = 'post'; f.action = 'bag'; f.hidden = true;
+      const f = document.createElement('form'); f.method = 'post'; f.action = ROOT + 'bag'; f.hidden = true;
       const field = document.createElement('input'); field.name = 'bag'; field.value = JSON.stringify(items);
       f.appendChild(field); document.body.appendChild(f); f.submit();
     });
   }
   // back from checkout (bfcache): the button is a button again, and the drawer asks about the order
-  addEventListener('pageshow', () => { if (bagGo) bagGo.textContent = 'Go to checkout'; renderBag(); });
+  addEventListener('pageshow', () => { if (bagGo) bagGo.textContent = t('Go to checkout'); renderBag(); });
   addEventListener('keydown', e => {
     if (!bagOpen || !bagEl) return;
     if (e.key === 'Escape') { openBag(false); return; }
@@ -354,10 +363,10 @@
   renderBag();
   window.CMBag = { add: addToBag, open: openBag };
   // the card renderer and helpers, so inner pages draw the same cards as the front page
-  window.CMUI = { prod, px, usd, byHandle, pick, catLabel };
+  window.CMUI = { prod, px, usd, byHandle, pick, catLabel, t, fmt, pieces };
 
   const nf = $('#newsForm');
-  if (nf) nf.addEventListener('submit', e => { e.preventDefault(); const v = $('#newsEmail').value.trim(), m = $('#newsMsg'); const ok = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v); m.textContent = ok ? 'You’re in. New colours reach you first.' : 'Enter a valid email.'; if (ok) nf.reset(); });
+  if (nf) nf.addEventListener('submit', e => { e.preventDefault(); const v = $('#newsEmail').value.trim(), m = $('#newsMsg'); const ok = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v); m.textContent = ok ? t('You’re in. New colours reach you first.') : t('Enter a valid email.'); if (ok) nf.reset(); });
   /* ══ MOBILE MENU + the sndr-studio toggle animation ══ */
   const burger = $('#burger'), menu = $('#menu');
   if (burger) {
@@ -432,7 +441,7 @@
       if (on) post('setVolume', [100]);
       reel.classList.toggle('on', on);
       sndBtn.setAttribute('aria-pressed', String(on));
-      sndBtn.querySelector('.snd__label').textContent = on ? 'Sound on' : 'Sound off';
+      sndBtn.querySelector('.snd__label').textContent = on ? t('Sound on') : t('Sound off');
     };
     sndBtn.addEventListener('click', () => setSound(!soundOn));
     /* Mobile browsers frequently ignore the iframe's autoplay= param, so ask the

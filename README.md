@@ -36,3 +36,15 @@ Run locally with `node _serve.cjs` and open http://127.0.0.1:5895.
 - `node --no-warnings tools/e2e-handoff.mjs` proves it against the sandbox (19 checks): hand-off,
   tampered, expired, used twice, sold out, pompom without its hat, over stock, the deploy ping,
   a real order through the classic checkout, then undone.
+
+## Two languages (plan step 7)
+
+English pages at the root (mjukiceland.com at launch), Icelandic pages in `is/` (mjukiceland.is):
+real, separate, crawlable URLs with `hreflang` both ways, never a text swap on one URL. Build
+both after any page change: `node tools/build-pages.mjs && node tools/build-is.mjs`
+(`--report` lists any English string left untranslated; it must say 0). Static text is
+translated from `tools/is.json`, keyed by the English source; strings the scripts write use
+`t()` with the `js:` entries of the same file (`assets/i18n-is.js`). Her product names and texts
+stay in her own English on both sites; shipping sentences come in both languages from her zones.
+The checkout (one host) is English for now.
+

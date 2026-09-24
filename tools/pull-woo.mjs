@@ -197,7 +197,28 @@ function shipping(zs) {
     bag: amounts.length ? `Shipping is calculated at checkout, and free once your order reaches $${Math.min(...amounts)}${Math.max(...amounts) > Math.min(...amounts) ? `–$${Math.max(...amounts)}` : ''}, depending on where it goes.` : 'Shipping is calculated at checkout.',
   };
 }
-const ship = shipping(zones);
+/* the same facts in Icelandic: country names stay nominative inside parentheses, since
+   "til" would need the genitive, which Intl's names do not give */
+const regionIs = new Intl.DisplayNames(['is'], { type: 'region' });
+const placesIs = codes => { const c = [...new Set(codes)]; const eu = EU.every(x => c.includes(x));
+  return [...(eu ? ['ESB'] : []), ...c.filter(x => !(eu && EU.includes(x))).map(x => regionIs.of(x))]; };
+function shippingIs(zs) {
+  if (!zs || !zs.length) return null;
+  const withFree = zs.filter(z => z.free), byAmount = {};
+  for (const z of withFree) (byAmount[z.free] = byAmount[z.free] || []).push(z);
+  const parts = Object.keys(byAmount).map(Number).map(amount => {
+    const named = byAmount[amount].filter(z => z.id !== 0).flatMap(z => placesIs(z.codes));
+    const rest = byAmount[amount].some(z => z.id === 0);
+    return { amount, rest, text: `frá $${amount} ${named.length ? `(${named.join(', ')})` : ''}${rest ? (named.length ? ' og ' : '') + 'annars staðar' : ''}`.replace(/\s+/g, ' ').trim() };
+  }).sort((a, b) => (a.rest - b.rest) || (a.amount - b.amount));
+  const pickup = zs.filter(z => z.pickup && z.id !== 0).flatMap(z => z.codes);
+  const amounts = withFree.map(z => z.free);
+  return {
+    deliveryIs: `Um allan heim${pickup.length ? (pickup.length === 1 && pickup[0] === 'IS' ? '; einnig hægt að sækja á Íslandi' : `; einnig hægt að sækja (${pickup.map(x => regionIs.of(x)).join(', ')})`) : ''}. ` + (parts.length ? `Frí sending ${parts.map(p => p.text).join('; ')}.` : ''),
+    bagIs: amounts.length ? `Sendingarkostnaður reiknast við greiðslu og er frír frá $${Math.min(...amounts)}${Math.max(...amounts) > Math.min(...amounts) ? `–$${Math.max(...amounts)}` : ''}, eftir áfangastað.` : 'Sendingarkostnaður reiknast við greiðslu.',
+  };
+}
+const ship = zones ? { ...shipping(zones), ...shippingIs(zones) } : null;
 const catalogue = JSON.parse(fs.readFileSync(CATALOGUE, 'utf8'));
 const curation = JSON.parse(fs.readFileSync(path.join(ROOT, 'tools/curation.json'), 'utf8'));
 

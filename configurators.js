@@ -23,6 +23,9 @@
   const pulse = el => { if (reduced || !el.animate) return;
     el.animate([{ filter: 'blur(3px)', opacity: .55 }, { filter: 'blur(0)', opacity: 1 }], { duration: 220, easing: 'cubic-bezier(.19,1,.22,1)' }); };
 
+  // the two languages (app.js): t() for a string, fmt() for one with {slots}
+  const U = window.CMUI || {}, t = U.t || (x => x), fmt = U.fmt || ((x, v) => x.replace(/\{(\w+)\}/g, (m, k) => (k in v ? v[k] : m)));
+
   /* ── the real pompoms, from her own catalogue: 25 photographed colours ── */
   // one typo on her live shop ("Grapefrui0") corrected here for the swatch label only
   const FIX = { Grapefrui0: 'Grapefruit' };
@@ -40,7 +43,7 @@
     let hat = null, count = 0, active = 0, chosen = [null, null];
 
     grid.innerHTML = POMS.map((s, i) =>
-      `<button type="button" class="sw" data-i="${i}" style="--i:${i}" aria-pressed="false" title="${s.kind}, ${s.name}, ${usd(s.price)}">
+      `<button type="button" class="sw" data-i="${i}" style="--i:${i}" aria-pressed="false" title="${t(s.kind)}, ${s.name}, ${usd(s.price)}">
          <img src="${px(s.img, 160)}" alt="" loading="lazy"/><span>${s.name}</span></button>`).join('');
 
     const price = () => (hat ? hat.p : 0) + chosen.slice(0, count).reduce((n, s) => n + (s ? s.price : 0), 0);
@@ -52,14 +55,14 @@
         el.classList.toggle('is-set', !!chosen[i]);
         const dot = $('.dot', el), lab = $('.pom__slotname', el);
         if (chosen[i]) { dot.style.backgroundImage = `url("${px(chosen[i].img, 80)}")`; lab.textContent = chosen[i].name; }
-        else { dot.style.backgroundImage = ''; lab.textContent = count === 2 ? `Pompom ${i + 1}` : 'Pick a colour'; }
+        else { dot.style.backgroundImage = ''; lab.textContent = count === 2 ? fmt('Pompom {n}', { n: i + 1 }) : t('Pick a colour'); }
       });
       $('#pomPick').hidden = count === 0;
       $$('.sw', grid).forEach(b => b.setAttribute('aria-pressed', String(chosen.slice(0, count).some(s => s && s.h === POMS[+b.dataset.i].h))));
-      const nextTotal = `${usd(price())}<small>${count === 0 ? 'hat only' : count === 1 ? 'hat and one pompom' : 'hat and two pompoms'}</small>`;
+      const nextTotal = `${usd(price())}<small>${t(count === 0 ? 'hat only' : count === 1 ? 'hat and one pompom' : 'hat and two pompoms')}</small>`;
       if (total.innerHTML !== nextTotal) { total.innerHTML = nextTotal; if (hat) pulse(total); }
       add.disabled = !ready();
-      add.textContent = count === 0 ? 'Add the hat as it is' : ready() ? 'Add to bag' : 'Pick a colour first';
+      add.textContent = t(count === 0 ? 'Add the hat as it is' : ready() ? 'Add to bag' : 'Pick a colour first');
     };
 
     dlg.addEventListener('change', e => {
@@ -89,7 +92,7 @@
       const picks = chosen.slice(0, count).filter(Boolean);
       const extra = picks.length ? {
         k: picks.map(s => s.h).join('+'),
-        label: picks.length === 1 ? `With a ${picks[0].name.toLowerCase()} pompom` : `With two pompoms, ${picks.map(s => s.name.toLowerCase()).join(' and ')}`,
+        label: picks.length === 1 ? fmt('With a {a} pompom', { a: picks[0].name.toLowerCase() }) : fmt('With two pompoms, {a} and {b}', { a: picks[0].name.toLowerCase(), b: picks[1].name.toLowerCase() }),
         price: picks.reduce((n, s) => n + s.price, 0),
         pompoms: picks.map(s => ({ h: s.h, name: s.name })),
       } : null;
@@ -140,19 +143,19 @@
       if (priceEl.textContent !== next) { priceEl.textContent = next; pulse(priceEl); }
       const adj = v('len') === 'adjusted';   // never name a field "length": form.elements.length is the control count
       lenEl.hidden = !adj;
-      noteEl.textContent = adj ? 'Indicative. We confirm the price with the length.' : 'The whole price. Ready within two hours in the shop.';
+      noteEl.textContent = t(adj ? 'Indicative. We confirm the price with the length.' : 'The whole price. Ready within two hours in the shop.');
     };
     cfg.addEventListener('change', () => { done.hidden = true; paint(); });
     cfg.addEventListener('submit', e => {
       e.preventDefault();
       const adj = v('len') === 'adjusted';
-      done.innerHTML = `<h3>${adj ? 'Nearly there' : 'Request received'}</h3>
-        <dl><dt>Shape</dt><dd>${SHAPE[v('shape')].name}</dd><dt>Fabric</dt><dd>${FABRIC[v('fabric')].name}, cut from one of our blankets</dd>
-        <dt>Trim</dt><dd>${v('trim') === 'yes' ? 'Salmon leather at the edges' : 'None'}</dd><dt>Length</dt><dd>${adj ? 'Adjusted, we will write to you' : 'Standard'}</dd>
-        <dt>Price</dt><dd>${usd(total())}${adj ? ', to be confirmed' : ''}</dd></dl>
-        <p>${adj
+      done.innerHTML = `<h3>${t(adj ? 'Nearly there' : 'Request received')}</h3>
+        <dl><dt>${t('Shape')}</dt><dd>${t(SHAPE[v('shape')].name)}</dd><dt>${t('Fabric')}</dt><dd>${fmt('{fabric}, cut from one of our blankets', { fabric: t(FABRIC[v('fabric')].name) })}</dd>
+        <dt>${t('Trim')}</dt><dd>${t(v('trim') === 'yes' ? 'Salmon leather at the edges' : 'None')}</dd><dt>${t('Length')}</dt><dd>${t(adj ? 'Adjusted, we will write to you' : 'Standard')}</dd>
+        <dt>${t('Price')}</dt><dd>${usd(total())}${adj ? t(', to be confirmed') : ''}</dd></dl>
+        <p>${t(adj
           ? 'Tell us how you would like it, and we will write back with the exact price before anything is cut.'
-          : 'In the finished shop this goes straight to the workshop above Laugavegur 23 and to your basket, with nothing left to explain by email.'}</p>`;
+          : 'In the finished shop this goes straight to the workshop above Laugavegur 23 and to your basket, with nothing left to explain by email.')}</p>`;
       done.hidden = false;
       done.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'nearest' });
     });
@@ -175,35 +178,6 @@
     }
   }
 
-  /* ════════════════════ 3 · LANGUAGE SWITCH (demo of the shape) ════════════════════
-     The real Icelandic site lives on its own URLs so Google indexes it as Icelandic.
-     This toggle only shows Anna what the interface reads like in both. */
-  const IS = {
-    'New': 'Nýtt', 'Fibres': 'Efni', 'Shop': 'Verslun', 'Stores': 'Búðir', 'Sale': 'Útsala', 'Bespoke': 'Sérsaumað', 'Made for you': 'Sérsaumað fyrir þig',
-    'Search': 'Leita', 'Bag': 'Karfa', 'Menu': 'Valmynd', 'Close': 'Loka',
-    'New this season': 'Nýtt á tímabilinu', 'Shop by fibre': 'Eftir efni', 'Shop by piece': 'Eftir flík', 'Last of the line': 'Síðustu eintökin',
-    'Four doors in Reykjavík': 'Fjórar búðir í Reykjavík', 'Also stocked at': 'Einnig fáanlegt hjá', 'Add to bag': 'Setja í körfu',
-    'Your bag': 'Karfan þín', 'Shape': 'Snið', 'Fabric': 'Efni', 'Salmon leather trim': 'Laxaleður í köntum', 'Length': 'Sídd',
-    'Request this piece': 'Panta þessa flík', 'Cape': 'Slá', 'Poncho': 'Pontsjó', 'Shawl': 'Sjal', 'None': 'Ekkert', 'At the edges': 'Í köntum',
-    'Standard': 'Venjuleg', 'I would like it adjusted': 'Ég vil breyta síddinni', 'Icelandic wool': 'Íslensk ull', 'Merino': 'Merínó', 'Cashmere': 'Kasmír', 'Alpaca': 'Alpakka',
-  };
-  const btn = $('#langBtn');
-  if (btn) {
-    const SEL = '.nav__mid a, .head__t, .sz--solo, .bag__title, .legend, .seg span > em, .t__m em, .cfg__go, #menu a, .nav__link:not(#bagBtn), .sm-toggle-line';
-    const apply = lang => {
-      $$(SEL).forEach(el => {
-        if (el.childNodes.length !== 1) return;
-        if (!el.dataset.en) el.dataset.en = el.textContent.trim();
-        const en = el.dataset.en;
-        if (lang === 'is' ? IS[en] : true) el.textContent = lang === 'is' ? IS[en] : en;
-      });
-      document.documentElement.lang = lang;
-      btn.innerHTML = lang === 'is' ? '<b>EN</b> / ÍS' : 'EN / <b>ÍS</b>';
-      btn.setAttribute('aria-label', lang === 'is' ? 'Switch to English' : 'Skipta yfir í íslensku');
-      try { localStorage.setItem('mjuk_lang', lang); } catch (e) {}
-    };
-    btn.addEventListener('click', () => apply(document.documentElement.lang === 'is' ? 'en' : 'is'));
-    let saved = 'en'; try { saved = localStorage.getItem('mjuk_lang') || 'en'; } catch (e) {}
-    if (saved === 'is') apply('is');
-  }
+  /* 3 · The language switch is a plain link now (tools/build-is.mjs): English pages at the
+     root, Icelandic pages in is/, each with its own URL so Google indexes both. */
 })();

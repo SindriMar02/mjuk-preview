@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="is" data-root="../">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>MJ&Uacute;K Iceland &mdash; Prjónað í Reykjavík</title>
+<meta name="description" content="MJ&Uacute;K Iceland. Angóra, kasmír, merínó og íslensk ull, hannað og gert í Reykjavík. Fjórar búðir á Laugavegi, Skólavörðustíg og Klapparstíg." />
+<meta name="theme-color" content="#f7f3ef" />
+<meta name="robots" content="noindex, nofollow" />
+<!-- Inlined as a data URI on purpose: this preview host serves several
+     prototypes from one origin, and browsers cache favicons per origin, so
+     an external icon URL here can lose to whichever prototype loaded first.
+     A data URI has no URL to cache and cannot 404. -->
+<link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAEyklEQVR42u2Xb0xVdRjHP7/fOYB/h1h3Np0Bwpw6xaQ1nKTiMv+AppFiappTgYldQjFtQiTL9EUvcivLrd5grSDFUpeWK7mBMjW1rVUmM2upcFPD3L1474Vzzq8X13v0CugFavai36uzc87O832e5/v9Ps8RPs81xX08kvt8/nsAkpNSGJY4hpQxaVy9ehUApW51KXTd/GczqakTSUpMIS+3EADTNHsOwLIUSim8nhvUflOPUirsw6ZpopSixnWEa81/YSkrDGCPAShLkRA/lH79+/Jx5W6EEEh56zUpJUIIqqqqiYuLRQiBaXWcuVIKwzDuWpn2HBAwZMhgsrKmc+rkd7jdl5FSYlkWlmUhpeTSxUa+PX6K+TnZCNlx6ZVSCCHQdR1N07pGwjbDZP78pxEIDh48dLM1QQAAez7dhx6lk5X5JJap2gWwLAshBD6fn02btpC70onLVRc5gJaWGzwyLoXYuFiqqqrt0ocCVVbuYcqUScQnxCMQaFKEBZdS4vcHyMt18uHOT3A4HiAt7bHIARhGK1JK5s6ZRcPP5zj/629278+caaCpsYnnlixA3azIncEDgQD5+YXU159gVcFytmzdRO/evSIHIEQwo+xnZoMQ7N930H5WVVlNTEwMEyak4fW2oG7ruaZptAZaycsr5EjdMZyF+RSvK8QwjE6V0iGAEOtHjRrB4CEPsWvXZ7YE9+7dz8wZU9F1nda2VkBhmMGet7W2BYPXHqNoTQFFRQUYhoGmaXZSXXJCKSU5Odk0XWriwu8X+fGHn7h+3cPCxTmhUgEQExODUoqCVWuoq61n3XonTmf+PYNHZMWzn5qJQnHgwCF2V+9jQNwAUlPHhunW7/dT9OIGXK4jWMriyuUr7drZ2dHvvKFpt9huWRaJCfGMGDGcioqP8Hq9LFqcYz+PitIBhaumDik1SkrX4aqpo6KiktRHxzFr1gwMw0DX9a5YMXg8njBvz1mQzR/uK3g8XubNm2MT6lzDeaSUREdHU/bqBlasWEr5ayX06hVDycZyLl64hK7rtn9EBGDy5HQmZUy8WY1gppmZ08mY8jhLn19EcnKSDWDbtu0oBenp41m2bDF+X4BhiQmUlr6E19PC2uKNWFZwVnSmAtHVhcQ0TTRNo+ZwLcuXFwAwbdoTvLvjTTtTXdfJXenk8Ne1FLywkuJiZ6etkB0FuLNkt2cQmgujx4xk5wfvAcI2oNDgUkqxZWsZAwfG8s729zlx/GSnPJDtSaiFTb8Qk402g0AgYLPa4XCQnDysHdNDAB0OB+WbS1FKsXp1MU2N7u7JMFSNNWtfJiMji+bmZjtLn9/XodQ0TcM0TTJnTmPJ0meJiormrbd3RCbDzo676TLuRretjNv3BCnba13TNJRSlJdvpKxsA/5AoGc7oR6lI6S462zvaKaEZkTfPn16BkApFZzziC6tXCEQnclQ78qHgLD1K9Jd8G52HDEATQikCErNNM1gZpaFFIJ+/ft1CVC3VPBw/FCEEJw+/b0t1S+/+AqEYGzK6G5vxfd0wtB+19DwC9lzF3LD52Pq1Mn4fa0cPXqMQYMe5PMD1cQNjIto+nXLikNOV1dXz+ub3+Ds2XOAIn3CeEpeWc/IkcPtd/7xCvz/c/pvn78BoQUwnQKgoGgAAAAASUVORK5CYII=" />
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAEyklEQVR42u2Xb0xVdRjHP7/fOYB/h1h3Np0Bwpw6xaQ1nKTiMv+AppFiappTgYldQjFtQiTL9EUvcivLrd5grSDFUpeWK7mBMjW1rVUmM2upcFPD3L1474Vzzq8X13v0CugFavai36uzc87O832e5/v9Ps8RPs81xX08kvt8/nsAkpNSGJY4hpQxaVy9ehUApW51KXTd/GczqakTSUpMIS+3EADTNHsOwLIUSim8nhvUflOPUirsw6ZpopSixnWEa81/YSkrDGCPAShLkRA/lH79+/Jx5W6EEEh56zUpJUIIqqqqiYuLRQiBaXWcuVIKwzDuWpn2HBAwZMhgsrKmc+rkd7jdl5FSYlkWlmUhpeTSxUa+PX6K+TnZCNlx6ZVSCCHQdR1N07pGwjbDZP78pxEIDh48dLM1QQAAez7dhx6lk5X5JJap2gWwLAshBD6fn02btpC70onLVRc5gJaWGzwyLoXYuFiqqqrt0ocCVVbuYcqUScQnxCMQaFKEBZdS4vcHyMt18uHOT3A4HiAt7bHIARhGK1JK5s6ZRcPP5zj/629278+caaCpsYnnlixA3azIncEDgQD5+YXU159gVcFytmzdRO/evSIHIEQwo+xnZoMQ7N930H5WVVlNTEwMEyak4fW2oG7ruaZptAZaycsr5EjdMZyF+RSvK8QwjE6V0iGAEOtHjRrB4CEPsWvXZ7YE9+7dz8wZU9F1nda2VkBhmMGet7W2BYPXHqNoTQFFRQUYhoGmaXZSXXJCKSU5Odk0XWriwu8X+fGHn7h+3cPCxTmhUgEQExODUoqCVWuoq61n3XonTmf+PYNHZMWzn5qJQnHgwCF2V+9jQNwAUlPHhunW7/dT9OIGXK4jWMriyuUr7drZ2dHvvKFpt9huWRaJCfGMGDGcioqP8Hq9LFqcYz+PitIBhaumDik1SkrX4aqpo6KiktRHxzFr1gwMw0DX9a5YMXg8njBvz1mQzR/uK3g8XubNm2MT6lzDeaSUREdHU/bqBlasWEr5ayX06hVDycZyLl64hK7rtn9EBGDy5HQmZUy8WY1gppmZ08mY8jhLn19EcnKSDWDbtu0oBenp41m2bDF+X4BhiQmUlr6E19PC2uKNWFZwVnSmAtHVhcQ0TTRNo+ZwLcuXFwAwbdoTvLvjTTtTXdfJXenk8Ne1FLywkuJiZ6etkB0FuLNkt2cQmgujx4xk5wfvAcI2oNDgUkqxZWsZAwfG8s729zlx/GSnPJDtSaiFTb8Qk402g0AgYLPa4XCQnDysHdNDAB0OB+WbS1FKsXp1MU2N7u7JMFSNNWtfJiMji+bmZjtLn9/XodQ0TcM0TTJnTmPJ0meJiormrbd3RCbDzo676TLuRretjNv3BCnba13TNJRSlJdvpKxsA/5AoGc7oR6lI6S462zvaKaEZkTfPn16BkApFZzziC6tXCEQnclQ78qHgLD1K9Jd8G52HDEATQikCErNNM1gZpaFFIJ+/ft1CVC3VPBw/FCEEJw+/b0t1S+/+AqEYGzK6G5vxfd0wtB+19DwC9lzF3LD52Pq1Mn4fa0cPXqMQYMe5PMD1cQNjIto+nXLikNOV1dXz+ub3+Ds2XOAIn3CeEpeWc/IkcPtd/7xCvz/c/pvn78BoQUwnQKgoGgAAAAASUVORK5CYII=" />
+<link rel="preload" href="../assets/logo.png" as="image" />
+<link rel="preconnect" href="https://i0.wp.com" crossorigin />
+<link rel="preconnect" href="https://i1.wp.com" crossorigin />
+<link rel="preconnect" href="https://i2.wp.com" crossorigin />
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+<link rel="preload" href="../assets/fonts/Humane.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="../assets/fonts/SpaceMono-Regular.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="../assets/fonts/BodoniModa-500.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="../styles.css" />
+<link rel="stylesheet" href="../configurators.css" />
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"ClothingStore","name":"Mjúk Iceland","alternateName":"MJÚK Iceland","url":"https://mjukiceland.com/","description":"Knitted and woven angora, cashmere, merino and Icelandic wool, designed and made in Reykjavík. Family owned, with its own workshop above the flagship store.","email":"customersupport@mjukiceland.com","telephone":"+354 832 0567","priceRange":"$$$","currenciesAccepted":"ISK, USD","areaServed":"IS","address":{"@type":"PostalAddress","streetAddress":"Laugavegur 23","addressLocality":"Reykjavík","postalCode":"101","addressCountry":"IS"},"location":[{"@type":"LocalBusiness","name":"Mjúk Iceland — Laugavegur 23","description":"Store and workshop","address":{"@type":"PostalAddress","streetAddress":"Laugavegur 23","addressLocality":"Reykjavík","postalCode":"101","addressCountry":"IS"},"telephone":"+354 832 0567"},{"@type":"LocalBusiness","name":"Mjúk Iceland — Klapparstígur 29","description":"Outlet and workshop","address":{"@type":"PostalAddress","streetAddress":"Klapparstígur 29","addressLocality":"Reykjavík","postalCode":"101","addressCountry":"IS"},"telephone":"+354 832 0567"},{"@type":"LocalBusiness","name":"Mjúk Iceland — Skólavörðustígur 36","description":"Store","address":{"@type":"PostalAddress","streetAddress":"Skólavörðustígur 36","addressLocality":"Reykjavík","postalCode":"101","addressCountry":"IS"},"telephone":"+354 832 0567"},{"@type":"LocalBusiness","name":"Mjúk Iceland — Skólavörðustígur 4","description":"Store","address":{"@type":"PostalAddress","streetAddress":"Skólavörðustígur 4","addressLocality":"Reykjavík","postalCode":"101","addressCountry":"IS"},"telephone":"+354 832 0567"}],"makesOffer":{"@type":"Offer","itemOffered":{"@type":"Product","name":"Knitted accessories","material":["angora","cashmere","merino wool","Icelandic wool","alpaca","silk"]}}}</script>
+<link rel="alternate" hreflang="en" href="https://mjukiceland.com/" />
+<link rel="alternate" hreflang="is" href="https://mjukiceland.is/" />
+<link rel="alternate" hreflang="x-default" href="https://mjukiceland.com/" />
+</head>
+<body>
+
+<!-- GRAIN-GRADIENT BACKGROUND (porcelain + ember, very lowkey) -->
+<canvas class="bars" id="bars" aria-hidden="true"></canvas>
+
+<!-- PRELOADER -->
+<div class="load" id="load">
+  <div class="load__mark">
+    <img class="load__still" src="../assets/logo.png" alt="MJ&Uacute;K Iceland" />
+    <span class="load__line" aria-hidden="true"></span>
+    <span class="load__sub mono" aria-hidden="true">Reykjavík &mdash; prjónað hér</span>
+  </div>
+</div>
+
+<!-- NAV -->
+<header class="nav" id="nav">
+  <nav class="nav__mid" aria-label="Aðalvalmynd">
+    <a href="#new">Nýtt</a>
+    <a href="#fibres">Efni</a>
+    <a href="#shop">Verslun</a>
+    <a href="#sale">Útsala</a>
+    <a href="#made">Sérsaumað</a>
+    <a href="#stores">Búðir</a>
+  </nav>
+  <a href="#top" class="nav__brand" aria-label="MJ&Uacute;K Iceland">
+    <span class="wordmark"><img src="../assets/logo.png" alt="MJ&Uacute;K Iceland" /></span>
+  </a>
+  <div class="nav__end">
+    <a class="nav__lang" id="langBtn" href="../index.html" hreflang="en" lang="en" aria-label="In English"><b>EN</b> / &Iacute;S</a>
+    <button class="nav__link" id="searchBtn">Leita</button>
+    <button class="nav__link" id="bagBtn">Karfa <span id="bagCount">(0)</span></button>
+    <button class="nav__burger sm-toggle" id="burger" aria-label="Valmynd" aria-expanded="false"
+            data-label-open="Valmynd" data-label-close="Loka">
+      <span class="sm-toggle-textwrap" aria-hidden="true"><span class="sm-toggle-textinner"><span class="sm-toggle-line">Valmynd</span></span></span>
+      <span class="sm-icon" aria-hidden="true"><span class="sm-icon-line"></span><span class="sm-icon-line sm-icon-line-v"></span></span>
+    </button>
+  </div>
+</header>
+
+<!-- MOBILE MENU -->
+<div class="menu" id="menu" aria-hidden="true">
+  <a href="#new"><i>01</i>Nýtt</a>
+  <a href="#fibres"><i>02</i>Efni</a>
+  <a href="#shop"><i>03</i>Verslun</a>
+    <a href="#sale"><i>03</i>Útsala</a>
+    <a href="#made"><i>03</i>Sérsaumað</a>
+  <a href="#lookbook"><i>04</i>Lookbook</a>
+  <a href="#stores"><i>05</i>Búðir</a>
+  <div class="menu__foot"><span>Laugavegur 23 &middot; 101 Reykjavík</span><a href="tel:+3548320567">+354 832 0567</a></div>
+</div>
+
+<main id="top">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero__head">
+      <span class="mono">Íslensk prjónahönnun &mdash; Reykjavík</span>
+      <span class="mono">Hannað, prjónað og selt beint</span>
+    </div>
+    <div class="hero__stage">
+      <div class="fcar" id="fcar" aria-roledescription="carousel" aria-label="MJ&Uacute;K Iceland"></div>
+      <button class="rnav__b fcar__btn fcar__btn--l" id="fcarPrev" aria-label="Fyrri mynd">&larr;</button>
+      <button class="rnav__b fcar__btn fcar__btn--r" id="fcarNext" aria-label="Næsta mynd">&rarr;</button>
+      <h1 class="hero__word"><span class="hero__l1">Mj&uacute;k</span><span class="hero__l2">í gegn</span></h1>
+    </div>
+    <div class="hero__cta">
+      <span class="mono hero__tag">Angóra &middot; kasmír &middot; merínó &middot; íslensk ull</span>
+      <a href="#new" class="link">[ Sjá það nýjasta ]</a>
+    </div>
+  </section>
+
+  <!-- 01 NEW ARRIVALS -->
+  <section class="ny" id="new">
+    <div class="head">
+      <span class="head__n">01.</span>
+      <h2 class="head__t">Nýtt á tímabilinu</h2>
+      <div class="head__end">
+        <div class="rnav">
+          <button class="rnav__b" data-rail="rail" data-dir="-1" aria-label="Fletta til vinstri">&larr;</button>
+          <button class="rnav__b" data-rail="rail" data-dir="1" aria-label="Fletta til hægri">&rarr;</button>
+        </div>
+        <a href="https://mjukiceland.com/product-category/new/" class="link" target="_blank" rel="noopener">[ Sjá allt ]</a>
+      </div>
+    </div>
+    <div class="rail" id="rail" tabindex="0" aria-label="Nýtt á tímabilinu"><div class="rail__t" id="railT"></div></div>
+  </section>
+
+  <!-- 02 SHOP BY FIBRE -->
+  <section class="flokkar" id="fibres">
+    <div class="head">
+      <span class="head__n">02.</span>
+      <h2 class="head__t">Eftir efni</h2>
+      <div class="head__end"><span class="mono">Aðeins sjálfbær náttúruleg efni</span></div>
+    </div>
+    <div class="cats" id="cats"></div>
+  </section>
+
+  <!-- 03 SHOP BY PIECE -->
+  <section class="flokkar" id="shop">
+    <div class="head">
+      <span class="head__n">03.</span>
+      <h2 class="head__t">Eftir flík</h2>
+      <div class="head__end"><span class="mono" id="totalCount">&nbsp;</span></div>
+    </div>
+    <div class="cats cats--types" id="types"></div>
+  </section>
+
+  <!-- WORKSHOP STATEMENT -->
+  <section class="camp" id="camp">
+    <div class="camp__frame" id="campFrame">
+      <img class="camp__img" loading="lazy" alt="MJ&Uacute;K Iceland, Laugavegur 23" src="" id="campImg" />
+    </div>
+    <div class="camp__over">
+      <span class="mono">04. &mdash; Saumað uppi, selt niðri</span>
+      <p class="camp__line">Sniðið og<br>saumað á<br>Laugavegi.</p>
+    </div>
+  </section>
+
+  <!-- 05 ON SALE -->
+  <section class="best" id="sale">
+    <div class="head">
+      <span class="head__n">05.</span>
+      <h2 class="head__t">Síðustu eintökin</h2>
+      <div class="head__end">
+        <div class="rnav">
+          <button class="rnav__b" data-rail="railS" data-dir="-1" aria-label="Fletta til vinstri">&larr;</button>
+          <button class="rnav__b" data-rail="railS" data-dir="1" aria-label="Fletta til hægri">&rarr;</button>
+        </div>
+        <a href="https://mjukiceland.com/product-category/sales/" class="link" target="_blank" rel="noopener">[ Sjá allt ]</a>
+      </div>
+    </div>
+    <div class="rail" id="railS" tabindex="0" aria-label="Síðustu eintökin"><div class="rail__t" id="railST"></div></div>
+  </section>
+
+  <!-- 06 LOOKBOOK -->
+  <section class="pan" id="lookbook">
+    <div class="pan__track" id="panTrack">
+      <div class="pan__intro">
+        <div class="pan__bg"><img id="panBg" src="" alt="Lookbook MJ&Uacute;K Iceland" loading="lazy"/></div>
+        <span class="head__n">06.</span>
+        <h2 class="pan__title">Lookbook</h2>
+        <span class="mono pan__hint">Haltu áfram að skruna &rarr;</span>
+      </div>
+    </div>
+    <div class="pan__prog" aria-hidden="true"><span id="panProg"></span></div>
+  </section>
+
+  <!-- 07 AS WORN -->
+  <section class="seen" id="seen">
+    <div class="seen__wall" id="seenWall"></div>
+    <div class="seen__overlay">
+      <span class="mono seen__n">07.</span>
+      <h2 class="seen__title">Borið<br>úti.</h2>
+      <span class="mono">Hver flík er hluti af takmörkuðu upplagi.</span>
+    </div>
+  </section>
+
+  <!-- 08 STORES -->
+  <section class="stores" id="stores">
+    <div class="head">
+      <span class="head__n">08.</span>
+      <h2 class="head__t">Fjórar búðir í Reykjavík</h2>
+      <div class="head__end"><span class="mono">Allar innan tíu mínútna göngufæris</span></div>
+    </div>
+    <div class="stores__grid">
+      <article class="store rv">
+        <div class="store__top"><span class="store__ix mono">01</span><span class="mono store__tag">Búð og verkstæði</span></div>
+        <h3 class="store__name">Laugavegur 23</h3>
+        <p class="store__note">Húsið frá 1916 með víkingaveggmyndinni við aðalgötuna. Slár, pontsjóar og sjöl eru saumuð á efri hæðinni og gerð eftir pöntun.</p>
+        <button class="store__map-btn" type="button" aria-expanded="false" data-q="Laugavegur 23, 101 Reykjav&iacute;k"><span class="store__map-label">Sjá á korti</span></button>
+        <div class="store__map"><div><iframe title="Laugavegur 23 á korti" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe></div></div>
+      </article>
+      <article class="store rv">
+        <div class="store__top"><span class="store__ix mono">02</span><span class="mono store__tag">Útsölubúð og verkstæði</span></div>
+        <h3 class="store__name">Klapparstígur 29</h3>
+        <p class="store__note">Frumgerðir og prufur á afslætti, rétt hjá Laugavegi. Pantaðu hálskraga eftir þínu höfði og horfðu á hann verða til frá grunni.</p>
+        <button class="store__map-btn" type="button" aria-expanded="false" data-q="Klapparst&iacute;gur 29, 101 Reykjav&iacute;k"><span class="store__map-label">Sjá á korti</span></button>
+        <div class="store__map"><div><iframe title="Klapparstígur 29 á korti" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe></div></div>
+      </article>
+      <article class="store rv">
+        <div class="store__top"><span class="store__ix mono">03</span><span class="mono store__tag">Aðgengi án þrepa</span></div>
+        <h3 class="store__name">Skólavörðustígur 36</h3>
+        <p class="store__note">Stærsta búðin okkar, mínútu frá Hallgrímskirkju. Slétt aðkoma fyrir barnavagna og hjólastóla.</p>
+        <button class="store__map-btn" type="button" aria-expanded="false" data-q="Sk&oacute;lav&ouml;r&eth;ust&iacute;gur 36, 101 Reykjav&iacute;k"><span class="store__map-label">Sjá á korti</span></button>
+        <div class="store__map"><div><iframe title="Skólavörðustígur 36 á korti" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe></div></div>
+      </article>
+      <article class="store rv">
+        <div class="store__top"><span class="store__ix mono">04</span><span class="mono store__tag">Aðgengi án þrepa</span></div>
+        <h3 class="store__name">Skólavörðustígur 4</h3>
+        <p class="store__note">Við Regnbogann, í steinhúsi frá 19. öld. Lítil, hlý og full af litum.</p>
+        <button class="store__map-btn" type="button" aria-expanded="false" data-q="Sk&oacute;lav&ouml;r&eth;ust&iacute;gur 4, 101 Reykjav&iacute;k"><span class="store__map-label">Sjá á korti</span></button>
+        <div class="store__map"><div><iframe title="Skólavörðustígur 4 á korti" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe></div></div>
+      </article>
+    </div>
+    <div class="stores__foot">
+      <div class="budin__row"><span class="mono">Netpantanir</span><a href="mailto:customersupport@mjukiceland.com">customersupport@mjukiceland.com</a></div>
+      <div class="budin__row"><span class="mono">Sími</span><a href="tel:+3548320567">+354 832 0567</a></div>
+      <div class="budin__row"><span class="mono">Heildsala</span><a href="mailto:anna@mjukiceland.com">anna@mjukiceland.com</a></div>
+    </div>
+  </section>
+
+  <!-- 09 MADE FOR YOU -->
+  <section class="made" id="made">
+    <div class="head">
+      <span class="head__n">09.</span>
+      <h2 class="head__t">Sérsaumað fyrir þig</h2>
+    </div>
+    <div class="made__grid">
+      <div class="made__copy">
+        <p class="made__lead">Slá eða pontsjó, sniðið úr einu af teppunum okkar og saumað uppi á Laugavegi 23. Innan tveggja klukkustunda, alla daga ársins.</p>
+        <p>Veldu sniðið, teppið sem það er sniðið úr og hvort þú viljir laxaleður í köntunum. Verðið sem þú sérð er allt verðið. Viljir þú hafa það styttra eða síðara en venjulega, láttu okkur vita og við svörum áður en nokkuð er sniðið.</p>
+        <p class="made__aside">Á Klapparstíg 29 er hálskragi gerður fyrir framan þig á tuttugu mínútum. Til þess þarftu að kíkja við.</p>
+        <div class="made__im"><img id="madeImg" src="" alt="" loading="lazy"/></div>
+      </div>
+      <form class="cfg" id="cfg" novalidate>
+        <fieldset>
+          <legend class="legend">Snið</legend>
+          <div class="seg">
+            <label><input type="radio" name="shape" value="cape" checked><span><em>Slá</em><small>frá $560</small></span></label>
+            <label><input type="radio" name="shape" value="poncho"><span><em>Pontsjó</em><small>frá $480</small></span></label>
+            <label><input type="radio" name="shape" value="shawl"><span><em>Sjal</em><small>frá $320</small></span></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend class="legend">Efni, sniðið úr einu af teppunum okkar</legend>
+          <div class="tiles">
+            <label class="tile" data-fib="icelandic-wool"><input type="radio" name="fabric" value="icelandic" checked><span class="t"><span class="t__im"><img src="" alt=""/></span><span class="t__m"><em>Íslensk ull</em><small>innifalið</small></span></span></label>
+            <label class="tile" data-fib="merino"><input type="radio" name="fabric" value="merino"><span class="t"><span class="t__im"><img src="" alt=""/></span><span class="t__m"><em>Merínó</em><small>+ $80</small></span></span></label>
+            <label class="tile" data-fib="alpaca-silk"><input type="radio" name="fabric" value="alpaca"><span class="t"><span class="t__im"><img src="" alt=""/></span><span class="t__m"><em>Alpakka</em><small>+ $180</small></span></span></label>
+            <label class="tile" data-fib="cashmere"><input type="radio" name="fabric" value="cashmere"><span class="t"><span class="t__im"><img src="" alt=""/></span><span class="t__m"><em>Kasmír</em><small>+ $260</small></span></span></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend class="legend">Laxaleður í köntum</legend>
+          <div class="seg">
+            <label><input type="radio" name="trim" value="no" checked><span><em>Ekkert</em></span></label>
+            <label><input type="radio" name="trim" value="yes"><span><em>Í köntum</em><small>+ $90</small></span></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend class="legend">Sídd</legend>
+          <div class="seg">
+            <label><input type="radio" name="len" value="standard" checked><span><em>Venjuleg</em></span></label>
+            <label><input type="radio" name="len" value="adjusted"><span><em>Ég vil breyta síddinni</em></span></label>
+          </div>
+          <p class="cfg__len" id="cfgLen" hidden>Sænskir og japanskir viðskiptavinir okkar eru ekki jafnháir. Segðu okkur í grófum dráttum hvernig þú vilt hafa hana og við svörum með nákvæmu verði áður en nokkuð er sniðið.</p>
+        </fieldset>
+        <div class="cfg__sum">
+          <span class="cfg__price" id="cfgPrice">$560</span>
+          <span class="cfg__note" id="cfgNote"></span>
+          <button type="submit" class="cfg__go">Panta þessa flík</button>
+        </div>
+        <div class="cfg__done" id="cfgDone" hidden></div>
+      </form>
+    </div>
+  </section>
+
+  <!-- 09 STOCKISTS -->
+  <section class="stock" id="stockists">
+    <div class="head">
+      <span class="head__n">10.</span>
+      <h2 class="head__t">Einnig fáanlegt hjá</h2>
+      <div class="head__end"><span class="mono">Á Íslandi og erlendis</span></div>
+    </div>
+    <div class="stock__grid">
+      <div class="stock__row"><span class="stock__pl mono">Reykjavík</span><span class="stock__nm">Perlan &middot; Scintilla</span></div>
+      <div class="stock__row"><span class="stock__pl mono">Egilsstaðir</span><span class="stock__nm">Hús Handanna</span></div>
+      <div class="stock__row"><span class="stock__pl mono">Hvolsvöllur</span><span class="stock__nm">Seljalandsfoss</span></div>
+      <div class="stock__row"><span class="stock__pl mono">Kaupmannahöfn</span><span class="stock__nm">Helmers Magasin</span></div>
+      <div class="stock__row"><span class="stock__pl mono">Sviss</span><span class="stock__nm">imi beauty &mdash; Luzern &amp; Interlaken</span></div>
+      <div class="stock__row"><span class="stock__pl mono">Michigan, Bandaríkjunum</span><span class="stock__nm">Simply Stuga</span></div>
+      <div class="stock__row"><span class="stock__pl mono">Kína</span><span class="stock__nm">Fei Fei Travel Diary</span></div>
+    </div>
+  </section>
+
+  <!-- NEWSLETTER -->
+  <section class="news" id="news">
+    <span class="mono">(Nýir litir birtast fyrst hér)</span>
+    <h2 class="news__t">Lítil<br>upplög.</h2>
+    <p class="mono news__sub">Hver litur er prjónaður einu sinni. Við skrifum þegar nýr kemur í hillurnar.</p>
+    <form class="news__form" id="newsForm" novalidate>
+      <input id="newsEmail" type="email" placeholder="you@example.com" autocomplete="email" required />
+      <button class="link" type="submit">[ Skrá mig ]</button>
+    </form>
+    <p class="mono news__msg" id="newsMsg" role="status"></p>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <div class="foot__word">
+    <span class="wordmark"><img src="../assets/logo.png" alt="MJ&Uacute;K Iceland" /></span>
+  </div>
+  <div class="foot__grid">
+    <div><span class="mono">Verslun</span><a href="#new">Nýtt á tímabilinu</a><a href="#fibres">Eftir efni</a><a href="#shop">Eftir flík</a><a href="#sale">Síðustu eintökin</a><a href="#made">Sérsaumað fyrir þig</a></div>
+    <div><span class="mono">MJ&Uacute;K</span><a href="#camp">Verkstæðið</a><a href="#lookbook">Lookbook</a><a href="#stockists">Söluaðilar</a></div>
+    <div><span class="mono">Heimsókn</span><a href="#stores">Laugavegur 23</a><a href="#stores">Klapparstígur 29</a><a href="#stores">Skólavörðustígur 4 &amp; 36</a></div>
+    <div><span class="mono">Hafa samband</span><a href="mailto:customersupport@mjukiceland.com">Þjónusta</a><a href="mailto:anna@mjukiceland.com">Heildsala</a><a href="tel:+3548320567">+354 832 0567</a></div>
+  </div>
+  <div class="foot__base">
+    <span class="mono">&copy; 2026 Mjúk Iceland ehf &middot; Reykjavík, Íslandi</span>
+    <a class="sndr" href="https://sndrstudio.is" target="_blank" rel="noopener" aria-label="Hannað af SNDR Studio" data-logotype><span class="mono">Hannað af</span><span class="sndr__mark">SN<i>&#10022;</i>DR</span><span class="sndr__studio">STUDIO</span></a>
+  </div>
+</footer>
+
+<!-- BAG DRAWER -->
+<div class="bag" id="bag" aria-hidden="true">
+  <div class="bag__scrim" id="bagScrim"></div>
+  <aside class="bag__panel" role="dialog" aria-modal="true" aria-labelledby="bagTitle">
+    <header class="bag__head">
+      <h2 class="bag__title" id="bagTitle">Karfan þín <span id="bagQty">(0)</span></h2>
+      <button class="link" id="bagClose">[ Loka ]</button>
+    </header>
+    <div class="bag__items" id="bagItems"></div>
+    <footer class="bag__foot" id="bagFoot">
+      <div class="bag__sum"><span class="mono">Samtals</span><span class="bag__total" id="bagTotal">$0</span></div>
+      <p class="mono bag__note">Sendingarkostnaður reiknast við greiðslu.</p>
+      <button class="bag__go" id="bagGo">Fara í greiðslu</button>
+    </footer>
+  </aside>
+</div>
+
+<!-- POMPOM CHOOSER: opened when a plain hat goes in the bag -->
+<dialog class="pom" id="pom" aria-labelledby="pomName">
+  <form method="dialog" class="pom__form" id="pomForm">
+    <button type="submit" value="cancel" class="pom__x" aria-label="Loka">&times;</button>
+    <div class="pom__hat">
+      <img id="pomImg" src="" alt=""/>
+      <div><div class="pom__name" id="pomName"></div><p class="pom__why" id="pomWhy"></p></div>
+    </div>
+    <fieldset>
+      <legend class="legend">Dúskar</legend>
+      <div class="seg">
+        <label><input type="radio" name="n" value="0" checked><span>Ekkert</span></label>
+        <label><input type="radio" name="n" value="1"><span>Einn</span></label>
+        <label><input type="radio" name="n" value="2"><span>Tveir</span></label>
+      </div>
+    </fieldset>
+    <div id="pomPick" hidden>
+      <div class="pom__slots">
+        <button type="button" class="pom__slot" data-slot="0"><span class="dot"></span><span class="pom__slotname">Veldu lit</span></button>
+        <button type="button" class="pom__slot" data-slot="1" hidden><span class="dot"></span><span class="pom__slotname">Dúskur 2</span></button>
+      </div>
+      <div class="pom__grid" id="pomGrid" role="group" aria-label="Litir á dúskum"></div>
+    </div>
+    <div class="pom__foot">
+      <span class="pom__total" id="pomTotal"></span>
+      <button type="submit" value="add" class="pom__add" id="pomAdd">Setja í körfu</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="../assets/i18n-is.js"></script>
+<script defer src="../assets/data.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<script defer src="../app.js"></script>
+<script defer src="../configurators.js"></script>
+</body>
+</html>
