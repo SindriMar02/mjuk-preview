@@ -191,8 +191,10 @@ function shipping(zs) {
   const pickup = zs.filter(z => z.pickup && z.id !== 0).flatMap(z => places(z.codes));
   const amounts = withFree.map(z => z.free);
   return {
-    delivery: `DHL Express abroad${pickup.length ? `; local pickup in ${and(pickup)}` : ''}. ` + (parts.length ? `Free shipping ${parts.map(p => p.text).join('; ')}.` : ''),
-    bag: amounts.length ? `Shipping is calculated at checkout, and free above $${Math.min(...amounts)}${Math.max(...amounts) > Math.min(...amounts) ? `–$${Math.max(...amounts)}` : ''} depending on where it goes.` : 'Shipping is calculated at checkout.',
+    // no carrier named: her settings do not say one (DHL is ours to confirm with her first)
+    delivery: `Worldwide${pickup.length ? `, with local pickup in ${and(pickup)}` : ''}. ` + (parts.length ? `Free shipping ${parts.map(p => p.text).join('; ')}.` : ''),
+    // Woo's free-shipping minimum includes the amount itself, so "once it reaches", not "above"
+    bag: amounts.length ? `Shipping is calculated at checkout, and free once your order reaches $${Math.min(...amounts)}${Math.max(...amounts) > Math.min(...amounts) ? `–$${Math.max(...amounts)}` : ''}, depending on where it goes.` : 'Shipping is calculated at checkout.',
   };
 }
 const ship = shipping(zones);
