@@ -154,10 +154,12 @@
     const facts = [
       ['Fibre', p.fib ? fibName(p.fib) : ''],
       ['Composition', p.comp || ''],
-      ['Size', 'One size'],
-      ['Made', 'Designed and knitted in Reykjavík'],
+      /* facts only where her own text states them: size and origin come from it, never a default */
+      ['Size', /\bone[- ]size\b/i.test(c.short + ' ' + c.long) ? 'One size' : ''],
+      ['Made', p.mi || ''],
       ['Care', c.care ? c.care.replace(/-\s/g, ': ').replace(/\s+/g, ' ') : ''],
-      ['Delivery', 'DHL Express, worldwide. Free shipping over $150.'],
+      /* no free-shipping threshold until her real shipping settings are read (her orders suggest $250, not $150) */
+      ['Delivery', 'DHL Express, worldwide.'],
     ].filter(f => f[1]);
     $('#info').innerHTML = `
       <div class="pdp__kick mono">${p.fib ? `<span>${esc(fibName(p.fib))}</span>` : ''}${p.tyk ? `<span>${esc(typeName(p.tyk))}</span>` : ''}${isNew(p) ? '<span class="is-new">New</span>' : ''}${p.cp ? '<span class="is-new">Sale</span>' : ''}</div>

@@ -11,3 +11,18 @@ shop is at [mjukiceland.com](https://mjukiceland.com).
 
 Static site: vanilla HTML/CSS/JS, GSAP + Lenis from a CDN, no build step.
 Run locally with `node _serve.cjs` and open http://127.0.0.1:5895.
+
+## Catalogue and checkout (storefront build, steps 1–3 of `_docs/MJUK-STOREFRONT-PLAN-2026-09-24.md`)
+
+- `node tools/pull-woo.mjs` writes `assets/data.js` and `assets/copy.js` from WooCommerce wc/v3:
+  the local sandbox by default, `--live` for her shop with the read-only key (paced, stops at
+  the first 5xx), `--file` for a saved pull, `--dry` to only report. Composition, type and
+  origin come from the customs catalogue in `04-platform/mjuk-shipping`; where her text states
+  nothing, the page says nothing. Editorial picks live in `tools/curation.json`, by product id.
+- Checkout: the bag posts to `/bag` (`functions/bag.js`, a Cloudflare Pages Function; the local
+  `_serve.cjs` runs the same file with `.dev.vars`). It signs the bag (ids, quantities, pompom
+  notes, never prices) for ten minutes and sends the browser to the WooCommerce host, where the
+  mu-plugin `04-platform/mjuk-woo-sandbox/mu-plugins/sndr-bag-handoff.php` fills the cart and
+  opens checkout.
+- `node --no-warnings tools/e2e-handoff.mjs` proves it against the sandbox: hand-off, tampered,
+  expired, sold out, over stock, a real order through the classic checkout, then undone.

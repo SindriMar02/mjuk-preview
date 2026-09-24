@@ -204,7 +204,7 @@
             <div class="bag__qty">
               <button data-q="-1" data-i="${i}" aria-label="Decrease quantity">−</button>
               <span>${l.q}</span>
-              <button data-q="1" data-i="${i}" aria-label="Increase quantity">+</button>
+              <button data-q="1" data-i="${i}" aria-label="Increase quantity"${byHandle[l.h] && roomFor(byHandle[l.h]) < 1 ? ' disabled' : ''}>+</button>
             </div>
           </div>
           <div class="bag__right">
@@ -219,8 +219,17 @@
     document.documentElement.style.overflow = on ? 'hidden' : '';
     if (lenis) { on ? lenis.stop() : lenis.start(); }
   };
+  /* one of one: never more of a piece in the bag than she has on the shelf. Woo's stock is still
+     the final word at checkout, since this is build-time data. */
+  const inBag = h => lines.filter(l => l.h === h).reduce((n, l) => n + l.q, 0);
+  const roomFor = p => (p.oos ? 0 : p.q > 0 ? p.q - inBag(p.h) : Infinity);
   function addToBag(handle, size, btn, extra) {
     const p = byHandle[handle]; if (!p) return;
+    if (roomFor(p) < 1) {
+      if (btn && !btn.dataset.was) { btn.dataset.was = btn.textContent; btn.textContent = p.q === 1 ? 'The only one is in your bag' : 'All of them are in your bag';
+        setTimeout(() => { btn.textContent = btn.dataset.was; delete btn.dataset.was; }, 1800); }
+      openBag(true); return;
+    }
     const key = handle + '|' + size + (extra ? '|' + extra.k : '');
     const hit = lines.find(l => l.k === key);
     if (hit) hit.q++; else lines.push({ k: key, h: handle, t: p.t, s: size, p: p.p + (extra ? extra.price : 0), img: p.img[0], q: 1, x: extra || null });
@@ -233,11 +242,30 @@
     if (e.target.closest('#bagBtn')) { openBag(true); return; }
     if (e.target.closest('#bagClose') || e.target.closest('#bagScrim')) { openBag(false); return; }
     const q = e.target.closest('[data-q]');
-    if (q) { const l = lines[+q.dataset.i]; if (l) { l.q += +q.dataset.q; if (l.q < 1) lines.splice(+q.dataset.i, 1); save(); renderBag(); } return; }
+    if (q) { const l = lines[+q.dataset.i]; if (l) { const p = byHandle[l.h]; if (+q.dataset.q > 0 && p && roomFor(p) < 1) return; l.q += +q.dataset.q; if (l.q < 1) lines.splice(+q.dataset.i, 1); save(); renderBag(); } return; }
     const rm = e.target.closest('[data-rm]');
     if (rm) { lines.splice(+rm.dataset.rm, 1); save(); renderBag(); return; }
-    if (e.target.closest('#bagGo')) { if (bagItems) bagItems.innerHTML = `<p class="bag__empty">Checkout is not wired up in this prototype.<br>It would hand off to your WooCommerce checkout here, on the same address.</p>`; }
+    if (e.target.closest('#bagGo')) checkout();
   });
+  /* Checkout: the bag goes to the edge function (functions/bag.js), which signs it and sends the
+     browser to the WooCommerce checkout host, where the cart is filled first-party. Ids,
+     quantities and notes only: Woo prices every line. A chosen pompom is its own product, with
+     a note saying which hat it goes on. */
+  function checkout() {
+    const items = [];
+    lines.forEach(l => {
+      const p = byHandle[l.h]; if (!p) return;
+      items.push({ id: p.id, q: l.q });
+      ((l.x && l.x.pompoms) || []).forEach(pm => { const pp = byHandle[pm.h]; if (pp) items.push({ id: pp.id, q: l.q, note: 'Attach to ' + p.t }); });
+    });
+    if (!items.length) return;
+    if (bagGo) { bagGo.disabled = true; bagGo.textContent = 'Opening checkout…'; }
+    const f = document.createElement('form'); f.method = 'post'; f.action = 'bag'; f.hidden = true;
+    const field = document.createElement('input'); field.name = 'bag'; field.value = JSON.stringify(items);
+    f.appendChild(field); document.body.appendChild(f); f.submit();
+  }
+  // back from checkout (bfcache): the button is a button again
+  addEventListener('pageshow', () => { if (bagGo) bagGo.textContent = 'Go to checkout'; renderBag(); });
   addEventListener('keydown', e => { if (e.key === 'Escape' && bagEl && bagEl.getAttribute('aria-hidden') === 'false') openBag(false); });
   renderBag();
   window.CMBag = { add: addToBag, open: openBag };
