@@ -1,0 +1,47 @@
+# Prices, stock and what is listed, refreshed from her WooCommerce with the READ-ONLY key.
+# Facts (composition, type, origin) come from the last full local pull and are carried over.
+#
+# Off until launch: run it by hand from the Actions tab. At launch, uncomment the schedule.
+# Each run is about 40 GET requests, 4 seconds apart; her host is shared hosting on PHP 7.0
+# and must be read gently. The key goes in the repository secrets MJUK_WOO_URL, MJUK_WOO_CK
+# and MJUK_WOO_CS (Settings, Secrets and variables, Actions), set by Sindri; without them the
+# run says so and stops.
+name: Stock and prices from her shop
+
+on:
+  workflow_dispatch:
+  # schedule:
+  #   - cron: '17 */6 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: stock
+  cancel-in-progress: false
+
+jobs:
+  pull:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Read her shop (read-only key)
+        env:
+          MJUK_WOO_URL: ${{ secrets.MJUK_WOO_URL }}
+          MJUK_WOO_CK: ${{ secrets.MJUK_WOO_CK }}
+          MJUK_WOO_CS: ${{ secrets.MJUK_WOO_CS }}
+        run: |
+          if [ -z "$MJUK_WOO_CK" ]; then echo "No read-only key in the repository secrets yet, so nothing was read."; exit 0; fi
+          node tools/pull-woo.mjs --live
+      - name: Publish if anything changed
+        run: |
+          if git diff --quiet -- assets/data.js assets/copy.js; then echo "Nothing changed."; exit 0; fi
+          git config user.name "mjuk-stock"
+          git config user.email "actions@users.noreply.github.com"
+          git add assets/data.js assets/copy.js
+          git commit -m "Stock and prices from her shop"
+          git push

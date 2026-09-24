@@ -238,7 +238,7 @@
     <div class="made__grid">
       <div class="made__copy">
         <p class="made__lead">Slá eða pontsjó, sniðið úr einu af teppunum okkar og saumað uppi á Laugavegi 23. Innan tveggja klukkustunda, alla daga ársins.</p>
-        <p>Veldu sniðið, teppið sem það er sniðið úr og hvort þú viljir laxaleður í köntunum. Verðið sem þú sérð er allt verðið. Viljir þú hafa það styttra eða síðara en venjulega, láttu okkur vita og við svörum áður en nokkuð er sniðið.</p>
+        <p>Veldu sniðið, teppið sem það er sniðið úr og hvort þú viljir laxaleður í köntunum. Viljir þú hafa það styttra eða síðara en venjulega, láttu okkur vita og við svörum áður en nokkuð er sniðið.</p>
         <p class="made__aside">Á Klapparstíg 29 er hálskragi gerður fyrir framan þig á tuttugu mínútum. Til þess þarftu að kíkja við.</p>
         <div class="made__im"><img id="madeImg" src="" alt="" loading="lazy"/></div>
       </div>
@@ -246,25 +246,25 @@
         <fieldset>
           <legend class="legend">Snið</legend>
           <div class="seg">
-            <label><input type="radio" name="shape" value="cape" checked><span><em>Slá</em><small>frá $560</small></span></label>
-            <label><input type="radio" name="shape" value="poncho"><span><em>Pontsjó</em><small>frá $480</small></span></label>
-            <label><input type="radio" name="shape" value="shawl"><span><em>Sjal</em><small>frá $320</small></span></label>
+            <label><input type="radio" name="shape" value="cape" checked><span><em>Slá</em><small data-price="shape.cape"></small></span></label>
+            <label><input type="radio" name="shape" value="poncho"><span><em>Pontsjó</em><small data-price="shape.poncho"></small></span></label>
+            <label><input type="radio" name="shape" value="shawl"><span><em>Sjal</em><small data-price="shape.shawl"></small></span></label>
           </div>
         </fieldset>
         <fieldset>
           <legend class="legend">Efni, sniðið úr einu af teppunum okkar</legend>
           <div class="tiles">
-            <label class="tile" data-fib="icelandic-wool"><input type="radio" name="fabric" value="icelandic" checked><span class="t"><span class="t__im"><img src="" alt=""/></span><span class="t__m"><em>Íslensk ull</em><small>innifalið</small></span></span></label>
-            <label class="tile" data-fib="merino"><input type="radio" name="fabric" value="merino"><span class="t"><span class="t__im"><img src="" alt=""/></span><span class="t__m"><em>Merínó</em><small>+ $80</small></span></span></label>
-            <label class="tile" data-fib="alpaca-silk"><input type="radio" name="fabric" value="alpaca"><span class="t"><span class="t__im"><img src="" alt=""/></span><span class="t__m"><em>Alpakka</em><small>+ $180</small></span></span></label>
-            <label class="tile" data-fib="cashmere"><input type="radio" name="fabric" value="cashmere"><span class="t"><span class="t__im"><img src="" alt=""/></span><span class="t__m"><em>Kasmír</em><small>+ $260</small></span></span></label>
+            <label class="tile" data-fib="icelandic-wool"><input type="radio" name="fabric" value="icelandic" checked><span class="t"><span class="t__im"><img src="" alt=""/></span><span class="t__m"><em>Íslensk ull</em><small data-price="fabric.icelandic"></small></span></span></label>
+            <label class="tile" data-fib="merino"><input type="radio" name="fabric" value="merino"><span class="t"><span class="t__im"><img src="" alt=""/></span><span class="t__m"><em>Merínó</em><small data-price="fabric.merino"></small></span></span></label>
+            <label class="tile" data-fib="alpaca-silk"><input type="radio" name="fabric" value="alpaca"><span class="t"><span class="t__im"><img src="" alt=""/></span><span class="t__m"><em>Alpakka</em><small data-price="fabric.alpaca"></small></span></span></label>
+            <label class="tile" data-fib="cashmere"><input type="radio" name="fabric" value="cashmere"><span class="t"><span class="t__im"><img src="" alt=""/></span><span class="t__m"><em>Kasmír</em><small data-price="fabric.cashmere"></small></span></span></label>
           </div>
         </fieldset>
         <fieldset>
           <legend class="legend">Laxaleður í köntum</legend>
           <div class="seg">
             <label><input type="radio" name="trim" value="no" checked><span><em>Ekkert</em></span></label>
-            <label><input type="radio" name="trim" value="yes"><span><em>Í köntum</em><small>+ $90</small></span></label>
+            <label><input type="radio" name="trim" value="yes"><span><em>Í köntum</em><small data-price="trim"></small></span></label>
           </div>
         </fieldset>
         <fieldset>
@@ -273,10 +273,10 @@
             <label><input type="radio" name="len" value="standard" checked><span><em>Venjuleg</em></span></label>
             <label><input type="radio" name="len" value="adjusted"><span><em>Ég vil breyta síddinni</em></span></label>
           </div>
-          <p class="cfg__len" id="cfgLen" hidden>Sænskir og japanskir viðskiptavinir okkar eru ekki jafnháir. Segðu okkur í grófum dráttum hvernig þú vilt hafa hana og við svörum með nákvæmu verði áður en nokkuð er sniðið.</p>
+          <p class="cfg__len" id="cfgLen" hidden>Segðu okkur í grófum dráttum hvernig þú vilt hafa hana og við svörum með nákvæmu verði áður en nokkuð er sniðið.</p>
         </fieldset>
         <div class="cfg__sum">
-          <span class="cfg__price" id="cfgPrice">$560</span>
+          <span class="cfg__price" id="cfgPrice"></span>
           <span class="cfg__note" id="cfgNote"></span>
           <button type="submit" class="cfg__go">Panta þessa flík</button>
         </div>

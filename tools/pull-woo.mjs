@@ -33,7 +33,8 @@ const FIELDS = 'id,name,slug,type,status,catalog_visibility,description,short_de
 async function pull() {
   if (opt('--file')) return { source: 'file ' + path.relative(WS, path.resolve(opt('--file'))), products: JSON.parse(fs.readFileSync(opt('--file'), 'utf8')) };
   const live = flag('--live');
-  const env = live ? readEnv(path.join(os.homedir(), '.config/sndr/mjuk-woo.env'))
+  // a scheduled run (.github/workflows/stock.yml) passes the read-only key as environment variables
+  const env = live ? (process.env.MJUK_WOO_CK ? process.env : readEnv(path.join(os.homedir(), '.config/sndr/mjuk-woo.env')))
                    : readEnv(path.join(WS, '04-platform/mjuk-woo-sandbox/local/sandbox.env'));
   const base = (live ? env.MJUK_WOO_URL : env.SANDBOX_URL).replace(/\/$/, '');
   const auth = 'Basic ' + Buffer.from(live ? `${env.MJUK_WOO_CK}:${env.MJUK_WOO_CS}` : `${env.SANDBOX_USER}:${env.SANDBOX_APP_PASSWORD}`).toString('base64');
@@ -219,7 +220,13 @@ function shippingIs(zs) {
   };
 }
 const ship = zones ? { ...shipping(zones), ...shippingIs(zones) } : null;
-const catalogue = JSON.parse(fs.readFileSync(CATALOGUE, 'utf8'));
+/* The customs catalogue lives in a local repository. Where it is not there (the scheduled run on
+   GitHub), each product keeps the facts the last full pull gave it, and only price, stock and
+   listing are refreshed; a product that is new since then gets no facts until a full pull. */
+const catalogue = fs.existsSync(CATALOGUE) ? JSON.parse(fs.readFileSync(CATALOGUE, 'utf8')) : null;
+const dataFile = path.join(ROOT, 'assets/data.js');
+const old = fs.existsSync(dataFile) ? new Function('window', fs.readFileSync(dataFile, 'utf8') + ';return window.CM;')({}) : null;
+const oldById = new Map(((old && old.all) || []).map(p => [p.id, p]));
 const curation = JSON.parse(fs.readFileSync(path.join(ROOT, 'tools/curation.json'), 'utf8'));
 
 const listed = products
@@ -231,12 +238,13 @@ const addText = s => { if (!s) return -1; if (!textIdx.has(s)) { textIdx.set(s, 
 const why = { fib: {}, missing: [], partial: [] };
 
 const all = listed.map(p => {
-  const cc = catalogue[p.id] || null;
-  if (!cc) why.missing.push(p.id);
+  const cc = catalogue ? catalogue[p.id] || null : null;
+  const prev = !catalogue ? oldById.get(p.id) || null : null;
+  if (!cc && !prev) why.missing.push(p.id);
   const shortText = txt(p.short_description), longText = txt(p.description);
-  const [fib, fibFrom] = fibreOf(p, cc, shortText);
+  const [fib, fibFrom] = prev ? [prev.fib, 'previous pull'] : fibreOf(p, cc, shortText);
   if (fibFrom) why.fib[fibFrom] = (why.fib[fibFrom] || 0) + 1;
-  const tyk = typeOf(p, cc);
+  const tyk = prev ? prev.tyk : typeOf(p, cc);
   const price = +p.price || 0, regular = +p.regular_price || 0;
   const s = addText(shortText), l = addText(longText);
   map[p.id] = { s, l };
@@ -245,11 +253,11 @@ const all = listed.map(p => {
     h: p.slug, t: texturize(decode(p.name).replace(/\s+/g, ' ').trim()), v: FIB_NAME[fib] || '', ty: TYPES[tyk] || '',
     p: price, cp: p.sale_price !== '' && regular > price ? regular : 0,
     img: [...new Set((p.images || []).map(i => String(i.src).split('?')[0]))].slice(0, 4),
-    sz: [], comp: compositionOf(p, cc), fib, tyk, id: p.id, live: true,
+    sz: [], comp: prev ? prev.comp : compositionOf(p, cc), fib, tyk, id: p.id, live: true,
     oos: p.stock_status === 'outofstock', cats: p.categories.map(c => c.slug),
   };
   if (p.manage_stock && Number.isInteger(p.stock_quantity)) o.q = p.stock_quantity;
-  const mi = originOf(p, cc, shortText, longText); if (mi) o.mi = mi;
+  const mi = prev ? prev.mi : originOf(p, cc, shortText, longText); if (mi) o.mi = mi;
   return o;
 });
 
@@ -276,6 +284,7 @@ const CM = {
   hero: curation.hero, campaign: curation.campaign, wall: curation.wall,
   totalCount: all.length, saleCount: all.filter(p => p.cp > 0 && !p.oos).length,
   retired: dropped, harvestedAt: new Date().toISOString().slice(0, 10), source, ship,
+  made: curation.made || null, // made-for-you prices from Anna; null until she sets them
 };
 
 /* ── report, against what the pages show today ──────────────────────────── */
@@ -286,12 +295,10 @@ L.push(`Fibre filter from: ${Object.entries(why.fib).map(([k, v]) => `${k} ${v}`
 L.push(`Types: ${types.map(t => `${t.key} ${t.count}`).join(', ')}; also ${[...new Set(all.map(p => p.tyk).filter(k => k && !TYPES[k]))].map(k => `${k} ${all.filter(p => p.tyk === k).length}`).join(', ') || 'none'}`);
 if (why.partial.length) L.push(`Composition withheld (does not add up to 100%) for ${why.partial.length}: ${[...new Set(why.partial.map(x => x.replace(/^\d+ /, '')))].join('; ')}`);
 if (all.some(p => !p.img.length)) L.push(`No photo in WooCommerce: ${all.filter(p => !p.img.length).map(p => `${p.id} ${p.t}`).join(', ')}`);
-if (why.missing.length) L.push(`Not in the customs catalogue (nothing claimed; rebuild it from a newer pull): ${why.missing.join(', ')}`);
+if (why.missing.length) L.push(catalogue ? `Not in the customs catalogue (nothing claimed; rebuild it from a newer pull): ${why.missing.join(', ')}` : `New since the last full pull, no facts yet (run a full pull): ${why.missing.join(', ')}`);
 if (dropped.length) L.push(`Curated picks no longer listed, dropped: ${dropped.join(', ')}`);
-const dataFile = path.join(ROOT, 'assets/data.js');
-if (fs.existsSync(dataFile)) {
-  const old = new Function('window', fs.readFileSync(dataFile, 'utf8') + ';return window.CM;')({});
-  const oldById = new Map(old.all.map(p => [p.id, p]));
+if (!catalogue) L.push(`No customs catalogue here (${path.relative(WS, CATALOGUE)}): facts carried over from the last full pull; prices, stock and listing refreshed.`);
+if (old) {
   const added = all.filter(p => !oldById.has(p.id)).map(p => p.id), gone = old.all.filter(p => !byId.has(p.id)).map(p => p.id);
   const changed = { p: [], cp: [], oos: [], fib: [], tyk: [], comp: [] };
   for (const p of all) { const o = oldById.get(p.id); if (!o) continue; for (const k of Object.keys(changed)) if (String(o[k]) !== String(p[k])) changed[k].push(p.id); }

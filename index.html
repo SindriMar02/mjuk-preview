@@ -238,7 +238,7 @@
     <div class="made__grid">
       <div class="made__copy">
         <p class="made__lead">A cape or poncho, cut from one of our blankets and sewn upstairs at Laugavegur 23. Within two hours, any day of the year.</p>
-        <p>Choose the shape, the blanket it is cut from, and whether you want salmon leather at the edges. The price you see is the whole price. If you would like it shorter or longer than standard, say so and we write back before anything is cut.</p>
+        <p>Choose the shape, the blanket it is cut from, and whether you want salmon leather at the edges. If you would like it shorter or longer than standard, say so and we write back before anything is cut.</p>
         <p class="made__aside">At Klapparst&iacute;gur 29 a neckwarmer is made in front of you in twenty minutes. That one you have to come in for.</p>
         <div class="made__im"><img id="madeImg" src="" alt="" loading="lazy"/></div>
       </div>
@@ -246,25 +246,25 @@
         <fieldset>
           <legend class="legend">Shape</legend>
           <div class="seg">
-            <label><input type="radio" name="shape" value="cape" checked><span><em>Cape</em><small>from $560</small></span></label>
-            <label><input type="radio" name="shape" value="poncho"><span><em>Poncho</em><small>from $480</small></span></label>
-            <label><input type="radio" name="shape" value="shawl"><span><em>Shawl</em><small>from $320</small></span></label>
+            <label><input type="radio" name="shape" value="cape" checked><span><em>Cape</em><small data-price="shape.cape"></small></span></label>
+            <label><input type="radio" name="shape" value="poncho"><span><em>Poncho</em><small data-price="shape.poncho"></small></span></label>
+            <label><input type="radio" name="shape" value="shawl"><span><em>Shawl</em><small data-price="shape.shawl"></small></span></label>
           </div>
         </fieldset>
         <fieldset>
           <legend class="legend">Fabric, cut from one of our blankets</legend>
           <div class="tiles">
-            <label class="tile" data-fib="icelandic-wool"><input type="radio" name="fabric" value="icelandic" checked><span class="t"><span class="t__im"><img src="" alt=""/></span><span class="t__m"><em>Icelandic wool</em><small>included</small></span></span></label>
-            <label class="tile" data-fib="merino"><input type="radio" name="fabric" value="merino"><span class="t"><span class="t__im"><img src="" alt=""/></span><span class="t__m"><em>Merino</em><small>+ $80</small></span></span></label>
-            <label class="tile" data-fib="alpaca-silk"><input type="radio" name="fabric" value="alpaca"><span class="t"><span class="t__im"><img src="" alt=""/></span><span class="t__m"><em>Alpaca</em><small>+ $180</small></span></span></label>
-            <label class="tile" data-fib="cashmere"><input type="radio" name="fabric" value="cashmere"><span class="t"><span class="t__im"><img src="" alt=""/></span><span class="t__m"><em>Cashmere</em><small>+ $260</small></span></span></label>
+            <label class="tile" data-fib="icelandic-wool"><input type="radio" name="fabric" value="icelandic" checked><span class="t"><span class="t__im"><img src="" alt=""/></span><span class="t__m"><em>Icelandic wool</em><small data-price="fabric.icelandic"></small></span></span></label>
+            <label class="tile" data-fib="merino"><input type="radio" name="fabric" value="merino"><span class="t"><span class="t__im"><img src="" alt=""/></span><span class="t__m"><em>Merino</em><small data-price="fabric.merino"></small></span></span></label>
+            <label class="tile" data-fib="alpaca-silk"><input type="radio" name="fabric" value="alpaca"><span class="t"><span class="t__im"><img src="" alt=""/></span><span class="t__m"><em>Alpaca</em><small data-price="fabric.alpaca"></small></span></span></label>
+            <label class="tile" data-fib="cashmere"><input type="radio" name="fabric" value="cashmere"><span class="t"><span class="t__im"><img src="" alt=""/></span><span class="t__m"><em>Cashmere</em><small data-price="fabric.cashmere"></small></span></span></label>
           </div>
         </fieldset>
         <fieldset>
           <legend class="legend">Salmon leather trim</legend>
           <div class="seg">
             <label><input type="radio" name="trim" value="no" checked><span><em>None</em></span></label>
-            <label><input type="radio" name="trim" value="yes"><span><em>At the edges</em><small>+ $90</small></span></label>
+            <label><input type="radio" name="trim" value="yes"><span><em>At the edges</em><small data-price="trim"></small></span></label>
           </div>
         </fieldset>
         <fieldset>
@@ -273,10 +273,10 @@
             <label><input type="radio" name="len" value="standard" checked><span><em>Standard</em></span></label>
             <label><input type="radio" name="len" value="adjusted"><span><em>I would like it adjusted</em></span></label>
           </div>
-          <p class="cfg__len" id="cfgLen" hidden>Our Swedish customers and our Japanese customers are not the same height. Tell us roughly how you would like it and we write back with the exact price before anything is cut.</p>
+          <p class="cfg__len" id="cfgLen" hidden>Tell us roughly how you would like it and we write back with the exact price before anything is cut.</p>
         </fieldset>
         <div class="cfg__sum">
-          <span class="cfg__price" id="cfgPrice">$560</span>
+          <span class="cfg__price" id="cfgPrice"></span>
           <span class="cfg__note" id="cfgNote"></span>
           <button type="submit" class="cfg__go">Request this piece</button>
         </div>

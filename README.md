@@ -48,3 +48,15 @@ translated from `tools/is.json`, keyed by the English source; strings the script
 stay in her own English on both sites; shipping sentences come in both languages from her zones.
 The checkout (one host) is English for now.
 
+## Freshness and made-for-you (plan steps 5 and 6)
+
+- `.github/workflows/stock.yml` refreshes prices, stock and listing from her shop with the
+  read-only key (repository secrets `MJUK_WOO_URL`, `MJUK_WOO_CK`, `MJUK_WOO_CS`, set by Sindri).
+  Manual until launch; the four-a-day schedule is written in and commented out. Where the
+  customs catalogue is not present (on GitHub), each product keeps the facts of the last full
+  local pull. WooCommerce stays the final word on stock at checkout.
+- Made for you: shapes, fabrics, salmon leather and length are Anna's (11 Sep meeting). Her
+  prices go in `tools/curation.json` under `made` (null until she gives them); with none set the
+  page shows no number and "Request this piece" opens an email to customer support with every
+  choice written out. With all set, the total is calculated as she asked.
+

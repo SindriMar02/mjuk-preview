@@ -73,5 +73,20 @@
   "https://i0.wp.com/mjukiceland.com/wp-content/uploads/2021/05/sessionMjuk-262-of-488-93-e1622253067135.jpg",
   "https://i0.wp.com/mjukiceland.com/wp-content/uploads/2023/02/IMG_8775.jpeg",
   "https://i1.wp.com/mjukiceland.com/wp-content/uploads/2021/11/IMG-20220401-WA0113.jpg"
- ]
+ ],
+ "made": {
+  "_about": "Made-for-you prices in USD, set by Anna (about twenty in total, per the 11 Sep meeting). null = not given yet: the page then shows no number and says price on request. Fill all to switch on the automatic total.",
+  "shape": {
+   "cape": null,
+   "poncho": null,
+   "shawl": null
+  },
+  "fabric": {
+   "icelandic": null,
+   "merino": null,
+   "cashmere": null,
+   "alpaca": null
+  },
+  "trim": null
+ }
 }

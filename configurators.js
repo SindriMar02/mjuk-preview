@@ -111,13 +111,16 @@
   /* ════════════════════ 2 · MADE FOR YOU ════════════════════ */
   const cfg = $('#cfg');
   if (cfg) {
-    /* PLACEHOLDER PRICES. Anna said there are about twenty prices in total, because the
-       colours all cost the same and only the fabric and the work move it. These are
-       indicative so the flow can be judged; the real table replaces them. */
-    const SHAPE = { cape: { name: 'Cape', base: 560 }, poncho: { name: 'Poncho', base: 480 }, shawl: { name: 'Shawl', base: 320 } };
-    const FABRIC = { icelandic: { name: 'Icelandic wool', up: 0, fib: 'icelandic-wool' }, merino: { name: 'Merino', up: 80, fib: 'merino' },
-                     cashmere: { name: 'Cashmere', up: 260, fib: 'cashmere' }, alpaca: { name: 'Alpaca', up: 180, fib: 'alpaca-silk' } };
-    const TRIM = 90;
+    /* Her shapes and fabrics (11 Sep meeting). Prices are Anna's to set, about twenty in all, and
+       live in tools/curation.json as CM.made. Until she gives them the page shows no number: the
+       request goes to the workshop by email, which is what the section replaces. */
+    const SHAPE = { cape: 'Cape', poncho: 'Poncho', shawl: 'Shawl' };
+    const FABRIC = { icelandic: { name: 'Icelandic wool', fib: 'icelandic-wool' }, merino: { name: 'Merino', fib: 'merino' },
+                     cashmere: { name: 'Cashmere', fib: 'cashmere' }, alpaca: { name: 'Alpaca', fib: 'alpaca-silk' } };
+    const PRICE = CM.made || {};
+    const get = k => k.split('.').reduce((o, p) => (o == null ? null : o[p]), PRICE);
+    // what each option adds, shown only when she has priced it
+    $$('[data-price]', cfg).forEach(el => { const n = get(el.dataset.price); el.textContent = n == null ? '' : el.dataset.price.startsWith('shape') ? usd(n) : n ? '+ ' + usd(n) : t('included'); el.hidden = n == null; });
 
     // fabric tiles show one of her real blankets in that fibre, because the fabric IS a blanket
     // prefer a BLANKET in that fibre (the fabric is literally a blanket); she has none in pure
@@ -137,27 +140,36 @@
 
     const v = n => (cfg.elements[n] && cfg.elements[n].value) || '';
     const priceEl = $('#cfgPrice'), noteEl = $('#cfgNote'), lenEl = $('#cfgLen'), done = $('#cfgDone');
-    const total = () => SHAPE[v('shape')].base + FABRIC[v('fabric')].up + (v('trim') === 'yes' ? TRIM : 0);
+    const parts = () => [get('shape.' + v('shape')), get('fabric.' + v('fabric')), v('trim') === 'yes' ? get('trim') : 0];
+    const priced = () => parts().every(n => n != null);
+    const total = () => parts().reduce((a, n) => a + n, 0);
     const paint = () => {
-      const next = usd(total());
+      const next = priced() ? usd(total()) : t('Price on request');
       if (priceEl.textContent !== next) { priceEl.textContent = next; pulse(priceEl); }
+      priceEl.classList.toggle('is-ask', !priced());
       const adj = v('len') === 'adjusted';   // never name a field "length": form.elements.length is the control count
       lenEl.hidden = !adj;
-      noteEl.textContent = t(adj ? 'Indicative. We confirm the price with the length.' : 'The whole price. Ready within two hours in the shop.');
+      noteEl.textContent = t(!priced() ? 'We write back with the price before anything is cut.'
+        : adj ? 'Indicative. We confirm the price with the length.' : 'The whole price. Ready within two hours in the shop.');
     };
     cfg.addEventListener('change', () => { done.hidden = true; paint(); });
+    /* The request is an email to the workshop, written out in full, so nothing is lost between
+       the page and the shop. It opens the shopper's own mail app; the address is shown too. */
     cfg.addEventListener('submit', e => {
       e.preventDefault();
       const adj = v('len') === 'adjusted';
-      done.innerHTML = `<h3>${t(adj ? 'Nearly there' : 'Request received')}</h3>
-        <dl><dt>${t('Shape')}</dt><dd>${t(SHAPE[v('shape')].name)}</dd><dt>${t('Fabric')}</dt><dd>${fmt('{fabric}, cut from one of our blankets', { fabric: t(FABRIC[v('fabric')].name) })}</dd>
-        <dt>${t('Trim')}</dt><dd>${t(v('trim') === 'yes' ? 'Salmon leather at the edges' : 'None')}</dd><dt>${t('Length')}</dt><dd>${t(adj ? 'Adjusted, we will write to you' : 'Standard')}</dd>
-        <dt>${t('Price')}</dt><dd>${usd(total())}${adj ? t(', to be confirmed') : ''}</dd></dl>
-        <p>${t(adj
-          ? 'Tell us how you would like it, and we will write back with the exact price before anything is cut.'
-          : 'In the finished shop this goes straight to the workshop above Laugavegur 23 and to your basket, with nothing left to explain by email.')}</p>`;
+      const price = priced() ? usd(total()) + (adj ? t(', to be confirmed') : '') : t('Price on request');
+      const rows = [[t('Shape'), t(SHAPE[v('shape')])], [t('Fabric'), fmt('{fabric}, cut from one of our blankets', { fabric: t(FABRIC[v('fabric')].name) })],
+        [t('Trim'), t(v('trim') === 'yes' ? 'Salmon leather at the edges' : 'None')], [t('Length'), t(adj ? 'Adjusted, we will write to you' : 'Standard')], [t('Price'), price]];
+      const to = 'customersupport@mjukiceland.com';
+      const body = t('Made for you') + '\n\n' + rows.map(r => r[0] + ': ' + r[1]).join('\n') + '\n\n' + (adj ? t('How I would like the length:') + '\n\n' : '');
+      const mail = `mailto:${to}?subject=${encodeURIComponent(t('Made for you') + ': ' + t(SHAPE[v('shape')]))}&body=${encodeURIComponent(body)}`;
+      done.innerHTML = `<h3>${t('Your request is ready to send')}</h3>
+        <dl>${rows.map(r => `<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join('')}</dl>
+        <p>${fmt('Your email app opens with this request. If it does not, write to {email}.', { email: `<a href="${mail}">${to}</a>` })}</p>`;
       done.hidden = false;
       done.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'nearest' });
+      location.href = mail;
     });
     paint();
 
