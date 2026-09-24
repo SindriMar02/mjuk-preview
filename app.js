@@ -190,9 +190,9 @@
   // the shipping line under the total comes from her shipping zones, like the product page's
   const bagNote = $('.bag__note'); if (bagNote && CM.ship && CM.ship.bag) bagNote.textContent = (isIS && CM.ship.bagIs) || CM.ship.bag;
   const MAX_EACH = 20, MAX_LINES = 40; // what functions/bag.js accepts, so a bag never fails there
-  let lines = [];
-  try { const saved = JSON.parse(localStorage.getItem('mjuk_bag') || '[]');
-    lines = Array.isArray(saved) ? saved.filter(l => l && typeof l.h === 'string' && Number.isInteger(l.q) && l.q > 0) : []; } catch (e) { lines = []; }
+  const load = () => { try { const saved = JSON.parse(localStorage.getItem('mjuk_bag') || '[]');
+    return Array.isArray(saved) ? saved.filter(l => l && typeof l.h === 'string' && Number.isInteger(l.q) && l.q > 0) : []; } catch (e) { return []; } };
+  let lines = load();
   const save = () => { try { localStorage.setItem('mjuk_bag', JSON.stringify(lines)); } catch (e) {} };
   const keep = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} };
   const kept = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
@@ -329,9 +329,10 @@
     const items = [];
     lines.filter(live).forEach(l => {
       const p = byHandle[l.h];
-      items.push({ id: p.id, q: l.q });
+      // p is the price the drawer showed, so checkout can say so if hers has changed since
+      items.push({ id: p.id, q: l.q, p: p.p });
       // "for" ties the pompom to its hat: if the hat has gone, the pompom is not bought alone
-      poms(l).forEach(pm => { items.push({ id: byHandle[pm.h].id, q: l.q, note: 'Attach to ' + p.t, for: p.id }); });
+      poms(l).forEach(pm => { items.push({ id: byHandle[pm.h].id, q: l.q, p: byHandle[pm.h].p, note: 'Attach to ' + p.t, for: p.id }); });
     });
     if (!items.length) return;
     if (bagGo) { bagGo.disabled = true; bagGo.textContent = t('Opening checkout…'); }
@@ -346,11 +347,18 @@
       keep('mjuk_bag_out', String(Date.now()));
       const f = document.createElement('form'); f.method = 'post'; f.action = ROOT + 'bag'; f.hidden = true;
       const field = document.createElement('input'); field.name = 'bag'; field.value = JSON.stringify(items);
-      f.appendChild(field); document.body.appendChild(f); f.submit();
+      f.appendChild(field);
+      // the checkout's way back leads to the shop in the language the bag was filled in
+      if (isIS) { const lang = document.createElement('input'); lang.name = 'lang'; lang.value = 'is'; f.appendChild(lang); }
+      document.body.appendChild(f); f.submit();
     });
   }
+  /* One bag across tabs: another tab's change arrives here, so this tab never writes back a bag
+     it read before that change. A page restored from the back/forward cache heard nothing while
+     it was away, so it reads the bag again. */
+  addEventListener('storage', e => { if (e.key === null || e.key === 'mjuk_bag' || e.key === 'mjuk_bag_out') { lines = load(); notices = []; renderBag(); } });
   // back from checkout (bfcache): the button is a button again, and the drawer asks about the order
-  addEventListener('pageshow', () => { if (bagGo) bagGo.textContent = t('Go to checkout'); renderBag(); });
+  addEventListener('pageshow', e => { if (e.persisted) lines = load(); if (bagGo) bagGo.textContent = t('Go to checkout'); renderBag(); });
   addEventListener('keydown', e => {
     if (!bagOpen || !bagEl) return;
     if (e.key === 'Escape') { openBag(false); return; }

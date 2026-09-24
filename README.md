@@ -21,9 +21,12 @@ Run locally with `node _serve.cjs` and open http://127.0.0.1:5895.
   nothing, the page says nothing. Editorial picks live in `tools/curation.json`, by product id.
 - Checkout: the bag posts to `/bag` (`functions/bag.js`, a Cloudflare Pages Function; the local
   `_serve.cjs` runs the same file with `.dev.vars`). It signs the bag (ids, quantities, pompom
-  notes, never prices) for ten minutes and sends the browser to the WooCommerce host, where the
-  mu-plugin `04-platform/mjuk-woo-sandbox/mu-plugins/sndr-bag-handoff.php` fills the cart and
-  opens checkout. `GET /bag` answers 204 where checkout is connected; a static preview (GitHub
+  notes, the price the drawer showed, the language) for ten minutes and sends the browser to the
+  WooCommerce host, where the mu-plugin `04-platform/mjuk-woo-sandbox/mu-plugins/sndr-bag-handoff.php`
+  fills the cart and opens checkout. Woo prices every line itself; when her price differs from
+  the one the bag showed, the basket says so. A bag filled on the Icelandic pages gets checkout
+  links back to `/is/`. A customer who signs in at checkout keeps this bag; WooCommerce would
+  otherwise pour their old saved basket into it. `GET /bag` answers 204 where checkout is connected; a static preview (GitHub
   Pages) has no `/bag`, so the drawer says checkout is not connected instead of erroring.
   Production needs `BAG_SECRET` (shared with the Woo host's `SNDR_BAG_SECRET`) and
   `CHECKOUT_ORIGIN` set on the Pages project. Deploy check for the Woo side:
@@ -32,10 +35,21 @@ Run locally with `node _serve.cjs` and open http://127.0.0.1:5895.
   counts for nothing; quantities above stock are trimmed with a note; prices are today's. At
   most 20 of a piece and 40 lines, the same limits `/bag` accepts. After a hand-off the drawer
   asks for a day whether the order was placed; `?ordered=1` (for the link back from her
-  order-received page) empties the bag. Hand-off links work once.
-- `node --no-warnings tools/e2e-handoff.mjs` proves it against the sandbox (19 checks): hand-off,
+  order-received page) empties the bag. Hand-off links work once. Two open tabs share one bag
+  (each hears the other's changes), so neither writes back a stale copy.
+- `node --no-warnings tools/e2e-handoff.mjs` proves it against the sandbox (22 checks): hand-off,
   tampered, expired, used twice, sold out, pompom without its hat, over stock, the deploy ping,
   a real order through the classic checkout, then undone.
+- Every scenario, on both WooCommerces: `node tools/e2e-scenarios.mjs replica|sandbox` (stock,
+  unpublished pieces, changed prices, sign-in with a saved basket, her twelve shipping cases and
+  country changes, pickup, coupons, PayPal out, cancel, back, paid by IPN, declined, "Pay" again,
+  her order emails, Icelandic links; everything it changes is put back). `node tools/e2e-bag.mjs`
+  drives the bag in Chrome (two tabs, storage refused, double click, back button, static preview,
+  one-of-one, sold since, `/is/`). `node tools/e2e-workerd.mjs` runs `functions/bag.js` in
+  Cloudflare's own runtime and measures the biggest possible bag's link (4.3 KB of ~8 KB).
+  The replica of her stack (WooCommerce 3.5.10, WordPress 6.4.12, her two PayPals) is
+  `04-platform/mjuk-woo-sandbox/replica/`, launch entry `mjuk-woo-replica`; this storefront on
+  :5896 hands off to it.
 
 ## Two languages (plan step 7)
 

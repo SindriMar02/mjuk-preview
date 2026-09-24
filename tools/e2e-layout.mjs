@@ -4,22 +4,25 @@
    sideways, text past the screen edge, and sideways page scroll (tools/layout-detect.mjs).
    Also opens the bag drawer and, on touch, the menu; with a mouse it hovers the first cards.
 
-     node tools/e2e-layout.mjs [--quick]
+     node tools/e2e-layout.mjs [--quick] [--replica]
 
-   Needs the storefront preview (:5895) and the sandbox (:9410). Headless Chrome, reduced
+   Needs the storefront preview (:5895) and the sandbox (:9410); with --replica, the same storefront
+   on :5896 and the WooCommerce 3.5 replica of her stack (:9420), whose markup differs from today's. Headless Chrome, reduced
    motion so reveals start visible. The iOS Simulator pass is separate: Chrome cannot show
    Safari's collapsing bar or its viewport units. */
 import puppeteer from 'puppeteer-core';
 import { detect } from './layout-detect.mjs';
 
-const STORE = 'http://localhost:5895', WOO = 'http://127.0.0.1:9410';
+const REPLICA = process.argv.includes('--replica');
+const STORE = REPLICA ? 'http://localhost:5896' : 'http://localhost:5895', WOO = REPLICA ? 'http://127.0.0.1:9420' : 'http://127.0.0.1:9410';
+const CART = REPLICA ? '/basket/' : '/cart/'; // her live basket is /basket/
 const QUICK = process.argv.includes('--quick');
 const MODES = QUICK
   ? [{ w: 375, touch: true }, { w: 1280, touch: false }]
   : [{ w: 320, touch: true }, { w: 360, touch: true }, { w: 375, touch: true }, { w: 390, touch: true }, { w: 414, touch: true },
      { w: 768, touch: true }, { w: 375, touch: false }, { w: 600, touch: false }, { w: 1024, touch: false }, { w: 1280, touch: false }, { w: 1440, touch: false }];
 const SITE = ['index.html', 'shop.html', 'product.html?p=79-beanie-black-with-matching-raccoon-pompom', 'product.html?p=slouchy-hat-light-grey', 'fibres.html', 'store.html', 'story.html', 'staff.html'];
-const PAGES = [...SITE.map(p => `${STORE}/${p}`), ...SITE.map(p => `${STORE}/is/${p}`), `${WOO}/cart/`, `${WOO}/checkout/`, `${WOO}/my-account/`];
+const PAGES = [...SITE.map(p => `${STORE}/${p}`), ...SITE.map(p => `${STORE}/is/${p}`), `${WOO}${CART}`, `${WOO}/checkout/`, `${WOO}/my-account/`];
 
 const browser = await puppeteer.launch({ executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', headless: 'new', protocolTimeout: 90000,
   args: ['--disable-background-timer-throttling', '--disable-backgrounding-occluded-windows', '--disable-renderer-backgrounding'] });
