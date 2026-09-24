@@ -203,7 +203,7 @@ section{padding:clamp(70px,12vw,180px) 0;position:relative}
 .bag__head{display:flex;align-items:baseline;justify-content:space-between;gap:14px;padding:24px var(--bagpad,22px);border-bottom:1px solid var(--line)}
 .bag__title{font-family:var(--ff-d);font-weight:600;font-size:34px;line-height:1;text-transform:uppercase}
 .bag__title span{color:var(--accent);font-size:.5em}
-.bag__items{flex:1;overflow-y:auto;padding:6px 22px}
+.bag__items{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:6px 22px}
 .bag__empty{padding:40px 0;color:var(--dim);font-family:var(--ff-m);font-size:12px;text-transform:uppercase;letter-spacing:.08em;line-height:1.9}
 .bag__it{display:grid;grid-template-columns:66px 1fr auto;gap:14px;padding:18px 0;border-bottom:1px solid var(--line);align-items:start}
 .bag__im{aspect-ratio:4/5;background:var(--bg-2);border:1px solid var(--line);overflow:hidden}
@@ -212,7 +212,12 @@ section{padding:clamp(70px,12vw,180px) 0;position:relative}
 .bag__sz{font-family:var(--ff-m);font-size:10px;color:var(--dim);text-transform:uppercase;margin-top:4px}
 .bag__qty{display:flex;align-items:center;gap:9px;margin-top:9px}
 .bag__qty button{width:20px;height:20px;display:grid;place-items:center;border:1px solid var(--line);font-size:12px;line-height:1;color:var(--ink);transition:.25s}
-.bag__qty button:hover{border-color:var(--accent);color:var(--accent)}
+.bag__qty button:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.bag__qty button:disabled{opacity:.3;cursor:default}
+.bag__it--gone .bag__im{opacity:.45}
+.bag__it--gone .bag__n{color:var(--dim);text-decoration:line-through}
+.bag__it--gone .bag__sz{color:var(--accent)}
+.bag__notice{margin:14px 0 4px;padding:12px 14px;border:1px solid var(--line);background:var(--bg-2);font-family:var(--ff-m);font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;line-height:1.7;color:var(--ink)}
 .bag__qty span{font-family:var(--ff-m);font-size:11px;min-width:14px;text-align:center}
 .bag__right{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
 .bag__p{font-family:var(--ff-m);font-size:11.5px;color:var(--accent);white-space:nowrap}

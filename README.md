@@ -23,6 +23,9 @@ Run locally with `node _serve.cjs` and open http://127.0.0.1:5895.
   `_serve.cjs` runs the same file with `.dev.vars`). It signs the bag (ids, quantities, pompom
   notes, never prices) for ten minutes and sends the browser to the WooCommerce host, where the
   mu-plugin `04-platform/mjuk-woo-sandbox/mu-plugins/sndr-bag-handoff.php` fills the cart and
-  opens checkout.
+  opens checkout. `GET /bag` answers 204 where checkout is connected; a static preview (GitHub
+  Pages) has no `/bag`, so the drawer says checkout is not connected instead of erroring.
+  Production needs `BAG_SECRET` (shared with the Woo host's `SNDR_BAG_SECRET`) and
+  `CHECKOUT_ORIGIN` set on the Pages project.
 - `node --no-warnings tools/e2e-handoff.mjs` proves it against the sandbox: hand-off, tampered,
   expired, sold out, over stock, a real order through the classic checkout, then undone.

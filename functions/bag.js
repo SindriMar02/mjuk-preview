@@ -22,8 +22,10 @@ export function readBag(raw) {
   const out = [];
   for (const i of items) {
     if (!i || !Number.isInteger(i.id) || i.id < 1 || !Number.isInteger(i.q) || i.q < 1 || i.q > MAX_QTY) return null;
+    if (i.for !== undefined && (!Number.isInteger(i.for) || i.for < 1)) return null;
     const line = { id: i.id, q: i.q };
     if (i.note) line.note = String(i.note).replace(/\s+/g, ' ').trim().slice(0, MAX_NOTE);
+    if (i.for) line.for = i.for; // a pompom names its hat: no hat, no pompom
     out.push(line);
   }
   return out;
@@ -37,10 +39,17 @@ export async function sign(items, secret, now = Date.now()) {
   return { payload, sig };
 }
 
+// GET /bag: 204 when this host can take a bag. The storefront asks first, so a static preview
+// (no functions) shows a sentence instead of an error page.
+export function onRequestGet({ env }) {
+  return new Response(null, { status: env.BAG_SECRET && env.CHECKOUT_ORIGIN ? 204 : 503, headers: { 'Cache-Control': 'no-store' } });
+}
+
 export async function onRequestPost({ request, env }) {
-  if (!env.BAG_SECRET || !env.CHECKOUT_ORIGIN) return new Response('Checkout is not configured.', { status: 500 });
-  const form = await request.formData();
-  const items = readBag(form.get('bag'));
+  if (!env.BAG_SECRET || !env.CHECKOUT_ORIGIN) return new Response('Checkout is not configured.', { status: 503 });
+  let form = null;
+  try { form = await request.formData(); } catch (e) { /* not a form post */ }
+  const items = form && readBag(form.get('bag'));
   if (!items) return new Response('That bag could not be read. Go back and try again.', { status: 400, headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
   const { payload, sig } = await sign(items, env.BAG_SECRET);
   const to = new URL('/', env.CHECKOUT_ORIGIN);

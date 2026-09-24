@@ -183,8 +183,22 @@
   let lines = [];
   try { lines = JSON.parse(localStorage.getItem('mjuk_bag') || '[]'); } catch (e) { lines = []; }
   const save = () => { try { localStorage.setItem('mjuk_bag', JSON.stringify(lines)); } catch (e) {} };
-  const bagN = () => lines.reduce((n, l) => n + l.q, 0);
-  const bagSum = () => lines.reduce((n, l) => n + l.q * l.p, 0);
+  /* a bag kept in the browser can outlive the piece: one that has sold since stays visible, marked,
+     and counts for nothing; one with fewer left than the bag holds is trimmed to what is left */
+  const live = l => { const p = byHandle[l.h]; return !!p && !p.oos; };
+  { const left = {};
+    lines = lines.filter(l => { const p = byHandle[l.h]; if (!p || !(p.q > 0)) return true;
+      if (!(l.h in left)) left[l.h] = p.q; if (left[l.h] < 1) return false;
+      l.q = Math.min(l.q, left[l.h]); left[l.h] -= l.q; return true; }); }
+  const bagN = () => lines.filter(live).reduce((n, l) => n + l.q, 0);
+  const bagSum = () => lines.filter(live).reduce((n, l) => n + l.q * l.p, 0);
+  // screen readers hear what the drawer shows: added, already in the bag, sold since
+  const say = (() => { const el = document.createElement('p'); el.setAttribute('aria-live', 'polite');
+    el.style.cssText = 'position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap';
+    document.body.appendChild(el); return t => { el.textContent = ''; setTimeout(() => { el.textContent = t; }, 60); }; })();
+  const isIS = () => document.documentElement.lang === 'is';
+  // the bag is rebuilt from localStorage, so its text is escaped, not trusted
+  const html = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
   function renderBag() {
     const n = bagN();
@@ -193,22 +207,31 @@
     if (bagTotal) bagTotal.textContent = usd(bagSum());
     if (bagGo) bagGo.disabled = n === 0;
     if (!bagItems) return;
-    bagItems.innerHTML = n === 0
+    bagItems.innerHTML = !lines.length
       ? `<p class="bag__empty">Your bag is empty.<br>Add any piece to it.</p>`
-      : lines.map((l, i) => `<div class="bag__it">
+      : lines.map((l, i) => live(l) ? `<div class="bag__it">
           <div class="bag__im"><img src="${px(l.img, 240)}" alt="${esc(l.t)}"/></div>
           <div>
-            <div class="bag__n">${l.t}</div>
+            <div class="bag__n">${html(l.t)}</div>
             ${l.s ? `<div class="bag__sz">Size ${l.s}</div>` : ''}
-            ${l.x ? `<div class="bag__x2">${l.x.label}</div>` : ''}
+            ${l.x ? `<div class="bag__x2">${html(l.x.label)}</div>` : ''}
             <div class="bag__qty">
               <button data-q="-1" data-i="${i}" aria-label="Decrease quantity">−</button>
               <span>${l.q}</span>
-              <button data-q="1" data-i="${i}" aria-label="Increase quantity"${byHandle[l.h] && roomFor(byHandle[l.h]) < 1 ? ' disabled' : ''}>+</button>
+              <button data-q="1" data-i="${i}" aria-label="${roomFor(byHandle[l.h]) < 1 ? 'No more in stock' : 'Increase quantity'}"${roomFor(byHandle[l.h]) < 1 ? ' disabled' : ''}>+</button>
             </div>
           </div>
           <div class="bag__right">
             <span class="bag__p">${usd(l.q * l.p)}</span>
+            <button class="bag__x" data-rm="${i}">Remove</button>
+          </div>
+        </div>` : `<div class="bag__it bag__it--gone">
+          <div class="bag__im"><img src="${px(l.img, 240)}" alt="${esc(l.t)}"/></div>
+          <div>
+            <div class="bag__n">${html(l.t)}</div>
+            <div class="bag__sz">Sold since you added it</div>
+          </div>
+          <div class="bag__right">
             <button class="bag__x" data-rm="${i}">Remove</button>
           </div>
         </div>`).join('');
@@ -226,14 +249,16 @@
   function addToBag(handle, size, btn, extra) {
     const p = byHandle[handle]; if (!p) return;
     if (roomFor(p) < 1) {
-      if (btn && !btn.dataset.was) { btn.dataset.was = btn.textContent; btn.textContent = p.q === 1 ? 'The only one is in your bag' : 'All of them are in your bag';
+      // short enough for a card chip; the drawer opens on the piece to show where it is
+      if (btn && !btn.dataset.was) { btn.dataset.was = btn.textContent; btn.textContent = isIS() ? 'Í körfunni' : 'In your bag';
         setTimeout(() => { btn.textContent = btn.dataset.was; delete btn.dataset.was; }, 1800); }
+      say(p.q === 1 ? `${p.t} is one of one, and it is already in your bag.` : `Every ${p.t} in stock is already in your bag.`);
       openBag(true); return;
     }
     const key = handle + '|' + size + (extra ? '|' + extra.k : '');
     const hit = lines.find(l => l.k === key);
     if (hit) hit.q++; else lines.push({ k: key, h: handle, t: p.t, s: size, p: p.p + (extra ? extra.price : 0), img: p.img[0], q: 1, x: extra || null });
-    save(); renderBag(); openBag(true);
+    save(); renderBag(); openBag(true); say(`Added to your bag: ${p.t}${extra ? ', ' + extra.label.toLowerCase() : ''}.`);
     if (btn) { btn.classList.add('added'); setTimeout(() => btn.classList.remove('added'), 700); }
   }
   document.addEventListener('click', e => {
@@ -253,16 +278,26 @@
      a note saying which hat it goes on. */
   function checkout() {
     const items = [];
-    lines.forEach(l => {
-      const p = byHandle[l.h]; if (!p) return;
+    lines.filter(live).forEach(l => {
+      const p = byHandle[l.h];
       items.push({ id: p.id, q: l.q });
-      ((l.x && l.x.pompoms) || []).forEach(pm => { const pp = byHandle[pm.h]; if (pp) items.push({ id: pp.id, q: l.q, note: 'Attach to ' + p.t }); });
+      // "for" ties the pompom to its hat: if the hat has gone, the pompom is not bought alone
+      ((l.x && l.x.pompoms) || []).forEach(pm => { const pp = byHandle[pm.h]; if (pp) items.push({ id: pp.id, q: l.q, note: 'Attach to ' + p.t, for: p.id }); });
     });
     if (!items.length) return;
     if (bagGo) { bagGo.disabled = true; bagGo.textContent = 'Opening checkout…'; }
-    const f = document.createElement('form'); f.method = 'post'; f.action = 'bag'; f.hidden = true;
-    const field = document.createElement('input'); field.name = 'bag'; field.value = JSON.stringify(items);
-    f.appendChild(field); document.body.appendChild(f); f.submit();
+    // only a host that runs functions/bag.js can take the bag; a static preview says so instead
+    fetch('bag', { cache: 'no-store' }).then(r => r.status === 204).catch(() => false).then(ready => {
+      if (!ready) {
+        if (bagGo) bagGo.textContent = 'Go to checkout';
+        renderBag();
+        if (bagItems) bagItems.insertAdjacentHTML('afterbegin', `<p class="bag__notice" role="status">Checkout is not connected in this preview. On the live shop this button opens your WooCommerce checkout with this bag.</p>`);
+        return;
+      }
+      const f = document.createElement('form'); f.method = 'post'; f.action = 'bag'; f.hidden = true;
+      const field = document.createElement('input'); field.name = 'bag'; field.value = JSON.stringify(items);
+      f.appendChild(field); document.body.appendChild(f); f.submit();
+    });
   }
   // back from checkout (bfcache): the button is a button again
   addEventListener('pageshow', () => { if (bagGo) bagGo.textContent = 'Go to checkout'; renderBag(); });

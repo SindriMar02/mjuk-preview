@@ -69,7 +69,7 @@ const gone = CM.all.find(p => p.oos);
 console.log(`hat #${hat.id} ${hat.t} · pompom #${pom.id} ${pom.t} · one-of-one #${one.id} · sold out #${gone.id}\n`);
 
 /* 1 · the happy path, up to the checkout page */
-const bag = [{ id: hat.id, q: 1 }, { id: pom.id, q: 1, note: 'Attach to ' + hat.t }];
+const bag = [{ id: hat.id, q: 1 }, { id: pom.id, q: 1, note: 'Attach to ' + hat.t, for: hat.id }]; // as app.js sends it
 const A = await handoff(bag);
 check(A.landed === '/checkout/', `hand-off lands on /checkout/ (got ${A.landed})`);
 check(lines(A.cart) === `${hat.id}×1, ${pom.id}×1`, `cart holds the hat and the pompom (${lines(A.cart)})`);
@@ -83,10 +83,18 @@ const E = await handoff(bag, { signedAt: Date.now() - 11 * 60 * 1000 });
 check(E.landed === '/cart/' && !E.cart.items.length && /expired/i.test(E.page), `an 11-minute-old bag is refused as expired (landed ${E.landed})`);
 const S = await handoff([{ id: gone.id, q: 1 }, { id: hat.id, q: 1 }]);
 check(lines(S.cart) === `${hat.id}×1` && /no longer available/i.test(S.page), `a sold-out piece is left out and said so (${lines(S.cart)})`);
+const H = await handoff([{ id: gone.id, q: 1 }, { id: pom.id, q: 1, note: 'Attach to ' + gone.t, for: gone.id }, { id: hat.id, q: 1 }]);
+check(lines(H.cart) === `${hat.id}×1`, `a pompom whose hat has sold is not bought alone (${lines(H.cart)})`);
+const P = await handoff([{ id: one.id, q: 5 }, { id: pom.id, q: 3, note: 'Attach to ' + one.t, for: one.id }]);
+check(lines(P.cart) === `${one.id}×1, ${pom.id}×1`, `pompoms never outnumber the hats that went in (${lines(P.cart)})`);
+const ready = await fetch(STORE + '/bag', { cache: 'no-store' });
+check(ready.status === 204, `GET /bag tells the storefront checkout is connected (${ready.status})`);
 const Q = await handoff([{ id: one.id, q: 5 }]);
 check(lines(Q.cart) === `${one.id}×1`, `five of a one-of-one becomes one (${lines(Q.cart)})`);
 const bad = await fetch(STORE + '/bag', { method: 'POST', body: new URLSearchParams({ bag: '[{"id":"x","q":1}]' }) });
 check(bad.status === 400, `/bag refuses a malformed bag (${bad.status})`);
+const notForm = await fetch(STORE + '/bag', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+check(notForm.status === 400, `/bag answers a non-form post with 400, not a crash (${notForm.status})`);
 
 /* 3 · the order, through the classic checkout form (her live WooCommerce 3.5 has no other), with
    the sandbox test payment, then undone */

@@ -127,7 +127,7 @@ function typeOf(p, cc) {
 }
 
 // Origin only where her text states it; her words for the place, not ours.
-const PLACE = /\b(custom[- ]made|hand[- ]?made|hand[- ]?knitted|made|knitted|sewn)\s+in\s+(reykjav[ií]k|iceland)\b/i;
+const PLACE = /\b(custom[- ]made|hand[- ]?made|hand[- ]?knitted|manufactured|made|knitted|sewn)\s+in\s+(reykjav[ií]k|iceland)\b/i;
 function originOf(p, cc, shortText, longText) {
   if (!cc || cc.originCountry !== 'IS') return '';
   const m = (p.name + ' ' + shortText + ' ' + longText).match(PLACE);
