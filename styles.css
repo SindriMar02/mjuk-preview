@@ -11,7 +11,7 @@
 
 :root{
   --bg:#f7f3ef;--bg-2:#efe9e2;--panel:#e9e1d8;
-  --ink:#17121a;--dim:#7c7370;--faint:#c9c0b6;
+  --ink:#17121a;--dim:#6b6360;--faint:#c9c0b6;  /* dim: 5.3:1 on bg, 4.5:1+ on every panel (was #7c7370, 4.2:1) */
   --accent:#a8320a;--accent-soft:rgba(168,50,10,.4);
   --line:rgba(23,18,26,.14);
   --ff-d:"Humane","Arial Narrow",sans-serif;
@@ -158,7 +158,7 @@ section{padding:clamp(70px,12vw,180px) 0;position:relative}
 .rail::-webkit-scrollbar{display:none}
 .rail.drag{cursor:grabbing}
 .rail__t{display:flex;gap:clamp(16px,2vw,34px);width:max-content;padding-bottom:4px}
-.prod{width:clamp(250px,29vw,380px);flex:0 0 auto}
+.prod{width:clamp(250px,29vw,380px);flex:0 0 auto;container-type:inline-size}
 .prod__im{position:relative;display:block;aspect-ratio:4/5;overflow:hidden;border:1px solid var(--line);
   background:var(--bg-2)}
 .prod__im::before{content:"";position:absolute;inset:0;background:radial-gradient(60% 50% at 50% 55%,rgba(168,50,10,.08),transparent 70%);opacity:0;transition:opacity .6s var(--ease)}
@@ -186,7 +186,7 @@ section{padding:clamp(70px,12vw,180px) 0;position:relative}
 @media(hover:none){.prod__sizes{opacity:1;transform:none;background:linear-gradient(0deg,rgba(247,243,239,.94),transparent)}}
 .prod__sizes .mono{color:var(--dim);margin-right:2px}
 .sz--solo{flex:0 0 auto;padding-inline:14px;letter-spacing:.06em}
-.sz{min-width:30px;padding:5px 7px;border:1px solid var(--line);font-family:var(--ff-m);font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink);transition:.25s var(--ease)}
+.sz{min-width:30px;padding:5px 7px;border:1px solid var(--line);font-family:var(--ff-m);font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink);transition:background-color .25s var(--ease),border-color .25s var(--ease),color .25s var(--ease)}
 .sz:hover:not(:disabled){background:var(--accent);border-color:var(--accent);color:#fff}
 .sz:disabled{opacity:.3;cursor:default;text-decoration:line-through}
 .sz:focus-visible{outline:1px solid var(--accent);outline-offset:2px}
@@ -195,11 +195,13 @@ section{padding:clamp(70px,12vw,180px) 0;position:relative}
 /* ══ BAG DRAWER ══ */
 .bag{position:fixed;inset:0;z-index:150;pointer-events:none}
 .bag[aria-hidden="false"]{pointer-events:auto}
-.bag__scrim{position:absolute;inset:0;background:rgba(23,18,26,.45);opacity:0;transition:opacity .5s var(--ease);backdrop-filter:blur(3px)}
-.bag[aria-hidden="false"] .bag__scrim{opacity:1}
+.bag__scrim{position:absolute;inset:0;background:rgba(23,18,26,.45);opacity:0;transition:opacity .28s var(--ease);backdrop-filter:blur(3px)}
+.bag[aria-hidden="false"] .bag__scrim{opacity:1;transition-duration:.4s}
 .bag__panel{position:absolute;top:0;right:0;height:100%;width:min(94vw,430px);background:var(--bg);border-left:1px solid var(--line);
-  display:flex;flex-direction:column;transform:translateX(101%);transition:transform .6s var(--ease)}
-.bag[aria-hidden="false"] .bag__panel{transform:none}
+  display:flex;flex-direction:column;transform:translateX(101%);visibility:hidden;transition:transform .32s var(--ease),visibility 0s linear .32s}
+/* closed means gone, for screen readers and the page edge too: hidden once it has slid out */
+/* opening is the one to watch (.5s); closing answers a tap and gets out of the way (.32s) */
+.bag[aria-hidden="false"] .bag__panel{transform:none;visibility:visible;transition:transform .5s var(--ease),visibility 0s}
 .bag__head{display:flex;align-items:baseline;justify-content:space-between;gap:14px;padding:24px var(--bagpad,22px);border-bottom:1px solid var(--line)}
 .bag__title{font-family:var(--ff-d);font-weight:600;font-size:34px;line-height:1;text-transform:uppercase}
 .bag__title span{color:var(--accent);font-size:.5em}
@@ -211,8 +213,8 @@ section{padding:clamp(70px,12vw,180px) 0;position:relative}
 .bag__n{font-family:var(--ff-m);font-size:11.5px;text-transform:uppercase;letter-spacing:.03em;line-height:1.4}
 .bag__sz{font-family:var(--ff-m);font-size:10px;color:var(--dim);text-transform:uppercase;margin-top:4px}
 .bag__qty{display:flex;align-items:center;gap:9px;margin-top:9px}
-.bag__qty button{width:20px;height:20px;display:grid;place-items:center;border:1px solid var(--line);font-size:12px;line-height:1;color:var(--ink);transition:.25s}
-.bag__qty button:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.bag__qty button{width:20px;height:20px;display:grid;place-items:center;border:1px solid var(--line);font-size:12px;line-height:1;color:var(--ink);transition:border-color .25s var(--ease),color .25s var(--ease),opacity .25s var(--ease)}
+@media(hover:hover) and (pointer:fine){.bag__qty button:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}}
 .bag__qty button:disabled{opacity:.3;cursor:default}
 .bag__it--gone .bag__im{opacity:.45}
 .bag__it--gone .bag__n{color:var(--dim);text-decoration:line-through}
@@ -237,7 +239,12 @@ section{padding:clamp(70px,12vw,180px) 0;position:relative}
 .prod__name{font-family:var(--ff-m);font-size:12.5px;text-transform:uppercase;letter-spacing:.03em;line-height:1.3}
 .prod__cat{font-family:var(--ff-m);font-size:10px;color:var(--dim);text-transform:uppercase;margin-top:5px}
 .prod__price{font-family:var(--ff-m);font-size:12.5px;color:var(--accent);white-space:nowrap}
-.prod__price s{color:var(--faint);margin-right:6px}
+.prod__price s{color:var(--dim);margin-right:6px}
+/* a narrow card (two per row on a phone) cannot hold a long name and a sale price side by side:
+   the name block stops shrinking at its longest word and the price escapes. Stack them there. */
+.prod__meta > div:first-child{min-width:0}
+.prod__name{overflow-wrap:break-word}
+@container (max-width:300px){.prod__meta{flex-direction:column;align-items:flex-start;gap:6px}}
 
 /* ══ CAMPAIGN (uncrop on scroll) ══ */
 .camp{min-height:100vh;padding:0;display:flex;align-items:flex-end;overflow:hidden;position:relative}
@@ -245,7 +252,7 @@ section{padding:clamp(70px,12vw,180px) 0;position:relative}
 .camp__img{width:100%;height:100%;object-fit:cover;object-position:50% 26%;filter:brightness(.82);transform:scale(1.12)}
 .camp__over{position:relative;z-index:2;padding:var(--pad);display:flex;flex-direction:column;gap:18px}
 .camp__over .mono{color:var(--ink);opacity:.75}
-.camp__line{font-size:clamp(48px,10vw,150px);line-height:.86;color:#f7f3ef;mix-blend-mode:difference}
+.camp__line{font-size:clamp(34px,10vw,150px);line-height:.86;color:#f7f3ef;mix-blend-mode:difference}
 
 /* ══ CATEGORIES — image grid, one tile per real collection ══ */
 .cats{padding:0 var(--pad);display:grid;gap:clamp(10px,1.4vw,20px);
@@ -287,7 +294,7 @@ section{padding:clamp(70px,12vw,180px) 0;position:relative}
 /* the longest tag ("Store & workshop") sits opposite a fixed-width index, so it
    gets the flexible column and the index never wraps under it */
 .store__tag{flex:1;min-width:0;text-align:right}
-.store__name{font-family:var(--ff-s);font-weight:500;font-size:clamp(19px,1.85vw,27px);
+.store__name{overflow-wrap:break-word;font-family:var(--ff-s);font-weight:500;font-size:clamp(19px,1.85vw,27px);
   line-height:1.25;letter-spacing:-.01em;color:var(--ink)}
 .store__note{font-family:var(--ff-m);font-size:12px;line-height:1.75;color:var(--dim)}
 .store__map-btn{margin-top:auto;align-self:flex-start;font-family:var(--ff-m);font-size:12px;
@@ -403,7 +410,7 @@ section{padding:clamp(70px,12vw,180px) 0;position:relative}
 .news__sub{max-width:44ch}
 .news__form{display:flex;gap:22px;align-items:center;max-width:520px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-top:12px}
 .news__form input{flex:1;background:none;border:none;color:var(--ink);font-family:var(--ff-m);font-size:15px;letter-spacing:.02em}
-.news__form input::placeholder{color:var(--faint)}
+.news__form input::placeholder{color:var(--dim)}
 .news__form input:focus{outline:none}
 .news__msg{color:var(--accent);min-height:14px}
 
@@ -501,3 +508,5 @@ section{padding:clamp(70px,12vw,180px) 0;position:relative}
 .sndr__mark i{font-style:normal;color:var(--accent);font-size:11px;vertical-align:.12em}
 .sndr__studio{font-family:var(--ff-m);font-size:10px;letter-spacing:.12em;line-height:1;color:var(--dim)}
 @media(hover:hover){.sndr:hover .sndr__mark,.sndr:hover .sndr__studio{color:var(--accent)}}
+/* four street names like Skólavörðustígur 36 need a card's full width on a phone */
+@media(max-width:560px){.stores__grid{grid-template-columns:1fr}}

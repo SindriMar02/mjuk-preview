@@ -223,7 +223,7 @@
       if (left[l.h] < 1) { trimmed.push(p.t); return false; }
       if (l.q > left[l.h]) { trimmed.push(p.t); l.q = left[l.h]; }
       left[l.h] -= l.q; return true; });
-    if (trimmed.length) { save(); notices.push(fmt('Fewer are left now of {names}, so your bag holds what there is.', { names: [...new Set(trimmed)].join(', ') })); } }
+    if (trimmed.length) { save(); notices.push(fmt('Fewer can be ordered now of {names}, so your bag holds what can be.', { names: [...new Set(trimmed)].join(', ') })); } }
   /* A bag that went to checkout may have been ordered. The link back from her order-received page
      (?ordered=1) empties it; otherwise the drawer asks, for a day. */
   if (new URLSearchParams(location.search).has('ordered')) { lines = []; save(); keep('mjuk_bag_out', null); }
@@ -252,7 +252,7 @@
             <div class="bag__qty">
               <button data-q="-1" data-i="${i}" aria-label="${t('Decrease quantity')}">−</button>
               <span>${l.q}</span>
-              <button data-q="1" data-i="${i}" aria-label="${roomFor(byHandle[l.h]) < 1 ? t('No more in stock') : t('Increase quantity')}"${roomFor(byHandle[l.h]) < 1 ? ' disabled' : ''}>+</button>
+              <button data-q="1" data-i="${i}" aria-label="${roomFor(byHandle[l.h]) < 1 ? t('No more can be ordered online') : t('Increase quantity')}"${roomFor(byHandle[l.h]) < 1 ? ' disabled' : ''}>+</button>
             </div>
           </div>
           <div class="bag__right">
@@ -295,7 +295,7 @@
       // short enough for a card chip; the drawer opens on the piece to show where it is
       if (btn && !btn.dataset.was) { btn.dataset.was = btn.textContent; btn.textContent = t('In your bag');
         setTimeout(() => { btn.textContent = btn.dataset.was; delete btn.dataset.was; }, 1800); }
-      say(fmt(p.q === 1 ? '{name} is one of one, and it is already in your bag.' : 'Every {name} there is, is already in your bag.', { name: p.t }));
+      say(fmt('{name} is already in your bag, as many as can be ordered online.', { name: p.t }));
       openBag(true); return;
     }
     const key = handle + '|' + size + (extra ? '|' + extra.k : '');

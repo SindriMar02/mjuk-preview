@@ -41,19 +41,19 @@ body[data-page] .bars{opacity:.18}
 .filt{padding:0 var(--pad);margin:calc(-1 * clamp(18px,3vw,44px)) 0 clamp(34px,5vw,64px);display:grid;gap:14px;
   border-top:1px solid var(--line);padding-top:18px}
 .filt__row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.filt__row > .mono{min-width:72px;color:var(--faint)}
+.filt__row > .mono{min-width:72px;color:var(--dim)}
 .chip{font-family:var(--ff-m);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);
   padding:8px 13px;border:1px solid var(--line);background:transparent;
   transition:border-color .24s var(--ease),background .24s var(--ease),color .24s var(--ease),transform .16s var(--ease)}
 .chip:active{transform:scale(.97)}
 .chip:hover{border-color:var(--ink)}
 .chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.chip small{margin-left:6px;color:var(--faint);letter-spacing:.02em}
+.chip small{margin-left:6px;color:var(--dim);letter-spacing:.02em}
 .chip[aria-pressed="true"] small{color:var(--faint)}
 .filt__end{margin-left:auto;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
 .filt__q{display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);padding-bottom:6px;min-width:200px}
 .filt__q input{flex:1;background:none;border:0;color:var(--ink);font-family:var(--ff-m);font-size:13px;letter-spacing:.02em}
-.filt__q input::placeholder{color:var(--faint)}
+.filt__q input::placeholder{color:var(--dim)}
 .filt__q input:focus{outline:none}
 .sel{position:relative}
 .sel select{appearance:none;-webkit-appearance:none;background:none;border:0;border-bottom:1px solid var(--line);padding:6px 20px 6px 0;color:var(--ink);
@@ -87,7 +87,7 @@ body[data-page] .bars{opacity:.18}
 .pdp__kick .is-new{color:var(--accent)}
 .pdp__t{font-family:var(--ff-s);font-weight:500;font-size:clamp(28px,3.2vw,46px);line-height:1.08;letter-spacing:-.01em;text-wrap:balance}
 .pdp__price{font-family:var(--ff-m);font-size:18px;color:var(--accent);display:flex;gap:12px;align-items:baseline}
-.pdp__price s{color:var(--faint);font-size:15px}
+.pdp__price s{color:var(--dim);font-size:15px}
 .pdp__save{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
 .pdp__short{font-size:14px;line-height:1.65;max-width:46ch}
 .pdp__short p{margin:0 0 10px}

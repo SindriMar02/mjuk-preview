@@ -122,7 +122,7 @@ fieldset{border:0;padding:0;margin:0;min-width:0}
 .cfg__go:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 .cfg__len{font-size:13px;line-height:1.55;color:var(--ink);max-width:48ch}
 .cfg__len[hidden]{display:none}
-.cfg__done{border:1px solid var(--ink);padding:22px;display:grid;gap:10px;transition:opacity .38s var(--ease),transform .38s var(--ease)}
+.cfg__done{border:1px solid var(--ink);padding:22px;display:grid;gap:10px;transition:opacity .3s var(--ease),transform .3s var(--ease)}
 @starting-style{.cfg__done{opacity:0;transform:translateY(10px)}}
 .cfg__done[hidden]{display:none}
 .cfg__done h3{font-family:var(--ff-s);font-size:22px;font-weight:500;line-height:1.15}
