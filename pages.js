@@ -158,8 +158,8 @@
       ['Size', /\bone[- ]size\b/i.test(c.short + ' ' + c.long) ? 'One size' : ''],
       ['Made', p.mi || ''],
       ['Care', c.care ? c.care.replace(/-\s/g, ': ').replace(/\s+/g, ' ') : ''],
-      /* no free-shipping threshold until her real shipping settings are read (her orders suggest $250, not $150) */
-      ['Delivery', 'DHL Express, worldwide.'],
+      /* from her own shipping zones (tools/pull-woo.mjs), never a number written here */
+      ['Delivery', (CM.ship && CM.ship.delivery) || ''],
     ].filter(f => f[1]);
     $('#info').innerHTML = `
       <div class="pdp__kick mono">${p.fib ? `<span>${esc(fibName(p.fib))}</span>` : ''}${p.tyk ? `<span>${esc(typeName(p.tyk))}</span>` : ''}${isNew(p) ? '<span class="is-new">New</span>' : ''}${p.cp ? '<span class="is-new">Sale</span>' : ''}</div>

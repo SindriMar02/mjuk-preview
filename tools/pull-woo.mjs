@@ -66,7 +66,20 @@ async function pull() {
     pages = r.pages; products.push(...r.list);
     process.stderr.write(`  page ${page}/${pages}: ${products.length} products\n`);
   }
-  return { source: live ? 'live wc/v3 (read-only key)' : 'sandbox wc/v3 ' + base, products };
+  // her shipping zones, so every shipping sentence on the site is her settings, not ours
+  const zones = [];
+  await sleep(pause);
+  for (const z of (await get(`${base}/wp-json/wc/v3/shipping/zones`)).list) {
+    await sleep(pause);
+    const locations = z.id === 0 ? [] : (await get(`${base}/wp-json/wc/v3/shipping/zones/${z.id}/locations`)).list;
+    await sleep(pause);
+    const methods = (await get(`${base}/wp-json/wc/v3/shipping/zones/${z.id}/methods`)).list.filter(m => m.enabled);
+    const setting = (id, k) => { const m = methods.find(x => x.method_id === id); return m && m.settings && m.settings[k] ? m.settings[k].value : ''; };
+    zones.push({ id: z.id, codes: locations.filter(l => l.type === 'country').map(l => l.code),
+      flat: +setting('flat_rate', 'cost') || null, free: setting('free_shipping', 'requires') === 'min_amount' ? +setting('free_shipping', 'min_amount') || null : null,
+      pickup: methods.some(m => m.method_id === 'local_pickup') });
+  }
+  return { source: live ? 'live wc/v3 (read-only key)' : 'sandbox wc/v3 ' + base, products, zones };
 }
 
 /* ── her text, cleaned the way the pages show it ────────────────────────── */
@@ -157,7 +170,32 @@ function compositionOf(p, cc) {
 }
 
 /* ── build ──────────────────────────────────────────────────────────────── */
-const { source, products } = await pull();
+const { source, products, zones = null } = await pull();
+
+/* shipping, in words, from her zones: the product page's Delivery row and the bag's note */
+const EU = 'AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE'.split(' ');
+const region = new Intl.DisplayNames(['en'], { type: 'region' });
+const places = codes => { const c = [...new Set(codes)]; const eu = EU.every(x => c.includes(x));
+  return [...(eu ? ['the EU'] : []), ...c.filter(x => !(eu && EU.includes(x))).map(x => ({ GB: 'the United Kingdom', US: 'the United States' })[x] || region.of(x))]; };
+const and = a => (a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1]);
+function shipping(zs) {
+  if (!zs || !zs.length) return null;
+  const withFree = zs.filter(z => z.free);
+  const byAmount = {};
+  for (const z of withFree) (byAmount[z.free] = byAmount[z.free] || []).push(z);
+  const parts = Object.keys(byAmount).map(Number).sort((a, b) => a - b).map(amount => {
+    const named = byAmount[amount].filter(z => z.id !== 0).flatMap(z => places(z.codes));
+    const rest = byAmount[amount].some(z => z.id === 0);
+    return { amount, rest, text: `from $${amount} ${rest && !named.length ? 'everywhere else' : 'to ' + and(named) + (rest ? ' and everywhere else' : '')}` };
+  }).sort((a, b) => (a.rest - b.rest) || (a.amount - b.amount));
+  const pickup = zs.filter(z => z.pickup && z.id !== 0).flatMap(z => places(z.codes));
+  const amounts = withFree.map(z => z.free);
+  return {
+    delivery: `DHL Express abroad${pickup.length ? `; local pickup in ${and(pickup)}` : ''}. ` + (parts.length ? `Free shipping ${parts.map(p => p.text).join('; ')}.` : ''),
+    bag: amounts.length ? `Shipping is calculated at checkout, and free above $${Math.min(...amounts)}${Math.max(...amounts) > Math.min(...amounts) ? `–$${Math.max(...amounts)}` : ''} depending on where it goes.` : 'Shipping is calculated at checkout.',
+  };
+}
+const ship = shipping(zones);
 const catalogue = JSON.parse(fs.readFileSync(CATALOGUE, 'utf8'));
 const curation = JSON.parse(fs.readFileSync(path.join(ROOT, 'tools/curation.json'), 'utf8'));
 
@@ -214,7 +252,7 @@ const CM = {
   all, featuredNew: picks(curation.featuredNew), own: picks(curation.own), cats, types,
   hero: curation.hero, campaign: curation.campaign, wall: curation.wall,
   totalCount: all.length, saleCount: all.filter(p => p.cp > 0 && !p.oos).length,
-  retired: dropped, harvestedAt: new Date().toISOString().slice(0, 10), source,
+  retired: dropped, harvestedAt: new Date().toISOString().slice(0, 10), source, ship,
 };
 
 /* ── report, against what the pages show today ──────────────────────────── */

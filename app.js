@@ -180,6 +180,8 @@
   /* ══ BAG (real add-to-bag flow, persisted) ══ */
   const bagEl = $('#bag'), bagItems = $('#bagItems'), bagCount = $('#bagCount'),
         bagQtyEl = $('#bagQty'), bagTotal = $('#bagTotal'), bagGo = $('#bagGo');
+  // the shipping line under the total comes from her shipping zones, like the product page's
+  const bagNote = $('.bag__note'); if (bagNote && CM.ship && CM.ship.bag) bagNote.textContent = CM.ship.bag;
   const MAX_EACH = 20, MAX_LINES = 40; // what functions/bag.js accepts, so a bag never fails there
   let lines = [];
   try { const saved = JSON.parse(localStorage.getItem('mjuk_bag') || '[]');
