@@ -150,7 +150,7 @@
       const adj = v('len') === 'adjusted';   // never name a field "length": form.elements.length is the control count
       lenEl.hidden = !adj;
       noteEl.textContent = t(!priced() ? 'We write back with the price before anything is cut.'
-        : adj ? 'Indicative. We confirm the price with the length.' : 'The whole price. Ready within two hours in the shop.');
+        : adj ? 'Indicative. We confirm the price with the length.' : 'The whole price. We confirm by email before anything is cut.');
     };
     cfg.addEventListener('change', () => { done.hidden = true; paint(); });
     /* The request is an email to the workshop, written out in full, so nothing is lost between

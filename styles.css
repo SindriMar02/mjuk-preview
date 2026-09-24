@@ -245,6 +245,8 @@ section{padding:clamp(70px,12vw,180px) 0;position:relative}
 .prod__meta > div:first-child{min-width:0}
 .prod__name{overflow-wrap:break-word}
 @container (max-width:300px){.prod__meta{flex-direction:column;align-items:flex-start;gap:6px}}
+/* browsers without container queries: the same stacking wherever cards are two to a row */
+@supports not (container-type:inline-size){@media(max-width:640px){.pgrid .prod__meta,.fib__mini .prod__meta{flex-direction:column;align-items:flex-start;gap:6px}}}
 
 /* ══ CAMPAIGN (uncrop on scroll) ══ */
 .camp{min-height:100vh;padding:0;display:flex;align-items:flex-end;overflow:hidden;position:relative}

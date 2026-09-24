@@ -281,7 +281,6 @@
  "js:Tell us how you would like it, and we will write back with the exact price before anything is cut.": "Segðu okkur hvernig þú vilt hafa hana og við svörum með nákvæmu verði áður en nokkuð er sniðið.",
  "js:The Viking and Greenland beanies are cashmere; the Explorer scarves and the Akureyri and Konungur blankets carry it on merino.": "Viking- og Greenland-húfurnar eru úr kasmír; Explorer-treflarnir og Akureyri- og Konungur-teppin bera það í merínó.",
  "js:The fibre most of the shop is knitted from: light, warm, and impossibly soft.": "Efnið sem stærstur hluti verslunarinnar er prjónaður úr: létt, hlýtt og ótrúlega mjúkt.",
- "js:The whole price. Ready within two hours in the shop.": "Allt verðið. Tilbúið innan tveggja klukkustunda í búðinni.",
  "js:This bag went to checkout at {time}. If you placed the order,": "Þessi karfa fór í greiðslu kl. {time}. Ef þú kláraðir pöntunina,",
  "js:Trim": "Kantur",
  "js:Used on its own in the Arctic beanies, the Ragnar designs and the merino aviator hats, and as the backbone of the cashmere blends.": "Notuð ein og sér í Arctic-húfunum, Ragnar-línunni og merínó-aviator-húfunum, og sem grunnur kasmírblandanna.",
@@ -315,5 +314,6 @@
  "js:Your email app opens with this request. If it does not, write to {email}.": "Tölvupóstforritið þitt opnast með beiðninni. Ef það gerist ekki, skrifaðu á {email}.",
  "js:{name} is already in your bag, as many as can be ordered online.": "{name} er þegar í körfunni, eins mörg og hægt er að panta á netinu.",
  "js:No more can be ordered online": "Ekki hægt að panta fleiri á netinu",
- "js:Fewer can be ordered now of {names}, so your bag holds what can be.": "Nú er hægt að panta færri af {names}, svo karfan geymir það sem hægt er."
+ "js:Fewer can be ordered now of {names}, so your bag holds what can be.": "Nú er hægt að panta færri af {names}, svo karfan geymir það sem hægt er.",
+ "js:The whole price. We confirm by email before anything is cut.": "Allt verðið. Við staðfestum með tölvupósti áður en nokkuð er sniðið."
 }
