@@ -35,7 +35,7 @@ jobs:
           MJUK_WOO_CK: ${{ secrets.MJUK_WOO_CK }}
           MJUK_WOO_CS: ${{ secrets.MJUK_WOO_CS }}
         run: |
-          if [ -z "$MJUK_WOO_CK" ]; then echo "No read-only key in the repository secrets yet, so nothing was read."; exit 0; fi
+          if [ -z "$MJUK_WOO_URL" ] || [ -z "$MJUK_WOO_CK" ] || [ -z "$MJUK_WOO_CS" ]; then echo "The read-only key is not fully in the repository secrets (URL, CK, CS), so nothing was read."; exit 0; fi
           node tools/pull-woo.mjs --live
       - name: Publish if anything changed
         run: |
@@ -44,4 +44,6 @@ jobs:
           git config user.email "actions@users.noreply.github.com"
           git add assets/data.js assets/copy.js
           git commit -m "Stock and prices from her shop"
+          # the branch may have moved while this ran: replay this one data commit on top
+          git pull --rebase origin "${GITHUB_REF_NAME}"
           git push

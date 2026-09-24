@@ -164,11 +164,14 @@
       const to = 'customersupport@mjukiceland.com';
       const body = t('Made for you') + '\n\n' + rows.map(r => r[0] + ': ' + r[1]).join('\n') + '\n\n' + (adj ? t('How I would like the length:') + '\n\n' : '');
       const mail = `mailto:${to}?subject=${encodeURIComponent(t('Made for you') + ': ' + t(SHAPE[v('shape')]))}&body=${encodeURIComponent(body)}`;
-      done.innerHTML = `<h3>${t('Your request is ready to send')}</h3>
+      done.setAttribute('role', 'status');
+      done.innerHTML = `<h3 tabindex="-1">${t('Your request is ready to send')}</h3>
         <dl>${rows.map(r => `<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join('')}</dl>
         <p>${fmt('Your email app opens with this request. If it does not, write to {email}.', { email: `<a href="${mail}">${to}</a>` })}</p>`;
       done.hidden = false;
       done.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'nearest' });
+      // the summary is where the shopper is now: screen readers hear it, keyboard focus lands on it
+      const h = $('h3', done); if (h) h.focus({ preventScroll: true });
       location.href = mail;
     });
     paint();
