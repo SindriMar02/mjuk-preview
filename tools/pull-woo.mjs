@@ -137,12 +137,13 @@ function originOf(p, cc, shortText, longText) {
 }
 
 // The customs catalogue's composition, shown only when it accounts for the whole piece. A list
-// that does not reach 100% has lost a fibre her text names, and a double-sided piece has two.
+// that does not reach 100% has lost a fibre her text names. A double-sided piece whose text
+// states each side already has no composition there (its sides are in compositionNote), and one
+// that states a single composition for both colourways (the Konungur blankets) is shown.
 function compositionOf(p, cc) {
   const c = (cc && cc.composition) || ''; if (!c) return '';
   const sum = (c.match(/\d+(?:\.\d+)?(?=%)/g) || []).reduce((a, n) => a + +n, 0);
   if (Math.round(sum) !== 100) { why.partial.push(`${p.id} "${c}"`); return ''; }
-  if (/double[- ]sided/i.test(p.name)) { why.partial.push(`${p.id} double-sided`); return ''; }
   return c;
 }
 
@@ -213,7 +214,7 @@ L.push(`Source: ${source}`, `Products: ${products.length} in WooCommerce, ${all.
 L.push(`Composition stated: ${all.filter(p => p.comp).length} · type known: ${all.filter(p => p.tyk).length} · origin stated: ${all.filter(p => p.mi).length} · care text: ${Object.keys(care).length} texts`);
 L.push(`Fibre filter from: ${Object.entries(why.fib).map(([k, v]) => `${k} ${v}`).join(', ')}; none ${all.filter(p => !p.fib).length}`);
 L.push(`Types: ${types.map(t => `${t.key} ${t.count}`).join(', ')}; also ${[...new Set(all.map(p => p.tyk).filter(k => k && !TYPES[k]))].map(k => `${k} ${all.filter(p => p.tyk === k).length}`).join(', ') || 'none'}`);
-if (why.partial.length) L.push(`Composition withheld (does not add up to 100%, or two sides) for ${why.partial.length}: ${[...new Set(why.partial.map(x => x.replace(/^\d+ /, '')))].join('; ')}`);
+if (why.partial.length) L.push(`Composition withheld (does not add up to 100%) for ${why.partial.length}: ${[...new Set(why.partial.map(x => x.replace(/^\d+ /, '')))].join('; ')}`);
 if (all.some(p => !p.img.length)) L.push(`No photo in WooCommerce: ${all.filter(p => !p.img.length).map(p => `${p.id} ${p.t}`).join(', ')}`);
 if (why.missing.length) L.push(`Not in the customs catalogue (nothing claimed; rebuild it from a newer pull): ${why.missing.join(', ')}`);
 if (dropped.length) L.push(`Curated picks no longer listed, dropped: ${dropped.join(', ')}`);
