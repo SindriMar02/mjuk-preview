@@ -129,6 +129,12 @@ if (placed.order_id) {
   check(order.line_items.length === 2 && oPom && oPom.meta_data.some(m => m.key === 'Note' && m.value === 'Attach to ' + hat.t), 'the order keeps both lines and the pompom note');
   const itemsTotal = order.line_items.reduce((n, l) => n + +l.total, 0);
   check(Math.abs(itemsTotal - (hat.p + pom.p)) < 0.01, `Woo priced the lines itself: ${itemsTotal} = ${hat.p} + ${pom.p} (order total ${order.total} ${order.currency} with shipping ${order.shipping_total})`);
+  // the order page when the payment went through, and when it did not (a declined PayPal payment)
+  const thanks = await (await A.b.go(out.redirect)).text();
+  check(/<h1 class="head__t">Thank you</.test(thanks) && /shop\.html\?ordered=1/.test(thanks), 'a paid order says Thank you, and its link empties the storefront bag');
+  await admin('orders/' + placed.order_id, { method: 'PUT', body: JSON.stringify({ status: 'failed' }) });
+  const failed = await (await A.b.go(out.redirect)).text();
+  check(/<h1 class="head__t">Not paid yet</.test(failed) && !/ordered=1/.test(failed), 'a failed payment says Not paid yet, and its link keeps the bag');
   await admin('orders/' + placed.order_id, { method: 'PUT', body: JSON.stringify({ status: 'cancelled' }) });
   await admin('orders/' + placed.order_id + '?force=true', { method: 'DELETE' });
   const after = Object.fromEntries(await Promise.all([hat.id, pom.id].map(async id => [id, (await admin('products/' + id)).stock_quantity])));
