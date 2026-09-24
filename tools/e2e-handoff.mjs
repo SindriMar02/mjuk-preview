@@ -55,7 +55,7 @@ async function handoff(items, { tamper = false, signedAt = null } = {}) {
   // the page first: it prints Woo's session notices, and a Store API call would clear them
   const page = await (await b.go(HOST + landed)).text();
   const cart = await (await b.go(HOST + '/wp-json/wc/store/v1/cart')).json();
-  return { b, landed, cart, page };
+  return { b, landed, cart, page, to };
 }
 
 let fails = 0;
@@ -90,7 +90,12 @@ check(lines(P.cart) === `${one.id}×1, ${pom.id}×1`, `pompoms never outnumber t
 const ready = await fetch(STORE + '/bag', { cache: 'no-store' });
 check(ready.status === 204, `GET /bag tells the storefront checkout is connected (${ready.status})`);
 const Q = await handoff([{ id: one.id, q: 5 }]);
-check(lines(Q.cart) === `${one.id}×1`, `five of a one-of-one becomes one (${lines(Q.cart)})`);
+check(lines(Q.cart) === `${one.id}×1` && /Fewer were left/i.test(Q.page), `five of a one-of-one becomes one, and says so (${lines(Q.cart)})`);
+{ const b = browser(); const r = await b.go(A.to); const landed = new URL(r.headers.get('location') || A.to).pathname;
+  const page = await (await b.go(HOST + landed)).text(); const cart = await (await b.go(HOST + '/wp-json/wc/store/v1/cart')).json();
+  check(landed === '/cart/' && !cart.items.length && /already been opened/i.test(page), `a used link cannot fill a cart again (landed ${landed}, ${lines(cart)})`); }
+{ const r = await fetch(HOST + '/?sndr_bag=ping', { redirect: 'manual', headers: { Cookie: 'playground_auto_login_already_happened=1' } });
+  check(r.status === 204 && r.headers.get('x-sndr-bag') === 'ready', `the Woo host answers the deploy ping (${r.status} ${r.headers.get('x-sndr-bag')})`); }
 const bad = await fetch(STORE + '/bag', { method: 'POST', body: new URLSearchParams({ bag: '[{"id":"x","q":1}]' }) });
 check(bad.status === 400, `/bag refuses a malformed bag (${bad.status})`);
 const notForm = await fetch(STORE + '/bag', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });

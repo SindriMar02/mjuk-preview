@@ -180,18 +180,13 @@
   /* ══ BAG (real add-to-bag flow, persisted) ══ */
   const bagEl = $('#bag'), bagItems = $('#bagItems'), bagCount = $('#bagCount'),
         bagQtyEl = $('#bagQty'), bagTotal = $('#bagTotal'), bagGo = $('#bagGo');
+  const MAX_EACH = 20, MAX_LINES = 40; // what functions/bag.js accepts, so a bag never fails there
   let lines = [];
-  try { lines = JSON.parse(localStorage.getItem('mjuk_bag') || '[]'); } catch (e) { lines = []; }
+  try { const saved = JSON.parse(localStorage.getItem('mjuk_bag') || '[]');
+    lines = Array.isArray(saved) ? saved.filter(l => l && typeof l.h === 'string' && Number.isInteger(l.q) && l.q > 0) : []; } catch (e) { lines = []; }
   const save = () => { try { localStorage.setItem('mjuk_bag', JSON.stringify(lines)); } catch (e) {} };
-  /* a bag kept in the browser can outlive the piece: one that has sold since stays visible, marked,
-     and counts for nothing; one with fewer left than the bag holds is trimmed to what is left */
-  const live = l => { const p = byHandle[l.h]; return !!p && !p.oos; };
-  { const left = {};
-    lines = lines.filter(l => { const p = byHandle[l.h]; if (!p || !(p.q > 0)) return true;
-      if (!(l.h in left)) left[l.h] = p.q; if (left[l.h] < 1) return false;
-      l.q = Math.min(l.q, left[l.h]); left[l.h] -= l.q; return true; }); }
-  const bagN = () => lines.filter(live).reduce((n, l) => n + l.q, 0);
-  const bagSum = () => lines.filter(live).reduce((n, l) => n + l.q * l.p, 0);
+  const keep = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} };
+  const kept = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
   // screen readers hear what the drawer shows: added, already in the bag, sold since
   const say = (() => { const el = document.createElement('p'); el.setAttribute('aria-live', 'polite');
     el.style.cssText = 'position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap';
@@ -200,6 +195,31 @@
   // the bag is rebuilt from localStorage, so its text is escaped, not trusted
   const html = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
+  /* A bag kept in the browser can outlive what it holds. A piece, or a pompom chosen for it, that
+     has sold since stays visible, marked, and counts for nothing. A piece with fewer left than the
+     bag holds is trimmed to what is left, and the drawer says so. Prices are today's, not the
+     day it went in. */
+  const poms = l => (l.x && l.x.pompoms) || [];
+  const pieceLive = l => { const p = byHandle[l.h]; return !!p && !p.oos; };
+  const pomsLive = l => poms(l).every(pm => byHandle[pm.h] && !byHandle[pm.h].oos);
+  const live = l => pieceLive(l) && pomsLive(l);
+  const priceOf = l => byHandle[l.h].p + poms(l).reduce((n, pm) => n + byHandle[pm.h].p, 0);
+  const itemCount = () => lines.reduce((n, l) => n + 1 + poms(l).length, 0);
+  let notices = [];
+  { const left = {}, trimmed = [];
+    lines = lines.filter(l => { const p = byHandle[l.h]; if (!p || !(p.q > 0)) return true;
+      if (!(l.h in left)) left[l.h] = p.q;
+      if (left[l.h] < 1) { trimmed.push(p.t); return false; }
+      if (l.q > left[l.h]) { trimmed.push(p.t); l.q = left[l.h]; }
+      left[l.h] -= l.q; return true; });
+    if (trimmed.length) { save(); notices.push(`Fewer are left now of ${[...new Set(trimmed)].join(', ')}, so your bag holds what there is.`); } }
+  /* A bag that went to checkout may have been ordered. The link back from her order-received page
+     (?ordered=1) empties it; otherwise the drawer asks, for a day. */
+  if (new URLSearchParams(location.search).has('ordered')) { lines = []; save(); keep('mjuk_bag_out', null); }
+  const wentOut = () => { const t = +kept('mjuk_bag_out'); return t && Date.now() - t < 864e5 ? new Date(t) : null; };
+  const bagN = () => lines.filter(live).reduce((n, l) => n + l.q, 0);
+  const bagSum = () => lines.filter(live).reduce((n, l) => n + l.q * priceOf(l), 0);
+
   function renderBag() {
     const n = bagN();
     if (bagCount) bagCount.textContent = '(' + n + ')';
@@ -207,13 +227,16 @@
     if (bagTotal) bagTotal.textContent = usd(bagSum());
     if (bagGo) bagGo.disabled = n === 0;
     if (!bagItems) return;
-    bagItems.innerHTML = !lines.length
+    const out = lines.length && wentOut();
+    const top = notices.map(t => `<p class="bag__notice" role="status">${html(t)}</p>`).join('')
+      + (out ? `<div class="bag__notice" role="status">This bag went to checkout at ${out.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}. If you placed the order, <button class="bag__clear" data-clear>empty the bag</button>.</div>` : '');
+    bagItems.innerHTML = top + (!lines.length
       ? `<p class="bag__empty">Your bag is empty.<br>Add any piece to it.</p>`
       : lines.map((l, i) => live(l) ? `<div class="bag__it">
           <div class="bag__im"><img src="${px(l.img, 240)}" alt="${esc(l.t)}"/></div>
           <div>
             <div class="bag__n">${html(l.t)}</div>
-            ${l.s ? `<div class="bag__sz">Size ${l.s}</div>` : ''}
+            ${l.s ? `<div class="bag__sz">Size ${html(l.s)}</div>` : ''}
             ${l.x ? `<div class="bag__x2">${html(l.x.label)}</div>` : ''}
             <div class="bag__qty">
               <button data-q="-1" data-i="${i}" aria-label="Decrease quantity">−</button>
@@ -222,41 +245,55 @@
             </div>
           </div>
           <div class="bag__right">
-            <span class="bag__p">${usd(l.q * l.p)}</span>
+            <span class="bag__p">${usd(l.q * priceOf(l))}</span>
             <button class="bag__x" data-rm="${i}">Remove</button>
           </div>
         </div>` : `<div class="bag__it bag__it--gone">
           <div class="bag__im"><img src="${px(l.img, 240)}" alt="${esc(l.t)}"/></div>
           <div>
             <div class="bag__n">${html(l.t)}</div>
-            <div class="bag__sz">Sold since you added it</div>
+            ${l.x ? `<div class="bag__x2">${html(l.x.label)}</div>` : ''}
+            <div class="bag__sz">${pieceLive(l) ? 'Its pompom has sold since. Remove it and choose again' : 'Sold since you added it'}</div>
           </div>
           <div class="bag__right">
             <button class="bag__x" data-rm="${i}">Remove</button>
           </div>
-        </div>`).join('');
+        </div>`).join(''));
   }
+  /* the drawer is a modal: it takes focus while open, keeps Tab inside, and gives focus back */
+  let bagOpen = false, lastFocus = null;
+  if (bagEl) bagEl.inert = true; // closed: nothing in it can be tabbed to or keep focus
   const openBag = on => {
     if (!bagEl) return;
     bagEl.setAttribute('aria-hidden', String(!on));
+    bagEl.inert = !on;
     document.documentElement.style.overflow = on ? 'hidden' : '';
     if (lenis) { on ? lenis.stop() : lenis.start(); }
+    if (on === bagOpen) return;
+    bagOpen = on;
+    if (on) { lastFocus = document.activeElement; setTimeout(() => { const c = $('#bagClose'); if (c) c.focus({ preventScroll: true }); }, 60); }
+    else if (lastFocus && lastFocus.focus && document.contains(lastFocus)) lastFocus.focus({ preventScroll: true });
   };
-  /* one of one: never more of a piece in the bag than she has on the shelf. Woo's stock is still
-     the final word at checkout, since this is build-time data. */
+  /* one of one: never more of a piece in the bag than she has on the shelf (or than a bag can
+     carry). Woo's stock is still the final word at checkout, since this is build-time data. */
   const inBag = h => lines.filter(l => l.h === h).reduce((n, l) => n + l.q, 0);
-  const roomFor = p => (p.oos ? 0 : p.q > 0 ? p.q - inBag(p.h) : Infinity);
+  const roomFor = p => (p.oos ? 0 : (p.q > 0 ? p.q : MAX_EACH) - inBag(p.h));
   function addToBag(handle, size, btn, extra) {
     const p = byHandle[handle]; if (!p) return;
     if (roomFor(p) < 1) {
       // short enough for a card chip; the drawer opens on the piece to show where it is
       if (btn && !btn.dataset.was) { btn.dataset.was = btn.textContent; btn.textContent = isIS() ? 'Í körfunni' : 'In your bag';
         setTimeout(() => { btn.textContent = btn.dataset.was; delete btn.dataset.was; }, 1800); }
-      say(p.q === 1 ? `${p.t} is one of one, and it is already in your bag.` : `Every ${p.t} in stock is already in your bag.`);
+      say(p.q === 1 ? `${p.t} is one of one, and it is already in your bag.` : `Every ${p.t} there is, is already in your bag.`);
       openBag(true); return;
     }
     const key = handle + '|' + size + (extra ? '|' + extra.k : '');
     const hit = lines.find(l => l.k === key);
+    if (!hit && itemCount() + 1 + ((extra && extra.pompoms) || []).length > MAX_LINES) {
+      notices = [`A bag carries up to ${MAX_LINES} pieces at once. Check out these first, then start a second bag.`];
+      renderBag(); openBag(true); say(notices[0]); return;
+    }
+    notices = [];
     if (hit) hit.q++; else lines.push({ k: key, h: handle, t: p.t, s: size, p: p.p + (extra ? extra.price : 0), img: p.img[0], q: 1, x: extra || null });
     save(); renderBag(); openBag(true); say(`Added to your bag: ${p.t}${extra ? ', ' + extra.label.toLowerCase() : ''}.`);
     if (btn) { btn.classList.add('added'); setTimeout(() => btn.classList.remove('added'), 700); }
@@ -267,9 +304,10 @@
     if (e.target.closest('#bagBtn')) { openBag(true); return; }
     if (e.target.closest('#bagClose') || e.target.closest('#bagScrim')) { openBag(false); return; }
     const q = e.target.closest('[data-q]');
-    if (q) { const l = lines[+q.dataset.i]; if (l) { const p = byHandle[l.h]; if (+q.dataset.q > 0 && p && roomFor(p) < 1) return; l.q += +q.dataset.q; if (l.q < 1) lines.splice(+q.dataset.i, 1); save(); renderBag(); } return; }
+    if (q) { const l = lines[+q.dataset.i]; if (l) { const p = byHandle[l.h]; if (+q.dataset.q > 0 && p && roomFor(p) < 1) return; notices = []; l.q += +q.dataset.q; if (l.q < 1) lines.splice(+q.dataset.i, 1); save(); renderBag(); } return; }
     const rm = e.target.closest('[data-rm]');
-    if (rm) { lines.splice(+rm.dataset.rm, 1); save(); renderBag(); return; }
+    if (rm) { notices = []; lines.splice(+rm.dataset.rm, 1); save(); renderBag(); return; }
+    if (e.target.closest('[data-clear]')) { lines = []; notices = []; save(); keep('mjuk_bag_out', null); renderBag(); say('Your bag is empty.'); const c = $('#bagClose'); if (c) c.focus(); return; }
     if (e.target.closest('#bagGo')) checkout();
   });
   /* Checkout: the bag goes to the edge function (functions/bag.js), which signs it and sends the
@@ -282,7 +320,7 @@
       const p = byHandle[l.h];
       items.push({ id: p.id, q: l.q });
       // "for" ties the pompom to its hat: if the hat has gone, the pompom is not bought alone
-      ((l.x && l.x.pompoms) || []).forEach(pm => { const pp = byHandle[pm.h]; if (pp) items.push({ id: pp.id, q: l.q, note: 'Attach to ' + p.t, for: p.id }); });
+      poms(l).forEach(pm => { items.push({ id: byHandle[pm.h].id, q: l.q, note: 'Attach to ' + p.t, for: p.id }); });
     });
     if (!items.length) return;
     if (bagGo) { bagGo.disabled = true; bagGo.textContent = 'Opening checkout…'; }
@@ -290,18 +328,27 @@
     fetch('bag', { cache: 'no-store' }).then(r => r.status === 204).catch(() => false).then(ready => {
       if (!ready) {
         if (bagGo) bagGo.textContent = 'Go to checkout';
-        renderBag();
-        if (bagItems) bagItems.insertAdjacentHTML('afterbegin', `<p class="bag__notice" role="status">Checkout is not connected in this preview. On the live shop this button opens your WooCommerce checkout with this bag.</p>`);
+        notices = ['Checkout is not connected in this preview. On the live shop this button opens your WooCommerce checkout with this bag.'];
+        renderBag(); say(notices[0]);
         return;
       }
+      keep('mjuk_bag_out', String(Date.now()));
       const f = document.createElement('form'); f.method = 'post'; f.action = 'bag'; f.hidden = true;
       const field = document.createElement('input'); field.name = 'bag'; field.value = JSON.stringify(items);
       f.appendChild(field); document.body.appendChild(f); f.submit();
     });
   }
-  // back from checkout (bfcache): the button is a button again
+  // back from checkout (bfcache): the button is a button again, and the drawer asks about the order
   addEventListener('pageshow', () => { if (bagGo) bagGo.textContent = 'Go to checkout'; renderBag(); });
-  addEventListener('keydown', e => { if (e.key === 'Escape' && bagEl && bagEl.getAttribute('aria-hidden') === 'false') openBag(false); });
+  addEventListener('keydown', e => {
+    if (!bagOpen || !bagEl) return;
+    if (e.key === 'Escape') { openBag(false); return; }
+    if (e.key !== 'Tab') return;
+    const f = $$('button:not([disabled]), a[href]', $('.bag__panel', bagEl)); if (!f.length) return;
+    const first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
   renderBag();
   window.CMBag = { add: addToBag, open: openBag };
   // the card renderer and helpers, so inner pages draw the same cards as the front page

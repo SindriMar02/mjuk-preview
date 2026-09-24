@@ -47,7 +47,12 @@ async function pull() {
         Authorization: auth, Accept: 'application/json', 'User-Agent': 'Mozilla/5.0 (SNDR catalogue read)',
         Cookie: [...jar].map(([k, v]) => `${k}=${v}`).join('; ') } });
       for (const c of res.headers.getSetCookie()) { const [kv] = c.split(';'); const i = kv.indexOf('='); jar.set(kv.slice(0, i).trim(), kv.slice(i + 1)); }
-      if (res.status >= 300 && res.status < 400 && res.headers.get('location')) { url = new URL(res.headers.get('location'), url).href; continue; }
+      if (res.status >= 300 && res.status < 400 && res.headers.get('location')) {
+        const next = new URL(res.headers.get('location'), url);
+        // credentials and cookies go to her host only, never to wherever a redirect points
+        if (next.origin !== new URL(base).origin) throw new Error(`${base} redirected to ${next.origin}. Stopped there; credentials not sent.`);
+        url = next.href; continue;
+      }
       if (res.status >= 500 || res.status === 429) throw new Error(`${base} answered ${res.status}. Stopped there, nothing written. Try again later, gently.`);
       if (!res.ok) throw new Error(`${res.status} ${res.statusText} for ${url}\n${(await res.text()).slice(0, 300)}`);
       return { list: await res.json(), pages: +res.headers.get('x-wp-totalpages') || 1 };
@@ -106,11 +111,14 @@ function careOf(long) {
 const FIBRES = [['angora', 'Angora'], ['merino', 'Merino'], ['cashmere', 'Cashmere'], ['icelandic-wool', 'Icelandic wool'], ['alpaca-silk', 'Alpaca & silk']];
 const FIB_NAME = Object.fromEntries(FIBRES);
 const FROM_MATERIAL = { 'angora': 'angora', 'merino wool': 'merino', 'cashmere': 'cashmere', 'Icelandic wool': 'icelandic-wool', 'alpaca': 'alpaca-silk' };
-const FROM_CATEGORY = { 'angora-wool': 'angora', 'merino-wool': 'merino', 'cashmere': 'cashmere', 'icelandic-wool': 'icelandic-wool', 'alpaca-and-silk': 'alpaca-silk', 'alpaca': 'alpaca-silk' };
-const FROM_WORD = [['angora', /\bangora\b/i], ['merino', /\bmerino\b/i], ['cashmere', /\bcashmere\b/i], ['icelandic-wool', /\bicelandic (sheep )?wool\b/i], ['alpaca-silk', /\balpaca\b/i]];
+// "Alpaca & silk" is only said where silk is in evidence: her own alpaca-and-silk category, or
+// silk named next to the alpaca. Alpaca alone stays out of that facet rather than gain a fibre.
+const FROM_CATEGORY = { 'angora-wool': 'angora', 'merino-wool': 'merino', 'cashmere': 'cashmere', 'icelandic-wool': 'icelandic-wool', 'alpaca-and-silk': 'alpaca-silk' };
+const FROM_WORD = [['angora', /\bangora\b/i], ['merino', /\bmerino\b/i], ['cashmere', /\bcashmere\b/i], ['icelandic-wool', /\bicelandic (sheep )?wool\b/i], ['alpaca-silk', /\balpaca\b[\s\S]*\bsilk\b|\bsilk\b[\s\S]*\balpaca\b/i]];
 const one = keys => { const u = [...new Set(keys)]; return u.length === 1 ? u[0] : ''; };
 function fibreOf(p, cc, shortText) {
-  if (cc && FROM_MATERIAL[cc.material]) return [FROM_MATERIAL[cc.material], 'composition'];
+  const byMat = cc && FROM_MATERIAL[cc.material];
+  if (byMat && (byMat !== 'alpaca-silk' || /\bsilk\b/i.test(cc.composition || ''))) return [byMat, 'composition'];
   const byCat = one(p.categories.map(c => FROM_CATEGORY[c.slug]).filter(Boolean));
   if (byCat) return [byCat, 'her category'];
   const byWord = one(FROM_WORD.filter(([, re]) => re.test(p.name + ' ' + shortText)).map(([k]) => k));
@@ -132,8 +140,9 @@ function originOf(p, cc, shortText, longText) {
   if (!cc || cc.originCountry !== 'IS') return '';
   const m = (p.name + ' ' + shortText + ' ' + longText).match(PLACE);
   if (m) { const verb = m[1].toLowerCase().replace(' ', '-'); return verb[0].toUpperCase() + verb.slice(1) + ' in ' + (/^i/i.test(m[2]) ? 'Iceland' : 'Reykjavík'); }
+  // capes: her website says they are sewn at Laugavegur 23 (the customs catalogue's source)
   if (/laugavegur 23/i.test(cc.originFrom || '')) return 'Sewn at Laugavegur 23, Reykjavík';
-  return 'Made in Iceland';
+  return '';
 }
 
 // The customs catalogue's composition, shown only when it accounts for the whole piece. A list

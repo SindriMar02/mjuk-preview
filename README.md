@@ -26,6 +26,13 @@ Run locally with `node _serve.cjs` and open http://127.0.0.1:5895.
   opens checkout. `GET /bag` answers 204 where checkout is connected; a static preview (GitHub
   Pages) has no `/bag`, so the drawer says checkout is not connected instead of erroring.
   Production needs `BAG_SECRET` (shared with the Woo host's `SNDR_BAG_SECRET`) and
-  `CHECKOUT_ORIGIN` set on the Pages project.
-- `node --no-warnings tools/e2e-handoff.mjs` proves it against the sandbox: hand-off, tampered,
-  expired, sold out, over stock, a real order through the classic checkout, then undone.
+  `CHECKOUT_ORIGIN` set on the Pages project. Deploy check for the Woo side:
+  `curl -sI "$CHECKOUT_ORIGIN/?sndr_bag=ping"` must answer 204 with `X-SNDR-Bag: ready`.
+- The bag: a piece (or its chosen pompom) sold since it went in stays visible, marked, and
+  counts for nothing; quantities above stock are trimmed with a note; prices are today's. At
+  most 20 of a piece and 40 lines, the same limits `/bag` accepts. After a hand-off the drawer
+  asks for a day whether the order was placed; `?ordered=1` (for the link back from her
+  order-received page) empties the bag. Hand-off links work once.
+- `node --no-warnings tools/e2e-handoff.mjs` proves it against the sandbox (19 checks): hand-off,
+  tampered, expired, used twice, sold out, pompom without its hat, over stock, the deploy ping,
+  a real order through the classic checkout, then undone.
