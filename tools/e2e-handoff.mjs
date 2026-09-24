@@ -87,6 +87,10 @@ const H = await handoff([{ id: gone.id, q: 1 }, { id: pom.id, q: 1, note: 'Attac
 check(lines(H.cart) === `${hat.id}×1`, `a pompom whose hat has sold is not bought alone (${lines(H.cart)})`);
 const P = await handoff([{ id: one.id, q: 5 }, { id: pom.id, q: 3, note: 'Attach to ' + one.t, for: one.id }]);
 check(lines(P.cart) === `${one.id}×1, ${pom.id}×1`, `pompoms never outnumber the hats that went in (${lines(P.cart)})`);
+{ const big = CM.all.find(p => !p.oos && p.q >= 1 && p.p >= 150 && p.id !== hat.id) || null;
+  const F = big ? await handoff([{ id: big.id, q: 1 }]) : null;
+  const chosen = F && (F.page.match(/<input[^>]*name="shipping_method\[0\]"[^>]*>/g) || []).find(t => /checked/.test(t)) || '';
+  check(!big || /free_shipping/.test(chosen), `free shipping is chosen by default once her Iceland threshold is reached (${big ? '$' + big.p + ' → ' + (chosen.match(/value="([^"]+)"/) || [,'none'])[1] : 'no piece over $150 in stock'})`); }
 const ready = await fetch(STORE + '/bag', { cache: 'no-store' });
 check(ready.status === 204, `GET /bag tells the storefront checkout is connected (${ready.status})`);
 const Q = await handoff([{ id: one.id, q: 5 }]);
