@@ -144,7 +144,7 @@ function catalogue(lang) {
   return `<!-- CATALOGUE -->
     <details class="idx" id="every">
       <summary class="idx__s"><span class="mono">${lang === 'is' ? 'Allar flíkurnar, A til Ö' : 'Every piece, A to Z'}</span><span class="mono idx__n">${CM.all.length}</span></summary>
-${groups.filter(g => g.list.length).map(g => `      <section class="idx__g" aria-label="${esc(g.name)}"><h3 class="mono">${esc(g.name)} <small>${g.list.length}</small></h3><ul>${g.list.sort(byName).map(p => `<li${p.oos ? ' class="oos"' : ''}><a href="product/${p.h}/">${esc(p.t)}</a>${p.oos ? ` <small>${soldOut}</small>` : ''}</li>`).join('')}</ul></section>`).join('\n')}
+${groups.filter(g => g.list.length).map(g => `      <section class="idx__g"><h3 class="mono">${esc(g.name)} <small>${g.list.length}</small></h3><ul>${g.list.sort(byName).map(p => `<li${p.oos ? ' class="oos"' : ''}><a href="product/${p.h}/">${esc(p.t)}</a>${p.oos ? ` <small>${soldOut}</small>` : ''}</li>`).join('')}</ul></section>`).join('\n')}
     </details>
     <!-- /CATALOGUE -->`;
 }

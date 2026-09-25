@@ -12,7 +12,8 @@
      2. /bag → functions/bag.js (signs the bag, sends the shopper to /?sndr_bag=…)
      3. hers, always: /basket /checkout /my-account /wp-admin /wp-content /wp-includes /wp-json
         /wp-login.php /wc-api /.well-known …, any POST that is not /bag, and / with any query
-        other than tracking tags (?add-to-cart, ?wc-ajax, ?wc-api for PayPal, ?sndr_bag, ?p=, ?s=)
+        other than tracking tags (?add-to-cart, ?wc-ajax, ?wc-api for PayPal, ?sndr_bag, ?p=, ?s=),
+        and a WooCommerce action (?add-to-cart=, ?wc-ajax=, ?wc-api=, …) on any path
      4. her old addresses → ours (301): /shop/, /product-category/…/ (tools/category-map.json),
         /product.html?p=<slug>, /index.html, /product/<slug> without its slash, /is/… → mjukiceland.is
      5. ours, when the build has the file: /, /shop.html, /product/<slug>/, /assets/…, sitemap, robots
@@ -34,13 +35,16 @@ const HERS = /^\/(?:basket|checkout|my-account|wp-admin|wp-content|wp-includes|w
 const PRIVATE = /^\/(?:basket|checkout|my-account|wp-admin|wp-login\.php|wc-api|wc-auth)(?:\/|$)/;
 const SESSION = /(?:^|;\s*)(?:woocommerce_[a-z_]+|wp_woocommerce_session_[^=]*|wordpress_logged_in_[^=]*|wordpress_sec_[^=]*|wordpress_[0-9a-f]{32})=/;
 const TRACKING = /^(?:utm_[a-z]+|gclid|fbclid|msclkid|mc_cid|mc_eid|_ga|ref)$/;
+// WooCommerce's own actions ride in the query on ANY path (her old "add to cart" links were
+// /shop/?add-to-cart=…, /product/<slug>/?add-to-cart=…): those always go to WordPress (Codex, 2026-09-25)
+const WOO_ACTION = /(?:^|&)(?:add-to-cart|wc-ajax|wc-api|sndr_bag|removed_item|undo_item|remove_item|order_again|pay_for_order|key)=/;
 const SHARED = /^\/(?:assets\/|(?:styles|pages|configurators)\.css$|(?:app|pages|pdp|configurators)\.js$)/;
 
 const moved = (to, status = 301) => new Response(null, { status, headers: { Location: to, 'Cache-Control': 'public, max-age=3600' } });
 
 // her WordPress, same Host; never from a cache when it is personal
 async function hers(request, env, url, why) {
-  const personal = PRIVATE.test(url.pathname) || SESSION.test(request.headers.get('Cookie') || '') || /(?:^|&)(?:add-to-cart|wc-ajax|wc-api|sndr_bag|removed_item|undo_item|order-received|key)=/.test(url.search.slice(1));
+  const personal = PRIVATE.test(url.pathname) || SESSION.test(request.headers.get('Cookie') || '') || WOO_ACTION.test(url.search.slice(1));
   let req = request;
   if (env.ORIGIN) { // local rehearsal only
     const o = new URL(env.ORIGIN);
@@ -91,6 +95,7 @@ async function english(request, env, url) {
   if (p === '/bag') return bag(request, env);
   if (HERS.test(p)) return hers(request, env, url, 'path');
   if (!get) return hers(request, env, url, 'method');
+  if (WOO_ACTION.test(url.search.slice(1))) return hers(request, env, url, 'action');
   // on the homepage, any query but a tracking tag is WordPress's: add-to-cart, wc-ajax, wc-api, the hand-off, ?p=, ?s=
   if (p === '/' && [...url.searchParams.keys()].some(k => !TRACKING.test(k))) return hers(request, env, url, 'query');
   if (p === '/is' || p.startsWith('/is/')) {

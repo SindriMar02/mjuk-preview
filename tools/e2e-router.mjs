@@ -104,6 +104,10 @@ try {
     const r = await req(SHOP + p, p.includes('wc-ajax') ? { method: 'POST' } : {}); const cc = r.headers.get('cache-control') || '';
     check(/no-store/.test(cc) && /private/.test(cc), `${p}: never cached (${cc})`);
   }
+  // her old add-to-cart links carry the action on any page: WordPress must get it, uncached (Codex finding)
+  for (const p of [`/product/${one.h}/?add-to-cart=${one.id}`, `/shop/?add-to-cart=${one.id}`, `/shop.html?wc-ajax=get_refreshed_fragments`]) {
+    const r = await req(SHOP + p); check(route(r) === 'wordpress:action' && /no-store/.test(r.headers.get('cache-control') || ''), `${p} → her WordPress, uncached (${r.status} ${route(r)})`);
+  }
   { const r = await req(SHOP + '/shop.html', { headers: { Cookie: 'wp_woocommerce_session_abc=1' } }); check(route(r) === 'storefront', 'a WooCommerce session cookie does not take the storefront away'); }
   { const r = await req(SHOP + '/wp-content/themes/mjuk-checkout/style.css', { headers: { Cookie: 'woocommerce_items_in_cart=1' } }); check(route(r).startsWith('wordpress') && /no-store/.test(r.headers.get('cache-control') || ''), 'with a cart cookie, even her files are fetched uncached'); }
 
