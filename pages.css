@@ -222,3 +222,22 @@ body[data-page] .bars{opacity:.18}
   transition:opacity .35s var(--ease),transform .5s var(--ease)}
 .stf__toast.on{opacity:1;transform:translate(-50%,0)}
 @media(max-width:640px){.stf__row{grid-template-columns:44px 1fr auto}.stf__row img{width:44px}}
+
+/* ── shop: every piece as a plain link (tools/build-products.mjs), so the whole catalogue is in the
+      HTML for crawlers that run no script; closed until asked for ── */
+.idx{margin:clamp(48px,7vw,96px) var(--pad) 0;border-top:1px solid var(--line)}
+.idx__s{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:18px 0;cursor:pointer;list-style:none;min-height:44px}
+.idx__s::-webkit-details-marker{display:none}
+.idx__s::after{content:"+";font-family:var(--ff-m);font-size:16px;line-height:1;color:var(--dim);transition:transform .3s var(--ease)}
+.idx[open] .idx__s::after{transform:rotate(45deg)}
+.idx__s:hover .mono:first-child{color:var(--accent)}
+.idx__n{color:var(--dim);margin-left:auto}
+.idx__g{padding:8px 0 28px}
+.idx__g h3{font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:400;margin:0 0 12px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.idx__g h3 small{color:var(--dim);font-size:inherit;margin-left:6px}
+.idx ul{list-style:none;margin:0;padding:0;columns:3 260px;column-gap:clamp(20px,3vw,48px)}
+.idx li{break-inside:avoid;padding:5px 0;font-size:13px;line-height:1.4;overflow-wrap:anywhere}
+.idx li a{color:var(--ink);text-decoration:none;background:linear-gradient(currentColor,currentColor) 0 100%/0 1px no-repeat;transition:background-size .4s var(--ease)}
+.idx li a:hover{background-size:100% 1px;color:var(--accent)}
+.idx li.oos a{color:var(--dim)}
+.idx li small{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin-left:4px}

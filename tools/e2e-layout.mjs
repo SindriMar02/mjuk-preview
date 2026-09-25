@@ -13,15 +13,22 @@
 import puppeteer from 'puppeteer-core';
 import { detect } from './layout-detect.mjs';
 
-const REPLICA = process.argv.includes('--replica');
-const STORE = REPLICA ? 'http://localhost:5896' : 'http://localhost:5895', WOO = REPLICA ? 'http://127.0.0.1:9420' : 'http://127.0.0.1:9410';
+// --upgraded: the copy of her stack after the upgrade rehearsal (storefront :5897 → :9430), her /basket/ as on the replica
+const UPGRADED = process.argv.includes('--upgraded'), REPLICA = process.argv.includes('--replica') || UPGRADED;
+const STORE = UPGRADED ? 'http://localhost:5897' : REPLICA ? 'http://localhost:5896' : 'http://localhost:5895';
+const WOO = UPGRADED ? 'http://127.0.0.1:9430' : REPLICA ? 'http://127.0.0.1:9420' : 'http://127.0.0.1:9410';
 const CART = REPLICA ? '/basket/' : '/cart/'; // her live basket is /basket/
 const QUICK = process.argv.includes('--quick');
 const MODES = QUICK
   ? [{ w: 375, touch: true }, { w: 1280, touch: false }]
   : [{ w: 320, touch: true }, { w: 360, touch: true }, { w: 375, touch: true }, { w: 390, touch: true }, { w: 414, touch: true },
      { w: 768, touch: true }, { w: 375, touch: false }, { w: 600, touch: false }, { w: 1024, touch: false }, { w: 1280, touch: false }, { w: 1440, touch: false }];
-const SITE = ['index.html', 'shop.html', 'product.html?p=79-beanie-black-with-matching-raccoon-pompom', 'product.html?p=slouchy-hat-light-grey', 'fibres.html', 'store.html', 'story.html', 'staff.html'];
+// product pages at her own addresses (tools/build-products.mjs): a plain one, sold out, on sale, no photo,
+// the longest name, a blanket, a cape; and product.html?p=, which forwards to the first
+const SITE = ['index.html', 'shop.html', 'product.html?p=79-beanie-black-with-matching-raccoon-pompom',
+  ...['79-beanie-black-with-matching-raccoon-pompom', '79-beanie-dark-grey-with-matching-raccoon-pompom', 'slouchy-hat-black', 'ragnar-gloves',
+    'logo-scarf-double-sided-100icelandic-wool-angorasuper-fine-merino-wool-kelly-green-bubble-gum', 'unicorn-blanket-fishbone-pattern-olive-100-wool', 'princess-poncho-cold-pink-fb'].map(h => `product/${h}/`),
+  'fibres.html', 'store.html', 'story.html', 'staff.html'];
 const PAGES = [...SITE.map(p => `${STORE}/${p}`), ...SITE.map(p => `${STORE}/is/${p}`), `${WOO}${CART}`, `${WOO}/checkout/`, `${WOO}/my-account/`];
 
 const browser = await puppeteer.launch({ executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', headless: 'new', protocolTimeout: 90000,

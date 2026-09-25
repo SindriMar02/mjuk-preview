@@ -37,12 +37,19 @@ jobs:
         run: |
           if [ -z "$MJUK_WOO_URL" ] || [ -z "$MJUK_WOO_CK" ] || [ -z "$MJUK_WOO_CS" ]; then echo "The read-only key is not fully in the repository secrets (URL, CK, CS), so nothing was read."; exit 0; fi
           node tools/pull-woo.mjs --live
+      # every product page carries its price and availability in the HTML, so they are rewritten with
+      # the data (pieces that left the shop lose their page; tools/check-seo.mjs must pass)
+      - name: Product pages, catalogue and sitemaps
+        run: |
+          if git diff --quiet -- assets/data.js assets/copy.js; then echo "Nothing changed."; exit 0; fi
+          node tools/build-products.mjs
+          node tools/check-seo.mjs
       - name: Publish if anything changed
         run: |
           if git diff --quiet -- assets/data.js assets/copy.js; then echo "Nothing changed."; exit 0; fi
           git config user.name "mjuk-stock"
           git config user.email "actions@users.noreply.github.com"
-          git add assets/data.js assets/copy.js
+          git add -A assets/data.js assets/copy.js product is/product shop.html is/shop.html sitemap.xml is/sitemap.xml
           git commit -m "Stock and prices from her shop"
           # the branch may have moved while this ran: replay this one data commit on top
           git pull --rebase origin "${GITHUB_REF_NAME}"

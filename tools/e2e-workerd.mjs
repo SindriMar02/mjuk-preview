@@ -14,8 +14,8 @@ import { createRequire } from 'node:module';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const WS = path.resolve(ROOT, '../..');
-const TARGET = process.argv[2] === 'sandbox' ? 'sandbox' : 'replica';
-const WOO = TARGET === 'sandbox' ? 'http://127.0.0.1:9410' : 'http://127.0.0.1:9420';
+const TARGET = ['sandbox', 'upgraded'].includes(process.argv[2]) ? process.argv[2] : 'replica';
+const WOO = { sandbox: 'http://127.0.0.1:9410', replica: 'http://127.0.0.1:9420', upgraded: 'http://127.0.0.1:9430' }[TARGET];
 const env = f => Object.fromEntries(fs.readFileSync(f, 'utf8').split('\n').map(l => l.match(/^([A-Z_]+)=(.*)$/)).filter(Boolean).map(m => [m[1], m[2].trim()]));
 const dev = env(path.join(ROOT, '.dev.vars'));
 const TOKEN = env(path.join(WS, '04-platform/mjuk-woo-sandbox/local/test.env')).TEST_TOKEN;

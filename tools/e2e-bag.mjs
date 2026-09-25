@@ -10,9 +10,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
-const TARGET = process.argv[2] === 'sandbox' ? 'sandbox' : 'replica';
-const STORE = TARGET === 'sandbox' ? 'http://localhost:5895' : 'http://localhost:5896';
-const WOO = TARGET === 'sandbox' ? 'http://127.0.0.1:9410' : 'http://127.0.0.1:9420';
+const TARGET = ['sandbox', 'upgraded'].includes(process.argv[2]) ? process.argv[2] : 'replica';
+// sandbox: today's WooCommerce; replica: her exact stack; upgraded: a copy of her stack after the upgrade rehearsal
+const STORE = { sandbox: 'http://localhost:5895', replica: 'http://localhost:5896', upgraded: 'http://localhost:5897' }[TARGET];
+const WOO = { sandbox: 'http://127.0.0.1:9410', replica: 'http://127.0.0.1:9420', upgraded: 'http://127.0.0.1:9430' }[TARGET];
 globalThis.window = {};
 new Function('window', fs.readFileSync(path.join(ROOT, 'assets/data.js'), 'utf8'))(globalThis.window);
 const CM = globalThis.window.CM;
@@ -43,7 +44,7 @@ try {
     await ctx.close(); }
 
   /* the real button on a product page, and the one-of-one limit */
-  { const ctx = await fresh(); const p = await open(ctx, `${STORE}/product.html?p=${encodeURIComponent(one.h)}`);
+  { const ctx = await fresh(); const p = await open(ctx, `${STORE}/product/${encodeURIComponent(one.h)}/`);
     await p.click('.sz--solo'); await sleep(400);
     check((await bag(p)) === `${one.h}×1`, `the product page's button puts the piece in the bag (${await bag(p)})`);
     check(await p.$eval('#bagItems [data-q="1"]', b => b.disabled), 'a one-of-one: the + in the drawer is off, she has one');

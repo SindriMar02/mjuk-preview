@@ -11,18 +11,19 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const src = readFileSync(path.join(root, 'index.html'), 'utf8');
 const cut = (a, b, from = src) => { const i = from.indexOf(a), j = from.indexOf(b, i); if (i < 0 || j < 0) throw new Error('marker missing: ' + a + ' … ' + b); return from.slice(i, j); };
 
-/* homepage anchors become real pages where one exists */
-const MAP = { '#new': 'shop.html?new=1', '#fibres': 'fibres.html', '#shop': 'shop.html', '#sale': 'shop.html?sale=1', '#made': 'index.html#made', '#stores': 'store.html', '#top': 'index.html', '#camp': 'story.html', '#lookbook': 'index.html#lookbook', '#stockists': 'store.html#stockists' };
-const relink = html => html.replace(/href="(#[a-z]+)"/g, (m, h) => `href="${MAP[h] || 'index.html' + h}"`);
+/* homepage anchors become real pages where one exists; the homepage itself is "./", its canonical
+   address (mjukiceland.com/), never index.html, so no internal link goes through a redirect */
+const MAP = { '#new': 'shop.html?new=1', '#fibres': 'fibres.html', '#shop': 'shop.html', '#sale': 'shop.html?sale=1', '#made': './#made', '#stores': 'store.html', '#top': './', '#camp': 'story.html', '#lookbook': './#lookbook', '#stockists': 'store.html#stockists' };
+const relink = html => html.replace(/href="(#[a-z]+)"/g, (m, h) => `href="${MAP[h] || './' + h}"`);
 
 let head = cut('<!DOCTYPE html>', '</head>');
-head = head.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>\n?/, '');
+head = head.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>\n?/g, '');   // the store and the site name belong to the homepage only
 head = head.replace('<link rel="stylesheet" href="configurators.css" />', '<link rel="stylesheet" href="configurators.css" />\n<link rel="stylesheet" href="pages.css" />');
 const bgAndNav = relink(cut('<!-- GRAIN-GRADIENT BACKGROUND', '<!-- PRELOADER -->')) + relink(cut('<!-- NAV -->', '<main id="top">'));
 const footer = relink(cut('<footer class="foot">', '<!-- BAG DRAWER -->'));
 const tail = cut('<!-- BAG DRAWER -->', '</html>')
   .replace('<script defer src="assets/data.js"></script>', '<script defer src="assets/data.js"></script>\n<script defer src="assets/copy.js"></script>')
-  .replace(/(<script defer src="configurators.js"><\/script>)/, '$1\n<script defer src="pages.js"></script>');
+  .replace(/(<script defer src="configurators.js"><\/script>)/, '$1\n<script defer src="pdp.js"></script>\n<script defer src="pages.js"></script>');
 if (!tail.includes('pages.js')) throw new Error('configurators.js script tag not found; pages.js not inserted');
 
 const rnav = id => `<div class="rnav"><button class="rnav__b" data-rail="${id}" data-dir="-1" aria-label="Scroll left">&larr;</button><button class="rnav__b" data-rail="${id}" data-dir="1" aria-label="Scroll right">&rarr;</button></div>`;

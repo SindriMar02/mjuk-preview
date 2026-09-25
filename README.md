@@ -61,6 +61,35 @@ Run locally with `node _serve.cjs` and open http://127.0.0.1:5895.
   `04-platform/mjuk-woo-sandbox/replica/`, launch entry `mjuk-woo-replica`; this storefront on
   :5896 hands off to it.
 
+## Her product addresses, and the launch build (overnight 2026-09-25)
+
+- **Every piece keeps its address.** Her WordPress served each piece at
+  `mjukiceland.com/product/<slug>/`, and that is what Google has indexed. `node tools/build-products.mjs`
+  writes a real page there for every listed piece: `product/<slug>/index.html` and
+  `is/product/<slug>/index.html` (mjukiceland.is), with the breadcrumb, gallery, text, facts and both
+  rails in the HTML (`pdp.js` is the one definition, run by the browser and by the build), its own
+  title, description, canonical, hreflang, Open Graph and Product + BreadcrumbList JSON-LD (price in
+  USD, availability InStock/OutOfStock only, never a count). A `<base href="../../">` makes every
+  relative link resolve from the site root, so the pages work at the root and under the preview's
+  subpath alike. `product.html?p=<slug>` forwards there, so old and bag links hold.
+- Pieces she keeps as drafts (105) or hides from her catalogue (13) get no page; the build says so
+  every run. The router passes any `/product/` address we have no page for to her WordPress.
+- The shop page carries "Every piece, A to Z": plain links to every product page, grouped as she
+  groups them, so the whole catalogue is reachable without JavaScript.
+- `sitemap.xml` and `is/sitemap.xml` (hreflang alternates), and `tools/category-map.json`: her old
+  `/product-category/…/` addresses mapped to shop filters from what each category holds; the router
+  301s them, and `product-category/…/index.html` are redirect pages for the static preview only.
+- **The repository is the preview**: every page is noindex and `robots.txt` disallows everything.
+  `node tools/build-production.mjs` writes the launch build to `dist/` (gitignored): noindex off
+  except staff.html and the product.html forwarder, a crawlable PNG favicon, robots.txt and sitemap
+  per host. It fails if a noindex or a data-URI icon survives.
+- `node tools/check-seo.mjs [dist]` crawls every generated page from the files: links and assets
+  resolve, canonical and hreflang pairs, JSON-LD complete and free of stock counts, the name and
+  price in the HTML text, the sitemaps list only real pages, the catalogue links every page.
+- Build order after any change: `node tools/build-pages.mjs && node tools/build-is.mjs &&
+  node tools/build-products.mjs` (then `build-production.mjs` for launch). The stock workflow
+  rebuilds the product pages with the data.
+
 ## Two languages (plan step 7)
 
 English pages at the root (mjukiceland.com at launch), Icelandic pages in `is/` (mjukiceland.is):

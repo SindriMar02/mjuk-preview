@@ -1,0 +1,581 @@
+{
+ "note": "Her /product-category/<path>/ addresses (her WordPress, wc/v3 categories 2026-09-24) to shop filters. Written by tools/build-products.mjs; the router 301s on the last path segment.",
+ "map": {
+  "79-beanies": {
+   "path": "our-collections/merino-wool/79-beanies",
+   "to": "shop.html?family=arctic",
+   "why": "its 16 pieces are her design \"arctic\"",
+   "n": 16
+  },
+  "alpaca": {
+   "path": "our-collections/alpaca-and-silk/alpaca",
+   "to": "shop.html?family=lia-beanies",
+   "why": "its 19 pieces are her design \"lia-beanies\"",
+   "n": 19
+  },
+  "alpaca-hats": {
+   "path": "alpaca-hats",
+   "to": "shop.html",
+   "why": "no piece in the shop today",
+   "n": 0
+  },
+  "angora-kitty-hat": {
+   "path": "our-collections/angora-wool/angora-kitty-hat",
+   "to": "shop.html?family=fluffy-kitty",
+   "why": "its 13 pieces are her design \"fluffy-kitty\"",
+   "n": 13
+  },
+  "explorer-scarfs-cashmere-and-merino": {
+   "path": "sales/explorer-hats-cashmere-and-merino-wool/explorer-scarfs-cashmere-and-merino",
+   "to": "shop.html?type=scarves&material=cashmere-merino",
+   "why": "its 1 pieces are scarves in cashmere-merino",
+   "n": 1
+  },
+  "explorer-scarves-cashmere-and-merino": {
+   "path": "explorer-scarves-cashmere-and-merino",
+   "to": "shop.html?type=scarves&material=cashmere-merino",
+   "why": "its 2 pieces are scarves in cashmere-merino",
+   "n": 2
+  },
+  "gudmundur": {
+   "path": "our-collections/gudmundur",
+   "to": "shop.html",
+   "why": "no piece in the shop today",
+   "n": 0
+  },
+  "new-tenderness-beanies": {
+   "path": "our-collections/angora-and-merino-wool/tenderness-collection/new-tenderness-beanies",
+   "to": "shop.html?family=new-tenderness",
+   "why": "its 19 pieces are her design \"new-tenderness\"",
+   "n": 19
+  },
+  "ragnar-scarfs": {
+   "path": "our-collections/merino-wool/ragnar-scarfs",
+   "to": "shop.html?family=ragnar-scarves",
+   "why": "its 13 pieces are her design \"ragnar-scarves\"",
+   "n": 13
+  },
+  "slouchy-beanie": {
+   "path": "our-collections/angora-and-merino-wool/tenderness-collection/slouchy-beanie",
+   "to": "shop.html?family=slouchy",
+   "why": "its 13 pieces are her design \"slouchy\"",
+   "n": 13
+  },
+  "tender-kitty-hat": {
+   "path": "our-collections/angora-and-merino-wool/tenderness-collection/tender-kitty-hat",
+   "to": "shop.html?family=smooth-kitty",
+   "why": "its 10 pieces are her design \"smooth-kitty\"",
+   "n": 10
+  },
+  "our-collections": {
+   "path": "our-collections",
+   "to": "shop.html",
+   "why": "its 658 pieces share no single design, group or material",
+   "n": 658
+  },
+  "alpaca-and-silk": {
+   "path": "our-collections/alpaca-and-silk",
+   "to": "shop.html?material=alpaca-silk",
+   "why": "its 29 pieces are alpaca-silk",
+   "n": 29
+  },
+  "lia-scarves-alpaca-and-silk": {
+   "path": "our-collections/alpaca-and-silk/lia-scarves-alpaca-and-silk",
+   "to": "shop.html?family=lia-scarves",
+   "why": "its 10 pieces are her design \"lia-scarves\"",
+   "n": 10
+  },
+  "angora-and-merino-wool": {
+   "path": "our-collections/angora-and-merino-wool",
+   "to": "shop.html?material=smooth-angora-merino",
+   "why": "its 170 pieces are smooth-angora-merino",
+   "n": 170
+  },
+  "tenderness-collection": {
+   "path": "our-collections/angora-and-merino-wool/tenderness-collection",
+   "to": "shop.html?material=smooth-angora-merino",
+   "why": "its 170 pieces are smooth-angora-merino",
+   "n": 170
+  },
+  "tenderness-beanies": {
+   "path": "our-collections/angora-and-merino-wool/tenderness-collection/tenderness-beanies",
+   "to": "shop.html?family=tenderness",
+   "why": "its 31 pieces are her design \"tenderness\"",
+   "n": 31
+  },
+  "tenderness-beanies-with-pompom": {
+   "path": "our-collections/angora-and-merino-wool/tenderness-collection/tenderness-beanies-with-pompom",
+   "to": "shop.html?family=tenderness",
+   "why": "its 6 pieces are her design \"tenderness\"",
+   "n": 6
+  },
+  "tenderness-gloves": {
+   "path": "our-collections/angora-and-merino-wool/tenderness-collection/tenderness-gloves",
+   "to": "shop.html",
+   "why": "no piece in the shop today",
+   "n": 0
+  },
+  "tenderness-mittens": {
+   "path": "our-collections/angora-and-merino-wool/tenderness-collection/tenderness-mittens",
+   "to": "shop.html?family=tenderness-mittens",
+   "why": "its 20 pieces are her design \"tenderness-mittens\"",
+   "n": 20
+  },
+  "reversible-soft-slouchy-beanie": {
+   "path": "our-collections/angora-and-merino-wool/tenderness-collection/reversible-soft-slouchy-beanie",
+   "to": "shop.html?family=reversible",
+   "why": "its 11 pieces are her design \"reversible\"",
+   "n": 11
+  },
+  "headbands": {
+   "path": "our-collections/angora-and-merino-wool/tenderness-collection/headbands",
+   "to": "shop.html?type=headbands",
+   "why": "named after her piece group",
+   "n": 18
+  },
+  "neckwarmers": {
+   "path": "our-collections/angora-and-merino-wool/tenderness-collection/neckwarmers",
+   "to": "shop.html?family=tenderness-neckwarmers",
+   "why": "its 19 pieces are her design \"tenderness-neckwarmers\"",
+   "n": 19
+  },
+  "tenderness-scarves": {
+   "path": "our-collections/angora-and-merino-wool/tenderness-collection/tenderness-scarves",
+   "to": "shop.html?family=tenderness-scarves",
+   "why": "its 24 pieces are her design \"tenderness-scarves\"",
+   "n": 24
+  },
+  "angora-wool": {
+   "path": "our-collections/angora-wool",
+   "to": "shop.html?type=hats&material=fluffy-angora",
+   "why": "its 282 pieces are hats in fluffy-angora",
+   "n": 282
+  },
+  "marsmallow-collection": {
+   "path": "our-collections/angora-wool/marsmallow-collection",
+   "to": "shop.html?material=fluffy-angora",
+   "why": "its 131 pieces are fluffy-angora",
+   "n": 131
+  },
+  "marshmallow-beanies": {
+   "path": "our-collections/angora-wool/marsmallow-collection/marshmallow-beanies",
+   "to": "shop.html?family=marshmallow",
+   "why": "its 42 pieces are her design \"marshmallow\"",
+   "n": 42
+  },
+  "marshmallow-with-pompom": {
+   "path": "our-collections/angora-wool/marsmallow-collection/marshmallow-with-pompom",
+   "to": "shop.html?family=marshmallow",
+   "why": "its 68 pieces are her design \"marshmallow\"",
+   "n": 68
+  },
+  "marshmallow-beanies-with-2-pompoms": {
+   "path": "our-collections/angora-wool/marsmallow-collection/marshmallow-beanies-with-2-pompoms",
+   "to": "shop.html?family=marshmallow",
+   "why": "its 2 pieces are her design \"marshmallow\"",
+   "n": 2
+  },
+  "marshmallow-glove": {
+   "path": "our-collections/angora-wool/marsmallow-collection/marshmallow-glove",
+   "to": "shop.html?family=marshmallow-gloves",
+   "why": "its 4 pieces are her design \"marshmallow-gloves\"",
+   "n": 4
+  },
+  "marshmallow-mittens": {
+   "path": "our-collections/angora-wool/marsmallow-collection/marshmallow-mittens",
+   "to": "shop.html?family=marshmallow-mittens",
+   "why": "its 16 pieces are her design \"marshmallow-mittens\"",
+   "n": 16
+  },
+  "roots": {
+   "path": "our-collections/angora-wool/roots",
+   "to": "shop.html?family=roots",
+   "why": "its 46 pieces are her design \"roots\"",
+   "n": 46
+  },
+  "rootsbeanies": {
+   "path": "our-collections/angora-wool/roots/rootsbeanies",
+   "to": "shop.html?family=roots",
+   "why": "its 25 pieces are her design \"roots\"",
+   "n": 25
+  },
+  "roots-beanies-with-pompom": {
+   "path": "our-collections/angora-wool/roots/roots-beanies-with-pompom",
+   "to": "shop.html?family=roots",
+   "why": "its 15 pieces are her design \"roots\"",
+   "n": 15
+  },
+  "roots-beanies-with-2-pompoms": {
+   "path": "our-collections/angora-wool/roots/roots-beanies-with-2-pompoms",
+   "to": "shop.html?family=roots",
+   "why": "its 9 pieces are her design \"roots\"",
+   "n": 9
+  },
+  "aviator-hats": {
+   "path": "our-collections/angora-wool/aviator-hats",
+   "to": "shop.html?type=hats&material=fluffy-angora",
+   "why": "its 92 pieces are hats in fluffy-angora",
+   "n": 92
+  },
+  "chunky-aviator": {
+   "path": "our-collections/angora-wool/aviator-hats/chunky-aviator",
+   "to": "shop.html?family=chunky-aviator",
+   "why": "its 29 pieces are her design \"chunky-aviator\"",
+   "n": 29
+  },
+  "lined-aviator": {
+   "path": "our-collections/angora-wool/aviator-hats/lined-aviator",
+   "to": "shop.html?family=fluffy-aviator",
+   "why": "its 38 pieces are her design \"fluffy-aviator\"",
+   "n": 38
+  },
+  "lined-aviator-with-pompom": {
+   "path": "our-collections/angora-wool/aviator-hats/lined-aviator-with-pompom",
+   "to": "shop.html?family=fluffy-aviator",
+   "why": "its 2 pieces are her design \"fluffy-aviator\"",
+   "n": 2
+  },
+  "lined-aviator-with-2-pompoms": {
+   "path": "our-collections/angora-wool/aviator-hats/lined-aviator-with-2-pompoms",
+   "to": "shop.html?family=fluffy-aviator",
+   "why": "its 19 pieces are her design \"fluffy-aviator\"",
+   "n": 19
+  },
+  "chunky-aviator-2-pompoms": {
+   "path": "our-collections/angora-wool/aviator-hats/chunky-aviator-2-pompoms",
+   "to": "shop.html?family=chunky-aviator",
+   "why": "its 12 pieces are her design \"chunky-aviator\"",
+   "n": 12
+  },
+  "icelandic-wool": {
+   "path": "our-collections/icelandic-wool",
+   "to": "shop.html?material=icelandic-wool",
+   "why": "its 21 pieces are icelandic-wool",
+   "n": 21
+  },
+  "gudmundur-beanies": {
+   "path": "our-collections/icelandic-wool/gudmundur-beanies",
+   "to": "shop.html?family=gudmundur",
+   "why": "its 17 pieces are her design \"gudmundur\"",
+   "n": 17
+  },
+  "logomania-scarves": {
+   "path": "our-collections/icelandic-wool/logomania-scarves",
+   "to": "shop.html?type=scarves",
+   "why": "its 4 pieces are scarves",
+   "n": 4
+  },
+  "merino-wool": {
+   "path": "our-collections/merino-wool",
+   "to": "shop.html?material=merino",
+   "why": "its 116 pieces are merino",
+   "n": 116
+  },
+  "ragnar-beanies": {
+   "path": "our-collections/merino-wool/ragnar-beanies",
+   "to": "shop.html?family=ragnar-beanies",
+   "why": "its 62 pieces are her design \"ragnar-beanies\"",
+   "n": 62
+  },
+  "ragnar-with-fleece": {
+   "path": "our-collections/merino-wool/ragnar-beanies/ragnar-with-fleece",
+   "to": "shop.html?family=ragnar-beanies",
+   "why": "its 33 pieces are her design \"ragnar-beanies\"",
+   "n": 33
+  },
+  "ragnar-without-fleece": {
+   "path": "our-collections/merino-wool/ragnar-beanies/ragnar-without-fleece",
+   "to": "shop.html?family=ragnar-beanies",
+   "why": "its 26 pieces are her design \"ragnar-beanies\"",
+   "n": 26
+  },
+  "ragnar-beanie-with-pompom": {
+   "path": "our-collections/merino-wool/ragnar-beanies/ragnar-beanie-with-pompom",
+   "to": "shop.html?family=ragnar-beanies",
+   "why": "its 28 pieces are her design \"ragnar-beanies\"",
+   "n": 28
+  },
+  "merino-aviator-hat": {
+   "path": "our-collections/merino-wool/merino-aviator-hat",
+   "to": "shop.html?family=unisex-aviator",
+   "why": "its 25 pieces are her design \"unisex-aviator\"",
+   "n": 25
+  },
+  "merino-aviator-hat-merino-aviator-hat": {
+   "path": "our-collections/merino-wool/merino-aviator-hat/merino-aviator-hat-merino-aviator-hat",
+   "to": "shop.html?family=unisex-aviator",
+   "why": "its 14 pieces are her design \"unisex-aviator\"",
+   "n": 14
+  },
+  "merino-aviator-hat-with-fleece": {
+   "path": "our-collections/merino-wool/merino-aviator-hat/merino-aviator-hat-with-fleece",
+   "to": "shop.html?family=unisex-aviator",
+   "why": "its 11 pieces are her design \"unisex-aviator\"",
+   "n": 11
+  },
+  "merino-scarves": {
+   "path": "our-collections/merino-wool/merino-scarves",
+   "to": "shop.html?family=ragnar-scarves",
+   "why": "its 13 pieces are her design \"ragnar-scarves\"",
+   "n": 13
+  },
+  "merino-gloves": {
+   "path": "our-collections/merino-wool/merino-gloves",
+   "to": "shop.html",
+   "why": "no piece in the shop today",
+   "n": 0
+  },
+  "cashmere": {
+   "path": "our-collections/cashmere",
+   "to": "shop.html?type=hats&material=cashmere",
+   "why": "its 39 pieces are hats in cashmere",
+   "n": 39
+  },
+  "greenland-gloves": {
+   "path": "our-collections/cashmere/greenland-gloves",
+   "to": "shop.html",
+   "why": "no piece in the shop today",
+   "n": 0
+  },
+  "greenland-scarves": {
+   "path": "our-collections/cashmere/greenland-scarves",
+   "to": "shop.html",
+   "why": "no piece in the shop today",
+   "n": 0
+  },
+  "greenland-beanie-with-pompom": {
+   "path": "our-collections/cashmere/greenland-beanie-with-pompom",
+   "to": "shop.html?family=greenland",
+   "why": "its 21 pieces are her design \"greenland\"",
+   "n": 21
+  },
+  "greenland": {
+   "path": "our-collections/cashmere/greenland",
+   "to": "shop.html?family=greenland",
+   "why": "its 25 pieces are her design \"greenland\"",
+   "n": 25
+  },
+  "viking-beanie-cashmere": {
+   "path": "our-collections/cashmere/viking-beanie-cashmere",
+   "to": "shop.html?type=hats&material=cashmere",
+   "why": "its 23 pieces are hats in cashmere",
+   "n": 23
+  },
+  "colors": {
+   "path": "colors",
+   "to": "shop.html?type=hats",
+   "why": "its 44 pieces are hats",
+   "n": 44
+  },
+  "black": {
+   "path": "colors/black",
+   "to": "shop.html",
+   "why": "its 2 pieces share no single design, group or material",
+   "n": 2
+  },
+  "blue": {
+   "path": "colors/blue",
+   "to": "shop.html?type=hats",
+   "why": "its 5 pieces are hats",
+   "n": 5
+  },
+  "green": {
+   "path": "colors/green",
+   "to": "shop.html?type=hats",
+   "why": "its 5 pieces are hats",
+   "n": 5
+  },
+  "grey": {
+   "path": "colors/grey",
+   "to": "shop.html?family=tenderness",
+   "why": "its 1 pieces are her design \"tenderness\"",
+   "n": 1
+  },
+  "orange": {
+   "path": "colors/orange",
+   "to": "shop.html?family=chunky-aviator",
+   "why": "its 1 pieces are her design \"chunky-aviator\"",
+   "n": 1
+  },
+  "purple": {
+   "path": "colors/purple",
+   "to": "shop.html?type=hats&material=fluffy-angora",
+   "why": "its 2 pieces are hats in fluffy-angora",
+   "n": 2
+  },
+  "red": {
+   "path": "colors/red",
+   "to": "shop.html",
+   "why": "no piece in the shop today",
+   "n": 0
+  },
+  "white": {
+   "path": "colors/white",
+   "to": "shop.html",
+   "why": "no piece in the shop today",
+   "n": 0
+  },
+  "neutralcolors": {
+   "path": "colors/neutralcolors",
+   "to": "shop.html",
+   "why": "its 9 pieces share no single design, group or material",
+   "n": 9
+  },
+  "pinkhats": {
+   "path": "colors/pinkhats",
+   "to": "shop.html",
+   "why": "its 7 pieces share no single design, group or material",
+   "n": 7
+  },
+  "sales": {
+   "path": "sales",
+   "to": "shop.html?sale=1",
+   "why": "her sale category",
+   "n": 94
+  },
+  "explorer-hats-cashmere-and-merino-wool": {
+   "path": "sales/explorer-hats-cashmere-and-merino-wool",
+   "to": "shop.html?material=cashmere-merino",
+   "why": "its 2 pieces are cashmere-merino",
+   "n": 2
+  },
+  "uncategorised": {
+   "path": "uncategorised",
+   "to": "shop.html",
+   "why": "its 37 pieces share no single design, group or material",
+   "n": 37
+  },
+  "blankets": {
+   "path": "blankets",
+   "to": "shop.html?type=blankets",
+   "why": "named after her piece group",
+   "n": 38
+  },
+  "unicorn": {
+   "path": "blankets/unicorn",
+   "to": "shop.html?family=unicorn",
+   "why": "its 23 pieces are her design \"unicorn\"",
+   "n": 23
+  },
+  "fishbone": {
+   "path": "blankets/unicorn/fishbone",
+   "to": "shop.html?family=unicorn",
+   "why": "its 6 pieces are her design \"unicorn\"",
+   "n": 6
+  },
+  "gradient": {
+   "path": "blankets/unicorn/gradient",
+   "to": "shop.html?family=unicorn",
+   "why": "its 5 pieces are her design \"unicorn\"",
+   "n": 5
+  },
+  "leaves": {
+   "path": "blankets/unicorn/leaves",
+   "to": "shop.html?family=unicorn",
+   "why": "its 2 pieces are her design \"unicorn\"",
+   "n": 2
+  },
+  "puffins": {
+   "path": "blankets/unicorn/puffins",
+   "to": "shop.html?family=unicorn",
+   "why": "its 1 pieces are her design \"unicorn\"",
+   "n": 1
+  },
+  "rainbow": {
+   "path": "blankets/unicorn/rainbow",
+   "to": "shop.html?family=unicorn",
+   "why": "its 5 pieces are her design \"unicorn\"",
+   "n": 5
+  },
+  "stripes": {
+   "path": "blankets/unicorn/stripes",
+   "to": "shop.html?family=unicorn",
+   "why": "its 3 pieces are her design \"unicorn\"",
+   "n": 3
+  },
+  "konungur": {
+   "path": "blankets/konungur",
+   "to": "shop.html?family=konungur",
+   "why": "its 6 pieces are her design \"konungur\"",
+   "n": 6
+  },
+  "akureyri": {
+   "path": "blankets/akureyri",
+   "to": "shop.html?family=akureyri",
+   "why": "its 9 pieces are her design \"akureyri\"",
+   "n": 9
+  },
+  "interiortrends2023": {
+   "path": "blankets/interiortrends2023",
+   "to": "shop.html?type=blankets",
+   "why": "its 26 pieces are blankets",
+   "n": 26
+  },
+  "colorful-blankets": {
+   "path": "blankets/colorful-blankets",
+   "to": "shop.html?type=blankets",
+   "why": "its 24 pieces are blankets",
+   "n": 24
+  },
+  "neutral-blankets": {
+   "path": "blankets/neutral-blankets",
+   "to": "shop.html?type=blankets",
+   "why": "its 32 pieces are blankets",
+   "n": 32
+  },
+  "hats": {
+   "path": "hats",
+   "to": "shop.html?type=hats",
+   "why": "named after her piece group",
+   "n": 201
+  },
+  "divashittheroads5": {
+   "path": "hats/divashittheroads5",
+   "to": "shop.html?family=marshmallow",
+   "why": "its 21 pieces are her design \"marshmallow\"",
+   "n": 21
+  },
+  "pompomhats": {
+   "path": "hats/pompomhats",
+   "to": "shop.html?type=hats",
+   "why": "its 32 pieces are hats",
+   "n": 32
+  },
+  "pompom": {
+   "path": "hats/pompom",
+   "to": "shop.html?family=fur-pompoms",
+   "why": "its 24 pieces are her design \"fur-pompoms\"",
+   "n": 24
+  },
+  "unisexhats": {
+   "path": "hats/unisexhats",
+   "to": "shop.html?type=hats",
+   "why": "its 62 pieces are hats",
+   "n": 62
+  },
+  "information": {
+   "path": "information",
+   "to": "shop.html",
+   "why": "no piece in the shop today",
+   "n": 0
+  },
+  "new": {
+   "path": "new",
+   "to": "shop.html?new=1",
+   "why": "her new-in category",
+   "n": 18
+  },
+  "scarves": {
+   "path": "scarves",
+   "to": "shop.html?type=scarves",
+   "why": "named after her piece group",
+   "n": 17
+  },
+  "clothesmadeinreykjavik": {
+   "path": "clothesmadeinreykjavik",
+   "to": "shop.html?family=grace",
+   "why": "its 10 pieces are her design \"grace\"",
+   "n": 10
+  }
+ }
+}

@@ -1,7 +1,8 @@
 /* The Icelandic site: real, separate, crawlable pages (is/*.html here, mjukiceland.is at launch),
    built from the English pages so there is one design and two languages.
 
-     node tools/build-pages.mjs && node tools/build-is.mjs          build both
+     node tools/build-pages.mjs && node tools/build-is.mjs && node tools/build-products.mjs
+                                                                    build both, then the product pages
      node tools/build-is.mjs --report                               list every English string left
 
    Static text and attributes (alt, aria-label, title, placeholder, meta content) are translated
@@ -60,14 +61,18 @@ const hreflang = file => `<link rel="alternate" hreflang="en" href="${url('en', 
 let written = 0;
 for (const file of PAGES) {
   let en = fs.readFileSync(path.join(ROOT, file), 'utf8');
+  // the shop's plain catalogue is her product names, written per language by tools/build-products.mjs
+  en = en.replace(/\s*<!-- CATALOGUE -->[\s\S]*?<!-- \/CATALOGUE -->/, '');
   // English page: hreflang in, the language switch becomes a link to its Icelandic twin
   en = en.replace(/<link rel="alternate" hreflang[^>]*\/>\n/g, '').replace('</head>', hreflang(file) + '</head>');
   en = en.replace(/<button class="nav__lang" id="langBtn"[^>]*>[\s\S]*?<\/button>|<a class="nav__lang"[^>]*>[\s\S]*?<\/a>/,
     `<a class="nav__lang" id="langBtn" href="is/${file}" hreflang="is" lang="is" aria-label="&Iacute; &iacute;slensku">EN / <b>&Iacute;S</b></a>`);
   let is = translate(en, file)
     .replace('<html lang="en">', '<html lang="is" data-root="../">')
+    // the site name (Google's WebSite node) is the Icelandic host's own on the Icelandic homepage
+    .replace('"url":"https://mjukiceland.com/","inLanguage":"en"}', '"url":"https://mjukiceland.is/","inLanguage":"is"}')
     // one level down: shared files come from the site root
-    .replace(/(src|href)="(?!https?:|mailto:|tel:|#|\.\.\/|data:|is\/)((?:assets\/|styles\.css|pages\.css|configurators\.css|app\.js|pages\.js|configurators\.js)[^"]*)"/g, '$1="../$2"')
+    .replace(/(src|href)="(?!https?:|mailto:|tel:|#|\.\.\/|data:|is\/)((?:assets\/|styles\.css|pages\.css|configurators\.css|app\.js|pages\.js|pdp\.js|configurators\.js)[^"]*)"/g, '$1="../$2"')
     // the same for every candidate in a srcset and for inline url(), so no asset resolves under is/
     .replace(/srcset="([^"]*)"/g, (m, v) => `srcset="${v.replace(/(^|,\s*)(assets\/)/g, '$1../$2')}"`)
     .replace(/url\((['"]?)(assets\/)/g, 'url($1../$2')
@@ -85,7 +90,7 @@ for (const file of PAGES) {
 // every string the scripts pass to t()/fmt() (literals, and both sides of a ternary inside one)
 // must have an Icelandic entry, or it shows in English on the Icelandic pages
 const used = new Set();
-for (const f of ['app.js', 'pages.js', 'configurators.js']) {
+for (const f of ['app.js', 'pages.js', 'pdp.js', 'configurators.js']) {
   const src = fs.readFileSync(path.join(ROOT, f), 'utf8');
   // walk each t( / fmt( call to its matching bracket, skipping strings, then keep the string
   // literals that are results: the first argument, or a branch right after ? or :

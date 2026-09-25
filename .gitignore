@@ -3,3 +3,5 @@ node_modules/
 _serve.cjs
 .dev.vars
 .wrangler/
+.stale/
+dist/

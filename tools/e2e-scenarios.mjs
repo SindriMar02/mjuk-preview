@@ -5,6 +5,8 @@
                                             (her host runs PHP 7.0.33; 7.2 is the oldest PHP whose SQLite can hold
                                             WooCommerce in Playground. PHP 7.0 itself: 04-platform/mjuk-woo-sandbox/
                                             tools/lint-php70.mjs, on the real 7.0.33 interpreter.)
+     node tools/e2e-scenarios.mjs upgraded  the copy of her stack after the upgrade rehearsal (04-platform/mjuk-woo-sandbox/
+                                            upgraded/), her data and PayPal, :9430 via :5897
      node tools/e2e-scenarios.mjs sandbox   current WooCommerce, PHP 8.3, offline test payment  :9410 via :5895
 
    The storefront's /bag (functions/bag.js) signs the bag; the host's sndr-bag-handoff fills the cart.
@@ -20,9 +22,10 @@ import path from 'node:path';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const WS = path.resolve(ROOT, '../..');
-const TARGET = process.argv[2] === 'sandbox' ? 'sandbox' : 'replica';
-const STORE = TARGET === 'sandbox' ? 'http://localhost:5895' : 'http://localhost:5896';
-const WOO = TARGET === 'sandbox' ? 'http://127.0.0.1:9410' : 'http://127.0.0.1:9420';
+const TARGET = ['sandbox', 'upgraded'].includes(process.argv[2]) ? process.argv[2] : 'replica';
+// sandbox: today's WooCommerce; replica: her exact stack; upgraded: a copy of her stack after the upgrade rehearsal
+const STORE = { sandbox: 'http://localhost:5895', replica: 'http://localhost:5896', upgraded: 'http://localhost:5897' }[TARGET];
+const WOO = { sandbox: 'http://127.0.0.1:9410', replica: 'http://127.0.0.1:9420', upgraded: 'http://127.0.0.1:9430' }[TARGET];
 const env = f => Object.fromEntries(fs.readFileSync(f, 'utf8').split('\n').map(l => l.match(/^([A-Z_]+)=(.*)$/)).filter(Boolean).map(m => [m[1], m[2].trim()]));
 const TOKEN = env(path.join(WS, '04-platform/mjuk-woo-sandbox/local/test.env')).TEST_TOKEN;
 const MAIL = path.join(WS, '04-platform/mjuk-woo-sandbox/local/mail');
@@ -124,7 +127,7 @@ try {
   if (TARGET === 'replica') check(/^7\.2\./.test(info.php) && info.woocommerce === '3.5.10' && /^6\.4\./.test(info.wp), 'the replica runs her WooCommerce 3.5.10 and WordPress 6.4, on PHP 7.2');
   check(info.theme === 'mjuk-checkout' && info.manage_stock === 'yes', `checkout theme on, stock managed (${info.theme}, ${info.manage_stock})`);
   if (TARGET === 'replica') check(info.gateways.join() === 'paypal,ppec_paypal', `her two PayPal gateways are offered, as on her shop (${info.gateways})`);
-  const CART = new URL(info.cart).pathname, PAY = TARGET === 'replica' ? 'paypal' : 'cod';
+  const CART = new URL(info.cart).pathname, PAY = TARGET !== 'sandbox' ? 'paypal' : 'cod';
   check((await glue('orders')).length === 0, 'no orders before the run');
 
   const hat = CM.all.find(p => p.id === 12167), pom = CM.all.find(p => p.id === 4249), one = CM.all.find(p => p.id === 11646);
@@ -243,22 +246,22 @@ try {
   /* ════════════════════════════════════════════════════════════════════════ */
   head('basket page and coupons');
   { const B = await handoff([w(hat)]); const basket = (await B.b.follow(WOO + CART)).html;
-    check(basket.includes(`${STORE}/product.html?p=${encodeURIComponent(hat.h)}`), 'a basket line links to the piece on the storefront, not her old product page');
+    check(basket.includes(`${STORE}/product/${encodeURIComponent(hat.h)}/`), 'a basket line links to the piece on the storefront, at her own product address');
     check(/<h1 class="head__t">Your bag</.test(basket) && basket.includes(`${STORE}/shop.html`) && !phpNoise(basket), 'the basket is dressed as the storefront, with the way back to the shop');
     const co = (await B.b.follow(WOO + '/checkout/')).html;
     const bad = await (await B.b.go(WOO + '/?wc-ajax=apply_coupon', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ security: param(co, 'apply_coupon_nonce'), coupon_code: 'nosuchcode' }) })).text();
     check(/does not exist/i.test(bad), 'an unknown coupon code is refused in words');
-    if (TARGET === 'replica') { const ok = await (await B.b.go(WOO + '/?wc-ajax=apply_coupon', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ security: param(co, 'apply_coupon_nonce'), coupon_code: 'replica10' }) })).text();
+    if (TARGET !== 'sandbox') { const ok = await (await B.b.go(WOO + '/?wc-ajax=apply_coupon', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ security: param(co, 'apply_coupon_nonce'), coupon_code: 'replica10' }) })).text();
       const r = await review(B.b, co, { country: 'IS' });
       check(/applied successfully/i.test(ok) && Math.abs(r.total - (hat.p * 0.9 + 15)) < 0.01, `a real coupon applies (10% off: $${r.total})`); } }
   { const b = browser(); const empty = await b.follow(WOO + CART);
     check(empty.html.includes(`${STORE}/shop.html`) && !phpNoise(empty.html), 'an empty basket sends the shopper back to the storefront shop'); }
 
   /* ════════════════════════════════════════════════════════════════════════ */
-  head(TARGET === 'replica' ? 'paying with PayPal (her PayPal Standard, sandbox mode)' : 'paying (sandbox test payment)');
+  head(TARGET !== 'sandbox' ? 'paying with PayPal (her PayPal Standard, sandbox mode)' : 'paying (sandbox test payment)');
   const stockBefore = (await glue('product', { id: hat.id })).stock;
   const mailBefore = new Set(fs.existsSync(MAIL) ? fs.readdirSync(MAIL) : []);
-  if (TARGET === 'replica') {
+  if (TARGET !== 'sandbox') {
     const X = await handoff(bag); const first = await placeOrder(X.b, { pay: PAY });
     const to = first.out.redirect ? new URL(first.out.redirect) : null;
     check(first.out.result === 'success' && to && to.host === 'www.sandbox.paypal.com', `placing the order sends the shopper to PayPal (${to ? to.host : first.messages})`);
@@ -304,7 +307,7 @@ try {
   head('Icelandic');
   { const I = await handoff([w(hat)], { lang: 'is' });
     const basket = (await I.b.follow(WOO + CART)).html;
-    check(I.cart.lang === 'is' && I.page.includes(`${STORE}/is/shop.html`) && basket.includes(`${STORE}/is/product.html?p=`), 'a bag from the Icelandic shop: the ways back from checkout and basket lead to the Icelandic pages');
+    check(I.cart.lang === 'is' && I.page.includes(`${STORE}/is/shop.html`) && basket.includes(`${STORE}/is/product/${encodeURIComponent(hat.h)}/`), 'a bag from the Icelandic shop: the ways back from checkout and basket lead to the Icelandic pages');
     const E = await handoff([w(hat)], { b: I.b });
     check(E.cart.lang === '' && E.page.includes(`${STORE}/shop.html`) && !E.page.includes('/is/shop.html'), 'the same browser checking out from the English shop later goes back to English'); }
 } finally {
