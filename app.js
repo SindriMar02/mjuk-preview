@@ -52,11 +52,10 @@
   /* ── designed product card, with real size chips that add to bag ── */
   const esc = s => String(s).replace(/"/g, '&quot;');
   const prod = (p, i) => {
-    // cards render at most 380px wide, so 620 still covers 2x screens.
-    // hasAlt is true only when THIS product has a genuine second gallery shot;
-    // otherwise the card zooms on hover rather than swapping in another product.
-    const hasAlt = !!(p.img[1] && p.img[1] !== p.img[0]);
-    const main = px(p.img[0], 620), alt = px(p.img[1] || p.img[0], 620);
+    // cards render at most 380px wide, so 620 still covers 2x screens. Hover no longer swaps to
+    // the second gallery shot: on her shop that is usually a close-up of the knit, which read as
+    // a huge zoom (Sindri, 25 Sep). The photo only eases in a little.
+    const main = px(p.img[0], 620);
     const price = p.cp ? `<span class="prod__price"><s>${usd(p.cp)}</s>${usd(p.p)}</span>` : `<span class="prod__price">${usd(p.p)}</span>`;
     // chip shows just the size token ("S / Navy Blue" → "S"); full variant kept for the bag.
     // MJÚK's pieces are one-size, so the sized branch is unused here — and the "Add"
@@ -69,11 +68,10 @@
         }).join('')
       // a plain hat (no pompom in its name) asks about pompoms instead of being added silently
       : `<button class="sz sz--solo${p.tyk === 'hats' && !/pom ?pom/i.test(p.t) ? ' pom-ask' : ''}" data-h="${esc(p.h)}" data-s="">${t('Add to bag')}</button>`;
-    return `<article class="prod rv${hasAlt ? ' has-alt' : ''}">
+    return `<article class="prod rv">
       <div class="prod__im">
         <span class="prod__ix">${String(i + 1).padStart(2, '0')}</span>
         <img class="main" src="${main}" alt="${p.t}" loading="lazy"/>
-        ${hasAlt ? `<img class="alt" src="${alt}" alt="" aria-hidden="true" loading="lazy"/>` : ''}
         <div class="prod__sizes">${sizes}</div>
       </div>
       <div class="prod__meta"><div><div class="prod__name">${p.t}</div><div class="prod__cat">(${catLabel(p)})</div></div>${price}</div>
