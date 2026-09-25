@@ -2,6 +2,9 @@
    local _serve.cjs) → signed hand-off → WooCommerce cart → order with the sandbox test payment.
 
      node tools/e2e-handoff.mjs [storefront]     default http://localhost:5895
+     node tools/e2e-handoff.mjs upgraded         the copy of her stack after the upgrade rehearsal (:5897 → :9430,
+                                                 WooCommerce 11 on PHP 8.5, her PayPal instead of the test payment;
+                                                 her seeded orders are left as they are)
 
    Needs the storefront preview (launch entry mjuk-experimental) and the sandbox (mjuk-woo-sandbox).
    Every case is a fresh guest session. The sandbox's cart and checkout pages are the classic
@@ -13,11 +16,13 @@ import { sign } from '../functions/bag.js';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const WS = path.resolve(ROOT, '../..');
-const STORE = (process.argv[2] || 'http://localhost:5895').replace(/\/$/, '');
+const UPGRADED = process.argv[2] === 'upgraded';
+const STORE = UPGRADED ? 'http://localhost:5897' : (process.argv[2] || 'http://localhost:5895').replace(/\/$/, '');
 const env = f => Object.fromEntries(fs.readFileSync(f, 'utf8').split('\n').map(l => l.match(/^([A-Z_]+)=(.*)$/)).filter(Boolean).map(m => [m[1], m[2].trim()]));
 const dev = env(path.join(ROOT, '.dev.vars'));
-const sb = env(path.join(WS, '04-platform/mjuk-woo-sandbox/local/sandbox.env'));
-const HOST = dev.CHECKOUT_ORIGIN.replace(/\/$/, '');
+const sb = env(path.join(WS, '04-platform/mjuk-woo-sandbox', UPGRADED ? 'upgraded/local/upgraded.env' : 'local/sandbox.env'));
+const CART = UPGRADED ? '/basket/' : '/cart/'; // her basket is /basket/, the sandbox keeps WooCommerce's default
+const HOST = UPGRADED ? 'http://127.0.0.1:9430' : dev.CHECKOUT_ORIGIN.replace(/\/$/, '');
 if (!/^http:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/.test(HOST)) throw new Error('e2e runs against a local sandbox only, not ' + HOST);
 
 globalThis.window = {};
@@ -78,9 +83,9 @@ check(pomLine && pomLine.item_data.some(d => d.key === 'Note' && d.value === 'At
 
 /* 2 · what must be refused or trimmed */
 const T = await handoff(bag, { tamper: true });
-check(T.landed === '/cart/' && !T.cart.items.length && /could not be opened/i.test(T.page), `a tampered signature fills nothing and says so (landed ${T.landed}, ${lines(T.cart)})`);
+check(T.landed === CART && !T.cart.items.length && /could not be opened/i.test(T.page), `a tampered signature fills nothing and says so (landed ${T.landed}, ${lines(T.cart)})`);
 const E = await handoff(bag, { signedAt: Date.now() - 11 * 60 * 1000 });
-check(E.landed === '/cart/' && !E.cart.items.length && /expired/i.test(E.page), `an 11-minute-old bag is refused as expired (landed ${E.landed})`);
+check(E.landed === CART && !E.cart.items.length && /expired/i.test(E.page), `an 11-minute-old bag is refused as expired (landed ${E.landed})`);
 const S = await handoff([{ id: gone.id, q: 1 }, { id: hat.id, q: 1 }]);
 check(lines(S.cart) === `${hat.id}×1` && /no longer available/i.test(S.page), `a sold-out piece is left out and said so (${lines(S.cart)})`);
 const H = await handoff([{ id: gone.id, q: 1 }, { id: pom.id, q: 1, note: 'Attach to ' + gone.t, for: gone.id }, { id: hat.id, q: 1 }]);
@@ -97,7 +102,7 @@ const Q = await handoff([{ id: one.id, q: 5 }]);
 check(lines(Q.cart) === `${one.id}×1` && /Fewer were left/i.test(Q.page), `five of a one-of-one becomes one, and says so (${lines(Q.cart)})`);
 { const b = browser(); const r = await b.go(A.to); const landed = new URL(r.headers.get('location') || A.to).pathname;
   const page = await (await b.go(HOST + landed)).text(); const cart = await (await b.go(HOST + '/wp-json/wc/store/v1/cart')).json();
-  check(landed === '/cart/' && !cart.items.length && /already been opened/i.test(page), `a used link cannot fill a cart again (landed ${landed}, ${lines(cart)})`); }
+  check(landed === CART && !cart.items.length && /already been opened/i.test(page), `a used link cannot fill a cart again (landed ${landed}, ${lines(cart)})`); }
 { const r = await fetch(HOST + '/?sndr_bag=ping', { redirect: 'manual', headers: { Cookie: 'playground_auto_login_already_happened=1' } });
   check(r.status === 204 && r.headers.get('x-sndr-bag') === 'ready', `the Woo host answers the deploy ping (${r.status} ${r.headers.get('x-sndr-bag')})`); }
 const bad = await fetch(STORE + '/bag', { method: 'POST', body: new URLSearchParams({ bag: '[{"id":"x","q":1}]' }) });
@@ -107,13 +112,14 @@ check(notForm.status === 400, `/bag answers a non-form post with 400, not a cras
 
 /* 3 · the order, through the classic checkout form (her live WooCommerce 3.5 has no other), with
    the sandbox test payment, then undone */
+const KEEP = new Set((await admin('orders?per_page=100&status=any')).map(o => o.id)); // the upgraded copy's seeded orders
 const before = Object.fromEntries(await Promise.all([hat.id, pom.id].map(async id => [id, (await admin('products/' + id)).stock_quantity])));
 const co = await (await A.b.go(HOST + '/checkout/')).text();
 const field = re => (co.match(re) || [])[1] || '';
 const form = new URLSearchParams({
   billing_first_name: 'Test', billing_last_name: 'Buyer', billing_country: 'IS', billing_address_1: 'Laugavegur 1',
   billing_city: 'Reykjavík', billing_postcode: '101', billing_email: 'test@example.com', billing_phone: '5555555',
-  ship_to_different_address: '0', payment_method: 'cod',
+  ship_to_different_address: '0', payment_method: UPGRADED ? 'paypal' : 'cod',
   'shipping_method[0]': field(/name="shipping_method\[0\]"[^>]*value="([^"]+)"/) || field(/value="([^"]+)"[^>]*name="shipping_method\[0\]"/),
   'woocommerce-process-checkout-nonce': field(/name="woocommerce-process-checkout-nonce" value="([a-f0-9]+)"/),
   _wp_http_referer: '/checkout/',
@@ -121,7 +127,8 @@ const form = new URLSearchParams({
 if (/name="terms"/.test(co)) form.set('terms', 'on');
 const res = await A.b.go(HOST + '/?wc-ajax=checkout', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: form });
 const out = await res.json().catch(() => ({}));
-const placed = { order_id: +((out.redirect || '').match(/order-received\/(\d+)/) || [])[1] || 0 };
+// the test payment lands on order-received; her PayPal Standard sends the shopper to PayPal, whose link names the order
+const placed = { order_id: +((decodeURIComponent(out.redirect || '').match(/order-received\/(\d+)|"order_id":(\d+)/) || []).slice(1).find(Boolean) || 0) };
 check(out.result === 'success' && placed.order_id > 0, `order placed through the classic checkout, sandbox test payment (#${placed.order_id || '?'} ${out.result || res.status} ${(out.messages || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160)})`);
 if (placed.order_id) {
   const order = await admin('orders/' + placed.order_id);
@@ -130,17 +137,20 @@ if (placed.order_id) {
   const itemsTotal = order.line_items.reduce((n, l) => n + +l.total, 0);
   check(Math.abs(itemsTotal - (hat.p + pom.p)) < 0.01, `Woo priced the lines itself: ${itemsTotal} = ${hat.p} + ${pom.p} (order total ${order.total} ${order.currency} with shipping ${order.shipping_total})`);
   // the order page when the payment went through, and when it did not (a declined PayPal payment)
-  const thanks = await (await A.b.go(out.redirect)).text();
+  // with PayPal: paid as PayPal's IPN would mark it, then her order page at the address PayPal returns to
+  if (UPGRADED) await admin('orders/' + placed.order_id, { method: 'PUT', body: JSON.stringify({ status: 'processing' }) });
+  const back = UPGRADED ? `${HOST}/checkout/order-received/${placed.order_id}/?key=${order.order_key}` : out.redirect;
+  const thanks = await (await A.b.go(back)).text();
   check(/<h1 class="head__t">Thank you</.test(thanks) && /shop\.html\?ordered=1/.test(thanks), 'a paid order says Thank you, and its link empties the storefront bag');
   await admin('orders/' + placed.order_id, { method: 'PUT', body: JSON.stringify({ status: 'failed' }) });
-  const failed = await (await A.b.go(out.redirect)).text();
+  const failed = await (await A.b.go(back)).text();
   check(/<h1 class="head__t">Not paid yet</.test(failed) && !/ordered=1/.test(failed), 'a failed payment says Not paid yet, and its link keeps the bag');
   await admin('orders/' + placed.order_id, { method: 'PUT', body: JSON.stringify({ status: 'cancelled' }) });
   await admin('orders/' + placed.order_id + '?force=true', { method: 'DELETE' });
   const after = Object.fromEntries(await Promise.all([hat.id, pom.id].map(async id => [id, (await admin('products/' + id)).stock_quantity])));
   check(JSON.stringify(after) === JSON.stringify(before), `order cancelled and deleted, stock back as it was (${JSON.stringify(after)})`);
-  const left = await admin('orders?per_page=5&status=any');
-  check(Array.isArray(left) && left.length === 0, `the sandbox holds no orders again (${Array.isArray(left) ? left.length : JSON.stringify(left).slice(0, 80)})`);
+  const left = await admin('orders?per_page=100&status=any');
+  check(Array.isArray(left) && left.filter(o => !KEEP.has(o.id)).length === 0, `the ${UPGRADED ? 'copy' : 'sandbox'} holds no orders of this run (${Array.isArray(left) ? left.filter(o => !KEEP.has(o.id)).length : JSON.stringify(left).slice(0, 80)}${KEEP.size ? `, ${KEEP.size} seeded kept` : ''})`);
 }
 
 console.log(fails ? `\n${fails} FAILED` : '\nALL PASS');

@@ -80,6 +80,8 @@ const req = (u, init) => fetch(u, { redirect: 'manual', ...init });
 const route = r => r.headers.get('x-mjuk-route') || '';
 
 let orderId = 0, stockBefore = null;
+// orders already there (the upgraded copy carries seeded ones); the rehearsal must add none
+const KEEP = new Set(await glue('orders'));
 const one = CM.all.find(p => !p.oos && p.q === 1 && p.tyk !== 'hats' && p.id !== 11646) || CM.all.find(p => !p.oos);
 try {
   head('route table: ours');
@@ -178,7 +180,7 @@ try {
 } finally {
   if (orderId) { await glue('order_set', { id: orderId, body: { status: 'cancelled' } }); await glue('order_delete', { id: orderId }); }
   const left = await glue('orders').catch(() => []);
-  check(Array.isArray(left) && left.length === 0, `the rehearsal leaves no orders behind (${Array.isArray(left) ? left.length : '?'})`);
+  check(Array.isArray(left) && left.filter(id => !KEEP.has(id)).length === 0, `the rehearsal leaves no orders behind (${Array.isArray(left) ? left.filter(id => !KEEP.has(id)).length : '?'}${KEEP.size ? `, ${KEEP.size} already there kept` : ''})`);
   if (stockBefore !== null) { const st = await glue('product', { id: one.id }).catch(() => ({})); check(st.stock === stockBefore, `stock back as it was (${st.stock} = ${stockBefore})`); }
   await worker.stop();
 }

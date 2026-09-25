@@ -28,7 +28,7 @@ const STORE = { sandbox: 'http://localhost:5895', replica: 'http://localhost:589
 const WOO = { sandbox: 'http://127.0.0.1:9410', replica: 'http://127.0.0.1:9420', upgraded: 'http://127.0.0.1:9430' }[TARGET];
 const env = f => Object.fromEntries(fs.readFileSync(f, 'utf8').split('\n').map(l => l.match(/^([A-Z_]+)=(.*)$/)).filter(Boolean).map(m => [m[1], m[2].trim()]));
 const TOKEN = env(path.join(WS, '04-platform/mjuk-woo-sandbox/local/test.env')).TEST_TOKEN;
-const MAIL = path.join(WS, '04-platform/mjuk-woo-sandbox/local/mail');
+const MAIL = path.join(WS, '04-platform/mjuk-woo-sandbox', TARGET === 'upgraded' ? 'upgraded/local/mail' : 'local/mail'); // the glue's /sandbox-out/mail
 
 globalThis.window = {};
 new Function('window', fs.readFileSync(path.join(ROOT, 'assets/data.js'), 'utf8'))(globalThis.window);
@@ -119,6 +119,7 @@ const restore = []; // put back whatever a scenario changed, even if it fails
 const setProduct = async (id, change) => { const was = await glue('product', { id }); restore.push(() => glue('product_set', { id, body: { regular: was.regular, sale: was.sale, stock: was.stock, stock_status: was.stock_status, status: was.status } }));
   await glue('product_set', { id, body: change }); return was; };
 
+let KEEP = new Set(); // orders present before the run (the upgraded copy's seeded ones)
 try {
   /* ════════════════════════════════════════════════════════════════════════ */
   head(`the stack (${TARGET})`);
@@ -127,8 +128,15 @@ try {
   if (TARGET === 'replica') check(/^7\.2\./.test(info.php) && info.woocommerce === '3.5.10' && /^6\.4\./.test(info.wp), 'the replica runs her WooCommerce 3.5.10 and WordPress 6.4, on PHP 7.2');
   check(info.theme === 'mjuk-checkout' && info.manage_stock === 'yes', `checkout theme on, stock managed (${info.theme}, ${info.manage_stock})`);
   if (TARGET === 'replica') check(info.gateways.join() === 'paypal,ppec_paypal', `her two PayPal gateways are offered, as on her shop (${info.gateways})`);
+  if (TARGET === 'upgraded') {
+    check(/^8\.5\./.test(info.php) && info.woocommerce === '11.1.2' && info.wp === '7.1.2', 'the upgraded copy: WooCommerce 11.1.2 and WordPress 7.1.2 on PHP 8.5');
+    check(['paypal', 'ppec_paypal'].every(g => info.gateways.includes(g)), `her two PayPal gateways survived the upgrade (${info.gateways})`);
+  }
   const CART = new URL(info.cart).pathname, PAY = TARGET !== 'sandbox' ? 'paypal' : 'cod';
-  check((await glue('orders')).length === 0, 'no orders before the run');
+  // the sandbox and the replica start empty; the upgraded copy carries the orders seeded before its upgrade
+  // (tools/upgrade-rehearsal.mjs seed), which the run must leave exactly as they are
+  KEEP = new Set(await glue('orders'));
+  check(TARGET === 'upgraded' ? KEEP.size > 0 : KEEP.size === 0, TARGET === 'upgraded' ? `her seeded orders are there before the run (${KEEP.size})` : 'no orders before the run');
 
   const hat = CM.all.find(p => p.id === 12167), pom = CM.all.find(p => p.id === 4249), one = CM.all.find(p => p.id === 11646);
   const gone = CM.all.find(p => p.oos);
@@ -314,7 +322,7 @@ try {
   while (restore.length) await restore.pop()();
   const left = await glue('orders').catch(() => null);
   console.log('');
-  check(Array.isArray(left) && left.length === 0, `nothing left behind: no orders (${Array.isArray(left) ? left.length : '?'})`);
+  check(Array.isArray(left) && left.filter(id => !KEEP.has(id)).length === 0 && left.length === KEEP.size, `nothing left behind: no orders of this run (${Array.isArray(left) ? left.filter(id => !KEEP.has(id)).length : '?'} left, ${KEEP.size} kept)`);
 }
 console.log(fails ? `\n${fails} FAILED (${TARGET})` : `\nALL PASS (${TARGET})`);
 process.exit(fails ? 1 : 0);
