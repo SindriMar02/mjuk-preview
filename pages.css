@@ -134,11 +134,32 @@ body[data-page] .bars{opacity:.18}
 .fib__im .head__n{position:absolute;top:14px;left:16px;z-index:2;background:var(--bg);padding:4px 8px}
 .fib__body{display:grid;gap:18px;align-content:start;position:sticky;top:96px}
 .fib__name{font-family:var(--ff-d);font-weight:600;font-size:clamp(46px,7vw,110px);line-height:.95;text-transform:uppercase;letter-spacing:.015em}
+/* her longer names ("Smooth angora and merino wool") a step down, so they hold three lines, not five */
+.fib__name--long{font-size:clamp(38px,5vw,76px)}
 .fib__lead{font-family:var(--ff-s);font-size:clamp(19px,2.1vw,27px);line-height:1.25;text-wrap:balance;max-width:26ch}
 .fib__p{font-size:14px;line-height:1.7;max-width:50ch}
 .fib__q{font-size:14px;line-height:1.7;max-width:50ch;color:var(--dim);border-left:1px solid var(--accent);padding-left:14px}
 .fib__q b{font-weight:400;color:var(--ink)}
 .fib__meta{display:flex;gap:18px;flex-wrap:wrap;align-items:baseline}
+/* her designs in this material, as links into the shop */
+.fib__des{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline;font-size:13px;line-height:1.5;max-width:56ch}
+.fib__des .mono{width:100%;color:var(--dim)}
+.fib__des a{color:var(--ink);text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px;transition:text-decoration-color .2s var(--ease)}
+@media(hover:hover){.fib__des a:hover{text-decoration-color:var(--ink)}}
+.pdp__facts dd a{color:var(--ink);text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
+@media(hover:hover){.pdp__facts dd a:hover{text-decoration-color:var(--ink)}}
+.filt__row--fam[hidden]{display:none}
+/* phones: her groups, designs and materials are one sideways line each, so the pieces start on
+   the first screen instead of three screens down; the cut-off chip at the edge says there is more */
+@media(max-width:640px){
+  /* the filter grid's one column must not grow to the unwrapped rows' width */
+  .filt{grid-template-columns:minmax(0,1fr)}
+  .filt__row{min-width:0}
+  #fType,#fFam,#fFibre{width:100%;min-width:0;flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;
+    margin-right:calc(-1 * var(--pad));padding-right:var(--pad);padding-bottom:2px}
+  #fType::-webkit-scrollbar,#fFam::-webkit-scrollbar,#fFibre::-webkit-scrollbar{display:none}
+  #fType .chip,#fFam .chip,#fFibre .chip{flex:none}
+}
 .fib__mini{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:6px}
 .fib__mini .prod{width:auto}
 .fib__mini .prod__sizes{display:none}

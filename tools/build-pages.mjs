@@ -39,7 +39,7 @@ const HOURS = ['Hours', '<span class="await">Confirmed hours to follow</span>'];
 
 const PAGES = {
   shop: {
-    title: 'Shop &mdash; MJ&Uacute;K Iceland', desc: 'Every piece MJ&Uacute;K Iceland knits, by piece and by fibre. Angora, merino, cashmere, alpaca and silk, Icelandic wool.',
+    title: 'Shop &mdash; MJ&Uacute;K Iceland', desc: 'Every piece MJ&Uacute;K Iceland knits, by piece, design and material: hats, scarves, gloves, blankets and capes in alpaca and silk, cashmere, merino, Icelandic wool and angora.',
     main: `
   <section class="pg" id="shop">
     <div class="head">
@@ -49,7 +49,8 @@ const PAGES = {
     </div>
     <div class="filt" id="filt">
       <div class="filt__row"><span class="mono">Piece</span><div class="filt__row" id="fType"></div></div>
-      <div class="filt__row"><span class="mono">Fibre</span><div class="filt__row" id="fFibre"></div></div>
+      <div class="filt__row filt__row--fam" hidden><span class="mono">Design</span><div class="filt__row" id="fFam"></div></div>
+      <div class="filt__row"><span class="mono">Material</span><div class="filt__row" id="fFibre"></div></div>
       <div class="filt__row">
         <span class="mono">Show</span>
         <label class="chk"><input type="checkbox" id="fNew"><span>New</span></label>
@@ -87,20 +88,20 @@ const PAGES = {
   <section class="pg" id="with">
     <div class="head">
       <span class="head__n">Wear it with</span>
-      <h2 class="head__t" id="withName">the same fibre</h2>
-      <div class="head__end">${rnav('withRail')}<span class="mono">Another piece, same fibre</span></div>
+      <h2 class="head__t" id="withName">Matching pieces</h2>
+      <div class="head__end">${rnav('withRail')}<span class="mono" id="withNote">Paired by Anna</span></div>
     </div>
     <div class="rail" id="withRail" data-page-rail tabindex="0" aria-label="Wear it with"><div class="rail__t" id="withT"></div></div>
   </section>`,
   },
   fibres: {
-    title: 'Fibres &mdash; MJ&Uacute;K Iceland', desc: 'The five fibres MJ&Uacute;K knits with, in Anna&rsquo;s own words: angora, merino, cashmere, alpaca and silk, Icelandic wool.',
+    title: 'Materials &mdash; MJ&Uacute;K Iceland', desc: 'What MJ&Uacute;K knits with, in Anna&rsquo;s own words: alpaca and silk, cashmere, cashmere and merino, merino, Icelandic wool, fluffy angora, smooth angora and merino.',
     main: `
   <section class="pg" id="fibres">
     <div class="head">
-      <span class="head__n">Fibres</span>
-      <h2 class="head__t">Only natural</h2>
-      <div class="head__end"><span class="mono">Five fibres, none of them synthetic</span></div>
+      <span class="head__n">Materials</span>
+      <h2 class="head__t">What we knit with</h2>
+      <div class="head__end"><span class="mono">In Anna&rsquo;s own ranking</span></div>
     </div>
     <div class="fib" id="fib"></div>
   </section>`,

@@ -104,6 +104,9 @@ for (const f of ['app.js', 'pages.js', 'configurators.js']) {
     }
   }
 }
+// the materials page passes its sentences to t() through a table (pages.js FIBRES), so those are
+// read from the table itself
+for (const m of fs.readFileSync(path.join(ROOT, 'pages.js'), 'utf8').matchAll(/\b(?:lead|p): '((?:[^'\\]|\\.)*)'/g)) used.add(m[1].replace(/\\'/g, "'"));
 const jsMissing = [...used].filter(k => !(('js:' + k) in dict));
 // the run-time dictionary: only entries marked for scripts ("js:" keys), stripped of the prefix
 const js = Object.fromEntries(Object.entries(dict).filter(([k]) => k.startsWith('js:')).map(([k, v]) => [k.slice(3), v]));

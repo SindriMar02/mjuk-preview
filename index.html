@@ -46,7 +46,7 @@
 <header class="nav" id="nav">
   <nav class="nav__mid" aria-label="Main">
     <a href="#new">New</a>
-    <a href="#fibres">Fibres</a>
+    <a href="#fibres">Materials</a>
     <a href="#shop">Shop</a>
     <a href="#sale">Sale</a>
     <a href="#made">Bespoke</a>
@@ -70,7 +70,7 @@
 <!-- MOBILE MENU -->
 <div class="menu" id="menu" aria-hidden="true">
   <a href="#new"><i>01</i>New</a>
-  <a href="#fibres"><i>02</i>Fibres</a>
+  <a href="#fibres"><i>02</i>Materials</a>
   <a href="#shop"><i>03</i>Shop</a>
     <a href="#sale"><i>03</i>Sale</a>
     <a href="#made"><i>03</i>Bespoke</a>
@@ -91,7 +91,7 @@
       <div class="fcar" id="fcar" aria-roledescription="carousel" aria-label="MJ&Uacute;K Iceland"></div>
       <button class="rnav__b fcar__btn fcar__btn--l" id="fcarPrev" aria-label="Previous image">&larr;</button>
       <button class="rnav__b fcar__btn fcar__btn--r" id="fcarNext" aria-label="Next image">&rarr;</button>
-      <h1 class="hero__word"><span class="hero__l1">Mj&uacute;k</span><span class="hero__l2">is soft</span></h1>
+      <h1 class="hero__word"><span class="hero__l1">Mj&uacute;k</span></h1>
     </div>
     <div class="hero__cta">
       <span class="mono hero__tag">Angora &middot; cashmere &middot; merino &middot; Icelandic wool</span>
@@ -119,7 +119,7 @@
   <section class="flokkar" id="fibres">
     <div class="head">
       <span class="head__n">02.</span>
-      <h2 class="head__t">Shop by fibre</h2>
+      <h2 class="head__t">Shop by material</h2>
       <div class="head__end"><span class="mono">Only sustainable natural materials</span></div>
     </div>
     <div class="cats" id="cats"></div>
@@ -237,34 +237,51 @@
     </div>
     <div class="made__grid">
       <div class="made__copy">
-        <p class="made__lead">A cape or poncho, cut from one of our blankets and sewn upstairs at Laugavegur 23. Within two hours, any day of the year.</p>
-        <p>Choose the shape, the blanket it is cut from, and whether you want salmon leather at the edges. If you would like it shorter or longer than standard, say so and we write back before anything is cut.</p>
+        <p class="made__lead">A shawl, poncho or cape, sewn to order upstairs at Laugavegur 23. Within two hours, any day of the year.</p>
+        <p>Choose the model, the fabric and its colour, fur or no fur, and salmon leather if you like. If you would like it shorter or longer than standard, say so and we write back before anything is cut.</p>
         <p class="made__aside">At Klapparst&iacute;gur 29 a neckwarmer is made in front of you in twenty minutes. That one you have to come in for.</p>
         <div class="made__im"><img id="madeImg" src="" alt="" loading="lazy"/></div>
       </div>
       <form class="cfg" id="cfg" novalidate>
         <fieldset>
-          <legend class="legend">Shape</legend>
-          <div class="seg">
-            <label><input type="radio" name="shape" value="cape" checked><span><em>Cape</em><small data-price="shape.cape"></small></span></label>
-            <label><input type="radio" name="shape" value="poncho"><span><em>Poncho</em><small data-price="shape.poncho"></small></span></label>
-            <label><input type="radio" name="shape" value="shawl"><span><em>Shawl</em><small data-price="shape.shawl"></small></span></label>
+          <legend class="legend">Model</legend>
+          <div class="seg seg--grid" id="cfgModel">
+            <label><input type="radio" name="model" value="shawl" checked><span><em>Shawl</em></span></label>
+            <label><input type="radio" name="model" value="shawl-pockets"><span><em>Shawl with pockets</em></span></label>
+            <label><input type="radio" name="model" value="petite-poncho"><span><em>Petite poncho</em></span></label>
+            <label><input type="radio" name="model" value="poncho"><span><em>Poncho</em></span></label>
+            <label><input type="radio" name="model" value="princess"><span><em>Princess cape</em></span></label>
+            <label><input type="radio" name="model" value="angelina"><span><em>Angelina cape</em></span></label>
+            <label><input type="radio" name="model" value="grace"><span><em>Grace cape</em></span></label>
+            <label><input type="radio" name="model" value="empress"><span><em>Empress cape</em></span></label>
           </div>
         </fieldset>
         <fieldset>
-          <legend class="legend">Fabric, cut from one of our blankets</legend>
-          <div class="tiles">
-            <label class="tile" data-fib="icelandic-wool"><input type="radio" name="fabric" value="icelandic" checked><span class="t"><span class="t__im"><img src="" alt=""/></span><span class="t__m"><em>Icelandic wool</em><small data-price="fabric.icelandic"></small></span></span></label>
-            <label class="tile" data-fib="merino"><input type="radio" name="fabric" value="merino"><span class="t"><span class="t__im"><img src="" alt=""/></span><span class="t__m"><em>Merino</em><small data-price="fabric.merino"></small></span></span></label>
-            <label class="tile" data-fib="alpaca-silk"><input type="radio" name="fabric" value="alpaca"><span class="t"><span class="t__im"><img src="" alt=""/></span><span class="t__m"><em>Alpaca</em><small data-price="fabric.alpaca"></small></span></span></label>
-            <label class="tile" data-fib="cashmere"><input type="radio" name="fabric" value="cashmere"><span class="t"><span class="t__im"><img src="" alt=""/></span><span class="t__m"><em>Cashmere</em><small data-price="fabric.cashmere"></small></span></span></label>
+          <legend class="legend">Fabric</legend>
+          <div class="tiles" id="cfgFabric">
+            <label class="tile" data-fabric="cashmere-merino"><input type="radio" name="fabric" value="cashmere-merino" checked><span class="t"><span class="t__im"><img src="" alt=""/></span><span class="t__m"><em>Cashmere and merino</em><small>Konungur and Akureyri blankets</small></span></span></label>
+            <label class="tile" data-fabric="icelandic-wool"><input type="radio" name="fabric" value="icelandic-wool"><span class="t"><span class="t__im"><img src="" alt=""/></span><span class="t__m"><em>Icelandic wool</em><small>Unicorn blankets</small></span></span></label>
+            <label class="tile" data-fabric="cashmere"><input type="radio" name="fabric" value="cashmere"><span class="t"><span class="t__im"><img src="" alt=""/></span><span class="t__m"><em>Cashmere</em><small>Shawl and poncho only</small></span></span></label>
           </div>
+        </fieldset>
+        <fieldset>
+          <legend class="legend">Colour, the blanket it is cut from</legend>
+          <div class="cfg__sw" id="cfgColour"></div>
+          <p class="cfg__len" id="cfgColourAsk" hidden>Tell us the colour you would like in your request and we write back with what we have.</p>
+        </fieldset>
+        <fieldset>
+          <legend class="legend">Fur</legend>
+          <div class="seg" id="cfgFur">
+            <label><input type="radio" name="fur" value="no" checked><span><em>Without fur</em></span></label>
+            <label><input type="radio" name="fur" value="yes"><span><em>With fur</em></span></label>
+          </div>
+          <p class="cfg__len" id="cfgFurNote" hidden></p>
         </fieldset>
         <fieldset>
           <legend class="legend">Salmon leather trim</legend>
           <div class="seg">
             <label><input type="radio" name="trim" value="no" checked><span><em>None</em></span></label>
-            <label><input type="radio" name="trim" value="yes"><span><em>At the edges</em><small data-price="trim"></small></span></label>
+            <label><input type="radio" name="trim" value="yes"><span><em>At the edges</em><small data-price="salmonLeather"></small></span></label>
           </div>
         </fieldset>
         <fieldset>
@@ -322,7 +339,7 @@
     <span class="wordmark"><img src="assets/logo.png" alt="MJ&Uacute;K Iceland" /></span>
   </div>
   <div class="foot__grid">
-    <div><span class="mono">Shop</span><a href="#new">New this season</a><a href="#fibres">By fibre</a><a href="#shop">By piece</a><a href="#sale">Last of the line</a><a href="#made">Made for you</a></div>
+    <div><span class="mono">Shop</span><a href="#new">New this season</a><a href="#fibres">By material</a><a href="#shop">By piece</a><a href="#sale">Last of the line</a><a href="#made">Made for you</a></div>
     <div><span class="mono">MJ&Uacute;K</span><a href="#camp">The workshop</a><a href="#lookbook">Lookbook</a><a href="#stockists">Stockists</a></div>
     <div><span class="mono">Visit</span><a href="#stores">Laugavegur 23</a><a href="#stores">Klapparst&iacute;gur 29</a><a href="#stores">Sk&oacute;lav&ouml;r&eth;ust&iacute;gur 4 &amp; 36</a></div>
     <div><span class="mono">Contact</span><a href="mailto:customersupport@mjukiceland.com">Customer support</a><a href="mailto:anna@mjukiceland.com">Wholesale</a><a href="tel:+3548320567">+354 832 0567</a></div>

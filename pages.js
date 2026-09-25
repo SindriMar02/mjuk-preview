@@ -20,8 +20,24 @@
   const Q = new URLSearchParams(location.search);
   const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
   const purl = p => 'product.html?p=' + encodeURIComponent(p.h);
-  const typeName = k => t(((CM.types || []).find(x => x.key === k) || {}).name || '');
-  const fibName = k => t(((CM.cats || []).find(x => x.key === k) || {}).name || '');
+  /* Anna's own classification (tools/groups.json, her sheet "Product groups"): her piece groups,
+     her families and her nine materials, each with its Icelandic name beside it */
+  const nm = x => (x ? (isIS && x.is) || x.name : '');
+  const byKey = list => Object.fromEntries((list || []).map(x => [x.key, x]));
+  const GRP = byKey(CM.groups), FAM = byKey(CM.families), MAT = byKey(CM.materials);
+  const typeName = k => nm(GRP[k]), famName = k => nm(FAM[k]), matName = k => nm(MAT[k]);
+  // what a piece is made of, in her words: one of her nine, or her sentence for a two-sided piece
+  const matWords = p => p.mat ? matName(p.mat) : FAM[p.fam] && FAM[p.fam].said ? (isIS && FAM[p.fam].saidIs) || FAM[p.fam].said : '';
+  /* her "Matching products", read both ways. A target is a family key, "@group" (every piece in
+     that group) or "@group/material". */
+  const hits = (tg, x) => { if (tg[0] !== '@') return x.fam === tg; const [g, m] = tg.slice(1).split('/'); return x.tyk === g && (!m || x.mat === m); };
+  const goesFor = p => {
+    const out = new Set(FAM[p.fam] ? FAM[p.fam].goes : []);
+    (CM.families || []).forEach(f => { if (f.key !== p.fam && f.goes.some(tg => hits(tg, p))) out.add(f.key); });
+    return [...out];
+  };
+  const tgName = tg => tg[0] === '@' ? typeName(tg.slice(1).split('/')[0]) : famName(tg);
+  const tgHref = tg => { if (tg[0] !== '@') return 'shop.html?family=' + encodeURIComponent(tg); const [g, m] = tg.slice(1).split('/'); return 'shop.html?type=' + g + (m ? '&material=' + m : ''); };
   const isNew = p => (p.cats || []).includes('new');
 
   /* ── reveal: same .rv grammar as the shell, observed here because app.js
@@ -73,26 +89,43 @@
   const catCount = {}; CM.all.forEach(p => (p.cats || []).forEach(c => { catCount[c] = (catCount[c] || 0) + 1; }));
   const familyKey = p => (p.cats || []).filter(c => !GENERIC.has(c)).sort((a, b) => catCount[b] - catCount[a])[0] || null;
   const familyName = k => k.replace(/marsmallow/, 'marshmallow').replace(/-/g, ' ').replace(/^\w/, c => c.toUpperCase());
+  const shown = list => (list || []).filter(x => x.count);
 
   /* ════════════════════════════ SHOP ════════════════════════════ */
   function shopPage() {
     const st = {
-      type: Q.get('type') || '', fibre: Q.get('fibre') || '',
+      type: Q.get('type') || '', family: Q.get('family') || '', material: Q.get('material') || '',
       sale: Q.get('sale') === '1', nw: Q.get('new') === '1', stock: Q.get('all') !== '1',
       sort: Q.get('sort') || 'featured', q: Q.get('q') || '', n: 24,
     };
+    if (!GRP[st.type]) st.type = '';
+    if (!FAM[st.family]) st.family = '';
+    if (!MAT[st.material]) st.material = '';
+    if (st.family) st.type = FAM[st.family].group;   // a design always sits in its group
     const grid = $('#pgrid'), title = $('#shopTitle'), count = $('#shopCount'), more = $('#more'), empty = $('#pgEmpty');
-    const chips = (host, list, key) => {
-      host.innerHTML = list.map(c => `<button class="chip" type="button" data-v="${esc(c.key)}" aria-pressed="${st[key] === c.key}">${esc(t(c.name))}<small>${c.count}</small></button>`).join('');
-      host.addEventListener('click', e => {
-        const b = e.target.closest('.chip'); if (!b) return;
-        st[key] = st[key] === b.dataset.v ? '' : b.dataset.v;
-        $$('.chip', host).forEach(x => x.setAttribute('aria-pressed', String(x.dataset.v === st[key])));
-        apply(true);
-      });
+    /* her groups, then (once a group is chosen) her designs in it, and her materials in her ranking */
+    const rows = { type: $('#fType'), family: $('#fFam'), material: $('#fFibre') };
+    const lists = {
+      type: () => shown(CM.groups),
+      family: () => st.type ? shown(CM.families).filter(f => f.group === st.type) : [],
+      material: () => shown(CM.materials),
     };
-    chips($('#fType'), CM.types || [], 'type');
-    chips($('#fFibre'), CM.cats || [], 'fibre');
+    const paintChips = key => {
+      const L = lists[key](), host = rows[key];
+      host.innerHTML = L.map(c => `<button class="chip" type="button" data-v="${esc(c.key)}" aria-pressed="${st[key] === c.key}">${esc(nm(c))}<small>${c.count}</small></button>`).join('');
+      if (key === 'family') host.closest('.filt__row--fam').hidden = !L.length;
+      // on a phone each row scrolls sideways: bring the chosen one into view
+      const on = $('[aria-pressed="true"]', host);
+      if (on && host.scrollWidth > host.clientWidth) host.scrollLeft += on.getBoundingClientRect().left - host.getBoundingClientRect().left - 8;
+    };
+    Object.keys(rows).forEach(key => rows[key].addEventListener('click', e => {
+      const b = e.target.closest('.chip'); if (!b) return;
+      st[key] = st[key] === b.dataset.v ? '' : b.dataset.v;
+      if (key === 'type' && st.family && FAM[st.family].group !== st.type) st.family = '';
+      Object.keys(rows).forEach(paintChips);
+      apply(true);
+    }));
+    Object.keys(rows).forEach(paintChips);
     const fSale = $('#fSale'), fNew = $('#fNew'), fStock = $('#fStock'), fSort = $('#fSort'), fQ = $('#fQ');
     fSale.checked = st.sale; fNew.checked = st.nw; fStock.checked = st.stock; fSort.value = st.sort; fQ.value = st.q;
     fSale.addEventListener('change', () => { st.sale = fSale.checked; apply(true); });
@@ -103,31 +136,34 @@
     more.addEventListener('click', () => { st.n += 24; apply(false); });
 
     const featuredRank = {}; (CM.featuredNew || []).concat(CM.own || []).forEach((h, i) => { if (!(h in featuredRank)) featuredRank[h] = i; });
+    // search reads her names too, in the page's language: "marshmallow", "cashmere", "húfur"
+    const words = p => (p.t + ' ' + (p.comp || '') + ' ' + famName(p.fam) + ' ' + matWords(p) + ' ' + typeName(p.tyk)).toLowerCase();
     const list = () => {
       const q = st.q.toLowerCase();
       let L = CM.all.filter(p =>
-        (!st.type || p.tyk === st.type) && (!st.fibre || p.fib === st.fibre) &&
-        (!st.sale || p.cp > 0) && (!st.nw || isNew(p)) && (!st.stock || !p.oos) &&
-        (!q || (p.t + ' ' + (p.comp || '') + ' ' + (p.ty || '')).toLowerCase().includes(q)));
+        (!st.type || p.tyk === st.type) && (!st.family || p.fam === st.family) && (!st.material || p.mat === st.material) &&
+        (!st.sale || p.cp > 0) && (!st.nw || isNew(p)) && (!st.stock || !p.oos) && (!q || words(p).includes(q)));
       if (st.sort === 'low') L.sort((a, b) => a.p - b.p);
       else if (st.sort === 'high') L.sort((a, b) => b.p - a.p);
       else if (st.sort === 'new') L.sort((a, b) => (isNew(b) - isNew(a)) || (b.id - a.id));
       else L.sort((a, b) => ((a.h in featuredRank ? featuredRank[a.h] : 1e6) - (b.h in featuredRank ? featuredRank[b.h] : 1e6)) || (a.oos - b.oos));
       return L;
     };
-    const heading = () => st.q ? (isIS ? `„${st.q}“` : `“${st.q}”`) : st.sale ? t('Last of the line') : st.nw ? t('New this season') : st.type ? typeName(st.type) : st.fibre ? fibName(st.fibre) : t('Everything');
+    const heading = () => st.q ? (isIS ? `„${st.q}“` : `“${st.q}”`) : st.sale ? t('Last of the line') : st.nw ? t('New this season')
+      : st.family ? famName(st.family) : st.type ? typeName(st.type) : st.material ? matName(st.material) : t('Everything');
     const apply = reset => {
       if (reset) st.n = 24;
       const L = list();
       title.textContent = heading();
       document.title = heading() + ' — ' + t('Shop') + ' — MJÚK Iceland';
       count.textContent = pieces(L.length) + (st.stock ? '' : ' ' + t('incl. sold out'));
-      const shown = L.slice(0, st.n);
-      if (reset) fill(grid, shown);
-      else { const have = grid.children.length; const add = shown.slice(have).map((p, i) => card(p, have + i)); grid.append(...add); reveal(grid); }
+      const shownL = L.slice(0, st.n);
+      if (reset) fill(grid, shownL);
+      else { const have = grid.children.length; const add = shownL.slice(have).map((p, i) => card(p, have + i)); grid.append(...add); reveal(grid); }
       more.hidden = L.length <= st.n; empty.hidden = L.length > 0;
       const u = new URLSearchParams();
-      if (st.type) u.set('type', st.type); if (st.fibre) u.set('fibre', st.fibre); if (st.sale) u.set('sale', '1'); if (st.nw) u.set('new', '1');
+      if (st.type) u.set('type', st.type); if (st.family) u.set('family', st.family); if (st.material) u.set('material', st.material);
+      if (st.sale) u.set('sale', '1'); if (st.nw) u.set('new', '1');
       if (!st.stock) u.set('all', '1'); if (st.sort !== 'featured') u.set('sort', st.sort); if (st.q) u.set('q', st.q);
       history.replaceState(null, '', location.pathname + (u.toString() ? '?' + u : ''));
     };
@@ -141,10 +177,10 @@
     if (!p) return;
     document.title = p.t + ' — MJÚK Iceland';
     const c = copyOf(p);
-    const fam = familyKey(p);
+    const fam = FAM[p.fam] ? null : familyKey(p);   // her family first; outside her sheet, the shop's category
     const imgs = [...new Set((p.img || []).filter(Boolean))];
 
-    $('#crumb').innerHTML = `<a href="shop.html">${t('Shop')}</a><i>/</i>${p.tyk ? `<a href="shop.html?type=${esc(p.tyk)}">${esc(typeName(p.tyk))}</a><i>/</i>` : ''}<span>${esc(p.t)}</span>`;
+    $('#crumb').innerHTML = `<a href="shop.html">${t('Shop')}</a><i>/</i>${GRP[p.tyk] ? `<a href="shop.html?type=${esc(p.tyk)}">${esc(typeName(p.tyk))}</a><i>/</i>` : ''}${FAM[p.fam] ? `<a href="shop.html?family=${esc(p.fam)}">${esc(famName(p.fam))}</a><i>/</i>` : ''}<span>${esc(p.t)}</span>`;
     const gal = $('#gal');
     gal.classList.toggle('two', imgs.length > 1);
     gal.innerHTML = imgs.map((u, i) => `<figure class="pdp__fig rv"><img src="${px(u, 1200)}" alt="${esc(p.t)}${i ? ', ' + t('detail') : ''}" ${i ? 'loading="lazy"' : 'fetchpriority="high"'}/></figure>`).join('');
@@ -153,8 +189,10 @@
     const price = p.cp
       ? `<s>${usd(p.cp)}</s><span>${usd(p.p)}</span><span class="pdp__save">${t('Save')} ${Math.round((1 - p.p / p.cp) * 100)}%</span>`
       : `<span>${usd(p.p)}</span>`;
+    // her matching pieces that are in the shop today, as links to them
+    const goes = goesFor(p).filter(tg => CM.all.some(x => x !== p && hits(tg, x)));
     const facts = [
-      [t('Fibre'), p.fib ? fibName(p.fib) : ''],
+      [t('Material'), matWords(p)],
       [t('Composition'), p.comp || ''],
       /* facts only where her own text states them: size and origin come from it, never a default */
       [t('Size'), /\bone[- ]size\b/i.test(c.short + ' ' + c.long) ? t('One size') : ''],
@@ -162,9 +200,10 @@
       [t('Care'), c.care ? c.care.replace(/-\s/g, ': ').replace(/\s+/g, ' ') : ''],
       /* from her own shipping zones (tools/pull-woo.mjs), never a number written here */
       [t('Delivery'), (CM.ship && (isIS && CM.ship.deliveryIs || CM.ship.delivery)) || ''],
+      [t('Goes with'), goes.map(tg => `<a href="${tgHref(tg)}">${esc(tgName(tg))}</a>`).join(', '), true],
     ].filter(f => f[1]);
     $('#info').innerHTML = `
-      <div class="pdp__kick mono">${p.fib ? `<span>${esc(fibName(p.fib))}</span>` : ''}${p.tyk ? `<span>${esc(typeName(p.tyk))}</span>` : ''}${isNew(p) ? `<span class="is-new">${t('New')}</span>` : ''}${p.cp ? `<span class="is-new">${t('Sale')}</span>` : ''}</div>
+      <div class="pdp__kick mono">${p.mat ? `<span>${esc(matName(p.mat))}</span>` : ''}${FAM[p.fam] ? `<span>${esc(famName(p.fam))}</span>` : GRP[p.tyk] ? `<span>${esc(typeName(p.tyk))}</span>` : ''}${isNew(p) ? `<span class="is-new">${t('New')}</span>` : ''}${p.cp ? `<span class="is-new">${t('Sale')}</span>` : ''}</div>
       <h1 class="pdp__t" id="pdpT">${esc(p.t)}</h1>
       <div class="pdp__price">${price}</div>
       ${c.short ? `<div class="pdp__short">${clean(c.short)}</div>` : ''}
@@ -174,22 +213,29 @@
           : `<button class="sz sz--solo${plainHat ? ' pom-ask' : ''}" data-h="${esc(p.h)}" data-s="">${t('Add to bag')}</button>`}
         ${plainHat && !p.oos ? `<p class="pdp__hint mono">${t('A plain hat.')} <b>${t('Pompoms are chosen in the next step')}</b>${t(', none, one or two.')}</p>` : ''}
       </div>
-      <dl class="pdp__facts">${facts.map(f => `<dt>${f[0]}</dt><dd>${esc(f[1])}</dd>`).join('')}</dl>
+      <dl class="pdp__facts">${facts.map(f => `<dt>${f[0]}</dt><dd>${f[2] ? f[1] : esc(f[1])}</dd>`).join('')}</dl>
       ${c.long && text(c.long) !== text(c.short) ? `<details class="pdp__desc" open><summary>${t('Description')}</summary><div class="pdp__body">${clean(c.long)}</div></details>` : ''}`;
     splitWords($('#pdpT'));
     $$('.pdp__info > *').forEach((el, i) => { if (!el.classList.contains('tr')) { el.classList.add('rv'); el.style.transitionDelay = (i * 60) + 'ms'; } });
 
-    /* rails: the same design in other colours, then the same fibre in another piece */
-    const sib = fam ? CM.all.filter(x => x !== p && (x.cats || []).includes(fam)) : CM.all.filter(x => x !== p && x.tyk === p.tyk && x.fib === p.fib);
+    /* rails: the same design in other colours (her family), then what she pairs it with (her
+       Matching products), or, where she has not paired it, another piece in the same material */
+    const sib = FAM[p.fam] ? CM.all.filter(x => x !== p && x.fam === p.fam)
+      : fam ? CM.all.filter(x => x !== p && (x.cats || []).includes(fam)) : CM.all.filter(x => x !== p && x.tyk === p.tyk && x.mat === p.mat);
     sib.sort((a, b) => a.oos - b.oos);
     const famSec = $('#family');
-    if (sib.length) { $('#famName').textContent = fam ? familyName(fam) : (typeName(p.tyk) || t('this piece')); fill($('#famT'), sib.slice(0, 12)); }
+    if (sib.length) { $('#famName').textContent = FAM[p.fam] ? famName(p.fam) : fam ? familyName(fam) : (typeName(p.tyk) || t('this piece')); fill($('#famT'), sib.slice(0, 12)); }
     else famSec.remove();
-    const withL = CM.all.filter(x => x !== p && !x.oos && x.fib === p.fib && x.tyk && x.tyk !== p.tyk);
-    withL.sort((a, b) => (isNew(b) - isNew(a)));
+    // one piece from each paired design in turn, so a long pairing list is not all one design
+    const byTarget = goes.map(tg => CM.all.filter(x => x !== p && !x.oos && x.fam !== p.fam && hits(tg, x)));
+    const paired = []; for (let r = 0; paired.length < 12 && byTarget.some(l => l.length > r); r++) for (const l of byTarget) if (l[r] && paired.length < 12 && !paired.includes(l[r])) paired.push(l[r]);
+    const withL = paired.length ? paired : p.mat ? CM.all.filter(x => x !== p && !x.oos && x.mat === p.mat && x.tyk && x.tyk !== p.tyk).sort((a, b) => (isNew(b) - isNew(a))).slice(0, 12) : [];
     const withSec = $('#with');
-    if (withL.length) { $('#withName').textContent = fibName(p.fib) || t('the same fibre'); fill($('#withT'), withL.slice(0, 12)); }
-    else withSec.remove();
+    if (withL.length) {
+      $('#withName').textContent = paired.length ? t('Matching pieces') : matName(p.mat);
+      $('#withNote').textContent = paired.length ? t('Paired by Anna') : t('Another piece, same material');
+      fill($('#withT'), withL);
+    } else withSec.remove();
     rails();
   }
 
@@ -209,48 +255,57 @@
     });
   }
 
-  /* ═══════════════════════════ FIBRES ═══════════════════════════
-     Every sentence in quotes below is hers, lifted from live product copy
-     on mjukiceland.com. The unquoted lines only state what the catalogue
-     itself shows (compositions, counts). Nothing here is invented. */
-  const FIBRES = [
-    { key: 'angora', lead: 'The fibre most of the shop is knitted from: light, warm, and impossibly soft.',
-      p: 'Angora is always blended so it holds its shape, with wool, viscose, nylon or merino. It is the fibre behind the Marshmallow, Roots and Tenderness designs.',
-      q: ['“Fluffy and soft angora wool blend. Flexible adjustable fit.”', '“Crafted from fluffy angora for a delightfully soft finish.”'] },
-    { key: 'merino', lead: 'Superfine merino, smooth against the skin and never scratchy.',
-      p: 'Used on its own in the Arctic beanies, the Ragnar designs and the merino aviator hats, and as the backbone of the cashmere blends.',
+  /* ═══════════════════════════ MATERIALS ═══════════════════════
+     Her nine materials (tools/groups.json), in her own ranking: prestige first, then popularity.
+     A material with nothing in the shop yet is left out. Every sentence in quotes is hers, lifted
+     from her product copy on mjukiceland.com; the unquoted lines only state what the catalogue
+     shows (compositions, designs, counts). The designs under each are her families, from the data. */
+  const FIBRES = {
+    'alpaca-silk': { lead: 'Baby alpaca with silk, a yarn developed for MJÚK in Italy.',
+      p: 'Eighty-eight percent baby alpaca, twelve percent silk, in the Lía beanies and scarves, named after the daughter it was first made for.',
+      q: ['“After more than one year, our designer in Iceland, Anna, and our yarn supplier in Italy have developed a totally new raw material: Alpaca with silk. Anna developed it for her baby daughter Lia.”', '“Light and non-itchy, even for sensitive skin.”'] },
+    'cashmere': { lead: 'Pure cashmere.',
+      p: 'One hundred percent in the Viking beanies. Ninety-eight in the Greenland beanies, with two percent elastane to hold the edge.',
+      q: ['“Made of certified ethically sourced pure cashmere.”'] },
+    'cashmere-merino': { lead: 'Cashmere carried on superfine merino.',
+      p: 'Ten percent cashmere in the Akureyri blankets, twenty in the Konungur blankets and the Empress cape, thirty in the Explorer hats and scarves.',
+      q: ['“Irresistibly soft blend of cashmere and the highest sort of superfine merino wool.”'] },
+    'merino': { lead: 'Superfine merino, smooth against the skin and never scratchy.',
+      p: 'On its own in the Arctic and Ragnar beanies, the unisex aviator hats, and the Ragnar scarves and gloves.',
       q: ['“This is superfine Merino wool in its truest form: smooth, clean, and refined.”', '“Merino is nature’s own regulator. It traps heat when you’re out in the frost but breathes the moment you step into a warm café.”'] },
-    { key: 'cashmere', lead: 'Pure cashmere, and cashmere carried on merino at ten, twenty and thirty percent.',
-      p: 'The Viking and Greenland beanies are cashmere; the Explorer scarves and the Akureyri and Konungur blankets carry it on merino.',
-      q: [] },
-    { key: 'alpaca-silk', lead: 'Baby suri alpaca with silk, a yarn developed for MJÚK in Italy.',
-      p: 'Eighty-eight percent baby suri alpaca, twelve percent silk. The Lia scarves are made from it, named after the daughter it was first made for.',
-      q: ['“After more than one year, our designer in Iceland, Anna, and our yarn supplier in Italy have developed a totally new raw material: Alpaca with silk. Anna developed it for her baby daughter Lia.”', '“Hypoallergenic: extra soft scarf that will keep you warm and give the weightless feeling on your shoulders and around the neck.”'] },
-    { key: 'icelandic-wool', lead: 'Icelandic wool, softened with a little angora and merino.',
-      p: 'Ninety percent Icelandic wool, five percent angora, five percent superfine merino: the Guðmundur beanies.',
-      q: ['“90% top quality Icelandic wool, 5% angora, 5% superfine merino wool.”'] },
-  ];
+    'icelandic-wool': { lead: 'Icelandic wool, from the Unicorn blankets to the Gudmundur beanies.',
+      p: 'The Gudmundur beanies are ninety percent Icelandic wool, softened with five percent angora and five percent superfine merino.',
+      q: ['“Unicorn is thicker than Akureyri blankets, thicker and more rough wool, but has got higher resistance against wind and rain.”', '“90% top quality Icelandic wool, 5% angora, 5% superfine merino wool.”'] },
+    'fluffy-angora': { lead: 'The fluffiest pieces in the shop, light and weightless.',
+      p: 'Angora blended so it holds its shape: seventy percent with nylon and merino in the Roots beanies, sixty with nylon in the Fluffy Kitty hats.',
+      q: ['“Fluffy and soft angora wool blend. Flexible adjustable fit.”', '“The name of the hat was the best to describe how soft and weightless it is.”'] },
+    'smooth-angora-merino': { lead: 'Angora with a smooth, silky finish.',
+      p: 'Half angora, with viscose for the silky feel, wool for warmth, and nylon or acrylic so it lasts.',
+      q: ['“50% angora for warmth and light fluffiness, 15% viscose for silky feeling.”', '“The softest hat in Iceland.”'] },
+  };
   function fibresPage() {
     const host = $('#fib');
-    host.innerHTML = FIBRES.map((f, i) => {
-      const cat = (CM.cats || []).find(c => c.key === f.key) || { name: f.key, count: 0, pool: [] };
-      const pool = CM.all.filter(p => p.fib === f.key && !p.oos);
-      const pick = pool.slice(0, 3);
+    const mats = shown(CM.materials).filter(m => FIBRES[m.key]);
+    host.innerHTML = mats.map((m, i) => {
+      const f = FIBRES[m.key];
+      const pool = CM.all.filter(p => p.mat === m.key && !p.oos);
       const im = pool[0] ? px(pool[0].img[0], 900) : '';
-      return `<article class="fib__ch" id="${esc(f.key)}">
-        <div class="fib__im rv"><span class="head__n">0${i + 1}.</span>${im ? `<img src="${im}" alt="${esc(t(cat.name))}" loading="${i ? 'lazy' : 'eager'}"/>` : ''}</div>
+      const designs = shown(CM.families).filter(x => CM.all.some(p => p.fam === x.key && p.mat === m.key));
+      return `<article class="fib__ch" id="${esc(m.key)}">
+        <div class="fib__im rv"><span class="head__n">0${i + 1}.</span>${im ? `<img src="${im}" alt="${esc(nm(m))}" loading="${i ? 'lazy' : 'eager'}"/>` : ''}</div>
         <div class="fib__body">
-          <h2 class="fib__name tr" data-name>${esc(t(cat.name))}</h2>
+          <h2 class="fib__name tr${nm(m).length > 16 ? ' fib__name--long' : ''}" data-name>${esc(nm(m))}</h2>
           <p class="fib__lead rv">${esc(t(f.lead))}</p>
           <p class="fib__p rv">${esc(t(f.p))}</p>
           ${f.q.map(q => `<p class="fib__q rv">${esc(q)}</p>`).join('')}
-          <div class="fib__meta rv"><span class="mono">${pieces(cat.count)}</span><a class="link" href="shop.html?fibre=${esc(f.key)}">[ ${t('Shop')} ${esc(t(cat.name).toLowerCase())} ]</a></div>
+          ${designs.length ? `<p class="fib__des rv"><span class="mono">${t('Designs')}</span>${designs.map(x => `<a href="shop.html?family=${esc(x.key)}">${esc(nm(x))}</a>`).join('')}</p>` : ''}
+          <div class="fib__meta rv"><span class="mono">${pieces(m.count)}</span><a class="link" href="shop.html?material=${esc(m.key)}">[ ${t('Shop')} ${esc(nm(m).toLowerCase())} ]</a></div>
           <div class="fib__mini" data-mini></div>
         </div>
       </article>`;
     }).join('');
     $$('[data-name]', host).forEach(splitWords);
-    $$('.fib__ch', host).forEach(ch => { const key = ch.id; fill($('[data-mini]', ch), CM.all.filter(p => p.fib === key && !p.oos).slice(0, 3), { index: false }); });
+    $$('.fib__ch', host).forEach(ch => { const key = ch.id; fill($('[data-mini]', ch), CM.all.filter(p => p.mat === key && !p.oos).slice(0, 3), { index: false }); });
     reveal(host);
     if (location.hash) { const t = $(location.hash); if (t) setTimeout(() => t.scrollIntoView({ block: 'start', behavior: reduced ? 'auto' : 'smooth' }), 250); }
   }
@@ -280,7 +335,7 @@
       cnt.textContent = `${L.length} ${t('products')} · ${L.filter(oos).length} ${t('sold out')}`;
       list.innerHTML = L.slice(0, n).map(p => `<div class="stf__row${oos(p) ? ' is-oos' : ''}" data-id="${p.id}">
         <img src="${px(p.img[0], 160)}" alt="" loading="lazy"/>
-        <div class="stf__nm">${esc(p.t)}<small>${esc(p.comp || p.v || '')} · ${usd(p.p)}</small></div>
+        <div class="stf__nm">${esc(p.t)}<small>${esc(p.comp || matWords(p))} · ${usd(p.p)}</small></div>
         <button class="stf__btn" type="button">${oos(p) ? t('Back in stock') : t('Sold out')}</button>
       </div>`).join('');
       more.hidden = L.length <= n;

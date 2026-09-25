@@ -1,7 +1,7 @@
 /* ══════════════════════════════════════════════════════════════
    MJÚK — the two configurators
    1. Pompom chooser: a <dialog> opened when a plain hat goes in the bag.
-   2. Made for you: shape → fabric → trim → one price.
+   2. Made for you: her model → fabric → the blanket it is cut from → fur → trim → one price.
    Uses the shell's own tokens; adds nothing to the palette.
    ══════════════════════════════════════════════════════════════ */
 
@@ -18,6 +18,14 @@
 .seg input:checked+span small{color:var(--faint)}
 .seg input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
 @media(hover:hover){.seg input:not(:checked)+span:hover{border-color:var(--ink)}}
+/* her eight models: a grid of equal cells rather than a ragged wrap */
+.seg--grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.seg--grid span{width:100%}
+/* an option her list does not have for the current choice: visible, so the shopper sees it exists, but off */
+.seg label.is-off,.tile.is-off{cursor:not-allowed}
+.seg label.is-off span{opacity:.35;border-style:dashed}
+.tile.is-off .t{opacity:.35}
+@media(hover:hover){.seg label.is-off input+span:hover{border-color:var(--line)}.tile.is-off input+.t:hover{border-color:var(--line)}}
 
 .legend{font-family:var(--ff-m);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin:0 0 10px}
 fieldset{border:0;padding:0;margin:0;min-width:0}
@@ -122,6 +130,20 @@ fieldset{border:0;padding:0;margin:0;min-width:0}
 .cfg__go:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 .cfg__len{font-size:13px;line-height:1.55;color:var(--ink);max-width:48ch}
 .cfg__len[hidden]{display:none}
+/* colour: her blankets in the chosen fabric, as round crops like the pompom swatches */
+.cfg__sw{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:14px 10px}
+.cfg__sw[hidden]{display:none}
+.csw{position:relative;cursor:pointer;display:grid;gap:6px;justify-items:center}
+.csw input{position:absolute;inset:0;opacity:0;pointer-events:none}
+.csw__im{display:block;width:60px;height:60px;border-radius:50%;overflow:hidden;background:var(--panel);transition:box-shadow .2s var(--ease),transform .16s var(--ease)}
+.csw__im img{display:block;width:100%;height:100%;object-fit:cover;transform:scale(1.8)}
+.csw:active .csw__im{transform:scale(.96)}
+/* her colour names can be a sentence long: two lines here, the whole name on hover and in the request */
+.csw__n{font-family:var(--ff-m);font-size:9px;letter-spacing:.04em;text-transform:uppercase;color:var(--dim);text-align:center;line-height:1.25;max-width:84px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.csw input:checked+.csw__im{box-shadow:0 0 0 2px var(--bg),0 0 0 3.5px var(--ink)}
+.csw input:checked~.csw__n{color:var(--ink)}
+.csw input:focus-visible+.csw__im{box-shadow:0 0 0 2px var(--bg),0 0 0 3.5px var(--accent)}
 .cfg__done{border:1px solid var(--ink);padding:22px;display:grid;gap:10px;transition:opacity .3s var(--ease),transform .3s var(--ease)}
 @starting-style{.cfg__done{opacity:0;transform:translateY(10px)}}
 .cfg__done[hidden]{display:none}

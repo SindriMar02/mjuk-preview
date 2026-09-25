@@ -42,8 +42,11 @@
   const px = (u, w) => (u ? u + '?w=' + w + '&ssl=1' : '');
   // her shop prices in USD; the name says what it prints
   const usd = n => '$' + (n || 0).toLocaleString('en-US');
-  // the fibre is the product story here, so the card states the real composition
-  const catLabel = p => (p.comp || t(p.v) || t(p.ty) || '');
+  // Anna's classification (tools/groups.json): her materials and piece groups, named in the page's language
+  const nm = x => (x ? (isIS && x.is) || x.name : '');
+  const MATS = Object.fromEntries((CM.materials || []).map(m => [m.key, m])), GRPS = Object.fromEntries((CM.groups || []).map(g => [g.key, g]));
+  // the fibre is the product story here, so the card states the real composition, else her material
+  const catLabel = p => (p.comp || nm(MATS[p.mat]) || nm(GRPS[p.tyk]) || '');
   const editorial = (CM.campaign || []);
 
   /* ── designed product card, with real size chips that add to bag ── */
@@ -79,36 +82,35 @@
   const railT = $('#railT'); if (railT) railT.innerHTML = pick(CM.featuredNew).map(prod).join('');
   const railST = $('#railST'); if (railST) railST.innerHTML = pick(CM.own).map(prod).join('');
 
-  /* ── the two browse grids: by fibre, then by piece ──
+  /* ── the two browse grids: by material, then by piece, both Anna's own (her sheet) ──
      Both render from the same shape and share .cat styling; the only difference
-     is which real taxonomy feeds them and where the tile links. */
+     is which of her lists feeds them and which shop filter the tile opens. */
   /* Name and count are STACKED, not pushed to opposite edges: a two-line label
      ("Icelandic wool") left its count orphaned against the first line, reading as
      if it belonged to the tile above. */
   const grid = (el, list, href) => {
     if (!el) return;
-    el.innerHTML = (list || []).map(c => {
+    el.innerHTML = (list || []).filter(c => c.count).map(c => {
       const p = pick(c.pool)[0];
       const img = p ? px(p.img[0], 620) : '';
-      return `<a class="cat rv" href="${href}" data-cat="${esc(c.key)}">
-        <div class="cat__im">${img ? `<img src="${img}" alt="${esc(t(c.name))}" loading="lazy"/>` : ''}</div>
-        <div class="cat__meta"><span class="cat__name">${t(c.name)}</span><span class="cat__n mono">${pieces(c.count)}</span></div>
+      return `<a class="cat rv" href="${href(c)}" data-cat="${esc(c.key)}">
+        <div class="cat__im">${img ? `<img src="${img}" alt="${esc(nm(c))}" loading="lazy"/>` : ''}</div>
+        <div class="cat__meta"><span class="cat__name">${nm(c)}</span><span class="cat__n mono">${pieces(c.count)}</span></div>
       </a>`;
     }).join('');
   };
-  grid($('#cats'), CM.cats, '#new');
-  grid($('#types'), CM.types, '#new');
-  /* Seven piece-types leave a hole in a four-column grid. Rather than stretching one
-     tile to hide it, the eighth cell earns its place as the way out of the taxonomy —
-     the shopper who does not think in categories gets a plain "show me everything". */
-  const types = $('#types');
-  if (types && (CM.types || []).length) {
-    types.insertAdjacentHTML('beforeend',
-      `<a class="cat cat--all rv" href="#new">
-         <div class="cat__im cat__im--all"><span class="cat__allmark" aria-hidden="true">&rarr;</span></div>
-         <div class="cat__meta"><span class="cat__name">${t('Everything')}</span><span class="cat__n mono">${pieces(CM.totalCount || 0)}</span></div>
-       </a>`);
-  }
+  grid($('#cats'), CM.materials, c => 'shop.html?material=' + encodeURIComponent(c.key));
+  grid($('#types'), CM.groups, c => 'shop.html?type=' + encodeURIComponent(c.key));
+  /* Seven materials and seven piece groups leave a hole in a four-column grid. Rather than
+     stretching one tile to hide it, the eighth cell earns its place as the way out: the
+     materials page for the first, a plain "show me everything" for the second. */
+  const allTile = (el, href, name, sub) => el && el.children.length && el.insertAdjacentHTML('beforeend',
+    `<a class="cat cat--all rv" href="${href}">
+       <div class="cat__im cat__im--all"><span class="cat__allmark" aria-hidden="true">&rarr;</span></div>
+       <div class="cat__meta"><span class="cat__name">${name}</span><span class="cat__n mono">${sub}</span></div>
+     </a>`);
+  allTile($('#cats'), 'fibres.html', t('About the materials'), t('In Anna’s words'));
+  allTile($('#types'), 'shop.html', t('Everything'), pieces(CM.totalCount || 0));
 
   /* ── store maps: the embed is created on first open, so four Google iframes
      never load for a visitor who only wanted to read the addresses ── */

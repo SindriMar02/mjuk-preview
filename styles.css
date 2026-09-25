@@ -28,6 +28,8 @@
    push right-aligned chrome (the bag, the burger) off the edge of the screen. */
 .bars,.load,.nav,.menu,.bag{width:var(--vw);right:auto}
 *{margin:0;padding:0;box-sizing:border-box}
+/* iOS Safari inflates text beside anything wider than the screen (the shop's sideways chip rows); the type scale here is already responsive */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{background:var(--bg);color:var(--ink);font-family:var(--ff-m);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 img{display:block;max-width:100%}
 a{color:inherit;text-decoration:none}
@@ -130,11 +132,11 @@ body.menu-open .menu{clip-path:inset(0 0 0 0);pointer-events:auto}
 .hero__word{position:absolute;left:0;right:0;bottom:max(28px,6%);margin:0;text-align:center;padding:0 var(--pad) .1em;
   z-index:4;pointer-events:none;display:flex;flex-direction:column;line-height:1.08;
   color:#fff;mix-blend-mode:difference}
-.hero__l1,.hero__l2{font-family:var(--ff-s);font-weight:500;text-transform:lowercase;
-  font-size:clamp(50px,11.5vw,190px);letter-spacing:-.015em;padding:.06em 0;
+/* the name alone, as large as the stage allows: bound by width (it is about 2.35em wide) and by
+   height, so a short laptop screen does not push it off the photo */
+.hero__l1{font-family:var(--ff-s);font-weight:500;text-transform:lowercase;
+  font-size:clamp(72px,min(24vw,44svh),400px);letter-spacing:-.015em;padding:.06em 0;
   -webkit-text-stroke:.9px #fff}
-.hero__l2{margin-top:-.1em}
-.hero__l2 em{font-style:italic}
 .hero__cta{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap}
 .hero__tag{color:var(--dim)}
 .hero__cta .link{color:var(--accent);background-image:linear-gradient(var(--accent),var(--accent))}
@@ -258,7 +260,7 @@ section{padding:clamp(70px,12vw,180px) 0;position:relative}
 
 /* ══ CATEGORIES — image grid, one tile per real collection ══ */
 .cats{padding:0 var(--pad);display:grid;gap:clamp(10px,1.4vw,20px);
-  grid-template-columns:repeat(5,minmax(0,1fr))}
+  grid-template-columns:repeat(4,minmax(0,1fr))}
 .cat{display:block;position:relative;min-width:0}
 .cat__im{position:relative;overflow:hidden;aspect-ratio:3/4;background:var(--bg-2);border:1px solid var(--line)}
 .cat__im img{width:100%;height:100%;object-fit:cover;
@@ -469,7 +471,7 @@ section{padding:clamp(70px,12vw,180px) 0;position:relative}
      and bottom:6% of the whole stage lands the text half off the photo's own
      bottom edge instead of inside it. */
   .hero__word{bottom:16%}
-  .hero__l1,.hero__l2{font-size:clamp(58px,22vw,130px)}
+  .hero__l1{font-size:clamp(88px,min(36vw,26svh),210px)}
 }
 
 /* ══ REDUCED MOTION ══ */

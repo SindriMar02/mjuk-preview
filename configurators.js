@@ -5,9 +5,9 @@
       place, pompoms in another, and customers thought the pompom page was
       for handbags. So the choice moves onto the hat, and a plain hat is
       never added to the bag without being asked once.
-   2. Made for you. A cape or poncho cut from one of her blankets, sewn
-      upstairs at Laugavegur 23 within two hours. Shape → fabric → trim →
-      one price, so the order arrives without an email chain.
+   2. Made for you. Her bespoke shawls, ponchos and capes (her sheet), sewn
+      upstairs at Laugavegur 23 within two hours. Model → fabric → the blanket
+      it is cut from → fur → trim → one price, so the order arrives whole.
    3. A language switch, to show the shape of the Icelandic version.
    Depends on window.CM (data) and window.CMBag (exposed by app.js).
    ══════════════════════════════════════════════════════════════ */
@@ -111,36 +111,76 @@
   /* ════════════════════ 2 · MADE FOR YOU ════════════════════ */
   const cfg = $('#cfg');
   if (cfg) {
-    /* Her shapes and fabrics (11 Sep meeting). Prices are Anna's to set, about twenty in all, and
-       live in tools/curation.json as CM.made. Until she gives them the page shows no number: the
-       request goes to the workshop by email, which is what the section replaces. */
-    const SHAPE = { cape: 'Cape', poncho: 'Poncho', shawl: 'Shawl' };
-    const FABRIC = { icelandic: { name: 'Icelandic wool', fib: 'icelandic-wool' }, merino: { name: 'Merino', fib: 'merino' },
-                     cashmere: { name: 'Cashmere', fib: 'cashmere' }, alpaca: { name: 'Alpaca', fib: 'alpaca-silk' } };
-    const PRICE = CM.made || {};
-    const get = k => k.split('.').reduce((o, p) => (o == null ? null : o[p]), PRICE);
-    // what each option adds, shown only when she has priced it
-    $$('[data-price]', cfg).forEach(el => { const n = get(el.dataset.price); el.textContent = n == null ? '' : el.dataset.price.startsWith('shape') ? usd(n) : n ? '+ ' + usd(n) : t('included'); el.hidden = n == null; });
+    /* Her "Bespoke clothing" list (tools/groups.json, her sheet "Product groups"): every model in
+       the fabrics she makes it in, with or without fur. Only her rows can be chosen. In the
+       11 Sep meeting: the customer picks the style, the colour of the fabric (the fabric is one
+       of her blankets), the salmon skin and the fur, and sees one price. Prices are hers to set,
+       one per row, in tools/curation.json (CM.made); until then the request goes by email. */
+    const B = CM.bespoke || { models: [], fabrics: [], rows: [] };
+    const isIS = document.documentElement.lang === 'is';
+    const nm = x => (x ? (isIS && x.is) || x.name : '');
+    const MODEL = Object.fromEntries(B.models.map(m => [m.key, m])), FABRIC = Object.fromEntries(B.fabrics.map(f => [f.key, f]));
+    const ROWS = B.rows.map(([name, model, fabric, fur]) => ({ name, model, fabric, fur }));
+    const PRICE = (CM.made && CM.made.prices) || {}, SALMON = CM.made ? CM.made.salmonLeather : null;
+    const tr = $('[data-price="salmonLeather"]', cfg); if (tr) { tr.textContent = SALMON == null ? '' : '+ ' + usd(SALMON); tr.hidden = SALMON == null; }
 
-    // fabric tiles show one of her real blankets in that fibre, because the fabric IS a blanket
-    // prefer a BLANKET in that fibre (the fabric is literally a blanket); she has none in pure
-    // cashmere or alpaca, so fall back to a blanket that contains the fibre, then to any piece
-    // in it, shown as a close crop so the texture reads rather than the garment
-    const word = { 'icelandic-wool': /icelandic/i, merino: /merino/i, cashmere: /cashmere/i, 'alpaca-silk': /alpaca/i };
-    const blanketFor = fib => CM.all.find(p => p.tyk === 'blankets' && p.fib === fib && p.img && p.img[0])
-                          || CM.all.find(p => p.tyk === 'blankets' && word[fib].test((p.comp || '') + ' ' + p.t) && p.img && p.img[0])
-                          || CM.all.find(p => p.fib === fib && p.img && p.img[0]);
-    $$('.tile[data-fib]', cfg).forEach(t => {
-      const p = blanketFor(t.dataset.fib), im = $('img', t);
+    const v = n => { const el = cfg.querySelector(`input[name="${n}"]:checked`); return el ? el.value : ''; };
+    const set = (n, val) => { const el = cfg.querySelector(`input[name="${n}"][value="${val}"]`); if (el) el.checked = true; };
+    const row = () => ROWS.find(r => r.model === v('model') && r.fabric === v('fabric') && r.fur === (v('fur') === 'yes')) || null;
+
+    /* the fabric's colours are her blankets in it, in stock and photographed: the one it is cut from */
+    const blankets = key => CM.all.filter(p => FABRIC[key] && FABRIC[key].blankets.includes(p.fam) && !p.oos && p.img && p.img[0]);
+    const famShort = { konungur: 'Konungur', akureyri: 'Akureyri', unicorn: 'Unicorn' };
+    /* the colour from her product name, colour first and pattern after ("Camel, Fishbone"), so
+       a short label still says the colour; a design inside the family ("Leaves") comes last */
+    const PATTERN = /^(fishbone( pattern)?|striped|rainbow pattern|double-sided)$/i;
+    const colourName = p => {
+      const [head, ...rest] = p.t.split(/\.\s+/);
+      const parts = rest.flatMap(x => x.replace(/\.$/, '').split(/,\s+/)).map(x => x.trim()).filter(x => x && !/^\d+% ?wool$/i.test(x));
+      const design = head.replace(/[“”"]/g, '').replace(/\s*(cashmere )?blanket$/i, '').trim();
+      return [...parts.filter(x => !PATTERN.test(x)), ...parts.filter(x => PATTERN.test(x)),
+        ...(design.toLowerCase() !== (famShort[p.fam] || '').toLowerCase() ? [design] : [])].join(', ') || p.t;
+    };
+    // a swatch label holds two short lines; the whole name is in the title and in the request
+    const short = x => (x.length <= 30 ? x : x.slice(0, 30).replace(/\s+\S*$/, '') + '…');
+    // fabric tiles: one of her blankets in that fabric, cropped close so the texture reads
+    $$('.tile[data-fabric]', cfg).forEach(tile => {
+      const p = blankets(tile.dataset.fabric)[0] || CM.all.find(x => x.mat === tile.dataset.fabric && x.img && x.img[0]), im = $('img', tile);
       if (p && im) { im.src = px(p.img[0], 480); im.alt = p.t; }
     });
     const heroIm = $('#madeImg');
-    const cape = CM.all.find(p => /cape|poncho/i.test(p.t) && p.img && p.img[0]);
+    const cape = CM.all.find(p => p.tyk === 'clothing' && p.img && p.img[0]);
     if (heroIm && cape) { heroIm.src = px(cape.img[0], 1100); heroIm.alt = cape.t; }
 
-    const v = n => (cfg.elements[n] && cfg.elements[n].value) || '';
+    const sw = $('#cfgColour'), ask = $('#cfgColourAsk'), furNote = $('#cfgFurNote');
+    let shownFabric = '';
+    const paintColours = () => {
+      const key = v('fabric'); if (key === shownFabric) return; shownFabric = key;
+      const L = blankets(key), many = new Set(L.map(p => p.fam)).size > 1;
+      sw.innerHTML = L.map((p, i) => `<label class="csw" title="${p.t.replace(/"/g, '&quot;')}"><input type="radio" name="colour" value="${p.id}"${i ? '' : ' checked'}>
+        <span class="csw__im"><img src="${px(p.img[0], 160)}" alt="" loading="lazy"/></span><span class="csw__n">${short((many ? famShort[p.fam] + ' · ' : '') + colourName(p))}</span></label>`).join('');
+      sw.hidden = !L.length; ask.hidden = !!L.length;
+    };
+    /* only her rows: an option with no row for the current choice is switched off, and a choice
+       that has just become impossible moves to the nearest one that exists */
+    const sync = () => {
+      const m = v('model');
+      const fabrics = new Set(ROWS.filter(r => r.model === m).map(r => r.fabric));
+      $$('input[name="fabric"]', cfg).forEach(i => { i.disabled = !fabrics.has(i.value); i.closest('label').classList.toggle('is-off', i.disabled); });
+      if (!fabrics.has(v('fabric'))) set('fabric', [...fabrics][0]);
+      const furs = new Set(ROWS.filter(r => r.model === m && r.fabric === v('fabric')).map(r => (r.fur ? 'yes' : 'no')));
+      $$('input[name="fur"]', cfg).forEach(i => { i.disabled = !furs.has(i.value); i.closest('label').classList.toggle('is-off', i.disabled); });
+      if (!furs.has(v('fur'))) set('fur', [...furs][0]);
+      furNote.hidden = furs.size > 1;
+      // say why: the model itself (the Empress cape is fur only), or only in this fabric (a cashmere shawl)
+      const modelFurs = new Set(ROWS.filter(r => r.model === m).map(r => r.fur)), words = { model: nm(MODEL[m]), fabric: nm(FABRIC[v('fabric')]).toLowerCase() };
+      furNote.textContent = furs.size > 1 ? '' : modelFurs.size > 1 ? fmt(furs.has('yes') ? 'In {fabric}, this model is made with fur only.' : 'In {fabric}, this model comes without fur.', words)
+        : fmt(furs.has('yes') ? 'This model is made with fur only.' : 'This model comes without fur.', words);
+      paintColours();
+    };
+
     const priceEl = $('#cfgPrice'), noteEl = $('#cfgNote'), lenEl = $('#cfgLen'), done = $('#cfgDone');
-    const parts = () => [get('shape.' + v('shape')), get('fabric.' + v('fabric')), v('trim') === 'yes' ? get('trim') : 0];
+    const parts = () => { const r = row(); return [r ? PRICE[r.name] : null, v('trim') === 'yes' ? SALMON : 0]; };
     const priced = () => parts().every(n => n != null);
     const total = () => parts().reduce((a, n) => a + n, 0);
     const paint = () => {
@@ -152,29 +192,36 @@
       noteEl.textContent = t(!priced() ? 'We write back with the price before anything is cut.'
         : adj ? 'Indicative. We confirm the price with the length.' : 'The whole price. We confirm by email before anything is cut.');
     };
-    cfg.addEventListener('change', () => { done.hidden = true; paint(); });
-    /* The request is an email to the workshop, written out in full, so nothing is lost between
-       the page and the shop. It opens the shopper's own mail app; the address is shown too. */
+    cfg.addEventListener('change', e => { if (e.target.name !== 'colour') sync(); done.hidden = true; paint(); });
+    /* The request is an email to the workshop, written out in full with her own name for the
+       piece, so nothing is lost between the page and the shop. It opens the shopper's own mail
+       app; the address is shown too. Fur and salmon leather colours are theirs to write in. */
     cfg.addEventListener('submit', e => {
       e.preventDefault();
-      const adj = v('len') === 'adjusted';
+      const r = row(); if (!r) return;
+      const adj = v('len') === 'adjusted', fur = v('fur') === 'yes', trim = v('trim') === 'yes';
+      const blanket = CM.all.find(p => String(p.id) === v('colour'));
       const price = priced() ? usd(total()) + (adj ? t(', to be confirmed') : '') : t('Price on request');
-      const rows = [[t('Shape'), t(SHAPE[v('shape')])], [t('Fabric'), fmt('{fabric}, cut from one of our blankets', { fabric: t(FABRIC[v('fabric')].name) })],
-        [t('Trim'), t(v('trim') === 'yes' ? 'Salmon leather at the edges' : 'None')], [t('Length'), t(adj ? 'Adjusted, we will write to you' : 'Standard')], [t('Price'), price]];
+      const rows = [[t('Piece'), r.name], [t('Model'), nm(MODEL[r.model])], [t('Fabric'), nm(FABRIC[r.fabric])],
+        [t('Colour'), blanket ? blanket.t : t('To tell you in this email')],
+        [t('Fur'), fur ? t('With fur, colour to tell you in this email') : t('Without fur')],
+        [t('Salmon leather'), trim ? t('At the edges, colour to tell you in this email') : t('None')],
+        [t('Length'), t(adj ? 'Adjusted, we will write to you' : 'Standard')], [t('Price'), price]];
       const to = 'customersupport@mjukiceland.com';
-      const body = t('Made for you') + '\n\n' + rows.map(r => r[0] + ': ' + r[1]).join('\n') + '\n\n' + (adj ? t('How I would like the length:') + '\n\n' : '');
-      const mail = `mailto:${to}?subject=${encodeURIComponent(t('Made for you') + ': ' + t(SHAPE[v('shape')]))}&body=${encodeURIComponent(body)}`;
+      const body = t('Made for you') + '\n\n' + rows.map(x => x[0] + ': ' + x[1]).join('\n') + '\n\n' + (adj ? t('How I would like the length:') + '\n\n' : '');
+      const mail = `mailto:${to}?subject=${encodeURIComponent(t('Made for you') + ': ' + nm(MODEL[r.model]))}&body=${encodeURIComponent(body)}`;
+      const escH = x => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;');
       done.setAttribute('role', 'status');
       done.innerHTML = `<h3 tabindex="-1">${t('Your request is ready to send')}</h3>
-        <dl>${rows.map(r => `<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join('')}</dl>
+        <dl>${rows.map(x => `<dt>${x[0]}</dt><dd>${escH(x[1])}</dd>`).join('')}</dl>
         <p>${fmt('Your email app opens with this request. If it does not, write to {email}.', { email: `<a href="${mail}">${to}</a>` })}</p>`;
       done.hidden = false;
-      done.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'nearest' });
+      done.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'nearest' });
       // the summary is where the shopper is now: screen readers hear it, keyboard focus lands on it
       const h = $('h3', done); if (h) h.focus({ preventScroll: true });
       location.href = mail;
     });
-    paint();
+    sync(); paint();
 
     /* ── scroll reveals for the section, on the shell's .rv grammar ──
        app.js reveals .head already; the copy, the image and each fieldset follow it, 70ms apart,

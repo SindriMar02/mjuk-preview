@@ -10,12 +10,13 @@
 
    Facts only where they are true. Composition, piece type and origin come from the customs
    catalogue (04-platform/mjuk-shipping/customs-catalogue.json), which reads them from her own
-   product text. Where it says nothing, the page says nothing. The fibre filter falls back to her
-   own fibre categories, then to a single fibre word in her name or short text, else stays empty.
+   product text. Where it says nothing, the page says nothing. Family, material and piece group
+   are Anna's (tools/groups.json, her sheet "Product groups"; tools/groups.mjs joins by name).
    Editorial picks the pull cannot derive live in tools/curation.json. */
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { G, familyOf, materialOf, groupOfType, MATERIALS } from './groups.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const WS = path.resolve(ROOT, '../..');
@@ -121,33 +122,9 @@ function careOf(long) {
   return c.charAt(0).toUpperCase() + c.slice(1);
 }
 
-/* ── classification ─────────────────────────────────────────────────────── */
-const FIBRES = [['angora', 'Angora'], ['merino', 'Merino'], ['cashmere', 'Cashmere'], ['icelandic-wool', 'Icelandic wool'], ['alpaca-silk', 'Alpaca & silk']];
-const FIB_NAME = Object.fromEntries(FIBRES);
-const FROM_MATERIAL = { 'angora': 'angora', 'merino wool': 'merino', 'cashmere': 'cashmere', 'Icelandic wool': 'icelandic-wool', 'alpaca': 'alpaca-silk' };
-// "Alpaca & silk" is only said where silk is in evidence: her own alpaca-and-silk category, or
-// silk named next to the alpaca. Alpaca alone stays out of that facet rather than gain a fibre.
-const FROM_CATEGORY = { 'angora-wool': 'angora', 'merino-wool': 'merino', 'cashmere': 'cashmere', 'icelandic-wool': 'icelandic-wool', 'alpaca-and-silk': 'alpaca-silk' };
-const FROM_WORD = [['angora', /\bangora\b/i], ['merino', /\bmerino\b/i], ['cashmere', /\bcashmere\b/i], ['icelandic-wool', /\bicelandic (sheep )?wool\b/i], ['alpaca-silk', /\balpaca\b[\s\S]*\bsilk\b|\bsilk\b[\s\S]*\balpaca\b/i]];
-const one = keys => { const u = [...new Set(keys)]; return u.length === 1 ? u[0] : ''; };
-function fibreOf(p, cc, shortText) {
-  const byMat = cc && FROM_MATERIAL[cc.material];
-  if (byMat && (byMat !== 'alpaca-silk' || /\bsilk\b/i.test(cc.composition || ''))) return [byMat, 'composition'];
-  const byCat = one(p.categories.map(c => FROM_CATEGORY[c.slug]).filter(Boolean));
-  if (byCat) return [byCat, 'her category'];
-  const byWord = one(FROM_WORD.filter(([, re]) => re.test(p.name + ' ' + shortText)).map(([k]) => k));
-  return byWord ? [byWord, 'her wording'] : ['', null];
-}
-
-// The storefront's seven piece types; the customs catalogue's types refined for shopping.
-const TYPES = { hats: 'Beanies & hats', scarves: 'Scarves', headbands: 'Headbands', mittens: 'Mittens & gloves', blankets: 'Blankets', neckwarmers: 'Neckwarmers', capes: 'Capes & ponchos' };
-function typeOf(p, cc) {
-  if (!cc || !cc.type) return '';
-  if (/\bneck ?warmer/i.test(p.name)) return 'neckwarmers';
-  if (cc.type === 'gloves') return 'mittens';
-  return cc.type; // hats, scarves, headbands, blankets, capes, pompoms, collars
-}
-
+/* ── classification: Anna's own (tools/groups.json) ─────────────────────── */
+// Family, material and piece group come from her sheet "Product groups", joined by product name.
+// Where her sheet names no material, the product's composition decides (tools/groups.mjs).
 // Origin only where her text states it; her words for the place, not ours.
 const PLACE = /\b(custom[- ]made|hand[- ]?made|hand[- ]?knitted|manufactured|made|knitted|sewn)\s+in\s+(reykjav[ií]k|iceland)\b/i;
 function originOf(p, cc, shortText, longText) {
@@ -235,36 +212,40 @@ const listed = products
 
 const texts = [], textIdx = new Map(), map = {}, care = {};
 const addText = s => { if (!s) return -1; if (!textIdx.has(s)) { textIdx.set(s, texts.length); texts.push(s); } return textIdx.get(s); };
-const why = { fib: {}, missing: [], partial: [] };
+const why = { mat: {}, missing: [], partial: [] };
 
 const all = listed.map(p => {
   const cc = catalogue ? catalogue[p.id] || null : null;
   const prev = !catalogue ? oldById.get(p.id) || null : null;
   if (!cc && !prev) why.missing.push(p.id);
   const shortText = txt(p.short_description), longText = txt(p.description);
-  const [fib, fibFrom] = prev ? [prev.fib, 'previous pull'] : fibreOf(p, cc, shortText);
-  if (fibFrom) why.fib[fibFrom] = (why.fib[fibFrom] || 0) + 1;
-  const tyk = prev ? prev.tyk : typeOf(p, cc);
+  const name = texturize(decode(p.name).replace(/\s+/g, ' ').trim()), cats = p.categories.map(c => c.slug);
+  const comp = prev ? prev.comp : compositionOf(p, cc);
+  // her family by name; her material from the family, else from the piece's own composition
+  const fam = familyOf(name, shortText + ' ' + longText);
+  const mat = fam ? fam.material || (fam.said ? '' : materialOf(comp, name, cats)) : materialOf(comp, name, cats);
+  why.mat[!mat ? 'none' : fam && fam.material ? 'her sheet' : 'composition'] = (why.mat[!mat ? 'none' : fam && fam.material ? 'her sheet' : 'composition'] || 0) + 1;
+  const tyk = fam ? fam.group : groupOfType(prev ? prev.tyk : cc && (/\bneck ?warmer/i.test(p.name) ? 'neckwarmers' : cc.type));
   const price = +p.price || 0, regular = +p.regular_price || 0;
   const s = addText(shortText), l = addText(longText);
   map[p.id] = { s, l };
   if (l >= 0 && !(l in care)) { const c = careOf(longText); if (c) care[l] = c; }
   const o = {
-    h: p.slug, t: texturize(decode(p.name).replace(/\s+/g, ' ').trim()), v: FIB_NAME[fib] || '', ty: TYPES[tyk] || '',
+    h: p.slug, t: name,
     p: price, cp: p.sale_price !== '' && regular > price ? regular : 0,
     img: [...new Set((p.images || []).map(i => String(i.src).split('?')[0]))].slice(0, 4),
-    sz: [], comp: prev ? prev.comp : compositionOf(p, cc), fib, tyk, id: p.id, live: true,
-    oos: p.stock_status === 'outofstock', cats: p.categories.map(c => c.slug),
+    sz: [], comp, fam: fam ? fam.key : '', mat, tyk, id: p.id, live: true,
+    oos: p.stock_status === 'outofstock', cats,
   };
   if (p.manage_stock && Number.isInteger(p.stock_quantity)) o.q = p.stock_quantity;
   const mi = prev ? prev.mi : originOf(p, cc, shortText, longText); if (mi) o.mi = mi;
   return o;
 });
 
-// Pools feed the category tiles: in stock, photographed, one per family in turn (her most
-// specific category), in her own shop order.
+// Pools feed the category tiles: in stock, photographed, one per family in turn (hers, else her
+// most specific category), in her own shop order.
 const catCount = {}; all.forEach(p => p.cats.forEach(c => { catCount[c] = (catCount[c] || 0) + 1; }));
-const family = p => p.cats.slice().sort((a, b) => catCount[a] - catCount[b])[0] || '';
+const family = p => p.fam || p.cats.slice().sort((a, b) => catCount[a] - catCount[b])[0] || '';
 function pool(items, n = 24) {
   const groups = new Map();
   for (const p of items) if (!p.oos && p.img[0]) { const f = family(p); if (!groups.has(f)) groups.set(f, []); groups.get(f).push(p.h); }
@@ -272,27 +253,35 @@ function pool(items, n = 24) {
   for (let r = 0; out.length < n && lists.some(l => l.length > r); r++) for (const l of lists) if (l[r] && out.length < n) out.push(l[r]);
   return out;
 }
-const cats = FIBRES.map(([key, name]) => { const items = all.filter(p => p.fib === key); return { key, name, count: items.length, pool: pool(items) }; });
-const types = Object.entries(TYPES).map(([key, name]) => { const items = all.filter(p => p.tyk === key); return { key, name, count: items.length, pool: pool(items) }; })
-  .filter(t => t.count).sort((a, b) => b.count - a.count);
+// her nine materials in her ranking, her groups and families in her sheet's order; the ones with
+// nothing listed yet stay in, with a count of 0, for the pages to leave out
+const materials = MATERIALS.map(({ key, name, is }) => { const items = all.filter(p => p.mat === key); return { key, name, is, count: items.length, pool: pool(items) }; });
+const groups = G.groups.map(({ key, name, is }) => { const items = all.filter(p => p.tyk === key); return { key, name, is, count: items.length, pool: pool(items) }; });
+const families = G.families.map(f => ({ key: f.key, name: f.name, is: f.is, group: f.group, mat: f.material || '', ...(f.said ? { said: f.said, saidIs: f.saidIs } : {}),
+  ...(f.sizes ? { sizes: f.sizes } : {}), goes: f.goes || [], count: all.filter(p => p.fam === f.key).length }));
+const { _about, ...bespoke } = G.bespoke;
 
 const byId = new Map(all.map(p => [p.id, p]));
 const dropped = [];
 const picks = ids => ids.filter(id => byId.has(id) || (dropped.push(id), false)).map(id => byId.get(id).h);
 const CM = {
-  all, featuredNew: picks(curation.featuredNew), own: picks(curation.own), cats, types,
+  all, featuredNew: picks(curation.featuredNew), own: picks(curation.own), materials, groups, families, bespoke,
   hero: curation.hero, campaign: curation.campaign, wall: curation.wall,
   totalCount: all.length, saleCount: all.filter(p => p.cp > 0 && !p.oos).length,
   retired: dropped, harvestedAt: new Date().toISOString().slice(0, 10), source, ship,
-  made: curation.made || null, // made-for-you prices from Anna; null until she sets them
+  made: curation.made || null, // made-for-you prices from Anna, per row of her bespoke list; null until she sets them
 };
 
 /* ── report, against what the pages show today ──────────────────────────── */
 const L = [];
 L.push(`Source: ${source}`, `Products: ${products.length} in WooCommerce, ${all.length} listed (published, visible, simple), ${CM.saleCount} on sale, ${all.filter(p => p.oos).length} sold out`);
 L.push(`Composition stated: ${all.filter(p => p.comp).length} · type known: ${all.filter(p => p.tyk).length} · origin stated: ${all.filter(p => p.mi).length} · care text: ${Object.keys(care).length} texts`);
-L.push(`Fibre filter from: ${Object.entries(why.fib).map(([k, v]) => `${k} ${v}`).join(', ')}; none ${all.filter(p => !p.fib).length}`);
-L.push(`Types: ${types.map(t => `${t.key} ${t.count}`).join(', ')}; also ${[...new Set(all.map(p => p.tyk).filter(k => k && !TYPES[k]))].map(k => `${k} ${all.filter(p => p.tyk === k).length}`).join(', ') || 'none'}`);
+L.push(`Her material from: ${Object.entries(why.mat).map(([k, v]) => `${k} ${v}`).join(', ')}`);
+L.push(`Her groups: ${groups.map(t => `${t.key} ${t.count}`).join(', ')}; none ${all.filter(p => !p.tyk).length}`);
+L.push(`Her materials: ${materials.map(m => `${m.key} ${m.count}`).join(', ')}`);
+L.push(`Her families: ${families.filter(f => f.count).length} of ${families.length} have listed pieces; ${all.filter(p => p.fam).length} of ${all.length} pieces joined`);
+L.push(`  nothing listed yet: ${families.filter(f => !f.count).map(f => f.name).join(', ')}`);
+L.push(`  not in her sheet (${all.filter(p => !p.fam).length}): ${all.filter(p => !p.fam).map(p => `${p.id} ${p.t}`).join(' | ')}`);
 if (why.partial.length) L.push(`Composition withheld (does not add up to 100%) for ${why.partial.length}: ${[...new Set(why.partial.map(x => x.replace(/^\d+ /, '')))].join('; ')}`);
 if (all.some(p => !p.img.length)) L.push(`No photo in WooCommerce: ${all.filter(p => !p.img.length).map(p => `${p.id} ${p.t}`).join(', ')}`);
 if (why.missing.length) L.push(catalogue ? `Not in the customs catalogue (nothing claimed; rebuild it from a newer pull): ${why.missing.join(', ')}` : `New since the last full pull, no facts yet (run a full pull): ${why.missing.join(', ')}`);
@@ -300,12 +289,12 @@ if (dropped.length) L.push(`Curated picks no longer listed, dropped: ${dropped.j
 if (!catalogue) L.push(`No customs catalogue here (${path.relative(WS, CATALOGUE)}): facts carried over from the last full pull; prices, stock and listing refreshed.`);
 if (old) {
   const added = all.filter(p => !oldById.has(p.id)).map(p => p.id), gone = old.all.filter(p => !byId.has(p.id)).map(p => p.id);
-  const changed = { p: [], cp: [], oos: [], fib: [], tyk: [], comp: [] };
+  const changed = { p: [], cp: [], oos: [], mat: [], tyk: [], comp: [] };
   for (const p of all) { const o = oldById.get(p.id); if (!o) continue; for (const k of Object.keys(changed)) if (String(o[k]) !== String(p[k])) changed[k].push(p.id); }
   L.push(`Against the current data.js (${old.harvestedAt}): +${added.length} −${gone.length}; changed ${Object.entries(changed).map(([k, v]) => `${k} ${v.length}`).join(', ')}`);
   if (added.length) L.push(`  new: ${added.slice(0, 20).join(', ')}${added.length > 20 ? ' …' : ''}`);
   if (gone.length) L.push(`  gone: ${gone.slice(0, 20).join(', ')}${gone.length > 20 ? ' …' : ''}`);
-  for (const k of ['fib', 'tyk', 'comp']) for (const id of changed[k].slice(0, 3)) {
+  for (const k of ['mat', 'tyk', 'comp']) for (const id of changed[k].slice(0, 3)) {
     const o = oldById.get(id), n = byId.get(id); L.push(`  ${k} #${id} ${JSON.stringify(o[k])} → ${JSON.stringify(n[k])}  (${n.t})`);
   }
 }

@@ -19,6 +19,16 @@ Run locally with `node _serve.cjs` and open http://127.0.0.1:5895.
   the first 5xx), `--file` for a saved pull, `--dry` to only report. Composition, type and
   origin come from the customs catalogue in `04-platform/mjuk-shipping`; where her text states
   nothing, the page says nothing. Editorial picks live in `tools/curation.json`, by product id.
+- Anna's own classification, her sheet "Product groups" (Drive, 24 Sep), is `tools/groups.json`:
+  her piece groups, her families (with the rows she wrote and her "Matching products"), her nine
+  materials with her prestige and popularity, and her bespoke list. `tools/groups.mjs` joins each
+  product to a family by its name; the family gives the group and the material, and where her
+  sheet names no material the product's composition does (one fibre at 90% or more, or cashmere
+  with merino). The pull reports every product that fits no family. The pages read it for the
+  shop filters (group, then design, then material), the product page (material in her words,
+  "Goes with" from her matching lists read both ways, a rail of those pieces), the materials page
+  (`fibres.html`, her materials in her ranking, only her own sentences quoted) and the homepage
+  tiles. Icelandic names sit beside the English ones in the same file.
 - Checkout: the bag posts to `/bag` (`functions/bag.js`, a Cloudflare Pages Function; the local
   `_serve.cjs` runs the same file with `.dev.vars`). It signs the bag (ids, quantities, pompom
   notes, the price the drawer showed, the language) for ten minutes and sends the browser to the
@@ -69,8 +79,12 @@ The checkout (one host) is English for now.
   Manual until launch; the four-a-day schedule is written in and commented out. Where the
   customs catalogue is not present (on GitHub), each product keeps the facts of the last full
   local pull. WooCommerce stays the final word on stock at checkout.
-- Made for you: shapes, fabrics, salmon leather and length are Anna's (11 Sep meeting). Her
-  prices go in `tools/curation.json` under `made` (null until she gives them); with none set the
-  page shows no number and "Request this piece" opens an email to customer support with every
-  choice written out. With all set, the total is calculated as she asked.
+- Made for you: exactly her 22 "Bespoke clothing" rows (`tools/groups.json` `bespoke`): eight
+  models, cashmere and merino or Icelandic wool (cashmere for the shawl and poncho), with or
+  without fur; an option her list does not have for the current choice is switched off. The
+  colour is one of her blankets in that fabric, in stock (the fabric is her blankets, 11 Sep
+  meeting). Salmon leather and length as she described. Prices go in `tools/curation.json`
+  `made.prices`, one per row under her own row name, plus `salmonLeather`; null until she gives
+  them, and then the page shows no number and "Request this piece" opens an email to customer
+  support with every choice written out, her row name first. With a row priced, its total shows.
 

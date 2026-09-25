@@ -75,18 +75,31 @@
   "https://i1.wp.com/mjukiceland.com/wp-content/uploads/2021/11/IMG-20220401-WA0113.jpg"
  ],
  "made": {
-  "_about": "Made-for-you prices in USD, set by Anna (about twenty in total, per the 11 Sep meeting). null = not given yet: the page then shows no number and says price on request. Fill all to switch on the automatic total.",
-  "shape": {
-   "cape": null,
-   "poncho": null,
-   "shawl": null
+  "_about": "Made-for-you prices in USD, set by Anna: one per row of her Bespoke clothing list (tools/groups.json bespoke.rows, her own row names), plus the salmon leather trim. null = not given yet: the page then shows no number and says price on request; the request goes to the workshop by email.",
+  "prices": {
+   "Cashmere shawl": null,
+   "Cashmere poncho": null,
+   "Cashmere and Merino shawl": null,
+   "Icelandic wool shawl": null,
+   "Cashmere and Merino shawl with pockets": null,
+   "Icelandic Wool shawl with pockets": null,
+   "Cashmere and Merino Petite poncho": null,
+   "Icelandic Wool Petite poncho": null,
+   "Cashmere and Merino Princess cape": null,
+   "Icelandic Wool Princess cape": null,
+   "Cashmere and Merino Angelina cape": null,
+   "Icelandic Wool Angelina cape": null,
+   "Cashmere and Merino Grace cape": null,
+   "Icelandic Wool Grace cape": null,
+   "Cashmere and Merino shawl with fur": null,
+   "Icelandic wool shawl with fur": null,
+   "Cashmere and Merino Petite poncho with fur": null,
+   "Icelandic Wool Petite poncho with fur": null,
+   "Cashmere and Merino Grace cape with fur": null,
+   "Icelandic Wool Grace cape with fur": null,
+   "Cashmere and Merino Empress cape with fur": null,
+   "Icelandic Wool Empress cape with fur": null
   },
-  "fabric": {
-   "icelandic": null,
-   "merino": null,
-   "cashmere": null,
-   "alpaca": null
-  },
-  "trim": null
+  "salmonLeather": null
  }
 }
