@@ -90,6 +90,20 @@ Run locally with `node _serve.cjs` and open http://127.0.0.1:5895.
   node tools/build-products.mjs` (then `build-production.mjs` for launch). The stock workflow
   rebuilds the product pages with the data.
 
+## The one-address router (launch rehearsal, 2026-09-25; nothing deployed)
+
+`edge/router.js` + `wrangler.jsonc`: a Cloudflare Worker on the route `mjukiceland.com/*` (and a
+custom domain for `mjukiceland.is`) serves the storefront from `dist/` and `/bag`, and hands her
+WooCommerce paths (`/basket/`, `/checkout/`, `/my-account/`, `/wp-admin/`, `/wp-json/`, `?wc-ajax=`,
+`?add-to-cart=`, PayPal's `wc-api`, the hand-off …) to her WordPress with the Host unchanged, so her
+cart cookie, PayPal return and IPN keep working. Her old `/shop/` and `/product-category/…/`
+addresses 301 to the shop; anything the storefront has no file for goes to her WordPress, never a
+404. Basket, checkout, account, admin and any request with a WooCommerce or login cookie are never
+cached. Route table, DNS to copy, launch order and the way back:
+`_docs/MJUK-LAUNCH-ROUTING-2026-09-25.md` (workspace).
+`node tools/build-production.mjs && node --no-warnings tools/e2e-router.mjs replica` rehearses it in
+workerd on localhost:8787 in front of the replica of her stack (or `upgraded`/`sandbox`/an origin).
+
 ## Two languages (plan step 7)
 
 English pages at the root (mjukiceland.com at launch), Icelandic pages in `is/` (mjukiceland.is):

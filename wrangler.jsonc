@@ -1,0 +1,27 @@
+// MJÚK router (edge/router.js): the storefront build (dist/, tools/build-production.mjs) and /bag on
+// her one hostname, her WordPress behind it. NOTHING IS DEPLOYED FROM HERE YET: the launch order,
+// DNS and the way back are in _docs/MJUK-LAUNCH-ROUTING-2026-09-25.md (parent workspace).
+// Secrets, set at launch with `wrangler secret put`, never in this file: BAG_SECRET.
+{
+  "name": "mjuk-router",
+  "main": "edge/router.js",
+  "compatibility_date": "2025-09-01",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    // every request meets the router first: it decides storefront or WordPress
+    "run_worker_first": true,
+    // exact files only, so /shop.html is served as is and /product/<slug>/ maps in the router
+    "html_handling": "none",
+    "not_found_handling": "none"
+  },
+  "vars": { "CHECKOUT_ORIGIN": "https://mjukiceland.com" },
+  // .com is a ROUTE: fetch() to the zone's own hostname then reaches her Hostinger origin.
+  // .is has no origin: a CUSTOM DOMAIN (the Worker is the origin).
+  "routes": [
+    { "pattern": "mjukiceland.com/*", "zone_name": "mjukiceland.com" },
+    { "pattern": "www.mjukiceland.com/*", "zone_name": "mjukiceland.com" },
+    { "pattern": "mjukiceland.is", "custom_domain": true },
+    { "pattern": "www.mjukiceland.is", "custom_domain": true }
+  ]
+}
