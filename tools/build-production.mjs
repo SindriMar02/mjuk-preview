@@ -94,5 +94,18 @@ fs.writeFileSync(path.join(OUT, 'is/robots.txt'), robots('mjukiceland.is'));
 for (const f of ['robots.txt', 'is/robots.txt']) if (/^Disallow:\s*\/\s*$/m.test(fs.readFileSync(path.join(OUT, f), 'utf8'))) bad.push(f + ': Disallow: /');
 for (const f of ['sitemap.xml', 'is/sitemap.xml']) if (!fs.existsSync(path.join(OUT, f))) bad.push(f + ' missing (run tools/build-products.mjs first)');
 
+/* A release is built from her live catalogue, pulled at most two days ago, and from pages generated
+   after that pull: the file checks above compare pages only with each other, so stale or sandbox
+   data would otherwise ship clean (Codex 2026-09-26). --rehearsal lets a local test build through. */
+if (!process.argv.includes('--rehearsal')) {
+  globalThis.window = {};
+  new Function('window', fs.readFileSync(path.join(ROOT, 'assets/data.js'), 'utf8'))(globalThis.window);
+  const { harvestedAt, source } = globalThis.window.CM;
+  if (!/^live /.test(source || '')) bad.push(`assets/data.js comes from "${source}", not her live shop: node tools/pull-woo.mjs --live, then rebuild (or --rehearsal for a test build)`);
+  if (!((Date.now() - Date.parse(harvestedAt)) / 864e5 <= 2)) bad.push(`assets/data.js was pulled ${harvestedAt}: pull her catalogue again before a release (two days at most)`);
+  const mt = f => fs.statSync(path.join(ROOT, f)).mtimeMs;
+  if (mt('sitemap.xml') < mt('assets/data.js') || mt('assets/i18n-is.js') < mt('tools/is.json')) bad.push('the pages are older than their data: run build-pages, build-is and build-products after the pull');
+}
+
 if (bad.length) { console.error('production build FAILED:\n  ' + bad.slice(0, 20).join('\n  ') + (bad.length > 20 ? `\n  … ${bad.length - 20} more` : '')); process.exit(1); }
 console.log(`dist/: ${pages} pages (${indexable} indexable, ${pages - indexable} noindex: staff and the product.html forwarder), robots.txt + sitemap.xml for mjukiceland.com and mjukiceland.is`);

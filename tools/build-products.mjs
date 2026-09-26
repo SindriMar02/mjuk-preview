@@ -180,7 +180,8 @@ if (fs.existsSync(CATS)) {
   const bySlug = Object.fromEntries(cats.map(c => [c.slug, c])), byId = Object.fromEntries(cats.map(c => [c.id, c]));
   const kids = id => cats.filter(c => c.parent === id).flatMap(c => [c.slug, ...kids(c.id)]);
   const full = c => (c.parent && byId[c.parent] ? full(byId[c.parent]) + '/' : '') + c.slug;
-  const one = (list, f) => { const k = {}; list.forEach(p => { const x = f(p); if (x) k[x] = (k[x] || 0) + 1; }); const top = Object.entries(k).sort((a, b) => b[1] - a[1])[0]; return top && top[1] >= list.length * 0.9 ? top[0] : ''; };
+  // the most common value, and how many of the pieces have it
+  const top = (list, f) => { const k = {}; list.forEach(p => { const x = f(p); if (x) k[x] = (k[x] || 0) + 1; }); return (Object.entries(k).sort((a, b) => b[1] - a[1])[0] || [''])[0]; };
   const map = {};
   for (const c of cats) {
     const slugs = new Set([c.slug, ...kids(c.id)]);
@@ -191,11 +192,23 @@ if (fs.existsSync(CATS)) {
     else if (LANG.en.V.GRP[c.slug]) { to = 'shop.html?type=' + c.slug; why = 'named after her piece group'; }
     else if (!list.length) why = 'no piece in the shop today';
     else {
-      const fam = one(list, p => p.fam), tyk = one(list, p => p.tyk), mat = one(list, p => p.mat);
-      if (fam) { to = 'shop.html?family=' + fam; why = `its ${list.length} pieces are her design "${fam}"`; }
-      else if (tyk && mat) { to = `shop.html?type=${tyk}&material=${mat}`; why = `its ${list.length} pieces are ${tyk} in ${mat}`; }
-      else if (tyk) { to = 'shop.html?type=' + tyk; why = `its ${list.length} pieces are ${tyk}`; }
-      else if (mat) { to = 'shop.html?material=' + mat; why = `its ${list.length} pieces are ${mat}`; }
+      /* Of the filters that show at least 90% of the category's pieces (counted on the filter as a
+         whole: type and material could each pass alone yet together drop the angora mittens and
+         gloves from her angora category, Codex 2026-09-26), the one that best matches it: most of
+         its pieces, fewest others (F1 of the two). */
+      const fam = top(list, p => p.fam), tyk = top(list, p => p.tyk), mat = top(list, p => p.mat);
+      const shows = keep => list.filter(keep).length;
+      const enough = n => n >= list.length * 0.9;
+      const cands = [
+        fam && ['shop.html?family=' + fam, p => p.fam === fam, `her design "${fam}"`],
+        tyk && mat && [`shop.html?type=${tyk}&material=${mat}`, p => p.tyk === tyk && p.mat === mat, `${tyk} in ${mat}`],
+        mat && ['shop.html?material=' + mat, p => p.mat === mat, mat],
+        tyk && ['shop.html?type=' + tyk, p => p.tyk === tyk, tyk],
+      ].filter(Boolean);
+      const score = keep => { const n = shows(keep), all = CM.all.filter(keep).length, rec = n / list.length, prec = all ? n / all : 0; return rec + prec ? 2 * rec * prec / (rec + prec) : 0; };
+      const best = cands.map((c, i) => ({ c, i, n: shows(c[1]), f: score(c[1]) })).filter(x => enough(x.n)).sort((x, y) => y.f - x.f || x.i - y.i)[0];
+      const hit = best && enough(best.n) ? best.c : null;
+      if (hit) { to = hit[0]; why = `${shows(hit[1])} of its ${list.length} pieces are ${hit[2]}`; }
       else why = `its ${list.length} pieces share no single design, group or material`;
     }
     map[c.slug] = { path: full(c), to, why, n: list.length };

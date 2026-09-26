@@ -418,7 +418,7 @@ section{padding:clamp(70px,12vw,180px) 0;position:relative}
 .foot{padding:clamp(40px,6vw,80px) var(--pad) 30px;border-top:1px solid var(--line)}
 .foot__word{width:100%;display:flex;justify-content:center}
 .foot__word .wordmark{height:clamp(86px,15vw,220px)}
-.foot__grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:40px;padding-top:36px;border-top:1px solid var(--line)}
+.foot__grid{display:grid;grid-template-columns:repeat(5,1fr);gap:24px;margin-top:40px;padding-top:36px;border-top:1px solid var(--line)}
 .foot__grid>div{display:flex;flex-direction:column;gap:10px}
 .foot__grid .mono{margin-bottom:6px}
 .foot__grid a,.foot__mut{font-size:13px;color:var(--dim);transition:color .3s}

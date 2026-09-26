@@ -58,6 +58,9 @@ for (const rel of pages) {
   if (isProduct) {
     products++;
     if (canon.length !== 1 || canon[0] !== prodUrl(rel)) fail(rel, `canonical ${canon.join(' ') || 'missing'}, expected ${prodUrl(rel)}`);
+  } else if (!/(^|\/)(staff|product)\.html$/.test(rel) && (canon.length !== 1 || canon[0] !== prodUrl(rel))) {
+    // every indexable page names itself on its production host (the staff tool and the forwarder are noindex)
+    fail(rel, `canonical ${canon.join(' ') || 'missing'}, expected ${prodUrl(rel)}`);
   } else if (canon.length > 1) fail(rel, 'more than one canonical');
   const title = (h.match(/<title>([\s\S]*?)<\/title>/) || [])[1] || '';
   if (!title.trim()) fail(rel, 'no title');

@@ -82,7 +82,9 @@ Run locally with `node _serve.cjs` and open http://127.0.0.1:5895.
 - **The repository is the preview**: every page is noindex and `robots.txt` disallows everything.
   `node tools/build-production.mjs` writes the launch build to `dist/` (gitignored): noindex off
   except staff.html and the product.html forwarder, a crawlable PNG favicon, robots.txt and sitemap
-  per host. It fails if a noindex or a data-URI icon survives.
+  per host. It fails if a noindex or a data-URI icon survives, and (for a release) unless
+  `assets/data.js` was pulled from her live shop (`pull-woo.mjs --live`) at most two days ago and the
+  pages were built after it; `--rehearsal` lets a local test build through.
 - `node tools/check-seo.mjs [dist]` crawls every generated page from the files: links and assets
   resolve, canonical and hreflang pairs, JSON-LD complete and free of stock counts, the name and
   price in the HTML text, the sitemaps list only real pages, the catalogue links every page.
@@ -101,7 +103,7 @@ addresses 301 to the shop; anything the storefront has no file for goes to her W
 404. Basket, checkout, account, admin and any request with a WooCommerce or login cookie are never
 cached. Route table, DNS to copy, launch order and the way back:
 `_docs/MJUK-LAUNCH-ROUTING-2026-09-25.md` (workspace).
-`node tools/build-production.mjs && node --no-warnings tools/e2e-router.mjs replica` rehearses it in
+`node tools/build-production.mjs --rehearsal && node --no-warnings tools/e2e-router.mjs replica` rehearses it in
 workerd on localhost:8787 in front of the replica of her stack (or `upgraded`/`sandbox`/an origin).
 
 ## Two languages (plan step 7)

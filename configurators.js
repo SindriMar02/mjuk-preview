@@ -29,11 +29,14 @@
   /* ── the real pompoms, from her own catalogue: 25 photographed colours ── */
   // one typo on her live shop ("Grapefrui0") corrected here for the swatch label only
   const FIX = { Grapefrui0: 'Grapefruit' };
+  // a pompom with no price in her shop is not offered: the chooser shows her price, never a stand-in (Codex 2026-09-26)
   const POMS = CM.all
-    .filter(p => /\bpom ?pom\b/i.test(p.t) && !/beanie|hat|aviator|cap\b/i.test(p.t) && p.img && p.img[0])
+    .filter(p => /\bpom ?pom\b/i.test(p.t) && !/beanie|hat|aviator|cap\b/i.test(p.t) && p.img && p.img[0] && p.p > 0)
     .map(p => { const raw = p.t.replace(/^.*?pom ?pom\.?\s*/i, '').replace(/\.$/, '').trim() || 'Raccoon';
-      return { h: p.h, name: FIX[raw] || raw, kind: /raccoon/i.test(p.t) ? 'Raccoon' : 'Polar fox', price: p.p || 29, img: p.img[0] }; })
+      return { h: p.h, name: FIX[raw] || raw, kind: /raccoon/i.test(p.t) ? 'Raccoon' : 'Polar fox', price: p.p, img: p.img[0] }; })
     .sort((a, b) => a.name.localeCompare(b.name));
+
+  const escA = x => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); // her names are data, not markup
 
   /* ════════════════════ 1 · POMPOM CHOOSER ════════════════════ */
   const dlg = $('#pom');
@@ -43,8 +46,8 @@
     let hat = null, count = 0, active = 0, chosen = [null, null];
 
     grid.innerHTML = POMS.map((s, i) =>
-      `<button type="button" class="sw" data-i="${i}" style="--i:${i}" aria-pressed="false" title="${t(s.kind)}, ${s.name}, ${usd(s.price)}">
-         <img src="${px(s.img, 160)}" alt="" loading="lazy"/><span>${s.name}</span></button>`).join('');
+      `<button type="button" class="sw" data-i="${i}" style="--i:${i}" aria-pressed="false" title="${t(s.kind)}, ${escA(s.name)}, ${usd(s.price)}">
+         <img src="${px(s.img, 160)}" alt="" loading="lazy"/><span>${escA(s.name)}</span></button>`).join('');
 
     const price = () => (hat ? hat.p : 0) + chosen.slice(0, count).reduce((n, s) => n + (s ? s.price : 0), 0);
     const ready = () => count === 0 || chosen.slice(0, count).every(Boolean);

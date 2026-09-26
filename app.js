@@ -50,7 +50,9 @@
   const editorial = (CM.campaign || []);
 
   /* ── designed product card, with real size chips that add to bag ── */
-  const esc = s => String(s).replace(/"/g, '&quot;');
+  // everything from her catalogue goes through here before it meets HTML: a product name is data,
+  // never markup (Codex 2026-09-26: a name with markup in it would have run on the home page)
+  const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   const prod = (p, i) => {
     // cards render at most 380px wide, so 620 still covers 2x screens. Hover no longer swaps to
     // the second gallery shot: on her shop that is usually a close-up of the knit, which read as
@@ -64,17 +66,17 @@
     const sizes = (p.sz && p.sz.length)
       ? `<span class="mono">Add</span>` + p.sz.map(v => {
           const label = String(v.s).split('/')[0].trim() || v.s;
-          return `<button class="sz" data-h="${esc(p.h)}" data-s="${esc(label)}" title="${esc(v.s)}${v.a ? '' : ' — sold out'}"${v.a ? '' : ' disabled'}>${label}</button>`;
+          return `<button class="sz" data-h="${esc(p.h)}" data-s="${esc(label)}" title="${esc(v.s)}${v.a ? '' : ' — sold out'}"${v.a ? '' : ' disabled'}>${esc(label)}</button>`;
         }).join('')
       // a plain hat (no pompom in its name) asks about pompoms instead of being added silently
       : `<button class="sz sz--solo${p.tyk === 'hats' && !/pom ?pom/i.test(p.t) ? ' pom-ask' : ''}" data-h="${esc(p.h)}" data-s="">${t('Add to bag')}</button>`;
     return `<article class="prod rv">
       <div class="prod__im">
         <span class="prod__ix">${String(i + 1).padStart(2, '0')}</span>
-        <img class="main" src="${main}" alt="${p.t}" loading="lazy"/>
+        <img class="main" src="${main}" alt="${esc(p.t)}" loading="lazy"/>
         <div class="prod__sizes">${sizes}</div>
       </div>
-      <div class="prod__meta"><div><div class="prod__name">${p.t}</div><div class="prod__cat">(${catLabel(p)})</div></div>${price}</div>
+      <div class="prod__meta"><div><div class="prod__name">${esc(p.t)}</div><div class="prod__cat">(${catLabel(p)})</div></div>${price}</div>
     </article>`;
   };
   const railT = $('#railT'); if (railT) railT.innerHTML = pick(CM.featuredNew).map(prod).join('');
@@ -93,7 +95,7 @@
       const img = p ? px(p.img[0], 620) : '';
       return `<a class="cat rv" href="${href(c)}" data-cat="${esc(c.key)}">
         <div class="cat__im">${img ? `<img src="${img}" alt="${esc(nm(c))}" loading="lazy"/>` : ''}</div>
-        <div class="cat__meta"><span class="cat__name">${nm(c)}</span><span class="cat__n mono">${pieces(c.count)}</span></div>
+        <div class="cat__meta"><span class="cat__name">${esc(nm(c))}</span><span class="cat__n mono">${pieces(c.count)}</span></div>
       </a>`;
     }).join('');
   };
@@ -140,7 +142,7 @@
     let e = 0, frames = [];
     specimens.forEach((p, i) => {
       if (i % 3 === 0) frames.push(`<figure class="pan__i pan__i--tall"><img src="${px(editorial[e++ % editorial.length], 900)}" alt="MJÚK Iceland" loading="lazy"/><figcaption class="pan__cap">Reykjavík — Laugavegur 23</figcaption></figure>`);
-      frames.push(`<figure class="pan__i pan__i--prod"><img src="${px(p.img[0], 620)}" alt="${p.t}" loading="lazy"/><figcaption class="pan__cap">${p.t}</figcaption></figure>`);
+      frames.push(`<figure class="pan__i pan__i--prod"><img src="${px(p.img[0], 620)}" alt="${esc(p.t)}" loading="lazy"/><figcaption class="pan__cap">${esc(p.t)}</figcaption></figure>`);
     });
     panTrack.insertAdjacentHTML('beforeend', frames.join(''));
   }
@@ -196,6 +198,26 @@
   const save = () => { try { localStorage.setItem('mjuk_bag', JSON.stringify(lines)); } catch (e) {} };
   const keep = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} };
   const kept = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+  /* Two hosts at launch (mjukiceland.com in English, mjukiceland.is in Icelandic) keep two separate
+     browser storages, so the language switch carries the bag across in the address's #fragment,
+     which never reaches a server, and the page it lands on takes it as its bag (Codex 2026-09-26).
+     On one host (the preview) the storage is shared and nothing is carried. */
+  const b64u = {
+    to: str => { let b = ''; new TextEncoder().encode(str).forEach(c => { b += String.fromCharCode(c); }); return btoa(b).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); },
+    from: s => new TextDecoder().decode(Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0))),
+  };
+  { const m = location.hash.match(/^#bag=([A-Za-z0-9_-]+)$/);
+    if (m) {
+      try { const got = JSON.parse(b64u.from(m[1])); if (Array.isArray(got)) { localStorage.setItem('mjuk_bag', JSON.stringify(got)); lines = load(); } } catch (e) {}
+      history.replaceState(null, '', location.pathname + location.search);
+    } }
+  { const lang = $('#langBtn');
+    if (lang) lang.addEventListener('click', () => {
+      let to; try { to = new URL(lang.getAttribute('href'), location.href); } catch (e) { return; }
+      to.hash = '';
+      if (to.origin !== location.origin && lines.length) to.hash = 'bag=' + b64u.to(JSON.stringify(lines));
+      lang.href = to.href;
+    }); }
   // screen readers hear what the drawer shows: added, already in the bag, sold since
   const say = (() => { const el = document.createElement('p'); el.setAttribute('aria-live', 'polite');
     el.style.cssText = 'position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap';
@@ -226,7 +248,7 @@
     if (trimmed.length) { save(); notices.push(fmt('Fewer can be ordered now of {names}, so your bag holds what can be.', { names: [...new Set(trimmed)].join(', ') })); } }
   /* A bag that went to checkout may have been ordered. The link back from her order-received page
      (?ordered=1) empties it; otherwise the drawer asks, for a day. */
-  if (new URLSearchParams(location.search).has('ordered')) { lines = []; save(); keep('mjuk_bag_out', null); }
+  if (new URLSearchParams(location.search).get('ordered') === '1') { lines = []; save(); keep('mjuk_bag_out', null); }
   const wentOut = () => { const t = +kept('mjuk_bag_out'); return t && Date.now() - t < 864e5 ? new Date(t) : null; };
   const bagN = () => lines.filter(live).reduce((n, l) => n + l.q, 0);
   const bagSum = () => lines.filter(live).reduce((n, l) => n + l.q * priceOf(l), 0);
@@ -288,7 +310,8 @@
   /* one of one: never more of a piece in the bag than she has on the shelf (or than a bag can
      carry). Woo's stock is still the final word at checkout, since this is build-time data. */
   const inBag = h => lines.filter(l => l.h === h).reduce((n, l) => n + l.q, 0);
-  const roomFor = p => (p.oos ? 0 : (p.q > 0 ? p.q : MAX_EACH) - inBag(p.h));
+  // never more than functions/bag.js accepts for one line, even when her stock is larger (Codex 2026-09-26)
+  const roomFor = p => (p.oos ? 0 : Math.min(p.q > 0 ? p.q : MAX_EACH, MAX_EACH) - inBag(p.h));
   function addToBag(handle, size, btn, extra) {
     const p = byHandle[handle]; if (!p) return;
     if (roomFor(p) < 1) {

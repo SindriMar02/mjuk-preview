@@ -1,6 +1,6 @@
 /* Launch-day rehearsal of the one-address router (edge/router.js), locally, never live.
 
-     node tools/build-production.mjs && node --no-warnings tools/e2e-router.mjs [replica|upgraded|sandbox|<origin>]
+     node tools/build-production.mjs --rehearsal && node --no-warnings tools/e2e-router.mjs [replica|upgraded|sandbox|<origin>]
 
    The router runs in workerd (the installed wrangler's unstable_dev, wrangler.jsonc, assets = dist/)
    on http://localhost:8787, in front of a local WooCommerce (default the replica of her stack,
@@ -105,7 +105,7 @@ try {
     check(/no-store/.test(cc) && /private/.test(cc), `${p}: never cached (${cc})`);
   }
   // her old add-to-cart links carry the action on any page: WordPress must get it, uncached (Codex finding)
-  for (const p of [`/product/${one.h}/?add-to-cart=${one.id}`, `/shop/?add-to-cart=${one.id}`, `/shop.html?wc-ajax=get_refreshed_fragments`]) {
+  for (const p of [`/product/${one.h}/?add-to-cart=${one.id}`, `/product/${one.h}/?%61dd-to-cart=${one.id}`, `/shop/?add-to-cart=${one.id}`, `/shop.html?wc-ajax=get_refreshed_fragments`]) {
     const r = await req(SHOP + p); check(route(r) === 'wordpress:action' && /no-store/.test(r.headers.get('cache-control') || ''), `${p} → her WordPress, uncached (${r.status} ${route(r)})`);
   }
   { const r = await req(SHOP + '/shop.html', { headers: { Cookie: 'wp_woocommerce_session_abc=1' } }); check(route(r) === 'storefront', 'a WooCommerce session cookie does not take the storefront away'); }
@@ -118,6 +118,10 @@ try {
     const r = await req(SHOP + from); check(r.status === 301 && r.headers.get('location') === to, `${from} → ${to} (${r.status} ${r.headers.get('location')})`);
   }
   { const r = await req(SHOP + '/is/shop.html'); check(r.status === 301 && r.headers.get('location') === `https://${ISHOST}/shop.html`, `/is/… on .com → the Icelandic host (${r.headers.get('location')})`); }
+  // her old forms under /is/ land on the final Icelandic address in one hop, never a 404 or a second redirect
+  for (const [from, to] of [['/is/shop/', '/shop.html'], [`/is/product/${one.h}`, `/product/${one.h}/`], ['/is/product-category/our-collections/angora-wool/', '/' + CATS['angora-wool'].to]]) {
+    const r = await req(SHOP + from); check(r.status === 301 && r.headers.get('location') === `https://${ISHOST}${to}`, `${from} → ${to} on the Icelandic host in one hop (${r.status} ${r.headers.get('location')})`);
+  }
   { const r = await req(SHOP + '/product-category/no-such-category/'); check(route(r).startsWith('wordpress'), 'a category she no longer has: WordPress answers for it'); }
   { const r = await req(`http://www.localhost:${PORT}/shop.html`, { headers: { Host: `www.localhost:${PORT}` } }).catch(() => null); if (r) check(r.status === 301, 'www. → the bare host'); }
 

@@ -55,8 +55,17 @@ export function onRequestGet({ env }) {
 
 export async function onRequestPost({ request, env }) {
   if (!env.BAG_SECRET || !env.CHECKOUT_ORIGIN) return new Response('Checkout is not configured.', { status: 503 });
+  // a real bag (40 lines at most) is a few kB; anything far larger is refused before it is read
+  // into memory and parsed (Codex 2026-09-26). The storefront posts a plain urlencoded form.
+  const MAX_BODY = 16 * 1024;
+  const tooBig = () => new Response('That bag is too large.', { status: 413, headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
+  if (+(request.headers.get('Content-Length') || 0) > MAX_BODY) return tooBig();
   let form = null;
-  try { form = await request.formData(); } catch (e) { /* not a form post */ }
+  try {
+    const text = await request.text();
+    if (text.length > MAX_BODY) return tooBig();
+    form = new URLSearchParams(text);
+  } catch (e) { /* no readable body */ }
   const items = form && readBag(form.get('bag'));
   if (!items) return new Response('That bag could not be read. Go back and try again.', { status: 400, headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
   const { payload, sig } = await sign(items, env.BAG_SECRET, Date.now(), form.get('lang') === 'is' ? 'is' : '');

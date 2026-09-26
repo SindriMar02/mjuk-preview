@@ -64,11 +64,15 @@ for (const file of PAGES) {
   // the shop's plain catalogue is her product names, written per language by tools/build-products.mjs
   en = en.replace(/\s*<!-- CATALOGUE -->[\s\S]*?<!-- \/CATALOGUE -->/, '');
   // English page: hreflang in, the language switch becomes a link to its Icelandic twin
-  en = en.replace(/<link rel="alternate" hreflang[^>]*\/>\n/g, '').replace('</head>', hreflang(file) + '</head>');
+  // and its own canonical, on its production host (Codex 2026-09-26: the static pages had none)
+  en = en.replace(/<link rel="alternate" hreflang[^>]*\/>\n/g, '').replace(/<link rel="canonical"[^>]*\/>\n/g, '')
+    // (not the product template, whose pages get their own, nor the noindex staff tool)
+    .replace('</head>', (/^(product|staff)\.html$/.test(file) ? '' : `<link rel="canonical" href="${url('en', file)}" />\n`) + hreflang(file) + '</head>');
   en = en.replace(/<button class="nav__lang" id="langBtn"[^>]*>[\s\S]*?<\/button>|<a class="nav__lang"[^>]*>[\s\S]*?<\/a>/,
     `<a class="nav__lang" id="langBtn" href="is/${file}" hreflang="is" lang="is" aria-label="&Iacute; &iacute;slensku">EN / <b>&Iacute;S</b></a>`);
   let is = translate(en, file)
     .replace('<html lang="en">', '<html lang="is" data-root="../">')
+    .replace(`<link rel="canonical" href="${url('en', file)}" />`, `<link rel="canonical" href="${url('is', file)}" />`)
     // the site name (Google's WebSite node) is the Icelandic host's own on the Icelandic homepage
     .replace('"url":"https://mjukiceland.com/","inLanguage":"en"}', '"url":"https://mjukiceland.is/","inLanguage":"is"}')
     // one level down: shared files come from the site root

@@ -155,6 +155,12 @@ try {
   check(!phpNoise(A.page), 'the checkout page prints no PHP warning');
   { const t = await handoff(bag); const b = browser(); const f = await b.follow(t.to); // the same link a second time
     check(new URL(f.at).pathname === CART && /already been opened/i.test(notices(f.html)) && !(await b.cart()).items.length, 'a used link fills nothing and says so'); }
+  { // the same fresh link opened in two browsers at the same moment fills exactly one cart (Codex 2026-09-26)
+    const r = await fetch(STORE + '/bag', { method: 'POST', redirect: 'manual', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ bag: JSON.stringify(bag) }) });
+    const link = r.headers.get('location'), b1 = browser(), b2 = browser();
+    await Promise.all([b1.follow(link), b2.follow(link)]);
+    const filled = [(await b1.cart()).items.length, (await b2.cart()).items.length].filter(n => n > 0).length;
+    check(filled === 1, `one link opened twice at once fills exactly one cart (${filled})`); }
   { const b = browser(); const f = await b.follow(A.to.replace(/.$/, c => (c === 'A' ? 'B' : 'A')));
     check(new URL(f.at).pathname === CART && /could not be opened/i.test(notices(f.html)), 'a tampered link fills nothing and says so'); }
   { const { sign } = await import('../functions/bag.js'); const dev = env(path.join(ROOT, '.dev.vars'));

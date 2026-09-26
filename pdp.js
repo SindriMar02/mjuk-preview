@@ -54,6 +54,27 @@
     const familyKey = p => (p.cats || []).filter(c => !GENERIC.has(c)).sort((a, b) => catCount[b] - catCount[a])[0] || null;
     const familyName = k => k.replace(/marsmallow/, 'marshmallow').replace(/-/g, ' ').replace(/^\w/, c => c.toUpperCase());
 
+    /* Her care lines with their grammar fixed (Sindri's yes, 2026-09-26: her text comes over as she wrote it
+       unless flagged and fixed). Keyed by her exact wording, so a line she rewrites shows as she wrote it.
+       Only the English pages use these; the Icelandic ones translate her original wording (tools/is.json). */
+    const CARE_FIX = {
+      "Machine-washable – cold water, wool or gentle cycle, laundry bag and airdry flat. Hand-washable – cold water, airdry flat.": "Machine washable: cold water, wool or gentle cycle, in a laundry bag, air dry flat. Hand washable: cold water, air dry flat.",
+      "Machine-washable: cold water, wool or gentle cycle, laundry bag and airdry flat. Hand-washable: cold water, airdry flat.": "Machine washable: cold water, wool or gentle cycle, in a laundry bag, air dry flat. Hand washable: cold water, air dry flat.",
+      "Dry clean only": "Dry clean only.",
+      "Handwash only, luke-warm water. Air-flat dry.": "Hand wash only, lukewarm water. Air dry flat.",
+      "Only handwash with cold water (20′ C) , no twisting, dry flat.": "Hand wash only in cold water (20 °C), no twisting, dry flat.",
+      "We recommend only by hand washing or dry cleaning to keep cashmere as soft and airy": "We recommend hand washing or dry cleaning only, to keep cashmere soft and airy.",
+      "We recommend only hand washing or dry cleaning to keep cashmere as soft and airy": "We recommend hand washing or dry cleaning only, to keep cashmere soft and airy.",
+      "Only hand wash with cold water, airdry flat.": "Hand wash only in cold water, air dry flat.",
+      "Dry cleaning or hand wash in cold water (20 degrees Celsius) and soft detergent. No twisting, dry flat": "Dry clean, or hand wash in cold water (20 °C) with a mild detergent. No twisting, dry flat.",
+      "Handwash with cold water (20′ C) , no twisting, dry flat.": "Hand wash in cold water (20 °C), no twisting, dry flat.",
+      "Only handwash with cold water (20′ C) , no twisting, no soaking, air dry flat.": "Hand wash only in cold water (20 °C), no twisting, no soaking, air dry flat.",
+      "Dry cleaning or Handwash with cold water, gentle wool detergent, no twisting, airdry flat": "Dry clean, or hand wash in cold water with a gentle wool detergent, no twisting, air dry flat.",
+      "Handwash with cold water (20′ C) , no twisting, no soaking, air dry flat.": "Hand wash in cold water (20 °C), no twisting, no soaking, air dry flat.",
+      "Only dry cleaning or handwash with cold water (20′ C) , no twisting, dry flat.": "Dry clean or hand wash only, in cold water (20 °C), no twisting, dry flat.",
+      "Handwash with cold water, no twisting.": "Hand wash in cold water, no twisting.",
+      "Only Dry cleaning.": "Dry clean only."
+    };
     /* ── one piece: the breadcrumb, the gallery, the buying column and what the two rails hold ── */
     const view = p => {
       const c = copyOf(p);
@@ -74,8 +95,8 @@
         /* facts only where her own text states them: size and origin come from it, never a default */
         [t('Size'), /\bone[- ]size\b/i.test(c.short + ' ' + c.long) ? t('One size') : ''],
         [t('Made'), t(p.mi || '')],
-        // her care line; the Icelandic pages carry tools/is.json's translation of each of her 18 wordings
-        [t('Care'), c.care ? t(c.care.replace(/-\s/g, ': ').replace(/\s+/g, ' ')) : ''],
+        // her care line: in English with its grammar fixed (CARE_FIX), in Icelandic from tools/is.json
+        [t('Care'), c.care ? (care => isIS ? t(care) : CARE_FIX[care] || care)(c.care.replace(/-\s/g, ': ').replace(/\s+/g, ' ')) : ''],
         /* from her own shipping zones (tools/pull-woo.mjs), never a number written here */
         [t('Delivery'), (CM.ship && (isIS && CM.ship.deliveryIs || CM.ship.delivery)) || ''],
         [t('Goes with'), goes.map(tg => `<a href="${tgHref(tg)}">${esc(tgName(tg))}</a>`).join(', '), true],

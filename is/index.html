@@ -25,6 +25,7 @@
 <link rel="stylesheet" href="../configurators.css" />
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"ClothingStore","name":"Mjúk Iceland","alternateName":"MJÚK Iceland","url":"https://mjukiceland.com/","description":"Knitted and woven angora, cashmere, merino and Icelandic wool, designed and made in Reykjavík. Family owned, with its own workshop above the flagship store.","email":"customersupport@mjukiceland.com","telephone":"+354 832 0567","priceRange":"$$$","currenciesAccepted":"ISK, USD","areaServed":"IS","address":{"@type":"PostalAddress","streetAddress":"Laugavegur 23","addressLocality":"Reykjavík","postalCode":"101","addressCountry":"IS"},"location":[{"@type":"LocalBusiness","name":"Mjúk Iceland — Laugavegur 23","description":"Store and workshop","address":{"@type":"PostalAddress","streetAddress":"Laugavegur 23","addressLocality":"Reykjavík","postalCode":"101","addressCountry":"IS"},"telephone":"+354 832 0567"},{"@type":"LocalBusiness","name":"Mjúk Iceland — Klapparstígur 29","description":"Outlet and workshop","address":{"@type":"PostalAddress","streetAddress":"Klapparstígur 29","addressLocality":"Reykjavík","postalCode":"101","addressCountry":"IS"},"telephone":"+354 832 0567"},{"@type":"LocalBusiness","name":"Mjúk Iceland — Skólavörðustígur 36","description":"Store","address":{"@type":"PostalAddress","streetAddress":"Skólavörðustígur 36","addressLocality":"Reykjavík","postalCode":"101","addressCountry":"IS"},"telephone":"+354 832 0567"},{"@type":"LocalBusiness","name":"Mjúk Iceland — Skólavörðustígur 4","description":"Store","address":{"@type":"PostalAddress","streetAddress":"Skólavörðustígur 4","addressLocality":"Reykjavík","postalCode":"101","addressCountry":"IS"},"telephone":"+354 832 0567"}],"makesOffer":{"@type":"Offer","itemOffered":{"@type":"Product","name":"Knitted accessories","material":["angora","cashmere","merino wool","Icelandic wool","alpaca","silk"]}}}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"MJÚK Iceland","alternateName":"Mjúk Iceland","url":"https://mjukiceland.is/","inLanguage":"is"}</script>
+<link rel="canonical" href="https://mjukiceland.is/" />
 <link rel="alternate" hreflang="en" href="https://mjukiceland.com/" />
 <link rel="alternate" hreflang="is" href="https://mjukiceland.is/" />
 <link rel="alternate" hreflang="x-default" href="https://mjukiceland.com/" />
@@ -121,7 +122,7 @@
     <div class="head">
       <span class="head__n">02.</span>
       <h2 class="head__t">Eftir efni</h2>
-      <div class="head__end"><span class="mono">Aðeins sjálfbær náttúruleg efni</span></div>
+      <div class="head__end"><span class="mono">Fimm efni</span></div>
     </div>
     <div class="cats" id="cats"></div>
   </section>
@@ -322,16 +323,9 @@
   </section>
 
   <!-- NEWSLETTER -->
-  <section class="news" id="news">
-    <span class="mono">(Nýir litir birtast fyrst hér)</span>
-    <h2 class="news__t">Lítil<br>upplög.</h2>
-    <p class="mono news__sub">Hver litur er prjónaður einu sinni. Við skrifum þegar nýr kemur í hillurnar.</p>
-    <form class="news__form" id="newsForm" novalidate>
-      <input id="newsEmail" type="email" placeholder="you@example.com" autocomplete="email" required />
-      <button class="link" type="submit">[ Skrá mig ]</button>
-    </form>
-    <p class="mono news__msg" id="newsMsg" role="status"></p>
-  </section>
+  <!-- Taken out 2026-09-26 (Codex). The form said "You're in" without sending the
+       address anywhere; her site has no signup to send it to (Mailchimp runs only through her
+       WooCommerce checkout). It comes back when a real signup form for her Mailchimp audience exists. -->
 
 </main>
 
@@ -344,9 +338,11 @@
     <div><span class="mono">MJ&Uacute;K</span><a href="#camp">Verkstæðið</a><a href="#lookbook">Lookbook</a><a href="#stockists">Söluaðilar</a></div>
     <div><span class="mono">Heimsókn</span><a href="#stores">Laugavegur 23</a><a href="#stores">Klapparstígur 29</a><a href="#stores">Skólavörðustígur 4 &amp; 36</a></div>
     <div><span class="mono">Hafa samband</span><a href="mailto:customersupport@mjukiceland.com">Þjónusta</a><a href="mailto:anna@mjukiceland.com">Heildsala</a><a href="tel:+3548320567">+354 832 0567</a></div>
+    <!-- her own pages, which stay on her WordPress (the router hands them over): absolute, so the Icelandic host and the preview reach them too -->
+    <div><span class="mono">Hjálp</span><a href="https://mjukiceland.com/shipping/" hreflang="en">Sendingar</a><a href="https://mjukiceland.com/return-policy/" hreflang="en">Skilaréttur</a><a href="https://mjukiceland.com/privacy-policy/" hreflang="en">Persónuvernd</a></div>
   </div>
   <div class="foot__base">
-    <span class="mono">&copy; 2026 Mjúk Iceland ehf &middot; Reykjavík, Íslandi</span>
+    <span class="mono">&copy; 2026 Mjúk Iceland ehf &middot; Kennitala 451199-2189 &middot; Hraungata 24, 210 Garðabær</span>
     <a class="sndr" href="https://sndrstudio.is" target="_blank" rel="noopener" aria-label="Hannað af SNDR Studio" data-logotype><span class="mono">Hannað af</span><span class="sndr__mark">SN<i>&#10022;</i>DR</span><span class="sndr__studio">STUDIO</span></a>
   </div>
 </footer>

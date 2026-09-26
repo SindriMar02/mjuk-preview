@@ -37,14 +37,16 @@ const SESSION = /(?:^|;\s*)(?:woocommerce_[a-z_]+|wp_woocommerce_session_[^=]*|w
 const TRACKING = /^(?:utm_[a-z]+|gclid|fbclid|msclkid|mc_cid|mc_eid|_ga|ref)$/;
 // WooCommerce's own actions ride in the query on ANY path (her old "add to cart" links were
 // /shop/?add-to-cart=…, /product/<slug>/?add-to-cart=…): those always go to WordPress (Codex, 2026-09-25)
-const WOO_ACTION = /(?:^|&)(?:add-to-cart|wc-ajax|wc-api|sndr_bag|removed_item|undo_item|remove_item|order_again|pay_for_order|key)=/;
+// Decoded keys, not the raw query: "?%61dd-to-cart=1" is add-to-cart to WordPress too (Codex 2026-09-26)
+const WOO_KEYS = new Set(['add-to-cart', 'wc-ajax', 'wc-api', 'sndr_bag', 'removed_item', 'undo_item', 'remove_item', 'order_again', 'pay_for_order', 'key']);
+const wooAction = url => [...url.searchParams.keys()].some(k => WOO_KEYS.has(k));
 const SHARED = /^\/(?:assets\/|(?:styles|pages|configurators)\.css$|(?:app|pages|pdp|configurators)\.js$)/;
 
 const moved = (to, status = 301) => new Response(null, { status, headers: { Location: to, 'Cache-Control': 'public, max-age=3600' } });
 
 // her WordPress, same Host; never from a cache when it is personal
 async function hers(request, env, url, why) {
-  const personal = PRIVATE.test(url.pathname) || SESSION.test(request.headers.get('Cookie') || '') || WOO_ACTION.test(url.search.slice(1));
+  const personal = PRIVATE.test(url.pathname) || SESSION.test(request.headers.get('Cookie') || '') || wooAction(url);
   let req = request;
   if (env.ORIGIN) { // local rehearsal only
     const o = new URL(env.ORIGIN);
@@ -95,12 +97,16 @@ async function english(request, env, url) {
   if (p === '/bag') return bag(request, env);
   if (HERS.test(p)) return hers(request, env, url, 'path');
   if (!get) return hers(request, env, url, 'method');
-  if (WOO_ACTION.test(url.search.slice(1))) return hers(request, env, url, 'action');
+  if (wooAction(url)) return hers(request, env, url, 'action');
   // on the homepage, any query but a tracking tag is WordPress's: add-to-cart, wc-ajax, wc-api, the hand-off, ?p=, ?s=
   if (p === '/' && [...url.searchParams.keys()].some(k => !TRACKING.test(k))) return hers(request, env, url, 'query');
   if (p === '/is' || p.startsWith('/is/')) {
-    const rest = p.replace(/^\/is\/?/, '/').replace(/\/index\.html$/, '/');
-    return moved(`https://${env.IS_HOST || 'mjukiceland.is'}${rest}${url.search}`);
+    // straight to the final Icelandic address, in one hop: her old shop and category forms, and a
+    // product without its closing slash, resolve here rather than 404 or redirect again (Codex 2026-09-26)
+    const rest = new URL(url); rest.pathname = p.replace(/^\/is\/?/, '/').replace(/\/index\.html$/, '/');
+    const old = oldAddress(rest);
+    const to = old || (/^\/product\/[^/]+$/.test(rest.pathname) ? rest.pathname + '/' + url.search : rest.pathname + url.search);
+    return moved(`https://${env.IS_HOST || 'mjukiceland.is'}${to}`);
   }
   const old = oldAddress(url);
   if (old) return moved(old);

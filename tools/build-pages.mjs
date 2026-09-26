@@ -36,7 +36,7 @@ const store = (id, n, tag, name, note, facts) => `      <article class="store rv
         <button class="store__map-btn" type="button" aria-expanded="false" data-q="${name.replace(/&[a-z]+;/g, m => ({ '&iacute;': 'í', '&oacute;': 'ó', '&ouml;': 'ö', '&eth;': 'ð' }[m] || m))}, 101 Reykjavík"><span class="store__map-label">See on map</span></button>
         <div class="store__map"><div><iframe title="${name} on the map" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe></div></div>
       </article>`;
-const HOURS = ['Hours', '<span class="await">Confirmed hours to follow</span>'];
+// no opening hours until they are confirmed: her site does not state them (Codex 2026-09-26, a placeholder was showing)
 
 const PAGES = {
   shop: {
@@ -117,10 +117,10 @@ const PAGES = {
       <div class="head__end"><span class="mono">All within a ten minute walk</span></div>
     </div>
     <div class="stores__grid">
-${store('laugavegur-23', '01', 'Store &amp; workshop', 'Laugavegur 23', 'The 1916 house with the Viking mural on the main street. Capes, ponchos and shawls are sewn on the upper floor and made to order.', [HOURS, ['Made here', 'Capes, ponchos and shawls, cut from our blankets. About two hours.'], ['Telephone', '<a href="tel:+3548320567">+354 832 0567</a>']])}
-${store('klapparstigur-29', '02', 'Outlet &amp; workshop', 'Klapparst&iacute;gur 29', 'Prototypes and samples at a discount, next door to Laugavegur. Order a custom neckwarmer and watch it come together from scratch.', [HOURS, ['Made here', 'A neckwarmer knitted in front of you in about twenty minutes.'], ['Telephone', '<a href="tel:+3548320567">+354 832 0567</a>']])}
-${store('skolavordustigur-36', '03', 'Step-free access', 'Sk&oacute;lav&ouml;r&eth;ust&iacute;gur 36', 'Our largest store, a minute from Hallgr&iacute;mskirkja. Level entry for strollers and wheelchairs.', [HOURS, ['Access', 'Level entry'], ['Telephone', '<a href="tel:+3548320567">+354 832 0567</a>']])}
-${store('skolavordustigur-4', '04', 'Step-free access', 'Sk&oacute;lav&ouml;r&eth;ust&iacute;gur 4', 'At the Rainbow, in a 19th century house built of natural stone. Small, warm, and full of colour.', [HOURS, ['Access', 'Level entry'], ['Telephone', '<a href="tel:+3548320567">+354 832 0567</a>']])}
+${store('laugavegur-23', '01', 'Store &amp; workshop', 'Laugavegur 23', 'The 1916 house with the Viking mural on the main street. Capes, ponchos and shawls are sewn on the upper floor and made to order.', [['Made here', 'Capes, ponchos and shawls, cut from our blankets. About two hours.'], ['Telephone', '<a href="tel:+3548320567">+354 832 0567</a>']])}
+${store('klapparstigur-29', '02', 'Outlet &amp; workshop', 'Klapparst&iacute;gur 29', 'Prototypes and samples at a discount, next door to Laugavegur. Order a custom neckwarmer and watch it come together from scratch.', [['Made here', 'A neckwarmer knitted in front of you in about twenty minutes.'], ['Telephone', '<a href="tel:+3548320567">+354 832 0567</a>']])}
+${store('skolavordustigur-36', '03', 'Step-free access', 'Sk&oacute;lav&ouml;r&eth;ust&iacute;gur 36', 'Our largest store, a minute from Hallgr&iacute;mskirkja. Level entry for strollers and wheelchairs.', [['Access', 'Level entry'], ['Telephone', '<a href="tel:+3548320567">+354 832 0567</a>']])}
+${store('skolavordustigur-4', '04', 'Step-free access', 'Sk&oacute;lav&ouml;r&eth;ust&iacute;gur 4', 'At the Rainbow, in a 19th century house built of natural stone. Small, warm, and full of colour.', [['Access', 'Level entry'], ['Telephone', '<a href="tel:+3548320567">+354 832 0567</a>']])}
     </div>
     <div class="stores__foot">
       <div class="budin__row"><span class="mono">Online orders</span><a href="mailto:customersupport@mjukiceland.com">customersupport@mjukiceland.com</a></div>
@@ -148,10 +148,9 @@ ${store('skolavordustigur-4', '04', 'Step-free access', 'Sk&oacute;lav&ouml;r&et
           <h3 class="rv">Designed and made here</h3>
           <p class="rv">Every design is Anna&rsquo;s. The hats, scarves and blankets are knitted in Reykjav&iacute;k, and the capes and ponchos are cut from those blankets and sewn on the upper floor of Laugavegur 23, above the shop floor.</p>
           <h3 class="rv">The fibres</h3>
-          <p class="rv">Angora, superfine merino, cashmere, Icelandic wool, and an alpaca-and-silk yarn developed with a spinner in Italy for Anna&rsquo;s daughter Lia. Nothing synthetic at heart. <a class="link" href="fibres.html">[ Read about the fibres ]</a></p>
+          <p class="rv">Angora, superfine merino, cashmere, Icelandic wool, and an alpaca-and-silk yarn developed with a spinner in Italy for Anna&rsquo;s daughter Lia. <a class="link" href="fibres.html">[ Read about the fibres ]</a></p>
           <h3 class="rv">Small batches</h3>
-          <p class="rv">A colourway is knitted in a limited edition. When it is gone, the next one is a different colour. That is why the shop shows what is actually on the shelf, and nothing that is not.</p>
-          <p class="rv"><span class="await">Anna&rsquo;s own words and the workshop photographs arrive here</span></p>
+          <p class="rv">Every MJ&Uacute;K piece is a limited edition.</p>
         </div>
       </div>
       <div class="story__facts">
