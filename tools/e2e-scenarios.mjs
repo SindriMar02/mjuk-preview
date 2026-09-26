@@ -319,8 +319,13 @@ try {
     // everything she reads is Icelandic (theme/mjuk-checkout/inc/is.php); the full list of strings is checked by
     // 04-platform/mjuk-woo-sandbox/tools/is-coverage.mjs, this checks it reaches the pages, the order and the emails
     const words = h => h.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/g, ' ').replace(/<[^>]+>/g, ' ').replace(/&nbsp;|\s+/g, ' ');
-    const ENGLISH = /\b(Proceed to checkout|Your bag|Cart totals|Subtotal|Quantity|Update cart|Place order|Billing details|First name|Your order|Back to the shop|Checkout|Thank you|Continue shopping|Order number)\b/;
-    const en = h => (words(h).match(ENGLISH) || [''])[0];
+    // the English side of the checkout's whole dictionary (every string of two words or more that has a
+    // different Icelandic), so any of them left on an Icelandic page fails, not only a chosen few (Codex 09-26)
+    const dict = JSON.parse(fs.readFileSync(path.join(WS, '04-platform/mjuk-woo-sandbox/theme/mjuk-checkout/inc/is-strings.json'), 'utf8')).strings;
+    const ENGLISH = Object.entries(dict).map(([k, v]) => [k.split('\u0004').pop(), [].concat(v)[0]])
+      .filter(([k, v]) => k !== v && /\w \w/.test(k) && !/[&<%{]/.test(k)).map(([k]) => k);
+    const en = h => { const t = words(h); return ENGLISH.find(k => t.includes(k)) || ''; };
+    check(ENGLISH.length > 100, `the English inventory the Icelandic pages are checked against (${ENGLISH.length} strings)`);
     check(/<html[^>]*lang="is"/.test(basket) && /<h1 class="head__t">Karfan þín</.test(basket) && basket.includes('Fara í greiðslu') && !en(basket) && !phpNoise(basket),
       `the Icelandic basket is in Icelandic: lang="is", "Karfan þín", "Fara í greiðslu"${en(basket) ? ' (English left: ' + en(basket) + ')' : ''}`);
     const co = (await I.b.follow(WOO + '/checkout/')).html;
@@ -328,21 +333,26 @@ try {
       `the Icelandic checkout: "Greiðsla", "Fornafn", Ísland in the country list, "Ganga frá pöntun"${en(co) ? ' (English left: ' + en(co) + ')' : ''}`);
     const mailsBefore = new Set(fs.existsSync(MAIL) ? fs.readdirSync(MAIL) : []);
     const o = await placeOrder(I.b, { pay: PAY });
+    try {
     check(o.out.result === 'success' && (await glue('order', { id: o.id })).lang === 'is', `an Icelandic order remembers its language, so later emails (PayPal's confirmation) are Icelandic too (#${o.id} ${o.messages})`);
     const thanksUrl = PAY === 'paypal' ? new URL(o.out.redirect).searchParams.get('return') : o.out.redirect;
     const thanks = await I.b.follow(thanksUrl);
     check(/<h1 class="head__t">Takk fyrir</.test(thanks.html) && thanks.html.includes('Halda áfram að versla') && thanks.html.includes(`${STORE}/is/shop.html?ordered=1`) && !en(thanks.html) && !phpNoise(thanks.html),
       `the Icelandic order received page: "Takk fyrir", "Halda áfram að versla" back to the Icelandic shop${en(thanks.html) ? ' (English left: ' + en(thanks.html) + ')' : ''}`);
     const elsewhere = await browser().follow(thanksUrl);
-    check(/<h1 class="head__t">Takk fyrir</.test(elsewhere.html), 'the same page opened in another browser (no session) is Icelandic too, from the order');
+    check(/<h1 class="head__t">Takk fyrir</.test(elsewhere.html) && !en(elsewhere.html) && elsewhere.html.includes(`${STORE}/is/shop.html`), `the same page opened in another browser (no session) is Icelandic too, from the order, and leads back to the Icelandic shop${en(elsewhere.html) ? ' (English left: ' + en(elsewhere.html) + ')' : ''}`);
     if (PAY === 'paypal') await glue('order_set', { id: o.id, body: { pay: true } }); // PayPal's IPN: no shopper session, the order's language decides
     await new Promise(r => setTimeout(r, 400));
     const mails = fs.existsSync(MAIL) ? fs.readdirSync(MAIL).filter(f => !mailsBefore.has(f)).map(f => JSON.parse(fs.readFileSync(path.join(MAIL, f), 'utf8'))) : [];
     const toBuyer = mails.find(m => [].concat(m.to).includes('buyer@example.com')), toHer = mails.find(m => /new.*order/i.test(m.subject));
-    check(!!toBuyer && toBuyer.message.includes('Takk fyrir pöntunina') && !/Thank you for your order|Order summary|Billing address/.test(words(toBuyer.message)) && !/order has been received/i.test(toBuyer.subject),
-      `the buyer's email is Icelandic (${toBuyer ? toBuyer.subject : 'no email'})`);
+    const enMail = toBuyer ? en(toBuyer.subject + ' ' + toBuyer.message) : '';
+    check(!!toBuyer && toBuyer.message.includes('Takk fyrir pöntunina') && !enMail,
+      `the buyer's email is Icelandic (${toBuyer ? toBuyer.subject : 'no email'})${enMail ? ' (English left: ' + enMail + ')' : ''}`);
     check(!!toHer && /order/i.test(toHer.subject) && !/Takk|Pöntun/.test(toHer.subject + words(toHer.message)), `her new-order email stays English (${toHer ? toHer.subject : 'no email'})`);
-    await glue('order_set', { id: o.id, body: { status: 'cancelled' } }); await glue('order_delete', { id: o.id });
+    } finally { // even when a step above throws: the order goes, and her stock is back
+      if (o.id) { await glue('order_set', { id: o.id, body: { status: 'cancelled' } }); await glue('order_delete', { id: o.id }); }
+    }
+    check((await glue('product', { id: hat.id })).stock === stockBefore, `the Icelandic order undone: stock back to ${stockBefore}`);
     const E = await handoff([w(hat)], { b: I.b });
     check(E.cart.lang === '' && E.page.includes(`${STORE}/shop.html`) && !E.page.includes('/is/shop.html'), 'the same browser checking out from the English shop later goes back to English'); }
 } finally {
