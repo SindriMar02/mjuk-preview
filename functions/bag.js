@@ -37,7 +37,9 @@ export function readBag(raw) {
 
 export async function sign(items, secret, now = Date.now(), lang = '') {
   const enc = new TextEncoder();
-  const bag = { v: 1, exp: Math.floor(now / 1000) + TTL, items };
+  // n: a random nonce, so two shoppers sending the same bag in the same second get different links;
+  // the checkout host lets each link fill a cart once, keyed on its signature
+  const bag = { v: 1, exp: Math.floor(now / 1000) + TTL, n: b64url(crypto.getRandomValues(new Uint8Array(9))), items };
   if (lang === 'is') bag.l = 'is';
   const payload = b64url(enc.encode(JSON.stringify(bag)));
   const key = await crypto.subtle.importKey('raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
