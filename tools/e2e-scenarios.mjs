@@ -316,6 +316,33 @@ try {
   { const I = await handoff([w(hat)], { lang: 'is' });
     const basket = (await I.b.follow(WOO + CART)).html;
     check(I.cart.lang === 'is' && I.page.includes(`${STORE}/is/shop.html`) && basket.includes(`${STORE}/is/product/${encodeURIComponent(hat.h)}/`), 'a bag from the Icelandic shop: the ways back from checkout and basket lead to the Icelandic pages');
+    // everything she reads is Icelandic (theme/mjuk-checkout/inc/is.php); the full list of strings is checked by
+    // 04-platform/mjuk-woo-sandbox/tools/is-coverage.mjs, this checks it reaches the pages, the order and the emails
+    const words = h => h.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/g, ' ').replace(/<[^>]+>/g, ' ').replace(/&nbsp;|\s+/g, ' ');
+    const ENGLISH = /\b(Proceed to checkout|Your bag|Cart totals|Subtotal|Quantity|Update cart|Place order|Billing details|First name|Your order|Back to the shop|Checkout|Thank you|Continue shopping|Order number)\b/;
+    const en = h => (words(h).match(ENGLISH) || [''])[0];
+    check(/<html[^>]*lang="is"/.test(basket) && /<h1 class="head__t">Karfan þín</.test(basket) && basket.includes('Fara í greiðslu') && !en(basket) && !phpNoise(basket),
+      `the Icelandic basket is in Icelandic: lang="is", "Karfan þín", "Fara í greiðslu"${en(basket) ? ' (English left: ' + en(basket) + ')' : ''}`);
+    const co = (await I.b.follow(WOO + '/checkout/')).html;
+    check(/<h1 class="head__t">Greiðsla</.test(co) && co.includes('Fornafn') && />Ísland<\/option>/.test(co) && co.includes('Ganga frá pöntun') && !en(co) && !phpNoise(co),
+      `the Icelandic checkout: "Greiðsla", "Fornafn", Ísland in the country list, "Ganga frá pöntun"${en(co) ? ' (English left: ' + en(co) + ')' : ''}`);
+    const mailsBefore = new Set(fs.existsSync(MAIL) ? fs.readdirSync(MAIL) : []);
+    const o = await placeOrder(I.b, { pay: PAY });
+    check(o.out.result === 'success' && (await glue('order', { id: o.id })).lang === 'is', `an Icelandic order remembers its language, so later emails (PayPal's confirmation) are Icelandic too (#${o.id} ${o.messages})`);
+    const thanksUrl = PAY === 'paypal' ? new URL(o.out.redirect).searchParams.get('return') : o.out.redirect;
+    const thanks = await I.b.follow(thanksUrl);
+    check(/<h1 class="head__t">Takk fyrir</.test(thanks.html) && thanks.html.includes('Halda áfram að versla') && thanks.html.includes(`${STORE}/is/shop.html?ordered=1`) && !en(thanks.html) && !phpNoise(thanks.html),
+      `the Icelandic order received page: "Takk fyrir", "Halda áfram að versla" back to the Icelandic shop${en(thanks.html) ? ' (English left: ' + en(thanks.html) + ')' : ''}`);
+    const elsewhere = await browser().follow(thanksUrl);
+    check(/<h1 class="head__t">Takk fyrir</.test(elsewhere.html), 'the same page opened in another browser (no session) is Icelandic too, from the order');
+    if (PAY === 'paypal') await glue('order_set', { id: o.id, body: { pay: true } }); // PayPal's IPN: no shopper session, the order's language decides
+    await new Promise(r => setTimeout(r, 400));
+    const mails = fs.existsSync(MAIL) ? fs.readdirSync(MAIL).filter(f => !mailsBefore.has(f)).map(f => JSON.parse(fs.readFileSync(path.join(MAIL, f), 'utf8'))) : [];
+    const toBuyer = mails.find(m => [].concat(m.to).includes('buyer@example.com')), toHer = mails.find(m => /new.*order/i.test(m.subject));
+    check(!!toBuyer && toBuyer.message.includes('Takk fyrir pöntunina') && !/Thank you for your order|Order summary|Billing address/.test(words(toBuyer.message)) && !/order has been received/i.test(toBuyer.subject),
+      `the buyer's email is Icelandic (${toBuyer ? toBuyer.subject : 'no email'})`);
+    check(!!toHer && /order/i.test(toHer.subject) && !/Takk|Pöntun/.test(toHer.subject + words(toHer.message)), `her new-order email stays English (${toHer ? toHer.subject : 'no email'})`);
+    await glue('order_set', { id: o.id, body: { status: 'cancelled' } }); await glue('order_delete', { id: o.id });
     const E = await handoff([w(hat)], { b: I.b });
     check(E.cart.lang === '' && E.page.includes(`${STORE}/shop.html`) && !E.page.includes('/is/shop.html'), 'the same browser checking out from the English shop later goes back to English'); }
 } finally {

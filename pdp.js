@@ -69,11 +69,13 @@
       const goes = goesFor(p).filter(tg => CM.all.some(x => x !== p && hits(tg, x)));
       const facts = [
         [t('Material'), matWords(p)],
-        [t('Composition'), p.comp || ''],
+        // her fibre names, one by one ("50% angora · 25% nylon"); in Icelandic from tools/is.json
+        [t('Composition'), (p.comp || '').replace(/[A-Za-z][A-Za-z ]*[A-Za-z]/g, w => t(w))],
         /* facts only where her own text states them: size and origin come from it, never a default */
         [t('Size'), /\bone[- ]size\b/i.test(c.short + ' ' + c.long) ? t('One size') : ''],
         [t('Made'), t(p.mi || '')],
-        [t('Care'), c.care ? c.care.replace(/-\s/g, ': ').replace(/\s+/g, ' ') : ''],
+        // her care line; the Icelandic pages carry tools/is.json's translation of each of her 18 wordings
+        [t('Care'), c.care ? t(c.care.replace(/-\s/g, ': ').replace(/\s+/g, ' ')) : ''],
         /* from her own shipping zones (tools/pull-woo.mjs), never a number written here */
         [t('Delivery'), (CM.ship && (isIS && CM.ship.deliveryIs || CM.ship.delivery)) || ''],
         [t('Goes with'), goes.map(tg => `<a href="${tgHref(tg)}">${esc(tgName(tg))}</a>`).join(', '), true],
