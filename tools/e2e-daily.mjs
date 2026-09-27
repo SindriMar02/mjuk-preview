@@ -116,7 +116,9 @@ async function newAdmin() {
   if (!browser.connected) browser = await launch(); // Chrome itself went away: start it again
   const pg = await browser.newPage(); await pg.setViewport({ width: 1440, height: 1000 });
   pg.on('pageerror', e => adminErrors.push(e.message));
-  await pg.setExtraHTTPHeaders({ 'X-SNDR-Test': TOKEN }); await pg.goto(WOO + '/?sndr_test=login'); await pg.setExtraHTTPHeaders({});
+  await pg.setExtraHTTPHeaders({ 'X-SNDR-Test': TOKEN }); const r = await pg.goto(WOO + '/?sndr_test=login'); await pg.setExtraHTTPHeaders({});
+  const ok = r && r.ok() && /"ok":true/.test(await r.text().catch(() => ''));
+  if (!ok) throw new Error('could not sign the admin in (' + (r ? r.status() : 'no answer') + ')');
   return pg;
 }
 let admin = await newAdmin();
@@ -454,6 +456,8 @@ async function restoreAll(snaps, made, run, startMax) {
     for (const c of Array.isArray(cats) ? cats : []) if (c.name.endsWith(' ' + run) && newer(c.id, 'category') && !made.categories.includes(c.id)) made.categories.push(c.id);
     // every design she added is on this page (the public lists hide unused ones)
     await go(`${WOO}/wp-admin/edit.php?post_type=product&page=sndr-shop-designs`);
+    if (!(await admin.$('#sndr-name'))) { admin = await newAdmin(); await go(`${WOO}/wp-admin/edit.php?post_type=product&page=sndr-shop-designs`); }
+    if (!(await admin.$('#sndr-name'))) throw new Error('not signed in to the Shop designs page: designs not checked');
     const mine = await admin.$$eval('.sndr-edit', (f, r) => f.map(e => [e.querySelector('input[name=name]').value, e.querySelector('input[name=key]').value]).filter(([n]) => n.endsWith(' ' + r)).map(([, k]) => k), run);
     for (const k of mine) if (!made.designs.includes(k)) made.designs.push(k);
   }
@@ -473,13 +477,13 @@ async function restoreAll(snaps, made, run, startMax) {
       if (nowImgs === s.images.map(i => i.id).join()) delete back.images;
       else if (s.images.every(i => i.id > 0)) back.images = s.images.map(i => ({ id: i.id }));
       else { delete back.images; undo.push(`product ${id}: its photos have no media id and were not put back`); }
-      if (!s.manage_stock) delete back.stock_quantity;
       await put(id, back);
     } catch (e) { undo.push(`product ${id}: ${e.message}`); }
   }
   if (made.designs.length) {
     try {
       await go(`${WOO}/wp-admin/edit.php?post_type=product&page=sndr-shop-designs`);
+      if (!(await admin.$('#sndr-name'))) throw new Error('not signed in to the Shop designs page');
       const still = new Set(await admin.$$eval('.sndr-edit input[name=key]', i => i.map(x => x.value)));
       for (const key of made.designs) {
         if (!still.has(key)) continue; // already gone
@@ -494,7 +498,7 @@ async function restoreAll(snaps, made, run, startMax) {
   const norm = (k, v) => k === 'categories' || k === 'images' ? (v || []).map(x => x.id).join() : JSON.stringify(v);
   for (const [id, s] of snaps) {
     const now = await api(`/wc/v3/products/${id}?_fields=${SNAP_FIELDS}`).catch(() => null);
-    const off = now ? Object.keys(s).filter(k => k !== 'id' && !(k === 'stock_quantity' && !s.manage_stock) && norm(k, now[k]) !== norm(k, s[k])) : ['(unreadable)'];
+    const off = now ? Object.keys(s).filter(k => k !== 'id' && norm(k, now[k]) !== norm(k, s[k])) : ['(unreadable)'];
     if (!off.length) same++; else undo.push(`product ${id} differs after restore: ${off.join(', ')}`);
   }
   return undo;

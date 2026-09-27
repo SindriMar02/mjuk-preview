@@ -104,7 +104,8 @@ for (const rel of pages) {
       // entities decoded first, so her name is found and left out however the page escapes it
       const unent = t => t.replace(/&#x([0-9a-f]+);/gi, (m, x) => String.fromCodePoint(parseInt(x, 16))).replace(/&#(\d+);/g, (m, d) => String.fromCodePoint(+d))
         .replace(/&quot;/g, '"').replace(/&apos;|&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&');
-      const ours = unent(h.replace(/<div class="pdp__short">[\s\S]*?<\/div>|<details class="pdp__desc"[\s\S]*?<\/details>|<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ')).split(P.name).join(' ');
+      // her text out: description, short text, other pieces' names in the rails (.prod__name), and this name
+      const ours = unent(h.replace(/<div class="pdp__short">[\s\S]*?<\/div>|<details class="pdp__desc"[\s\S]*?<\/details>|<div class="prod__name">[\s\S]*?<\/div>|<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ')).split(P.name).join(' ');
       if (/\b\d+\s+(?:left|in stock|available)\b/i.test(ours)) fail(rel, 'a stock count is shown');
     }
     if (!B || !B.itemListElement || B.itemListElement.at(-1).item !== prodUrl(rel) || B.itemListElement.some((x, i) => x.position !== i + 1 || !x.name || !/^https:\/\//.test(x.item))) fail(rel, 'BreadcrumbList incomplete');
