@@ -35,7 +35,8 @@ jobs:
           MJUK_WOO_CK: ${{ secrets.MJUK_WOO_CK }}
           MJUK_WOO_CS: ${{ secrets.MJUK_WOO_CS }}
         run: |
-          if [ -z "$MJUK_WOO_URL" ] || [ -z "$MJUK_WOO_CK" ] || [ -z "$MJUK_WOO_CS" ]; then echo "The read-only key is not fully in the repository secrets (URL, CK, CS), so nothing was read."; exit 0; fi
+          # a run that read nothing must not look like a run with nothing to change: fail loudly
+          if [ -z "$MJUK_WOO_URL" ] || [ -z "$MJUK_WOO_CK" ] || [ -z "$MJUK_WOO_CS" ]; then echo "::error::The read-only key is not fully in the repository secrets (URL, CK, CS), so nothing was read."; exit 1; fi
           node tools/pull-woo.mjs --live
           # the shop report (what needs Anna, what is not on the shop and why) on the run's page
           if [ -f reports/shop-health.md ]; then cat reports/shop-health.md >> "$GITHUB_STEP_SUMMARY"; fi

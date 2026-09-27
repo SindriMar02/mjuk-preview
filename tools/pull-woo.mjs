@@ -260,6 +260,9 @@ const why0 = p => {
   if (p.type !== 'simple') return `a ${p.type} product: the shop sells simple products (one product per size or colour)`;
   if (!String(p.name || '').trim()) return 'it has no name';
   if (p.price === '' || p.price == null || !(+p.price >= 0)) return 'it has no price';
+  // its page lives at product/<slug>/; WordPress makes Icelandic letters plain, but a hand-typed
+  // emoji or other script arrives percent-encoded and cannot be a folder name safely
+  if (!/^[a-z0-9_-]+$/i.test(String(p.slug || ''))) return 'its web address (slug) has characters the shop cannot use: give it a plain one in WordPress';
   return '';
 };
 const listed = products
@@ -280,18 +283,19 @@ const all = listed.map(p => {
   // her choice in WordPress first (Design, Material); the name rules only where nothing is chosen
   const raw = p.sndr_shop && typeof p.sndr_shop === 'object' ? p.sndr_shop : null;
   // only text is a choice; anything else is reported and treated as not chosen
+  // (the report is public: the product, never the stored value itself)
   if (raw && ((raw.design != null && typeof raw.design !== 'string') || (raw.material != null && typeof raw.material !== 'string'))) why.unknownDesign.push(`${p.id} ${name} (a value that is not text)`);
   const sel = raw ? { design: str(raw.design), material: str(raw.material) } : null;
   let fam = null, group = '', from = 'name rules';
   if (sel && sel.design) {
     if (FAM.has(sel.design)) { fam = FAM.get(sel.design); from = 'her choice'; }
     else if (/^other-/.test(sel.design) && GROUP_KEYS.has(sel.design.slice(6))) { group = sel.design.slice(6); from = 'her choice'; }
-    else why.unknownDesign.push(`${p.id} ${name} ("${sel.design}")`);
+    else why.unknownDesign.push(`${p.id} ${name} (a design that does not exist)`);
   }
   if (from === 'name rules') { fam = familyOf(name, shortText + ' ' + longText); if (!sel || !sel.design) why.notChosen.push(`${p.id} ${name}`); }
   why.src[from] = (why.src[from] || 0) + 1;
   const chosenMat = sel && sel.material && MAT_KEYS.has(sel.material) ? sel.material : '';
-  if (sel && sel.material && !chosenMat) why.unknownDesign.push(`${p.id} ${name} (material "${sel.material}")`);
+  if (sel && sel.material && !chosenMat) why.unknownDesign.push(`${p.id} ${name} (a material that does not exist)`);
   const mat = chosenMat || (fam ? fam.material || (fam.said ? '' : materialOf(comp, name, cats)) : materialOf(comp, name, cats));
   const matWhy = !mat ? 'none' : chosenMat ? 'her choice' : fam && fam.material ? 'her sheet' : 'composition';
   why.mat[matWhy] = (why.mat[matWhy] || 0) + 1;
@@ -380,7 +384,8 @@ const section = (title, lines, note) => { if (!lines.length) return; H.push(`## 
 section('Published but not on the shop', offShop.map(x => `#${x.id}: ${x.why}`), 'By WordPress id (Products, then search the id, or open post.php?post=<id>&action=edit). Everything else she publishes is on the shop.');
 section('On the shop, but no design chosen', why.notChosen, 'Listed by its name for now. In WordPress: Products, filter "Not chosen", choose a Design.');
 section('Design or material that no longer exists', why.unknownDesign, 'Probably a design that was deleted or renamed. Listed by its name for now; choose a design again.');
-section('Designs she added without an Icelandic name', addedFams.filter(f => f.isMissing).map(f => `${f.name} (${f.key})`), 'The Icelandic shop shows the English name until one is added under Products, Shop designs.');
+// only designs a listed piece uses: a planned line she has not published stays out of this public file
+section('Designs she added without an Icelandic name', addedFams.filter(f => f.isMissing && all.some(p => p.fam === f.key)).map(f => `${f.name} (${f.key})`), 'The Icelandic shop shows the English name until one is added under Products, Shop designs.');
 section('No photo', all.filter(p => !p.img.length).map(p => `${p.t} (#${p.id})`), 'On the shop without a picture; add one in WordPress.');
 section('New since the last full read: no composition or origin line yet', why.missing.map(String), 'Shown without those two lines until the next full catalogue read; nothing else is missing.');
 if (lists && lists.version && lists.version !== SHEET_VERSION) section('Her WordPress has an older list of designs than the storefront', [`WordPress ${lists.version}, storefront ${SHEET_VERSION}`], 'A design added to tools/groups.json cannot be chosen in WordPress yet: run tools/shop-fields-json.mjs and put the new sndr-shop-fields.json on her site.');

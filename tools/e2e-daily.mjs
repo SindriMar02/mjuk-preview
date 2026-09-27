@@ -155,8 +155,8 @@ try {
   // the pieces the day touches: listed, in stock, with a design, a photo and some categories
   const pool = base.all.filter(p => p.fam && !p.oos && p.img.length && p.cats.length >= 2 && Number.isInteger(p.q) ? true : p.fam && !p.oos && p.img.length && p.cats.length >= 2);
   const pick = n => pool.splice(Math.floor(pool.length / 2), n);
-  const [A, B, C, E, F, G, Hh, I, J, K, L, M, N, O, P, Q, R, S] = pick(18);
-  for (const p of [A, B, C, E, F, G, Hh, I, J, K, L, M, N, O, P, Q, R, S]) await snap(p.id);
+  const [A, B, C, E, F, G, Hh, I, J, K, L, M, N, O, P, Q, R, S, U, V] = pick(20);
+  for (const p of [A, B, C, E, F, G, Hh, I, J, K, L, M, N, O, P, Q, R, S, U, V]) await snap(p.id);
   let D = null; // Bulk Edit's second piece: one on the same admin page as C
   const hatDesign = lists.designs.find(d => d.group === 'hats' && !d.added && d.material);
 
@@ -176,7 +176,7 @@ try {
   // 3. Bulk Edit: two pieces marked out of stock (two on the same admin page)
   await openRow(C.id);
   const onPage = await admin.$$eval('#the-list tr[id^=post-]', r => r.map(x => +x.id.slice(5)));
-  const used = new Set([A, B, C, E, F, G, Hh, I, J, K, L, M, N, O, P, Q, R, S].map(p => p.id));
+  const used = new Set([A, B, C, E, F, G, Hh, I, J, K, L, M, N, O, P, Q, R, S, U, V].map(p => p.id));
   D = base.all.find(p => onPage.includes(p.id) && !used.has(p.id) && p.fam && !p.oos);
   if (!D) throw new Error('no second in-stock piece on the admin page of ' + C.id);
   await snap(D.id);
@@ -215,11 +215,16 @@ try {
   const addDesign = async (name, is, group, mat) => {
     await admin.type('#sndr-name', name); if (is) await admin.type('#sndr-is', is); await admin.select('#sndr-group', group); await admin.select('#sndr-material', mat);
     await Promise.all([admin.waitForNavigation({ waitUntil: 'load', timeout: 120000 }), admin.click('.sndr-add button[type=submit]')]);
-    const d = (await api('/sndr-shop/v1/lists')).designs.find(x => x.name === name); if (d) track('designs', d.key); return d;
+    // the public lists show a design only once a published piece uses it: read the key off the page
+    const key = await admin.$$eval('.sndr-edit', (f, n) => { const x = f.find(e => e.querySelector('input[name=name]').value === n); return x ? x.querySelector('input[name=key]').value : ''; }, name);
+    if (key) track('designs', key);
+    return key ? { key, name, is: is || '', added: true } : null;
   };
   const D1 = await addDesign(`Day scarves ${RUN}`, `Dagtreflar ${RUN}`, 'scarves', 'merino');
   check(D1 && D1.added, `7. Shop designs added "${D1 && D1.name}" (${D1 && D1.key})`);
+  check(!(await api('/sndr-shop/v1/lists')).designs.some(d => d.key === D1.key), '7. an added design stays out of the public list until a published piece uses it');
   const NEW2 = track('products', (await create({ name: `Day scarf ${RUN}`, regular_price: '30', sndr_shop: { design: D1.key, material: '' } })).id);
+  check((await api('/sndr-shop/v1/lists')).designs.some(d => d.key === D1.key), '7. and appears there once one does');
   // 8. one added with no Icelandic name
   const D2 = await addDesign(`Day mitts ${RUN}`, '', 'gloves', 'cashmere');
   const NEW3 = track('products', (await create({ name: `Day mitt ${RUN}`, regular_price: '28', sndr_shop: { design: D2.key, material: '' } })).id);
@@ -262,6 +267,9 @@ try {
   await admin.click('#publish');
   await admin.waitForFunction(() => /post\.php$/.test(location.pathname) && document.readyState === 'complete' && !!document.querySelector('#message'), { timeout: 120000 });
   const NEW7 = track('products', (await create({ name: `No price ${RUN}`, regular_price: '' })).id);
+  // 22. an emoji typed into a slug (WordPress keeps it, percent-encoded); 23. her own text saying "3 available"
+  await put(U.id, { slug: `hufa-${RUN}-😀` });
+  await put(V.id, { short_description: 'Comes in 3 available colours, 2 left in the workshop.' });
 
   /* ── the refresh, and what the shop shows ── */
   const one = refresh('round one');
@@ -297,6 +305,8 @@ try {
   check(!by(NEW6) && rep.includes(`#${NEW6}: it has no name`), '20. no name: off the shop, with the reason');
   check(!by(NEW7) && rep.includes(`#${NEW7}: it has no price`), '21. no price: off the shop, with the reason');
   check(![`No price ${RUN}`, `Day variable ${RUN}`, K.t].some(n => rep.includes(n)), 'the report (public with the site) never names a piece that is not on the site');
+  check(!by(U.id) && rep.includes(`#${U.id}: its web address (slug) has characters`), `22. an emoji in the slug: off the shop with the reason, the build goes on (${(await api(`/wc/v3/products/${U.id}?_fields=slug`)).slug})`);
+  check(by(V.id) && hasPage(by(V.id)), '23. her text says "3 available colours": listed, pages built, and the SEO check (above) still passes');
   const listedIds = new Set(CM.all.map(p => p.id));
   const published = [];
   for (let page = 1, pages = 1; page <= pages; page++) {
@@ -321,6 +331,13 @@ try {
     }
   }
   check(!faults.length, `layout: 9 pages × 320/390/1440 clean${faults.length ? '\n  ' + faults.slice(0, 8).join('\n  ') : ''}`);
+  // the bag drawer at 320 with the very long name in it
+  await sp.setViewport({ width: 320, height: 800 });
+  await sp.goto(`${STORE}/product/${by(P.id).h}/`, { waitUntil: 'load' });
+  await sp.evaluate(h => { window.CMBag.add(h, ''); window.CMBag.open(true); }, by(P.id).h); await sleep(500);
+  const bagR = await sp.evaluate(detect, '#bag');
+  check(!bagR.issues.length && bagR.scrollW <= 321, `the bag drawer at 320 with a very long name: clean${bagR.issues.length ? ' ' + JSON.stringify(bagR.issues.slice(0, 2)).slice(0, 200) : ''}`);
+  await sp.evaluate(() => { localStorage.removeItem('mjuk_bag'); });
   await sp.setViewport({ width: 1440, height: 900 });
   await sp.goto(`${STORE}/shop.html?family=${D1.key}&all=1`, { waitUntil: 'load' }); await sleep(300);
   const famView = await sp.evaluate(() => ({ h: document.querySelector('#shopTitle')?.textContent.trim(), cards: [...document.querySelectorAll('#pgrid .prod')].map(c => c.textContent) }));
@@ -357,8 +374,9 @@ try {
   const offCM = off.ok ? readCM() : null, offRep = off.ok ? fs.readFileSync(path.join(COPY, 'reports/shop-health.md'), 'utf8') : '';
   check(off.ok, `junk values and no lists: the pull still runs${off.ok ? '' : ' ' + off.out.slice(-300)}`);
   check(off.ok && offCM.all.find(p => p.id === NEW2)?.fam === D1.key && offCM.families.some(f => f.key === D1.key), 'lists out of reach: her added design is kept from the last good read, its piece does not move');
-  check(off.ok && [A, C, E, G, M].every(p => offCM.all.some(x => x.id === p.id)) && /not text/.test(offRep) && /ghost-design-x/.test(offRep) && /lists could not be read/.test(offRep),
-    'junk: every piece still listed, each bad value named in the report, the unreadable lists too');
+  check(off.ok && [A, C, E, G, M].every(p => offCM.all.some(x => x.id === p.id)) && /not text/.test(offRep) && offRep.includes(`${G.id} `) && /a design that does not exist/.test(offRep)
+    && !/ghost-design-x|"m"|\["m"\]/.test(offRep) && /lists could not be read/.test(offRep),
+    'junk: every piece still listed, each bad value named in the report by its piece (never the stored value), the unreadable lists too');
 
   /* ── round two: the day undone ── */
   await glue('product_set', L.id, { status: 'publish' });                     // out of the trash
@@ -372,7 +390,7 @@ try {
   await admin.reload({ waitUntil: 'load' });
   const di = await admin.$$eval('.sndr-del', (f, k) => f.findIndex(x => x.querySelector('input[name=key]').value === k), D1.key);
   if (di >= 0) { await Promise.all([admin.waitForNavigation({ waitUntil: 'load' }), admin.evaluate(n => document.querySelectorAll('.sndr-del')[n].querySelector('button').click(), di)]); drop('designs', D1.key); }
-  check(di >= 0 && !(await api('/sndr-shop/v1/lists')).designs.some(d => d.key === D1.key), 'once unused, it deletes');
+  check(di >= 0 && !(await admin.$$eval('.sndr-edit input[name=key]', (i, k) => i.some(x => x.value === k), D1.key)), 'once unused, it deletes');
   const two = refresh('round two');
   const by2 = id => two.CM.all.find(p => p.id === id);
   check([L, I, K].every(p => by2(p.id) && by2(p.id).fam === p.fam && fs.existsSync(pageOf(by2(p.id).h))), 'round two: restored, published and made visible again: back on the shop with their design and pages');
@@ -417,8 +435,10 @@ async function restoreAll(snaps, made, run, startMax) {
   if (run) {
     const cats = await (await hit(`${WOO}/wp-json/wc/v3/products/categories?search=${encodeURIComponent(run)}&per_page=100`, { headers: H })).json();
     for (const c of Array.isArray(cats) ? cats : []) if (c.name.endsWith(' ' + run) && newer(c.id, 'category') && !made.categories.includes(c.id)) made.categories.push(c.id);
-    const ls = await (await hit(`${WOO}/wp-json/sndr-shop/v1/lists`, { headers: H })).json();
-    for (const d of (ls && ls.designs) || []) if (d.added && d.name.endsWith(' ' + run) && !made.designs.includes(d.key)) made.designs.push(d.key);
+    // every design she added is on this page (the public lists hide unused ones)
+    await go(`${WOO}/wp-admin/edit.php?post_type=product&page=sndr-shop-designs`);
+    const mine = await admin.$$eval('.sndr-edit', (f, r) => f.map(e => [e.querySelector('input[name=name]').value, e.querySelector('input[name=key]').value]).filter(([n]) => n.endsWith(' ' + r)).map(([, k]) => k), run);
+    for (const k of mine) if (!made.designs.includes(k)) made.designs.push(k);
   }
   for (const id of stray) if (!made.products.includes(id)) made.products.push(id);
   // already gone (a 404) is as good as removed: an earlier recovery may have got there first
@@ -429,8 +449,13 @@ async function restoreAll(snaps, made, run, startMax) {
     try {
       if ((await glue('product', id)).status === 'trash') await glue('product_set', id, { status: s.status });
       const { id: _, ...back } = s;
-      back.categories = s.categories.map(c => ({ id: c.id })); back.images = s.images.map(i => ({ src: i.src, alt: i.alt || '' }));
-      if (!s.images.length) back.images = [];
+      back.categories = s.categories.map(c => ({ id: c.id }));
+      // photos: put back only when the run changed them, and by their media id, so nothing is ever
+      // downloaded again into the media library; a photo without an id cannot be put back by src safely
+      const nowImgs = ((await api(`/wc/v3/products/${id}?_fields=images`)).images || []).map(i => i.id).join();
+      if (nowImgs === s.images.map(i => i.id).join()) delete back.images;
+      else if (s.images.every(i => i.id > 0)) back.images = s.images.map(i => ({ id: i.id }));
+      else { delete back.images; undo.push(`product ${id}: its photos have no media id and were not put back`); }
       if (!s.manage_stock) delete back.stock_quantity;
       await put(id, back);
     } catch (e) { undo.push(`product ${id}: ${e.message}`); }
@@ -438,7 +463,7 @@ async function restoreAll(snaps, made, run, startMax) {
   if (made.designs.length) {
     try {
       await go(`${WOO}/wp-admin/edit.php?post_type=product&page=sndr-shop-designs`);
-      const still = new Set((await api('/sndr-shop/v1/lists')).designs.map(d => d.key));
+      const still = new Set(await admin.$$eval('.sndr-edit input[name=key]', i => i.map(x => x.value)));
       for (const key of made.designs) {
         if (!still.has(key)) continue; // already gone
         const i = await admin.$$eval('.sndr-del', (f, k) => f.findIndex(x => x.querySelector('input[name=key]').value === k), key);
@@ -448,8 +473,8 @@ async function restoreAll(snaps, made, run, startMax) {
     } catch (e) { undo.push('designs: ' + e.message); }
   }
   let same = 0;
-  for (const [id, s] of snaps) { const now = await api(`/wc/v3/products/${id}?_fields=name,status,regular_price,sale_price,stock_status,catalog_visibility,categories,sndr_shop`).catch(() => null);
-    if (now && now.name === s.name && now.status === s.status && now.regular_price === s.regular_price && now.sale_price === s.sale_price && now.stock_status === s.stock_status && now.catalog_visibility === s.catalog_visibility
-      && now.categories.map(c => c.id).join() === s.categories.map(c => c.id).join() && JSON.stringify(now.sndr_shop) === JSON.stringify(s.sndr_shop)) same++; else undo.push(`product ${id} differs after restore`); }
+  for (const [id, s] of snaps) { const now = await api(`/wc/v3/products/${id}?_fields=name,slug,status,regular_price,sale_price,stock_status,catalog_visibility,categories,images,sndr_shop`).catch(() => null);
+    if (now && now.name === s.name && now.slug === s.slug && now.status === s.status && now.regular_price === s.regular_price && now.sale_price === s.sale_price && now.stock_status === s.stock_status && now.catalog_visibility === s.catalog_visibility
+      && now.categories.map(c => c.id).join() === s.categories.map(c => c.id).join() && now.images.map(i => i.id).join() === s.images.map(i => i.id).join() && JSON.stringify(now.sndr_shop) === JSON.stringify(s.sndr_shop)) same++; else undo.push(`product ${id} differs after restore`); }
   return undo;
 }

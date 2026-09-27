@@ -90,14 +90,19 @@ for (const rel of pages) {
         if (o.priceCurrency !== 'USD' || !/^\d+\.\d{2}$/.test(o.price) || !['https://schema.org/InStock', 'https://schema.org/OutOfStock'].includes(o.availability)) fail(rel, 'Offer incomplete: ' + JSON.stringify(o));
         if (!P.image || !P.image.length) fail(rel, 'Offer without an image');
       } else if (P.image && P.image.length) fail(rel, 'has a photo but no Offer');
-      if (/inventoryLevel|stockQuantity|"q":|\bin stock: \d|\b\d+ (?:left|in stock)\b/i.test(JSON.stringify(P))) fail(rel, 'JSON-LD carries a stock count');
+      // our fields only: her description and name are her words ("2 left in the workshop")
+      const { description: _d, name: _n, ...ld } = P;
+      if (/inventoryLevel|stockQuantity|"q":|\bin stock: \d|\b\d+ (?:left|in stock)\b/i.test(JSON.stringify(ld))) fail(rel, 'JSON-LD carries a stock count');
       for (const u of [].concat(P.image || [])) if (!/^https:\/\//.test(u)) fail(rel, 'image not absolute: ' + u);
       // the text a crawler reads: name and price in the HTML, not only in the script
       const text = h.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&lt;/g, '<');
       if (!text.includes(P.name)) fail(rel, 'product name not in the HTML text');
       const shown = n => '$' + (n % 1 ? n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : n.toLocaleString('en-US')); // app.js usd
       if (P.offers && !text.includes(shown(Number(P.offers.price)))) fail(rel, `price $${P.offers.price} not in the HTML text`);
-      if (/\b\d+\s+(?:left|in stock|available)\b/i.test(text)) fail(rel, 'a stock count is shown');
+      // what the site prints, not her own words: her description and short text, and the product
+      // name, may say "3 available colours" and must never stop a publish
+      const ours = h.replace(/<div class="pdp__short">[\s\S]*?<\/div>|<details class="pdp__desc"[\s\S]*?<\/details>|<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ').split(P.name).join(' ');
+      if (/\b\d+\s+(?:left|in stock|available)\b/i.test(ours)) fail(rel, 'a stock count is shown');
     }
     if (!B || !B.itemListElement || B.itemListElement.at(-1).item !== prodUrl(rel) || B.itemListElement.some((x, i) => x.position !== i + 1 || !x.name || !/^https:\/\//.test(x.item))) fail(rel, 'BreadcrumbList incomplete');
     const og = (h.match(/<meta property="og:image" content="([^"]+)"/) || [])[1];

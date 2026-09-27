@@ -1001,7 +1001,7 @@ void main() {
     const quiet = fn => { if (watch) watch.disconnect(); fn(); if (watch) heads.forEach(x => watch.observe(x, { childList: true, characterData: true, subtree: true })); };
     const fitAll = () => quiet(() => heads.forEach(fitHead));
     (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(fitAll);
-    if (window.ResizeObserver) { let last = innerWidth; new ResizeObserver(() => { if (innerWidth !== last) { last = innerWidth; fitAll(); } }).observe(document.documentElement); }
+    if (window.ResizeObserver) { const root = document.documentElement; let last = root.clientWidth; new ResizeObserver(() => { if (root.clientWidth !== last) { last = root.clientWidth; fitAll(); } }).observe(root); }
     watch = new MutationObserver(recs => { const hit = new Set(recs.map(r => (r.target.nodeType === 1 ? r.target : r.target.parentElement).closest('.head__t')).filter(Boolean)); quiet(() => hit.forEach(fitHead)); });
     heads.forEach(x => watch.observe(x, { childList: true, characterData: true, subtree: true }));
   }
