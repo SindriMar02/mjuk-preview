@@ -6,7 +6,16 @@
                                             ~/.config/sndr/mjuk-woo.env: small pages, a pause
                                             between each, stops at the first 5xx or 429
      node tools/pull-woo.mjs --file <products.json>   a saved wc/v3 pull, no network
+                                            (--lists <lists.json> for the shop-fields lists)
+     node tools/pull-woo.mjs --woo http://127.0.0.1:9420   a local stack (replica, upgraded) with
+                                            the local test token; never a real host
      add --dry to print the report and write nothing
+
+   Where each piece is listed (design, group, material) is Anna's choice in WordPress: the two
+   shop-fields dropdowns (04-platform/mjuk-woo-sandbox/mu-plugins/sndr-shop-fields.php), read as
+   each product's "sndr_shop" and the lists at /wp-json/sndr-shop/v1/lists. A piece with nothing
+   chosen falls back to the name rules below, and says so in reports/shop-health.md, which every
+   run rewrites in plain words: what needs her, what is not on the shop and why.
 
    Facts only where they are true. Composition, piece type and origin come from the customs
    catalogue (04-platform/mjuk-shipping/customs-catalogue.json), which reads them from her own
@@ -17,6 +26,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { G, familyOf, materialOf, groupOfType, MATERIALS } from './groups.mjs';
+import { version as SHEET_VERSION } from './shop-fields-json.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const WS = path.resolve(ROOT, '../..');
@@ -28,17 +38,21 @@ const CATALOGUE = opt('--catalogue') || path.join(WS, '04-platform/mjuk-shipping
 const readEnv = file => Object.fromEntries(fs.readFileSync(file, 'utf8').split('\n')
   .map(l => l.match(/^\s*([A-Z_]+)\s*=\s*(.*?)\s*$/)).filter(Boolean).map(m => [m[1], m[2].replace(/^["']|["']$/g, '')]));
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-const FIELDS = 'id,name,slug,type,status,catalog_visibility,description,short_description,price,regular_price,sale_price,manage_stock,stock_quantity,stock_status,categories,images,menu_order';
+const FIELDS = 'id,name,slug,type,status,catalog_visibility,description,short_description,price,regular_price,sale_price,manage_stock,stock_quantity,stock_status,categories,images,menu_order,sndr_shop';
+const LOCAL = opt('--woo') ? opt('--woo').replace(/\/$/, '') : '';
+if (LOCAL && !/^http:\/\/(127\.0\.0\.1|localhost):\d+$/.test(LOCAL)) { console.error('--woo takes a local stack only, e.g. http://127.0.0.1:9420'); process.exit(2); }
 
 /* ── source ─────────────────────────────────────────────────────────────── */
 async function pull() {
-  if (opt('--file')) return { source: 'file ' + path.relative(WS, path.resolve(opt('--file'))), products: JSON.parse(fs.readFileSync(opt('--file'), 'utf8')) };
+  if (opt('--file')) return { source: 'file ' + path.relative(WS, path.resolve(opt('--file'))), products: JSON.parse(fs.readFileSync(opt('--file'), 'utf8')),
+    lists: opt('--lists') ? JSON.parse(fs.readFileSync(opt('--lists'), 'utf8')) : null, listsWhy: opt('--lists') ? '' : 'no --lists file given' };
   const live = flag('--live');
   // a scheduled run (.github/workflows/stock.yml) passes the read-only key as environment variables
   const env = live ? (process.env.MJUK_WOO_CK ? process.env : readEnv(path.join(os.homedir(), '.config/sndr/mjuk-woo.env')))
                    : readEnv(path.join(WS, '04-platform/mjuk-woo-sandbox/local/sandbox.env'));
-  const base = (live ? env.MJUK_WOO_URL : env.SANDBOX_URL).replace(/\/$/, '');
-  const auth = 'Basic ' + Buffer.from(live ? `${env.MJUK_WOO_CK}:${env.MJUK_WOO_CS}` : `${env.SANDBOX_USER}:${env.SANDBOX_APP_PASSWORD}`).toString('base64');
+  const base = LOCAL || (live ? env.MJUK_WOO_URL : env.SANDBOX_URL).replace(/\/$/, '');
+  const auth = LOCAL ? '' : 'Basic ' + Buffer.from(live ? `${env.MJUK_WOO_CK}:${env.MJUK_WOO_CS}` : `${env.SANDBOX_USER}:${env.SANDBOX_APP_PASSWORD}`).toString('base64');
+  const token = LOCAL ? readEnv(path.join(WS, '04-platform/mjuk-woo-sandbox/local/test.env')).TEST_TOKEN : '';
   // Playground's --login 302s any cookieless request; her CDN answers non-browser clients with a
   // 307 cookie loop. Both are passed by keeping the cookies they set.
   const jar = new Map(live ? [] : [['playground_auto_login_already_happened', '1']]);
@@ -46,7 +60,7 @@ async function pull() {
   const get = async url => {
     for (let hop = 0; hop < 5; hop++) {
       const res = await fetch(url, { redirect: 'manual', headers: {
-        Authorization: auth, Accept: 'application/json', 'User-Agent': 'Mozilla/5.0 (SNDR catalogue read)',
+        ...(auth ? { Authorization: auth } : { 'X-SNDR-Test': token }), Accept: 'application/json', 'User-Agent': 'Mozilla/5.0 (SNDR catalogue read)',
         Cookie: [...jar].map(([k, v]) => `${k}=${v}`).join('; ') } });
       for (const c of res.headers.getSetCookie()) { const [kv] = c.split(';'); const i = kv.indexOf('='); jar.set(kv.slice(0, i).trim(), kv.slice(i + 1)); }
       if (res.status >= 300 && res.status < 400 && res.headers.get('location')) {
@@ -81,7 +95,14 @@ async function pull() {
       flat: +setting('flat_rate', 'cost') || null, free: setting('free_shipping', 'requires') === 'min_amount' ? +setting('free_shipping', 'min_amount') || null : null,
       pickup: methods.some(m => m.method_id === 'local_pickup') });
   }
-  return { source: live ? 'live wc/v3 (read-only key)' : 'sandbox wc/v3 ' + base, products, zones };
+  // her lists (designs she added, the names): public. Without them the designs every product names
+  // from her sheet still hold; only a design she added herself needs them.
+  let lists = null, listsWhy = '';
+  await sleep(pause);
+  // the reason is kept short and never carries an address: it goes into the public report
+  try { lists = (await get(`${base}/wp-json/sndr-shop/v1/lists`)).list; if (!lists || typeof lists !== 'object' || !Array.isArray(lists.designs)) { lists = null; listsWhy = 'the answer had no list of designs'; } }
+  catch (e) { const m = String(e.message).match(/answered (\d{3})|^(\d{3}) /); listsWhy = m ? `it answered ${m[1] || m[2]}` : /redirected/.test(e.message) ? 'it redirected elsewhere' : 'it could not be reached'; }
+  return { source: LOCAL ? 'local wc/v3 ' + base : live ? 'live wc/v3 (read-only key)' : 'sandbox wc/v3 ' + base, products, zones, lists, listsWhy };
 }
 
 /* ── her text, cleaned the way the pages show it ────────────────────────── */
@@ -148,7 +169,31 @@ function compositionOf(p, cc) {
 }
 
 /* ── build ──────────────────────────────────────────────────────────────── */
-const { source, products, zones = null } = await pull();
+const { source, products, zones = null, lists = null, listsWhy = '' } = await pull();
+
+/* her designs: the sheet's, plus any she added in WordPress (Products → Shop designs) */
+const GROUP_KEYS = new Set(G.groups.map(g => g.key)), MAT_KEYS = new Set(MATERIALS.map(m => m.key));
+const str = v => typeof v === 'string' ? v : '';
+// a design she added: a real entry, a key that is not one of the sheet's and not a reserved
+// "other-<group>" or "none" choice, a name, and one of her groups
+const goodAdded = d => d && typeof d === 'object' && d.added === true && /^[a-z0-9-]{1,80}$/.test(str(d.key)) && !/^other-|^none$/.test(d.key)
+  && str(d.name).trim() && GROUP_KEYS.has(str(d.group)) && !G.families.some(f => f.key === d.key);
+const toFam = d => ({ key: d.key, name: str(d.name).trim(), is: str(d.is).trim() || str(d.name).trim(), isMissing: !str(d.is).trim(), group: d.group, material: MAT_KEYS.has(str(d.material)) ? d.material : '', goes: [], added: true });
+let addedFams = (lists ? lists.designs : []).filter(goodAdded).map(toFam);
+// her lists unreadable this time: the designs she added keep what the last good read gave them,
+// so a passing outage never moves a piece (a design added since then is reported, not guessed)
+const prevData = fs.existsSync(path.join(ROOT, 'assets/data.js')) ? new Function('window', fs.readFileSync(path.join(ROOT, 'assets/data.js'), 'utf8') + ';return window.CM;')({}) : null;
+const prevAdded = ((prevData && prevData.families) || []).filter(f => f.added && GROUP_KEYS.has(f.group))
+  .map(f => ({ key: f.key, name: f.name, is: f.is, isMissing: false, group: f.group, material: f.mat || '', goes: [], added: true }));
+const keptFromLast = [];
+if (!lists) addedFams = prevAdded;
+else {
+  // a list that answers but leaves out a design products still name (it cannot be deleted while in
+  // use, so that is the list's fault, not hers): keep that design from the last good read
+  const named = new Set(products.map(p => p.sndr_shop && typeof p.sndr_shop.design === 'string' ? p.sndr_shop.design : '').filter(Boolean));
+  for (const f of prevAdded) if (named.has(f.key) && !addedFams.some(a => a.key === f.key)) { addedFams.push(f); keptFromLast.push(`${f.name} (${f.key})`); }
+}
+const FAM = new Map([...G.families, ...addedFams].map(f => [f.key, f]));
 
 /* shipping, in words, from her zones: the product page's Delivery row and the bag's note */
 const EU = 'AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE'.split(' ');
@@ -206,13 +251,24 @@ const old = fs.existsSync(dataFile) ? new Function('window', fs.readFileSync(dat
 const oldById = new Map(((old && old.all) || []).map(p => [p.id, p]));
 const curation = JSON.parse(fs.readFileSync(path.join(ROOT, 'tools/curation.json'), 'utf8'));
 
+/* What the shop lists: published, visible in her catalogue, a simple product, with a name and a
+   price. Anything published that is left out is named in the report with the reason, so nothing
+   she publishes can vanish without a word. */
+const offShop = [];
+const why0 = p => {
+  if (!['visible', 'catalog'].includes(p.catalog_visibility)) return 'hidden from her catalogue in WordPress';
+  if (p.type !== 'simple') return `a ${p.type} product: the shop sells simple products (one product per size or colour)`;
+  if (!String(p.name || '').trim()) return 'it has no name';
+  if (p.price === '' || p.price == null || !(+p.price >= 0)) return 'it has no price';
+  return '';
+};
 const listed = products
-  .filter(p => p.status === 'publish' && ['visible', 'catalog'].includes(p.catalog_visibility) && p.type === 'simple')
+  .filter(p => { if (p.status !== 'publish') return false; const w = why0(p); if (w) offShop.push({ id: p.id, name: decode(p.name || '').trim() || '(no name)', why: w }); return !w; })
   .sort((a, b) => (a.menu_order - b.menu_order) || (a.id - b.id));
 
 const texts = [], textIdx = new Map(), map = {}, care = {};
 const addText = s => { if (!s) return -1; if (!textIdx.has(s)) { textIdx.set(s, texts.length); texts.push(s); } return textIdx.get(s); };
-const why = { mat: {}, missing: [], partial: [] };
+const why = { mat: {}, missing: [], partial: [], src: {}, notChosen: [], unknownDesign: [] };
 
 const all = listed.map(p => {
   const cc = catalogue ? catalogue[p.id] || null : null;
@@ -221,11 +277,25 @@ const all = listed.map(p => {
   const shortText = txt(p.short_description), longText = txt(p.description);
   const name = texturize(decode(p.name).replace(/\s+/g, ' ').trim()), cats = p.categories.map(c => c.slug);
   const comp = prev ? prev.comp : compositionOf(p, cc);
-  // her family by name; her material from the family, else from the piece's own composition
-  const fam = familyOf(name, shortText + ' ' + longText);
-  const mat = fam ? fam.material || (fam.said ? '' : materialOf(comp, name, cats)) : materialOf(comp, name, cats);
-  why.mat[!mat ? 'none' : fam && fam.material ? 'her sheet' : 'composition'] = (why.mat[!mat ? 'none' : fam && fam.material ? 'her sheet' : 'composition'] || 0) + 1;
-  const tyk = fam ? fam.group : groupOfType(prev ? prev.tyk : cc && (/\bneck ?warmer/i.test(p.name) ? 'neckwarmers' : cc.type));
+  // her choice in WordPress first (Design, Material); the name rules only where nothing is chosen
+  const raw = p.sndr_shop && typeof p.sndr_shop === 'object' ? p.sndr_shop : null;
+  // only text is a choice; anything else is reported and treated as not chosen
+  if (raw && ((raw.design != null && typeof raw.design !== 'string') || (raw.material != null && typeof raw.material !== 'string'))) why.unknownDesign.push(`${p.id} ${name} (a value that is not text)`);
+  const sel = raw ? { design: str(raw.design), material: str(raw.material) } : null;
+  let fam = null, group = '', from = 'name rules';
+  if (sel && sel.design) {
+    if (FAM.has(sel.design)) { fam = FAM.get(sel.design); from = 'her choice'; }
+    else if (/^other-/.test(sel.design) && GROUP_KEYS.has(sel.design.slice(6))) { group = sel.design.slice(6); from = 'her choice'; }
+    else why.unknownDesign.push(`${p.id} ${name} ("${sel.design}")`);
+  }
+  if (from === 'name rules') { fam = familyOf(name, shortText + ' ' + longText); if (!sel || !sel.design) why.notChosen.push(`${p.id} ${name}`); }
+  why.src[from] = (why.src[from] || 0) + 1;
+  const chosenMat = sel && sel.material && MAT_KEYS.has(sel.material) ? sel.material : '';
+  if (sel && sel.material && !chosenMat) why.unknownDesign.push(`${p.id} ${name} (material "${sel.material}")`);
+  const mat = chosenMat || (fam ? fam.material || (fam.said ? '' : materialOf(comp, name, cats)) : materialOf(comp, name, cats));
+  const matWhy = !mat ? 'none' : chosenMat ? 'her choice' : fam && fam.material ? 'her sheet' : 'composition';
+  why.mat[matWhy] = (why.mat[matWhy] || 0) + 1;
+  const tyk = fam ? fam.group : group || groupOfType(prev ? prev.tyk : cc && (/\bneck ?warmer/i.test(p.name) ? 'neckwarmers' : cc.type));
   const price = +p.price || 0, regular = +p.regular_price || 0;
   const s = addText(shortText), l = addText(longText);
   map[p.id] = { s, l };
@@ -257,8 +327,8 @@ function pool(items, n = 24) {
 // nothing listed yet stay in, with a count of 0, for the pages to leave out
 const materials = MATERIALS.map(({ key, name, is }) => { const items = all.filter(p => p.mat === key); return { key, name, is, count: items.length, pool: pool(items) }; });
 const groups = G.groups.map(({ key, name, is }) => { const items = all.filter(p => p.tyk === key); return { key, name, is, count: items.length, pool: pool(items) }; });
-const families = G.families.map(f => ({ key: f.key, name: f.name, is: f.is, group: f.group, mat: f.material || '', ...(f.said ? { said: f.said, saidIs: f.saidIs } : {}),
-  ...(f.sizes ? { sizes: f.sizes } : {}), goes: f.goes || [], count: all.filter(p => p.fam === f.key).length }));
+const families = [...G.families, ...addedFams].map(f => ({ key: f.key, name: f.name, is: f.is, group: f.group, mat: f.material || '', ...(f.said ? { said: f.said, saidIs: f.saidIs } : {}),
+  ...(f.sizes ? { sizes: f.sizes } : {}), goes: f.goes || [], ...(f.added ? { added: true } : {}), count: all.filter(p => p.fam === f.key).length }));
 const { _about, ...bespoke } = G.bespoke;
 
 const byId = new Map(all.map(p => [p.id, p]));
@@ -276,6 +346,7 @@ const CM = {
 const L = [];
 L.push(`Source: ${source}`, `Products: ${products.length} in WooCommerce, ${all.length} listed (published, visible, simple), ${CM.saleCount} on sale, ${all.filter(p => p.oos).length} sold out`);
 L.push(`Composition stated: ${all.filter(p => p.comp).length} · type known: ${all.filter(p => p.tyk).length} · origin stated: ${all.filter(p => p.mi).length} · care text: ${Object.keys(care).length} texts`);
+L.push(`Design from: ${Object.entries(why.src).map(([k, v]) => `${k} ${v}`).join(', ')}${lists ? `; her lists ${lists.version || '?'} (${addedFams.length} design(s) she added)` : `; her lists not read (${listsWhy})`}`);
 L.push(`Her material from: ${Object.entries(why.mat).map(([k, v]) => `${k} ${v}`).join(', ')}`);
 L.push(`Her groups: ${groups.map(t => `${t.key} ${t.count}`).join(', ')}; none ${all.filter(p => !p.tyk).length}`);
 L.push(`Her materials: ${materials.map(m => `${m.key} ${m.count}`).join(', ')}`);
@@ -289,18 +360,36 @@ if (dropped.length) L.push(`Curated picks no longer listed, dropped: ${dropped.j
 if (!catalogue) L.push(`No customs catalogue here (${path.relative(WS, CATALOGUE)}): facts carried over from the last full pull; prices, stock and listing refreshed.`);
 if (old) {
   const added = all.filter(p => !oldById.has(p.id)).map(p => p.id), gone = old.all.filter(p => !byId.has(p.id)).map(p => p.id);
-  const changed = { p: [], cp: [], oos: [], mat: [], tyk: [], comp: [] };
+  const changed = { p: [], cp: [], oos: [], fam: [], mat: [], tyk: [], comp: [] };
   for (const p of all) { const o = oldById.get(p.id); if (!o) continue; for (const k of Object.keys(changed)) if (String(o[k]) !== String(p[k])) changed[k].push(p.id); }
   L.push(`Against the current data.js (${old.harvestedAt}): +${added.length} −${gone.length}; changed ${Object.entries(changed).map(([k, v]) => `${k} ${v.length}`).join(', ')}`);
   if (added.length) L.push(`  new: ${added.slice(0, 20).join(', ')}${added.length > 20 ? ' …' : ''}`);
   if (gone.length) L.push(`  gone: ${gone.slice(0, 20).join(', ')}${gone.length > 20 ? ' …' : ''}`);
-  for (const k of ['mat', 'tyk', 'comp']) for (const id of changed[k].slice(0, 3)) {
+  for (const k of ['fam', 'mat', 'tyk', 'comp']) for (const id of changed[k].slice(0, 3)) {
     const o = oldById.get(id), n = byId.get(id); L.push(`  ${k} #${id} ${JSON.stringify(o[k])} → ${JSON.stringify(n[k])}  (${n.t})`);
   }
 }
 console.log(L.join('\n'));
 
-if (flag('--dry')) { console.log('\n--dry: nothing written'); process.exit(0); }
+/* ── the shop report, in plain words, for Sindri and Anna ───────────────── */
+// No clock in it: the file only changes (and is committed) when what it says changes. It is public
+// with the site, so a piece that is not on the site is named by its WordPress id only.
+const H = [`# Shop report`, ``, `${source} · ${all.length} pieces on the shop`, ``];
+const section = (title, lines, note) => { if (!lines.length) return; H.push(`## ${title} (${lines.length})`, '', ...(note ? [note, ''] : []), ...lines.slice(0, 200).map(l => `- ${l}`), ...(lines.length > 200 ? [`- … and ${lines.length - 200} more`] : []), ''); };
+section('Published but not on the shop', offShop.map(x => `#${x.id}: ${x.why}`), 'By WordPress id (Products, then search the id, or open post.php?post=<id>&action=edit). Everything else she publishes is on the shop.');
+section('On the shop, but no design chosen', why.notChosen, 'Listed by its name for now. In WordPress: Products, filter "Not chosen", choose a Design.');
+section('Design or material that no longer exists', why.unknownDesign, 'Probably a design that was deleted or renamed. Listed by its name for now; choose a design again.');
+section('Designs she added without an Icelandic name', addedFams.filter(f => f.isMissing).map(f => `${f.name} (${f.key})`), 'The Icelandic shop shows the English name until one is added under Products, Shop designs.');
+section('No photo', all.filter(p => !p.img.length).map(p => `${p.t} (#${p.id})`), 'On the shop without a picture; add one in WordPress.');
+section('New since the last full read: no composition or origin line yet', why.missing.map(String), 'Shown without those two lines until the next full catalogue read; nothing else is missing.');
+if (lists && lists.version && lists.version !== SHEET_VERSION) section('Her WordPress has an older list of designs than the storefront', [`WordPress ${lists.version}, storefront ${SHEET_VERSION}`], 'A design added to tools/groups.json cannot be chosen in WordPress yet: run tools/shop-fields-json.mjs and put the new sndr-shop-fields.json on her site.');
+section('Designs kept from the last read', keptFromLast, 'Products still name these designs, but the list from WordPress left them out this time.');
+if (!lists) section('Her design lists could not be read', [listsWhy || 'unknown'], 'Designs from her sheet still hold; a design she added herself falls back to the name rules until this is fixed.');
+if (H.length === 4) H.push('Nothing needs attention.', '');
+
+if (flag('--dry')) { console.log('\n' + H.join('\n') + '\n--dry: nothing written'); process.exit(0); }
+fs.mkdirSync(path.join(ROOT, 'reports'), { recursive: true });
+fs.writeFileSync(path.join(ROOT, 'reports/shop-health.md'), H.join('\n'));
 fs.writeFileSync(dataFile, 'window.CM = ' + JSON.stringify(CM) + ';\n');
 fs.writeFileSync(path.join(ROOT, 'assets/copy.js'), 'window.CMCOPY = ' + JSON.stringify({ texts, map, care }) + ';\n');
 console.log(`\nWrote assets/data.js (${(fs.statSync(dataFile).size / 1024).toFixed(0)} KB) and assets/copy.js`);

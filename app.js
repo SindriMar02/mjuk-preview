@@ -41,7 +41,8 @@
      place that decides a resolution. */
   const px = (u, w) => (u ? u + '?w=' + w + '&ssl=1' : '');
   // her shop prices in USD; the name says what it prints
-  const usd = n => '$' + (n || 0).toLocaleString('en-US');
+  // whole dollars as she prices ($45); a price with cents always shows both digits ($12.50)
+  const usd = n => { n = +n || 0; return '$' + (n % 1 ? n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : n.toLocaleString('en-US')); };
   // Anna's classification (tools/groups.json): her materials and piece groups, named in the page's language
   const nm = x => (x ? (isIS && x.is) || x.name : '');
   const MATS = Object.fromEntries((CM.materials || []).map(m => [m.key, m])), GRPS = Object.fromEntries((CM.groups || []).map(g => [g.key, g]));
@@ -974,6 +975,37 @@ void main() {
   setTimeout(boot, 3600);   // fail-safe: the loader can never stick
 
   // inner pages (body[data-page]) carry no preloader, so nothing to hold for
+  /* A display heading keeps the page's size unless one of its words is wider than the line: an
+     Icelandic compound, or a design she names herself. Then that heading alone is set smaller,
+     just enough for its widest word; the scale stays for everything else. Again on resize, and
+     when a heading's text changes (the shop's title follows its filters). */
+  const fitHead = el => {
+    el.style.fontSize = ''; el.style.overflowWrap = '';
+    const room = el.clientWidth, words = el.textContent.trim().split(/\s+/).filter(Boolean);
+    if (!room || !words.length) return;
+    const probe = document.createElement('span');
+    probe.style.cssText = 'position:absolute;left:-9999px;top:0;visibility:hidden;white-space:nowrap';
+    el.appendChild(probe);
+    let widest = 0;
+    for (const w of words) { probe.textContent = w; widest = Math.max(widest, probe.getBoundingClientRect().width); }
+    probe.remove();
+    if (widest > room) {
+      const size = Math.floor(parseFloat(getComputedStyle(el).fontSize) * room / widest * 0.97);
+      el.style.fontSize = Math.max(18, size) + 'px';
+      if (size < 18) el.style.overflowWrap = 'anywhere'; // a word too long even at the smallest size wraps rather than leaves the page
+    }
+  };
+  const heads = [...document.querySelectorAll('.head__t')];
+  if (heads.length) {
+    let watch = null;
+    const quiet = fn => { if (watch) watch.disconnect(); fn(); if (watch) heads.forEach(x => watch.observe(x, { childList: true, characterData: true, subtree: true })); };
+    const fitAll = () => quiet(() => heads.forEach(fitHead));
+    (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(fitAll);
+    if (window.ResizeObserver) { let last = innerWidth; new ResizeObserver(() => { if (innerWidth !== last) { last = innerWidth; fitAll(); } }).observe(document.documentElement); }
+    watch = new MutationObserver(recs => { const hit = new Set(recs.map(r => (r.target.nodeType === 1 ? r.target : r.target.parentElement).closest('.head__t')).filter(Boolean)); quiet(() => hit.forEach(fitHead)); });
+    heads.forEach(x => watch.observe(x, { childList: true, characterData: true, subtree: true }));
+  }
+
   const hold = document.body.dataset.page ? 0.05 : 2.5;
   if (reduced || !hasGsap) boot();
   else gsap.delayedCall(hold, boot);               // hold on the glitch, then wipe
