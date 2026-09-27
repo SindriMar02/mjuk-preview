@@ -35,7 +35,8 @@ const RUN = Date.now().toString(36).slice(-5);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 // a plain request that survives a connection the server has just closed
-async function hit(url, init = {}) { for (let i = 0; ; i++) { try { return await fetch(url, { redirect: 'manual', ...init }); } catch (e) { if (i >= 3) throw e; await sleep(1500); } } }
+// ...and never waits forever: a server that hangs a request (a stuck PHP worker) fails the run
+async function hit(url, init = {}) { for (let i = 0; ; i++) { try { return await fetch(url, { redirect: 'manual', signal: AbortSignal.timeout(90000), ...init }); } catch (e) { if (i >= 3) throw e; await sleep(1500); } } }
 let fails = 0;
 const check = (ok, what) => { console.log(`${ok ? 'PASS' : 'FAIL'}  ${what}`); if (!ok) fails++; return ok; };
 async function api(p, init = {}) {
@@ -106,11 +107,25 @@ const server = http.createServer(async (req, res) => {
   fs.createReadStream(f).pipe(res);
 }).listen(PORT, '127.0.0.1');
 
-const browser = await puppeteer.launch({ executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', headless: 'new' });
-const admin = await browser.newPage(); await admin.setViewport({ width: 1440, height: 1000 });
-const adminErrors = []; admin.on('pageerror', e => adminErrors.push(e.message));
-await admin.setExtraHTTPHeaders({ 'X-SNDR-Test': TOKEN }); await admin.goto(WOO + '/?sndr_test=login'); await admin.setExtraHTTPHeaders({});
-const go = (url) => admin.goto(url, { waitUntil: 'load', timeout: 120000 });
+const launch = () => puppeteer.launch({ executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', headless: 'new' });
+let browser = await launch();
+// the admin tab; Chrome has dropped it now and then on the heavier WooCommerce 11 screens ("detached
+// frame"), so a dead tab is replaced by a fresh, signed-in one instead of ending the run's restore
+const adminErrors = [];
+async function newAdmin() {
+  if (!browser.connected) browser = await launch(); // Chrome itself went away: start it again
+  const pg = await browser.newPage(); await pg.setViewport({ width: 1440, height: 1000 });
+  pg.on('pageerror', e => adminErrors.push(e.message));
+  await pg.setExtraHTTPHeaders({ 'X-SNDR-Test': TOKEN }); await pg.goto(WOO + '/?sndr_test=login'); await pg.setExtraHTTPHeaders({});
+  return pg;
+}
+let admin = await newAdmin();
+const dead = e => /detached|Target closed|Session closed|has been closed|Connection closed/i.test(String(e && e.message));
+async function go(url) {
+  try { return await admin.goto(url, { waitUntil: 'load', timeout: 180000 }); }
+  catch (e) { if (!dead(e)) throw e; admin = await newAdmin(); return admin.goto(url, { waitUntil: 'load', timeout: 180000 }); }
+}
+async function liveAdmin() { try { await admin.evaluate(() => 1); } catch (e) { admin = await newAdmin(); } }
 const noPhp = async where => { const t = await admin.evaluate(() => document.body.innerText.match(/\b(Warning|Notice|Fatal error|Parse error)\b:? [^\n]{0,140}/g) || []); return check(!t.length, `${where}: no PHP warnings ${t.length ? JSON.stringify(t.slice(0, 2)) : ''}`); };
 // the admin list shows her own number per page (Screen Options); find the page a product is on,
 // newest first, instead of changing her settings
@@ -130,9 +145,10 @@ async function openRow(...ids) {
 // a journal left by a run that was killed: put that right before anything else
 if (fs.existsSync(JOURNAL)) {
   const j = JSON.parse(fs.readFileSync(JOURNAL, 'utf8'));
-  const left = await restoreAll(new Map(j.snaps), { duplicates: [], ...j.made }, j.run, j.startMax);
+  // anything going wrong here is reported and the journal kept for the next try, never a crash
+  const left = await restoreAll(new Map(j.snaps), { duplicates: [], ...j.made }, j.run, j.startMax).catch(e => [`recovery stopped: ${String(e && e.message).split('\n')[0]}`]);
   check(!left.length, `a killed earlier run was put right from its journal (${j.snaps.length} pieces, ${j.made.products.length} made)${left.length ? ': ' + left.slice(0, 3).join('; ') : ''}`);
-  if (left.length) { await browser.close(); server.close(); process.exit(1); }
+  if (left.length) { await Promise.race([browser.close(), sleep(10000)]).catch(() => {}); server.close(); process.exit(1); }
   fs.unlinkSync(JOURNAL);
 }
 const catIds = async id => (await api(`/wc/v3/products/${id}?_fields=categories`)).categories.map(c => c.id).sort((a, b) => a - b).join(',');
@@ -269,7 +285,7 @@ try {
   const NEW7 = track('products', (await create({ name: `No price ${RUN}`, regular_price: '' })).id);
   // 22. an emoji typed into a slug (WordPress keeps it, percent-encoded); 23. her own text saying "3 available"
   await put(U.id, { slug: `hufa-${RUN}-😀` });
-  await put(V.id, { short_description: 'Comes in 3 available colours, 2 left in the workshop.' });
+  await put(V.id, { name: `${V.t.split('.')[0]}. 3 available & warm ${RUN}`, short_description: 'Comes in 3 available colours, 2 left in the workshop.' });
 
   /* ── the refresh, and what the shop shows ── */
   const one = refresh('round one');
@@ -403,7 +419,7 @@ try {
   const undo = await restoreAll(snaps, made, RUN, startMax);
   check(!undo.length, `the stack is left as it was found (${snaps.size} pieces checked; ${made.products.length} made and removed)${undo.length ? '\n  ' + undo.slice(0, 6).join('\n  ') : ''}`);
   if (!undo.length && fs.existsSync(JOURNAL)) fs.unlinkSync(JOURNAL);
-  await browser.close(); server.close();
+  await Promise.race([browser.close(), sleep(10000)]).catch(() => {}); server.close();
   if (process.env.KEEP) console.log('kept the built copy at ' + COPY); else fs.rmSync(TMP, { recursive: true, force: true });
 }
 console.log(fails ? `\n${fails} FAILED (${TARGET})` : `\nALL PASS (${TARGET})`);
@@ -412,6 +428,7 @@ process.exit(fails ? 1 : 0);
 /* everything back as it was: made things removed, touched products restored and compared */
 async function restoreAll(snaps, made, run, startMax) {
   const undo = [];
+  await liveAdmin();
   const newer = (id, kind) => startMax && id > startMax[kind];
   // anything this run made carries its code in the name, journalled or not (a kill can land between
   // making a product and writing it down); and any product still on one of this run's own designs
@@ -473,8 +490,12 @@ async function restoreAll(snaps, made, run, startMax) {
     } catch (e) { undo.push('designs: ' + e.message); }
   }
   let same = 0;
-  for (const [id, s] of snaps) { const now = await api(`/wc/v3/products/${id}?_fields=name,slug,status,regular_price,sale_price,stock_status,catalog_visibility,categories,images,sndr_shop`).catch(() => null);
-    if (now && now.name === s.name && now.slug === s.slug && now.status === s.status && now.regular_price === s.regular_price && now.sale_price === s.sale_price && now.stock_status === s.stock_status && now.catalog_visibility === s.catalog_visibility
-      && now.categories.map(c => c.id).join() === s.categories.map(c => c.id).join() && now.images.map(i => i.id).join() === s.images.map(i => i.id).join() && JSON.stringify(now.sndr_shop) === JSON.stringify(s.sndr_shop)) same++; else undo.push(`product ${id} differs after restore`); }
+  // every field that was written down is compared (categories and photos by id, in order)
+  const norm = (k, v) => k === 'categories' || k === 'images' ? (v || []).map(x => x.id).join() : JSON.stringify(v);
+  for (const [id, s] of snaps) {
+    const now = await api(`/wc/v3/products/${id}?_fields=${SNAP_FIELDS}`).catch(() => null);
+    const off = now ? Object.keys(s).filter(k => k !== 'id' && !(k === 'stock_quantity' && !s.manage_stock) && norm(k, now[k]) !== norm(k, s[k])) : ['(unreadable)'];
+    if (!off.length) same++; else undo.push(`product ${id} differs after restore: ${off.join(', ')}`);
+  }
   return undo;
 }

@@ -101,7 +101,10 @@ for (const rel of pages) {
       if (P.offers && !text.includes(shown(Number(P.offers.price)))) fail(rel, `price $${P.offers.price} not in the HTML text`);
       // what the site prints, not her own words: her description and short text, and the product
       // name, may say "3 available colours" and must never stop a publish
-      const ours = h.replace(/<div class="pdp__short">[\s\S]*?<\/div>|<details class="pdp__desc"[\s\S]*?<\/details>|<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ').split(P.name).join(' ');
+      // entities decoded first, so her name is found and left out however the page escapes it
+      const unent = t => t.replace(/&#x([0-9a-f]+);/gi, (m, x) => String.fromCodePoint(parseInt(x, 16))).replace(/&#(\d+);/g, (m, d) => String.fromCodePoint(+d))
+        .replace(/&quot;/g, '"').replace(/&apos;|&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&');
+      const ours = unent(h.replace(/<div class="pdp__short">[\s\S]*?<\/div>|<details class="pdp__desc"[\s\S]*?<\/details>|<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ')).split(P.name).join(' ');
       if (/\b\d+\s+(?:left|in stock|available)\b/i.test(ours)) fail(rel, 'a stock count is shown');
     }
     if (!B || !B.itemListElement || B.itemListElement.at(-1).item !== prodUrl(rel) || B.itemListElement.some((x, i) => x.position !== i + 1 || !x.name || !/^https:\/\//.test(x.item))) fail(rel, 'BreadcrumbList incomplete');
