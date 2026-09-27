@@ -375,7 +375,8 @@ console.log(L.join('\n'));
 // No clock in it: the file only changes (and is committed) when what it says changes. It is public
 // with the site, so a piece that is not on the site is named by its WordPress id only.
 const H = [`# Shop report`, ``, `${source} · ${all.length} pieces on the shop`, ``];
-const section = (title, lines, note) => { if (!lines.length) return; H.push(`## ${title} (${lines.length})`, '', ...(note ? [note, ''] : []), ...lines.slice(0, 200).map(l => `- ${l}`), ...(lines.length > 200 ? [`- … and ${lines.length - 200} more`] : []), ''); };
+// every line, never a truncated list: the report promises that each piece left off is named
+const section = (title, lines, note) => { if (!lines.length) return; H.push(`## ${title} (${lines.length})`, '', ...(note ? [note, ''] : []), ...lines.map(l => `- ${l}`), ''); };
 section('Published but not on the shop', offShop.map(x => `#${x.id}: ${x.why}`), 'By WordPress id (Products, then search the id, or open post.php?post=<id>&action=edit). Everything else she publishes is on the shop.');
 section('On the shop, but no design chosen', why.notChosen, 'Listed by its name for now. In WordPress: Products, filter "Not chosen", choose a Design.');
 section('Design or material that no longer exists', why.unknownDesign, 'Probably a design that was deleted or renamed. Listed by its name for now; choose a design again.');
