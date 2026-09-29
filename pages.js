@@ -77,6 +77,8 @@
     if (!FAM[st.family]) st.family = '';
     if (!MAT[st.material]) st.material = '';
     if (st.family) st.type = FAM[st.family].group;   // a design always sits in its group
+    // same as tools/build-products.mjs rowKey: a short fingerprint of which pieces, in which order
+    const rowKey = list => { let h = 0x811c9dc5; for (const c of list.map(purl).join('|')) h = Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0; return h.toString(16); };
     const grid = $('#pgrid'), title = $('#shopTitle'), count = $('#shopCount'), more = $('#more'), empty = $('#pgEmpty');
     /* her groups, then (once a group is chosen) her designs in it, and her materials in her ranking */
     const rows = { type: $('#fType'), family: $('#fFam'), material: $('#fFibre') };
@@ -134,9 +136,13 @@
       count.textContent = pieces(L.length) + (st.stock ? '' : ' ' + t('incl. sold out'));
       const shownL = L.slice(0, st.n);
       const img = { sizes: '(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw', eager: 4 };
-      if (reset) fill(grid, shownL, img);
+      /* the build puts the first 24 cards into the page (tools/build-products.mjs), so they paint without
+         waiting for these scripts. They are kept only when they are exactly the cards this would build
+         (same pieces, same order); any other view, or a changed catalogue, rebuilds them */
+      if (reset && grid.dataset.static && grid.dataset.static === rowKey(shownL)) { /* already in the page */ }
+      else if (reset) fill(grid, shownL, img);
       else { const have = grid.children.length; const add = shownL.slice(have).map((p, i) => card(p, have + i, img)); grid.append(...add); reveal(grid); }
-      grid.removeAttribute('data-wait');   // filled: the space kept for it (pages.css) is no longer needed
+      grid.removeAttribute('data-wait'); grid.removeAttribute('data-static');   // filled: the space kept for it (pages.css) is no longer needed, and the built-in row is now just cards
       more.hidden = L.length <= st.n; empty.hidden = L.length > 0;
       const u = new URLSearchParams();
       if (st.type) u.set('type', st.type); if (st.family) u.set('family', st.family); if (st.material) u.set('material', st.material);

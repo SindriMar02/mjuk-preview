@@ -26,6 +26,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
+import http from 'node:http';
 import { createRequire } from 'node:module';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
@@ -148,14 +149,89 @@ ${groups.filter(g => g.list.length).map(g => `      <section class="idx__g"><h3 
     </details>
     <!-- /CATALOGUE -->`;
 }
+/* The shop builds its cards from script, and the script waits for the animation libraries, so on a slow
+   phone the first row's photos were not even requested until ~1.7 s after the page arrived. This asks for
+   them from the very top of the head instead, for the plain shop only (a filtered view shows other pieces).
+   Same order as pages.js list() for the default view (her featured order, in stock only) and the same
+   srcset and sizes as the card, so the browser reuses the preloaded file. Runs before the stylesheets:
+   an inline script placed after them waits for them. */
+const firstRow = (() => {
+  const rank = {}; (CM.featuredNew || []).concat(CM.own || []).forEach((h, i) => { if (!(h in rank)) rank[h] = i; });
+  return CM.all.filter(p => !p.oos && p.img && p.img[0])
+    .sort((a, b) => ((a.h in rank ? rank[a.h] : 1e6) - (b.h in rank ? rank[b.h] : 1e6))).slice(0, 4).map(p => p.img[0]);
+})();
+const PRELOAD = `<!-- PRELOAD -->
+<script>(function(){if(location.search)return;var s='(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw',p=function(u,w){return u+'?w='+w+'&ssl=1'};${JSON.stringify(firstRow)}.forEach(function(u,i){var l=document.createElement('link');l.rel='preload';l.as='image';l.href=p(u,620);l.setAttribute('imagesrcset',p(u,380)+' 380w, '+p(u,620)+' 620w, '+p(u,940)+' 940w');l.setAttribute('imagesizes',s);if(i<2)l.setAttribute('fetchpriority','high');document.head.appendChild(l)})})()</script>
+<!-- /PRELOAD -->
+`;
+/* The shop's first 24 cards, built into the page. They are made by script, and on a slow phone the script
+   was the last thing to arrive (the largest image on the page appeared ~4.4 s in). So the build lets the
+   REAL page build them in a headless browser and embeds that markup, which cannot drift from the script's
+   own (a second copy of the card template would). pages.js keeps them only when they are exactly the
+   cards it would have built (key below), else it rebuilds as before. If there is no Chrome, nothing is
+   embedded and the page works as it always did. */
+const GRID_RE = /<div class="pgrid" id="pgrid"[^>]*>(?:<!-- GRID -->[\s\S]*?<!-- \/GRID -->)?<\/div>/;
+const EMPTY_GRID = '<div class="pgrid" id="pgrid" data-wait></div>';
+const rowKey = hrefs => { let h = 0x811c9dc5; for (const c of hrefs.join('|')) h = Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0; return h.toString(16); };   // same as pages.js rowKey
+async function snapshotGrids(files) {
+  const chrome = process.env.CHROME_BIN || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+  let puppeteer; try { puppeteer = (await import('puppeteer-core')).default; } catch { return { why: 'puppeteer-core is not installed' }; }
+  if (!fs.existsSync(chrome)) return { why: 'no Chrome at ' + chrome + ' (set CHROME_BIN)' };
+  const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.woff2': 'font/woff2', '.txt': 'text/plain', '.xml': 'application/xml' };
+  const server = http.createServer((req, res) => {
+    let p = decodeURIComponent(req.url.split('?')[0]); if (p.endsWith('/')) p += 'index.html';
+    const f = path.join(ROOT, p);
+    if (!f.startsWith(ROOT) || !fs.existsSync(f) || fs.statSync(f).isDirectory()) { res.writeHead(404); return res.end(); }
+    res.writeHead(200, { 'content-type': MIME[path.extname(f)] || 'application/octet-stream' }); fs.createReadStream(f).pipe(res);
+  });
+  await new Promise(r => server.listen(0, '127.0.0.1', r));
+  const port = server.address().port, out = {};
+  let browser;
+  try {
+    browser = await puppeteer.launch({ executablePath: chrome, headless: 'new', args: ['--no-sandbox'] });
+    for (const file of files) {
+      const page = await browser.newPage();
+      await page.setViewport({ width: 412, height: 900, deviceScaleFactor: 2 });
+      await page.setRequestInterception(true);   // photos and fonts are not needed to read the markup: no network, no waiting on them
+      page.on('request', rq => (['image', 'font', 'media'].includes(rq.resourceType()) ? rq.abort() : rq.continue()));
+      await page.goto(`http://127.0.0.1:${port}/${file}`, { waitUntil: 'domcontentloaded' });
+      await page.waitForFunction(() => document.querySelectorAll('#pgrid > .prod').length > 0, { timeout: 30000 });
+      out[file] = await page.evaluate(() => {
+        const kids = [...document.getElementById('pgrid').children]; kids.forEach(k => k.classList.add('in'));   // shown at once: no reveal to wait for
+        return { html: kids.map(k => k.outerHTML).join(''), hrefs: kids.map(k => k.querySelector('.prod__go').getAttribute('href')) };
+      });
+      await page.close();
+    }
+  } catch (e) { return { why: e.message }; }
+  finally { if (browser) await browser.close(); server.close(); }
+  return out;
+}
 for (const [file, lang] of [['shop.html', 'en'], ['is/shop.html', 'is']]) {
   let s = read(file);
+  s = s.replace(GRID_RE, EMPTY_GRID);   // start from the plain page: the browser must see what a visitor without the row sees
   s = s.replace(/\s*<!-- CATALOGUE -->[\s\S]*?<!-- \/CATALOGUE -->/, '');
+  s = s.replace(/<!-- PRELOAD -->[\s\S]*?<!-- \/PRELOAD -->\n?/, '');
+  const css = s.indexOf('<link rel="stylesheet"'); if (css < 0) throw new Error(file + ': no stylesheet link to place the photo hint before');
+  s = s.slice(0, css) + PRELOAD + s.slice(css);
   const anchor = '<div class="pg__more"><button class="link" id="more" hidden>';
   const i = s.indexOf(anchor); if (i < 0) throw new Error(file + ': shop "more" button not found');
   const j = s.indexOf('</div>', i) + '</div>'.length;
   s = s.slice(0, j) + '\n    ' + catalogue(lang) + s.slice(j);
   write(file, s);
+}
+{
+  const files = ['shop.html', 'is/shop.html'];
+  const snaps = await snapshotGrids(files);
+  for (const file of files) {
+    const g = snaps[file];
+    if (!g || g.hrefs.length < 24) { console.warn(`  ! ${file}: first row NOT embedded (${snaps.why || 'only ' + (g && g.hrefs.length) + ' cards'}); the page builds it from script as before`); continue; }
+    let s = read(file);
+    if (!GRID_RE.test(s)) throw new Error(file + ': shop grid not found');
+    s = s.replace(GRID_RE, () => `<div class="pgrid" id="pgrid" data-static="${rowKey(g.hrefs)}"><!-- GRID -->${g.html}<!-- /GRID --></div>`);
+    s = s.replace(/<!-- PRELOAD -->[\s\S]*?<!-- \/PRELOAD -->\n?/, '');   // the photos are in the HTML now: the browser finds them by itself
+    write(file, s);
+    console.log(`  ${file}: first ${g.hrefs.length} cards embedded (key ${rowKey(g.hrefs)}, ${Math.round(g.html.length / 1024)} KB)`);
+  }
 }
 
 /* ── sitemaps, one per host, each page with its twin ── */

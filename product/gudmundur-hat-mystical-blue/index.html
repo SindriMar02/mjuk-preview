@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <base href="../../" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<script>/* cross-fade (pages.css) is for going forward: Back, Forward and reload skip it, so a restored page never shows a fade first */addEventListener('pagereveal',function(e){var a=window.navigation&&navigation.activation;if(e.viewTransition&&a&&a.navigationType!=='push')e.viewTransition.skipTransition()})</script>
+<script>/* cross-fade (pages.css) is for going forward: Back, Forward and reload skip it, so a restored page never shows a fade first; a skipped or refused transition rejects its promises, which are caught here so they never reach the console */addEventListener('pagereveal',function(e){var v=e.viewTransition;if(!v)return;v.ready.catch(function(){});v.finished.catch(function(){});var a=window.navigation&&navigation.activation;if(a&&a.navigationType!=='push')v.skipTransition()})</script>
 <title>Gudmundur hat. Mystical blue &mdash; MJ&Uacute;K Iceland</title>
 <meta name="description" content="90% top quality Icelandic wool, 5% angora, 5% superfine merino wool without fleece very flexible fit" />
 <meta name="theme-color" content="#f7f3ef" />
@@ -15,11 +15,10 @@
      A data URI has no URL to cache and cannot 404. -->
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAEyklEQVR42u2Xb0xVdRjHP7/fOYB/h1h3Np0Bwpw6xaQ1nKTiMv+AppFiappTgYldQjFtQiTL9EUvcivLrd5grSDFUpeWK7mBMjW1rVUmM2upcFPD3L1474Vzzq8X13v0CugFavai36uzc87O832e5/v9Ps8RPs81xX08kvt8/nsAkpNSGJY4hpQxaVy9ehUApW51KXTd/GczqakTSUpMIS+3EADTNHsOwLIUSim8nhvUflOPUirsw6ZpopSixnWEa81/YSkrDGCPAShLkRA/lH79+/Jx5W6EEEh56zUpJUIIqqqqiYuLRQiBaXWcuVIKwzDuWpn2HBAwZMhgsrKmc+rkd7jdl5FSYlkWlmUhpeTSxUa+PX6K+TnZCNlx6ZVSCCHQdR1N07pGwjbDZP78pxEIDh48dLM1QQAAez7dhx6lk5X5JJap2gWwLAshBD6fn02btpC70onLVRc5gJaWGzwyLoXYuFiqqqrt0ocCVVbuYcqUScQnxCMQaFKEBZdS4vcHyMt18uHOT3A4HiAt7bHIARhGK1JK5s6ZRcPP5zj/629278+caaCpsYnnlixA3azIncEDgQD5+YXU159gVcFytmzdRO/evSIHIEQwo+xnZoMQ7N930H5WVVlNTEwMEyak4fW2oG7ruaZptAZaycsr5EjdMZyF+RSvK8QwjE6V0iGAEOtHjRrB4CEPsWvXZ7YE9+7dz8wZU9F1nda2VkBhmMGet7W2BYPXHqNoTQFFRQUYhoGmaXZSXXJCKSU5Odk0XWriwu8X+fGHn7h+3cPCxTmhUgEQExODUoqCVWuoq61n3XonTmf+PYNHZMWzn5qJQnHgwCF2V+9jQNwAUlPHhunW7/dT9OIGXK4jWMriyuUr7drZ2dHvvKFpt9huWRaJCfGMGDGcioqP8Hq9LFqcYz+PitIBhaumDik1SkrX4aqpo6KiktRHxzFr1gwMw0DX9a5YMXg8njBvz1mQzR/uK3g8XubNm2MT6lzDeaSUREdHU/bqBlasWEr5ayX06hVDycZyLl64hK7rtn9EBGDy5HQmZUy8WY1gppmZ08mY8jhLn19EcnKSDWDbtu0oBenp41m2bDF+X4BhiQmUlr6E19PC2uKNWFZwVnSmAtHVhcQ0TTRNo+ZwLcuXFwAwbdoTvLvjTTtTXdfJXenk8Ne1FLywkuJiZ6etkB0FuLNkt2cQmgujx4xk5wfvAcI2oNDgUkqxZWsZAwfG8s729zlx/GSnPJDtSaiFTb8Qk402g0AgYLPa4XCQnDysHdNDAB0OB+WbS1FKsXp1MU2N7u7JMFSNNWtfJiMji+bmZjtLn9/XodQ0TcM0TTJnTmPJ0meJiormrbd3RCbDzo676TLuRretjNv3BCnba13TNJRSlJdvpKxsA/5AoGc7oR6lI6S462zvaKaEZkTfPn16BkApFZzziC6tXCEQnclQ78qHgLD1K9Jd8G52HDEATQikCErNNM1gZpaFFIJ+/ft1CVC3VPBw/FCEEJw+/b0t1S+/+AqEYGzK6G5vxfd0wtB+19DwC9lzF3LD52Pq1Mn4fa0cPXqMQYMe5PMD1cQNjIto+nXLikNOV1dXz+ub3+Ds2XOAIn3CeEpeWc/IkcPtd/7xCvz/c/pvn78BoQUwnQKgoGgAAAAASUVORK5CYII=" />
 <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAEyklEQVR42u2Xb0xVdRjHP7/fOYB/h1h3Np0Bwpw6xaQ1nKTiMv+AppFiappTgYldQjFtQiTL9EUvcivLrd5grSDFUpeWK7mBMjW1rVUmM2upcFPD3L1474Vzzq8X13v0CugFavai36uzc87O832e5/v9Ps8RPs81xX08kvt8/nsAkpNSGJY4hpQxaVy9ehUApW51KXTd/GczqakTSUpMIS+3EADTNHsOwLIUSim8nhvUflOPUirsw6ZpopSixnWEa81/YSkrDGCPAShLkRA/lH79+/Jx5W6EEEh56zUpJUIIqqqqiYuLRQiBaXWcuVIKwzDuWpn2HBAwZMhgsrKmc+rkd7jdl5FSYlkWlmUhpeTSxUa+PX6K+TnZCNlx6ZVSCCHQdR1N07pGwjbDZP78pxEIDh48dLM1QQAAez7dhx6lk5X5JJap2gWwLAshBD6fn02btpC70onLVRc5gJaWGzwyLoXYuFiqqqrt0ocCVVbuYcqUScQnxCMQaFKEBZdS4vcHyMt18uHOT3A4HiAt7bHIARhGK1JK5s6ZRcPP5zj/629278+caaCpsYnnlixA3azIncEDgQD5+YXU159gVcFytmzdRO/evSIHIEQwo+xnZoMQ7N930H5WVVlNTEwMEyak4fW2oG7ruaZptAZaycsr5EjdMZyF+RSvK8QwjE6V0iGAEOtHjRrB4CEPsWvXZ7YE9+7dz8wZU9F1nda2VkBhmMGet7W2BYPXHqNoTQFFRQUYhoGmaXZSXXJCKSU5Odk0XWriwu8X+fGHn7h+3cPCxTmhUgEQExODUoqCVWuoq61n3XonTmf+PYNHZMWzn5qJQnHgwCF2V+9jQNwAUlPHhunW7/dT9OIGXK4jWMriyuUr7drZ2dHvvKFpt9huWRaJCfGMGDGcioqP8Hq9LFqcYz+PitIBhaumDik1SkrX4aqpo6KiktRHxzFr1gwMw0DX9a5YMXg8njBvz1mQzR/uK3g8XubNm2MT6lzDeaSUREdHU/bqBlasWEr5ayX06hVDycZyLl64hK7rtn9EBGDy5HQmZUy8WY1gppmZ08mY8jhLn19EcnKSDWDbtu0oBenp41m2bDF+X4BhiQmUlr6E19PC2uKNWFZwVnSmAtHVhcQ0TTRNo+ZwLcuXFwAwbdoTvLvjTTtTXdfJXenk8Ne1FLywkuJiZ6etkB0FuLNkt2cQmgujx4xk5wfvAcI2oNDgUkqxZWsZAwfG8s729zlx/GSnPJDtSaiFTb8Qk402g0AgYLPa4XCQnDysHdNDAB0OB+WbS1FKsXp1MU2N7u7JMFSNNWtfJiMji+bmZjtLn9/XodQ0TcM0TTJnTmPJ0meJiormrbd3RCbDzo676TLuRretjNv3BCnba13TNJRSlJdvpKxsA/5AoGc7oR6lI6S462zvaKaEZkTfPn16BkApFZzziC6tXCEQnclQ78qHgLD1K9Jd8G52HDEATQikCErNNM1gZpaFFIJ+/ft1CVC3VPBw/FCEEJw+/b0t1S+/+AqEYGzK6G5vxfd0wtB+19DwC9lzF3LD52Pq1Mn4fa0cPXqMQYMe5PMD1cQNjIto+nXLikNOV1dXz+ub3+Ds2XOAIn3CeEpeWc/IkcPtd/7xCvz/c/pvn78BoQUwnQKgoGgAAAAASUVORK5CYII=" />
-<link rel="preload" href="assets/logo.png" as="image" />
+<link rel="preload" href="assets/logo-480.png" as="image" />
 <link rel="preconnect" href="https://i0.wp.com" crossorigin />
 <link rel="preconnect" href="https://i1.wp.com" crossorigin />
 <link rel="preconnect" href="https://i2.wp.com" crossorigin />
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
 <link rel="preload" href="assets/fonts/Humane.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="preload" href="assets/fonts/SpaceMono-Regular.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="preload" href="assets/fonts/BodoniModa-500.woff2" as="font" type="font/woff2" crossorigin />
@@ -57,7 +56,7 @@
     <a href="store.html">Stores</a>
   </nav>
   <a href="./" class="nav__brand" aria-label="MJ&Uacute;K Iceland">
-    <span class="wordmark"><img src="assets/logo.png" alt="MJ&Uacute;K Iceland" /></span>
+    <span class="wordmark"><img src="assets/logo-480.png" alt="MJ&Uacute;K Iceland" /></span>
   </a>
   <div class="nav__end">
     <a class="nav__lang" id="langBtn" href="is/product/gudmundur-hat-mystical-blue/" hreflang="is" lang="is" aria-label="&Iacute; &iacute;slensku">EN / <b>&Iacute;S</b></a>
@@ -123,7 +122,7 @@
 
 <footer class="foot">
   <div class="foot__word">
-    <span class="wordmark"><img src="assets/logo.png" alt="MJ&Uacute;K Iceland" /></span>
+    <span class="wordmark"><img src="assets/logo-480.png" alt="MJ&Uacute;K Iceland" /></span>
   </div>
   <div class="foot__grid">
     <div><span class="mono">Shop</span><a href="shop.html?new=1">New this season</a><a href="fibres.html">By material</a><a href="shop.html">By piece</a><a href="shop.html?sale=1">Last of the line</a><a href="./#made">Made for you</a></div>
@@ -188,9 +187,9 @@
 
 <script defer src="assets/data.js"></script>
 <script defer src="assets/copy.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<script defer src="assets/vendor/gsap.min.js"></script>
+<script defer src="assets/vendor/ScrollTrigger.min.js"></script>
+<script defer src="assets/vendor/lenis.min.js"></script>
 <script defer src="app.js"></script>
 <script defer src="configurators.js"></script>
 <script defer src="pdp.js"></script>

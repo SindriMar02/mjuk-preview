@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<script>/* cross-fade (pages.css) is for going forward: Back, Forward and reload skip it, so a restored page never shows a fade first */addEventListener('pagereveal',function(e){var a=window.navigation&&navigation.activation;if(e.viewTransition&&a&&a.navigationType!=='push')e.viewTransition.skipTransition()})</script>
+<script>/* cross-fade (pages.css) is for going forward: Back, Forward and reload skip it, so a restored page never shows a fade first; a skipped or refused transition rejects its promises, which are caught here so they never reach the console */addEventListener('pagereveal',function(e){var v=e.viewTransition;if(!v)return;v.ready.catch(function(){});v.finished.catch(function(){});var a=window.navigation&&navigation.activation;if(a&&a.navigationType!=='push')v.skipTransition()})</script>
 <title>Shop &mdash; MJ&Uacute;K Iceland</title>
 <meta name="description" content="Every piece MJ&Uacute;K Iceland knits, by piece, design and material: hats, scarves, gloves, blankets and capes in alpaca and silk, cashmere, merino, Icelandic wool and angora." />
 <meta name="theme-color" content="#f7f3ef" />
@@ -14,11 +14,10 @@
      A data URI has no URL to cache and cannot 404. -->
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAEyklEQVR42u2Xb0xVdRjHP7/fOYB/h1h3Np0Bwpw6xaQ1nKTiMv+AppFiappTgYldQjFtQiTL9EUvcivLrd5grSDFUpeWK7mBMjW1rVUmM2upcFPD3L1474Vzzq8X13v0CugFavai36uzc87O832e5/v9Ps8RPs81xX08kvt8/nsAkpNSGJY4hpQxaVy9ehUApW51KXTd/GczqakTSUpMIS+3EADTNHsOwLIUSim8nhvUflOPUirsw6ZpopSixnWEa81/YSkrDGCPAShLkRA/lH79+/Jx5W6EEEh56zUpJUIIqqqqiYuLRQiBaXWcuVIKwzDuWpn2HBAwZMhgsrKmc+rkd7jdl5FSYlkWlmUhpeTSxUa+PX6K+TnZCNlx6ZVSCCHQdR1N07pGwjbDZP78pxEIDh48dLM1QQAAez7dhx6lk5X5JJap2gWwLAshBD6fn02btpC70onLVRc5gJaWGzwyLoXYuFiqqqrt0ocCVVbuYcqUScQnxCMQaFKEBZdS4vcHyMt18uHOT3A4HiAt7bHIARhGK1JK5s6ZRcPP5zj/629278+caaCpsYnnlixA3azIncEDgQD5+YXU159gVcFytmzdRO/evSIHIEQwo+xnZoMQ7N930H5WVVlNTEwMEyak4fW2oG7ruaZptAZaycsr5EjdMZyF+RSvK8QwjE6V0iGAEOtHjRrB4CEPsWvXZ7YE9+7dz8wZU9F1nda2VkBhmMGet7W2BYPXHqNoTQFFRQUYhoGmaXZSXXJCKSU5Odk0XWriwu8X+fGHn7h+3cPCxTmhUgEQExODUoqCVWuoq61n3XonTmf+PYNHZMWzn5qJQnHgwCF2V+9jQNwAUlPHhunW7/dT9OIGXK4jWMriyuUr7drZ2dHvvKFpt9huWRaJCfGMGDGcioqP8Hq9LFqcYz+PitIBhaumDik1SkrX4aqpo6KiktRHxzFr1gwMw0DX9a5YMXg8njBvz1mQzR/uK3g8XubNm2MT6lzDeaSUREdHU/bqBlasWEr5ayX06hVDycZyLl64hK7rtn9EBGDy5HQmZUy8WY1gppmZ08mY8jhLn19EcnKSDWDbtu0oBenp41m2bDF+X4BhiQmUlr6E19PC2uKNWFZwVnSmAtHVhcQ0TTRNo+ZwLcuXFwAwbdoTvLvjTTtTXdfJXenk8Ne1FLywkuJiZ6etkB0FuLNkt2cQmgujx4xk5wfvAcI2oNDgUkqxZWsZAwfG8s729zlx/GSnPJDtSaiFTb8Qk402g0AgYLPa4XCQnDysHdNDAB0OB+WbS1FKsXp1MU2N7u7JMFSNNWtfJiMji+bmZjtLn9/XodQ0TcM0TTJnTmPJ0meJiormrbd3RCbDzo676TLuRretjNv3BCnba13TNJRSlJdvpKxsA/5AoGc7oR6lI6S462zvaKaEZkTfPn16BkApFZzziC6tXCEQnclQ78qHgLD1K9Jd8G52HDEATQikCErNNM1gZpaFFIJ+/ft1CVC3VPBw/FCEEJw+/b0t1S+/+AqEYGzK6G5vxfd0wtB+19DwC9lzF3LD52Pq1Mn4fa0cPXqMQYMe5PMD1cQNjIto+nXLikNOV1dXz+ub3+Ds2XOAIn3CeEpeWc/IkcPtd/7xCvz/c/pvn78BoQUwnQKgoGgAAAAASUVORK5CYII=" />
 <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAEyklEQVR42u2Xb0xVdRjHP7/fOYB/h1h3Np0Bwpw6xaQ1nKTiMv+AppFiappTgYldQjFtQiTL9EUvcivLrd5grSDFUpeWK7mBMjW1rVUmM2upcFPD3L1474Vzzq8X13v0CugFavai36uzc87O832e5/v9Ps8RPs81xX08kvt8/nsAkpNSGJY4hpQxaVy9ehUApW51KXTd/GczqakTSUpMIS+3EADTNHsOwLIUSim8nhvUflOPUirsw6ZpopSixnWEa81/YSkrDGCPAShLkRA/lH79+/Jx5W6EEEh56zUpJUIIqqqqiYuLRQiBaXWcuVIKwzDuWpn2HBAwZMhgsrKmc+rkd7jdl5FSYlkWlmUhpeTSxUa+PX6K+TnZCNlx6ZVSCCHQdR1N07pGwjbDZP78pxEIDh48dLM1QQAAez7dhx6lk5X5JJap2gWwLAshBD6fn02btpC70onLVRc5gJaWGzwyLoXYuFiqqqrt0ocCVVbuYcqUScQnxCMQaFKEBZdS4vcHyMt18uHOT3A4HiAt7bHIARhGK1JK5s6ZRcPP5zj/629278+caaCpsYnnlixA3azIncEDgQD5+YXU159gVcFytmzdRO/evSIHIEQwo+xnZoMQ7N930H5WVVlNTEwMEyak4fW2oG7ruaZptAZaycsr5EjdMZyF+RSvK8QwjE6V0iGAEOtHjRrB4CEPsWvXZ7YE9+7dz8wZU9F1nda2VkBhmMGet7W2BYPXHqNoTQFFRQUYhoGmaXZSXXJCKSU5Odk0XWriwu8X+fGHn7h+3cPCxTmhUgEQExODUoqCVWuoq61n3XonTmf+PYNHZMWzn5qJQnHgwCF2V+9jQNwAUlPHhunW7/dT9OIGXK4jWMriyuUr7drZ2dHvvKFpt9huWRaJCfGMGDGcioqP8Hq9LFqcYz+PitIBhaumDik1SkrX4aqpo6KiktRHxzFr1gwMw0DX9a5YMXg8njBvz1mQzR/uK3g8XubNm2MT6lzDeaSUREdHU/bqBlasWEr5ayX06hVDycZyLl64hK7rtn9EBGDy5HQmZUy8WY1gppmZ08mY8jhLn19EcnKSDWDbtu0oBenp41m2bDF+X4BhiQmUlr6E19PC2uKNWFZwVnSmAtHVhcQ0TTRNo+ZwLcuXFwAwbdoTvLvjTTtTXdfJXenk8Ne1FLywkuJiZ6etkB0FuLNkt2cQmgujx4xk5wfvAcI2oNDgUkqxZWsZAwfG8s729zlx/GSnPJDtSaiFTb8Qk402g0AgYLPa4XCQnDysHdNDAB0OB+WbS1FKsXp1MU2N7u7JMFSNNWtfJiMji+bmZjtLn9/XodQ0TcM0TTJnTmPJ0meJiormrbd3RCbDzo676TLuRretjNv3BCnba13TNJRSlJdvpKxsA/5AoGc7oR6lI6S462zvaKaEZkTfPn16BkApFZzziC6tXCEQnclQ78qHgLD1K9Jd8G52HDEATQikCErNNM1gZpaFFIJ+/ft1CVC3VPBw/FCEEJw+/b0t1S+/+AqEYGzK6G5vxfd0wtB+19DwC9lzF3LD52Pq1Mn4fa0cPXqMQYMe5PMD1cQNjIto+nXLikNOV1dXz+ub3+Ds2XOAIn3CeEpeWc/IkcPtd/7xCvz/c/pvn78BoQUwnQKgoGgAAAAASUVORK5CYII=" />
-<link rel="preload" href="assets/logo.png" as="image" />
+<link rel="preload" href="assets/logo-480.png" as="image" />
 <link rel="preconnect" href="https://i0.wp.com" crossorigin />
 <link rel="preconnect" href="https://i1.wp.com" crossorigin />
 <link rel="preconnect" href="https://i2.wp.com" crossorigin />
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
 <link rel="preload" href="assets/fonts/Humane.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="preload" href="assets/fonts/SpaceMono-Regular.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="preload" href="assets/fonts/BodoniModa-500.woff2" as="font" type="font/woff2" crossorigin />
@@ -46,7 +45,7 @@
     <a href="store.html">Stores</a>
   </nav>
   <a href="./" class="nav__brand" aria-label="MJ&Uacute;K Iceland">
-    <span class="wordmark"><img src="assets/logo.png" alt="MJ&Uacute;K Iceland" /></span>
+    <span class="wordmark"><img src="assets/logo-480.png" alt="MJ&Uacute;K Iceland" /></span>
   </a>
   <div class="nav__end">
     <a class="nav__lang" id="langBtn" href="is/shop.html" hreflang="is" lang="is" aria-label="&Iacute; &iacute;slensku">EN / <b>&Iacute;S</b></a>
@@ -95,7 +94,175 @@
         </div>
       </div>
     </div>
-    <div class="pgrid" id="pgrid" data-wait></div>
+    <div class="pgrid" id="pgrid" data-static="faf3ecaa"><!-- GRID --><article class="prod rv in" style="--i: 0;">
+      <div class="prod__im">
+        <span class="prod__ix">01</span>
+        <img class="main" src="https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07638-scaled.jpg?w=620&amp;ssl=1" srcset="https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07638-scaled.jpg?w=380&amp;ssl=1 380w, https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07638-scaled.jpg?w=620&amp;ssl=1 620w, https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07638-scaled.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Roots beanie. Beige melange. With 2 cream pom poms" loading="eager" fetchpriority="high" decoding="async">
+        <a class="prod__go" href="product/roots-beanie-beige-melange-with-2-cream-pom-poms/" aria-label="Roots beanie. Beige melange. With 2 cream pom poms"></a><div class="prod__sizes"><button class="sz sz--solo" data-h="roots-beanie-beige-melange-with-2-cream-pom-poms" data-s="">Add to bag</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/roots-beanie-beige-melange-with-2-cream-pom-poms/">Roots beanie. Beige melange. With 2 cream pom poms</a></div><div class="prod__cat">(70% angora · 20% nylon · 10% merino wool)</div></div><span class="prod__price">$131</span></div>
+    </article><article class="prod rv in" style="--i: 1;">
+      <div class="prod__im">
+        <span class="prod__ix">02</span>
+        <img class="main" src="https://i2.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07628-scaled.jpg?w=620&amp;ssl=1" srcset="https://i2.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07628-scaled.jpg?w=380&amp;ssl=1 380w, https://i2.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07628-scaled.jpg?w=620&amp;ssl=1 620w, https://i2.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07628-scaled.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Roots beanie. Calm blue/navy melange. With 2 matching pom poms" loading="eager" fetchpriority="high" decoding="async">
+        <a class="prod__go" href="product/roots-beanie-calm-blue-navy-melange-with-2-matching-pom-poms/" aria-label="Roots beanie. Calm blue/navy melange. With 2 matching pom poms"></a><div class="prod__sizes"><button class="sz sz--solo" data-h="roots-beanie-calm-blue-navy-melange-with-2-matching-pom-poms" data-s="">Add to bag</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/roots-beanie-calm-blue-navy-melange-with-2-matching-pom-poms/">Roots beanie. Calm blue/navy melange. With 2 matching pom poms</a></div><div class="prod__cat">(70% angora · 20% nylon · 10% merino wool)</div></div><span class="prod__price">$131</span></div>
+    </article><article class="prod rv in" style="--i: 2;">
+      <div class="prod__im">
+        <span class="prod__ix">03</span>
+        <img class="main" src="https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07645-scaled.jpg?w=620&amp;ssl=1" srcset="https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07645-scaled.jpg?w=380&amp;ssl=1 380w, https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07645-scaled.jpg?w=620&amp;ssl=1 620w, https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07645-scaled.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Roots beanie. Mint melange with matching pom pom" loading="eager" fetchpriority="high" decoding="async">
+        <a class="prod__go" href="product/roots-beanie-mint-melange-with-matching-pom-pom/" aria-label="Roots beanie. Mint melange with matching pom pom"></a><div class="prod__sizes"><button class="sz sz--solo" data-h="roots-beanie-mint-melange-with-matching-pom-pom" data-s="">Add to bag</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/roots-beanie-mint-melange-with-matching-pom-pom/">Roots beanie. Mint melange with matching pom pom</a></div><div class="prod__cat">(70% angora · 20% nylon · 10% merino wool)</div></div><span class="prod__price">$97</span></div>
+    </article><article class="prod rv in" style="--i: 3;">
+      <div class="prod__im">
+        <span class="prod__ix">04</span>
+        <img class="main" src="https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07649-scaled.jpg?w=620&amp;ssl=1" srcset="https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07649-scaled.jpg?w=380&amp;ssl=1 380w, https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07649-scaled.jpg?w=620&amp;ssl=1 620w, https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07649-scaled.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Roots beanie. Purple/yellow melange .With 2 purple pom poms" loading="eager" fetchpriority="high" decoding="async">
+        <a class="prod__go" href="product/roots-beanie-with-2-blue-orange-pom-poms/" aria-label="Roots beanie. Purple/yellow melange .With 2 purple pom poms"></a><div class="prod__sizes"><button class="sz sz--solo" data-h="roots-beanie-with-2-blue-orange-pom-poms" data-s="">Add to bag</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/roots-beanie-with-2-blue-orange-pom-poms/">Roots beanie. Purple/yellow melange .With 2 purple pom poms</a></div><div class="prod__cat">(70% angora · 20% nylon · 10% merino wool)</div></div><span class="prod__price">$131</span></div>
+    </article><article class="prod rv in" style="--i: 0;">
+      <div class="prod__im">
+        <span class="prod__ix">05</span>
+        <img class="main" src="https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07694-scaled.jpg?w=620&amp;ssl=1" srcset="https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07694-scaled.jpg?w=380&amp;ssl=1 380w, https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07694-scaled.jpg?w=620&amp;ssl=1 620w, https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07694-scaled.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Roots beanie.Mint/lemon melange" loading="lazy" decoding="async">
+        <a class="prod__go" href="product/roots-beanie-mint-grey-melange-copy/" aria-label="Roots beanie.Mint/lemon melange"></a><div class="prod__sizes"><button class="sz sz--solo pom-ask" data-h="roots-beanie-mint-grey-melange-copy" data-s="">Add to bag</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/roots-beanie-mint-grey-melange-copy/">Roots beanie.Mint/lemon melange</a></div><div class="prod__cat">(70% angora · 20% nylon · 10% merino wool)</div></div><span class="prod__price">$97</span></div>
+    </article><article class="prod rv in" style="--i: 1;">
+      <div class="prod__im">
+        <span class="prod__ix">06</span>
+        <img class="main" src="https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07656-scaled.jpg?w=620&amp;ssl=1" srcset="https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07656-scaled.jpg?w=380&amp;ssl=1 380w, https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07656-scaled.jpg?w=620&amp;ssl=1 620w, https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07656-scaled.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Roots beanie.Tutquoise melange. With 2 aqua pom poms" loading="lazy" decoding="async">
+        <a class="prod__go" href="product/roots-beanie-tutquoise-melange-with-2-aqua-pom-poms/" aria-label="Roots beanie.Tutquoise melange. With 2 aqua pom poms"></a><div class="prod__sizes"><button class="sz sz--solo" data-h="roots-beanie-tutquoise-melange-with-2-aqua-pom-poms" data-s="">Add to bag</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/roots-beanie-tutquoise-melange-with-2-aqua-pom-poms/">Roots beanie.Tutquoise melange. With 2 aqua pom poms</a></div><div class="prod__cat">(70% angora · 20% nylon · 10% merino wool)</div></div><span class="prod__price">$131</span></div>
+    </article><article class="prod rv in" style="--i: 2;">
+      <div class="prod__im">
+        <span class="prod__ix">07</span>
+        <img class="main" src="https://i2.wp.com/mjukiceland.com/wp-content/uploads/2026/02/IMG_9490.jpg?w=620&amp;ssl=1" srcset="https://i2.wp.com/mjukiceland.com/wp-content/uploads/2026/02/IMG_9490.jpg?w=380&amp;ssl=1 380w, https://i2.wp.com/mjukiceland.com/wp-content/uploads/2026/02/IMG_9490.jpg?w=620&amp;ssl=1 620w, https://i2.wp.com/mjukiceland.com/wp-content/uploads/2026/02/IMG_9490.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Fluffy Kitty Hat. Camel" loading="lazy" decoding="async">
+        <a class="prod__go" href="product/fluffy-kitty-hat-camel/" aria-label="Fluffy Kitty Hat. Camel"></a><div class="prod__sizes"><button class="sz sz--solo pom-ask" data-h="fluffy-kitty-hat-camel" data-s="">Add to bag</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/fluffy-kitty-hat-camel/">Fluffy Kitty Hat. Camel</a></div><div class="prod__cat">(60% angora · 40% nylon)</div></div><span class="prod__price">$78</span></div>
+    </article><article class="prod rv in" style="--i: 3;">
+      <div class="prod__im">
+        <span class="prod__ix">08</span>
+        <img class="main" src="https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07325-scaled.jpg?w=620&amp;ssl=1" srcset="https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07325-scaled.jpg?w=380&amp;ssl=1 380w, https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07325-scaled.jpg?w=620&amp;ssl=1 620w, https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07325-scaled.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Marshmallow hat. Aqua melange" loading="lazy" decoding="async">
+        <a class="prod__go" href="product/marshmallow-hat-aqua-melange/" aria-label="Marshmallow hat. Aqua melange"></a><div class="prod__sizes"><button class="sz sz--solo pom-ask" data-h="marshmallow-hat-aqua-melange" data-s="">Add to bag</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/marshmallow-hat-aqua-melange/">Marshmallow hat. Aqua melange</a></div><div class="prod__cat">(Fluffy angora)</div></div><span class="prod__price">$78</span></div>
+    </article><article class="prod rv in" style="--i: 0;">
+      <div class="prod__im">
+        <span class="prod__ix">09</span>
+        <img class="main" src="https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07334-scaled.jpg?w=620&amp;ssl=1" srcset="https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07334-scaled.jpg?w=380&amp;ssl=1 380w, https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07334-scaled.jpg?w=620&amp;ssl=1 620w, https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07334-scaled.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Marshmallow hat. Grey/cold beige melange" loading="lazy" decoding="async">
+        <a class="prod__go" href="product/marshmallow-hat-grey-cold-beige-melange/" aria-label="Marshmallow hat. Grey/cold beige melange"></a><div class="prod__sizes"><button class="sz sz--solo pom-ask" data-h="marshmallow-hat-grey-cold-beige-melange" data-s="">Add to bag</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/marshmallow-hat-grey-cold-beige-melange/">Marshmallow hat. Grey/cold beige melange</a></div><div class="prod__cat">(Fluffy angora)</div></div><span class="prod__price">$78</span></div>
+    </article><article class="prod rv in" style="--i: 1;">
+      <div class="prod__im">
+        <span class="prod__ix">10</span>
+        <img class="main" src="https://i2.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07307-scaled.jpg?w=620&amp;ssl=1" srcset="https://i2.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07307-scaled.jpg?w=380&amp;ssl=1 380w, https://i2.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07307-scaled.jpg?w=620&amp;ssl=1 620w, https://i2.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07307-scaled.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Marshmallow hat. Light peach melange" loading="lazy" decoding="async">
+        <a class="prod__go" href="product/marshmallow-hat-light-peach-melange/" aria-label="Marshmallow hat. Light peach melange"></a><div class="prod__sizes"><button class="sz sz--solo pom-ask" data-h="marshmallow-hat-light-peach-melange" data-s="">Add to bag</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/marshmallow-hat-light-peach-melange/">Marshmallow hat. Light peach melange</a></div><div class="prod__cat">(Fluffy angora)</div></div><span class="prod__price">$78</span></div>
+    </article><article class="prod rv in" style="--i: 2;">
+      <div class="prod__im">
+        <span class="prod__ix">11</span>
+        <img class="main" src="https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07284-scaled.jpg?w=620&amp;ssl=1" srcset="https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07284-scaled.jpg?w=380&amp;ssl=1 380w, https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07284-scaled.jpg?w=620&amp;ssl=1 620w, https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07284-scaled.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Marshmallow hat. Mint/grey melange with mint pom pom" loading="lazy" decoding="async">
+        <a class="prod__go" href="product/marshmallow-hat-mint-grey-melange/" aria-label="Marshmallow hat. Mint/grey melange with mint pom pom"></a><div class="prod__sizes"><button class="sz sz--solo" data-h="marshmallow-hat-mint-grey-melange" data-s="">Add to bag</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/marshmallow-hat-mint-grey-melange/">Marshmallow hat. Mint/grey melange with mint pom pom</a></div><div class="prod__cat">(Fluffy angora)</div></div><span class="prod__price">$97</span></div>
+    </article><article class="prod rv in" style="--i: 3;">
+      <div class="prod__im">
+        <span class="prod__ix">12</span>
+        <img class="main" src="https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07322-scaled.jpg?w=620&amp;ssl=1" srcset="https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07322-scaled.jpg?w=380&amp;ssl=1 380w, https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07322-scaled.jpg?w=620&amp;ssl=1 620w, https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07322-scaled.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Marshmallow hat. Navy/sky blue melange" loading="lazy" decoding="async">
+        <a class="prod__go" href="product/marshmallow-hat-navy-sky-blue-melange/" aria-label="Marshmallow hat. Navy/sky blue melange"></a><div class="prod__sizes"><button class="sz sz--solo pom-ask" data-h="marshmallow-hat-navy-sky-blue-melange" data-s="">Add to bag</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/marshmallow-hat-navy-sky-blue-melange/">Marshmallow hat. Navy/sky blue melange</a></div><div class="prod__cat">(Fluffy angora)</div></div><span class="prod__price">$78</span></div>
+    </article><article class="prod rv in" style="--i: 0;">
+      <div class="prod__im">
+        <span class="prod__ix">13</span>
+        <img class="main" src="https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07268-scaled.jpg?w=620&amp;ssl=1" srcset="https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07268-scaled.jpg?w=380&amp;ssl=1 380w, https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07268-scaled.jpg?w=620&amp;ssl=1 620w, https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07268-scaled.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Marshmallow hat. Sky blue/navy melange" loading="lazy" decoding="async">
+        <a class="prod__go" href="product/marshmallow-hat-sky-blue-navy-melange/" aria-label="Marshmallow hat. Sky blue/navy melange"></a><div class="prod__sizes"><button class="sz sz--solo pom-ask" data-h="marshmallow-hat-sky-blue-navy-melange" data-s="">Add to bag</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/marshmallow-hat-sky-blue-navy-melange/">Marshmallow hat. Sky blue/navy melange</a></div><div class="prod__cat">(Fluffy angora)</div></div><span class="prod__price">$78</span></div>
+    </article><article class="prod rv in" style="--i: 1;">
+      <div class="prod__im">
+        <span class="prod__ix">14</span>
+        <img class="main" src="https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07312-scaled.jpg?w=620&amp;ssl=1" srcset="https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07312-scaled.jpg?w=380&amp;ssl=1 380w, https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07312-scaled.jpg?w=620&amp;ssl=1 620w, https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07312-scaled.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Marshmallow hat. Sky blue/white melange" loading="lazy" decoding="async">
+        <a class="prod__go" href="product/marshmallow-hat-sky-blue-white-melange/" aria-label="Marshmallow hat. Sky blue/white melange"></a><div class="prod__sizes"><button class="sz sz--solo pom-ask" data-h="marshmallow-hat-sky-blue-white-melange" data-s="">Add to bag</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/marshmallow-hat-sky-blue-white-melange/">Marshmallow hat. Sky blue/white melange</a></div><div class="prod__cat">(Fluffy angora)</div></div><span class="prod__price">$78</span></div>
+    </article><article class="prod rv in" style="--i: 2;">
+      <div class="prod__im">
+        <span class="prod__ix">15</span>
+        <img class="main" src="https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07566-scaled.jpg?w=620&amp;ssl=1" srcset="https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07566-scaled.jpg?w=380&amp;ssl=1 380w, https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07566-scaled.jpg?w=620&amp;ssl=1 620w, https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07566-scaled.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Marshmallow hat. Violet" loading="lazy" decoding="async">
+        <a class="prod__go" href="product/marshmallow-hat-violet/" aria-label="Marshmallow hat. Violet"></a><div class="prod__sizes"><button class="sz sz--solo pom-ask" data-h="marshmallow-hat-violet" data-s="">Add to bag</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/marshmallow-hat-violet/">Marshmallow hat. Violet</a></div><div class="prod__cat">(Fluffy angora)</div></div><span class="prod__price">$78</span></div>
+    </article><article class="prod rv in" style="--i: 3;">
+      <div class="prod__im">
+        <span class="prod__ix">16</span>
+        <img class="main" src="https://i0.wp.com/mjukiceland.com/wp-content/uploads/2025/07/DSC05515-scaled.jpg?w=620&amp;ssl=1" srcset="https://i0.wp.com/mjukiceland.com/wp-content/uploads/2025/07/DSC05515-scaled.jpg?w=380&amp;ssl=1 380w, https://i0.wp.com/mjukiceland.com/wp-content/uploads/2025/07/DSC05515-scaled.jpg?w=620&amp;ssl=1 620w, https://i0.wp.com/mjukiceland.com/wp-content/uploads/2025/07/DSC05515-scaled.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Alpaca Hat Brushed. White." loading="lazy" decoding="async">
+        <a class="prod__go" href="product/alpaca-hat-boucle-white/" aria-label="Alpaca Hat Brushed. White."></a><div class="prod__sizes"><button class="sz sz--solo pom-ask" data-h="alpaca-hat-boucle-white" data-s="">Add to bag</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/alpaca-hat-boucle-white/">Alpaca Hat Brushed. White.</a></div><div class="prod__cat">(88% alpaca · 12% silk)</div></div><span class="prod__price">$100</span></div>
+    </article><article class="prod rv in" style="--i: 0;">
+      <div class="prod__im">
+        <span class="prod__ix">17</span>
+        <img class="main" src="https://i0.wp.com/mjukiceland.com/wp-content/uploads/2024/12/AVF2_BubbleOrange_Orange_front.jpg?w=620&amp;ssl=1" srcset="https://i0.wp.com/mjukiceland.com/wp-content/uploads/2024/12/AVF2_BubbleOrange_Orange_front.jpg?w=380&amp;ssl=1 380w, https://i0.wp.com/mjukiceland.com/wp-content/uploads/2024/12/AVF2_BubbleOrange_Orange_front.jpg?w=620&amp;ssl=1 620w, https://i0.wp.com/mjukiceland.com/wp-content/uploads/2024/12/AVF2_BubbleOrange_Orange_front.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Lined Aviator hat. Bubblegum and orange with 2 orange pompoms" loading="lazy" decoding="async">
+        <a class="prod__go" href="product/lined-aviator-hat-bubblegum-and-orange-with-2-orange-pompoms/" aria-label="Lined Aviator hat. Bubblegum and orange with 2 orange pompoms"></a><div class="prod__sizes"><button class="sz sz--solo" data-h="lined-aviator-hat-bubblegum-and-orange-with-2-orange-pompoms" data-s="">Add to bag</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/lined-aviator-hat-bubblegum-and-orange-with-2-orange-pompoms/">Lined Aviator hat. Bubblegum and orange with 2 orange pompoms</a></div><div class="prod__cat">(Fluffy angora)</div></div><span class="prod__price">$131</span></div>
+    </article><article class="prod rv in" style="--i: 1;">
+      <div class="prod__im">
+        <span class="prod__ix">18</span>
+        <img class="main" src="https://i1.wp.com/mjukiceland.com/wp-content/uploads/2024/01/photo_2024-01-19_19-35-32.jpg?w=620&amp;ssl=1" srcset="https://i1.wp.com/mjukiceland.com/wp-content/uploads/2024/01/photo_2024-01-19_19-35-32.jpg?w=380&amp;ssl=1 380w, https://i1.wp.com/mjukiceland.com/wp-content/uploads/2024/01/photo_2024-01-19_19-35-32.jpg?w=620&amp;ssl=1 620w, https://i1.wp.com/mjukiceland.com/wp-content/uploads/2024/01/photo_2024-01-19_19-35-32.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Marshmallow hat. Red" loading="lazy" decoding="async">
+        <a class="prod__go" href="product/marshmallow-hat-red/" aria-label="Marshmallow hat. Red"></a><div class="prod__sizes"><button class="sz sz--solo pom-ask" data-h="marshmallow-hat-red" data-s="">Add to bag</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/marshmallow-hat-red/">Marshmallow hat. Red</a></div><div class="prod__cat">(Fluffy angora)</div></div><span class="prod__price"><s>$78</s>$61</span></div>
+    </article><article class="prod rv in" style="--i: 2;">
+      <div class="prod__im">
+        <span class="prod__ix">19</span>
+        <img class="main" src="https://i2.wp.com/mjukiceland.com/wp-content/uploads/2020/03/Tenderness-lilac-blush-e1622262449198.jpg?w=620&amp;ssl=1" srcset="https://i2.wp.com/mjukiceland.com/wp-content/uploads/2020/03/Tenderness-lilac-blush-e1622262449198.jpg?w=380&amp;ssl=1 380w, https://i2.wp.com/mjukiceland.com/wp-content/uploads/2020/03/Tenderness-lilac-blush-e1622262449198.jpg?w=620&amp;ssl=1 620w, https://i2.wp.com/mjukiceland.com/wp-content/uploads/2020/03/Tenderness-lilac-blush-e1622262449198.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Tenderness angora hat. Lilac blush" loading="lazy" decoding="async">
+        <a class="prod__go" href="product/tenderness-angora-hat-nude-4/" aria-label="Tenderness angora hat. Lilac blush"></a><div class="prod__sizes"><button class="sz sz--solo pom-ask" data-h="tenderness-angora-hat-nude-4" data-s="">Add to bag</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/tenderness-angora-hat-nude-4/">Tenderness angora hat. Lilac blush</a></div><div class="prod__cat">(50% angora · 25% nylon · 15% viscose · 10% wool)</div></div><span class="prod__price">$65.55</span></div>
+    </article><article class="prod rv in" style="--i: 3;">
+      <div class="prod__im">
+        <span class="prod__ix">20</span>
+        <img class="main" src="https://i2.wp.com/mjukiceland.com/wp-content/uploads/2023/11/Fuchsia-1.jpg?w=620&amp;ssl=1" srcset="https://i2.wp.com/mjukiceland.com/wp-content/uploads/2023/11/Fuchsia-1.jpg?w=380&amp;ssl=1 380w, https://i2.wp.com/mjukiceland.com/wp-content/uploads/2023/11/Fuchsia-1.jpg?w=620&amp;ssl=1 620w, https://i2.wp.com/mjukiceland.com/wp-content/uploads/2023/11/Fuchsia-1.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Tenderness angora hat. Fuchsia." loading="lazy" decoding="async">
+        <a class="prod__go" href="product/tenderness-angora-hat-fuchsia/" aria-label="Tenderness angora hat. Fuchsia."></a><div class="prod__sizes"><button class="sz sz--solo pom-ask" data-h="tenderness-angora-hat-fuchsia" data-s="">Add to bag</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/tenderness-angora-hat-fuchsia/">Tenderness angora hat. Fuchsia.</a></div><div class="prod__cat">(50% angora · 25% nylon · 15% viscose · 10% wool)</div></div><span class="prod__price"><s>$65.55</s>$32</span></div>
+    </article><article class="prod rv in" style="--i: 0;">
+      <div class="prod__im">
+        <span class="prod__ix">21</span>
+        <img class="main" src="https://i0.wp.com/mjukiceland.com/wp-content/uploads/2023/02/IMG_4191-scaled.jpeg?w=620&amp;ssl=1" srcset="https://i0.wp.com/mjukiceland.com/wp-content/uploads/2023/02/IMG_4191-scaled.jpeg?w=380&amp;ssl=1 380w, https://i0.wp.com/mjukiceland.com/wp-content/uploads/2023/02/IMG_4191-scaled.jpeg?w=620&amp;ssl=1 620w, https://i0.wp.com/mjukiceland.com/wp-content/uploads/2023/02/IMG_4191-scaled.jpeg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Marshmallow hat. Fuchsia. Arctic fox pompom." loading="lazy" decoding="async">
+        <a class="prod__go" href="product/marshmallow-hat-raspberry-arctic-fox-pompom/" aria-label="Marshmallow hat. Fuchsia. Arctic fox pompom."></a><div class="prod__sizes"><button class="sz sz--solo" data-h="marshmallow-hat-raspberry-arctic-fox-pompom" data-s="">Add to bag</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/marshmallow-hat-raspberry-arctic-fox-pompom/">Marshmallow hat. Fuchsia. Arctic fox pompom.</a></div><div class="prod__cat">(Fluffy angora)</div></div><span class="prod__price"><s>$97</s>$48</span></div>
+    </article><article class="prod rv in" style="--i: 1;">
+      <div class="prod__im">
+        <span class="prod__ix">22</span>
+        <img class="main" src="https://i0.wp.com/mjukiceland.com/wp-content/uploads/2024/01/IMG_0463.jpeg-1.jpg?w=620&amp;ssl=1" srcset="https://i0.wp.com/mjukiceland.com/wp-content/uploads/2024/01/IMG_0463.jpeg-1.jpg?w=380&amp;ssl=1 380w, https://i0.wp.com/mjukiceland.com/wp-content/uploads/2024/01/IMG_0463.jpeg-1.jpg?w=620&amp;ssl=1 620w, https://i0.wp.com/mjukiceland.com/wp-content/uploads/2024/01/IMG_0463.jpeg-1.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Marshmallow hat. Kelly green with fuchsia pompom (arctic fox)" loading="lazy" decoding="async">
+        <a class="prod__go" href="product/marshmallow-hat-color-color-arctic-fox-pompom-1/" aria-label="Marshmallow hat. Kelly green with fuchsia pompom (arctic fox)"></a><div class="prod__sizes"><button class="sz sz--solo" data-h="marshmallow-hat-color-color-arctic-fox-pompom-1" data-s="">Add to bag</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/marshmallow-hat-color-color-arctic-fox-pompom-1/">Marshmallow hat. Kelly green with fuchsia pompom (arctic fox)</a></div><div class="prod__cat">(Fluffy angora)</div></div><span class="prod__price"><s>$97</s>$48</span></div>
+    </article><article class="prod rv in" style="--i: 2;">
+      <div class="prod__im">
+        <span class="prod__ix">23</span>
+        <img class="main" src="https://i1.wp.com/mjukiceland.com/wp-content/uploads/2023/02/IMG_4226-scaled.jpeg?w=620&amp;ssl=1" srcset="https://i1.wp.com/mjukiceland.com/wp-content/uploads/2023/02/IMG_4226-scaled.jpeg?w=380&amp;ssl=1 380w, https://i1.wp.com/mjukiceland.com/wp-content/uploads/2023/02/IMG_4226-scaled.jpeg?w=620&amp;ssl=1 620w, https://i1.wp.com/mjukiceland.com/wp-content/uploads/2023/02/IMG_4226-scaled.jpeg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Marshmallow hat. Kelly green. Arctic fox pompom." loading="lazy" decoding="async">
+        <a class="prod__go" href="product/marshmallow-hat-kelly-green-arctic-fox-pompom/" aria-label="Marshmallow hat. Kelly green. Arctic fox pompom."></a><div class="prod__sizes"><button class="sz sz--solo" data-h="marshmallow-hat-kelly-green-arctic-fox-pompom" data-s="">Add to bag</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/marshmallow-hat-kelly-green-arctic-fox-pompom/">Marshmallow hat. Kelly green. Arctic fox pompom.</a></div><div class="prod__cat">(Fluffy angora)</div></div><span class="prod__price"><s>$97</s>$48</span></div>
+    </article><article class="prod rv in" style="--i: 3;">
+      <div class="prod__im">
+        <span class="prod__ix">24</span>
+        <img class="main" src="https://i2.wp.com/mjukiceland.com/wp-content/uploads/2025/12/photo_2025-12-25_12-11-47.jpg?w=620&amp;ssl=1" srcset="https://i2.wp.com/mjukiceland.com/wp-content/uploads/2025/12/photo_2025-12-25_12-11-47.jpg?w=380&amp;ssl=1 380w, https://i2.wp.com/mjukiceland.com/wp-content/uploads/2025/12/photo_2025-12-25_12-11-47.jpg?w=620&amp;ssl=1 620w, https://i2.wp.com/mjukiceland.com/wp-content/uploads/2025/12/photo_2025-12-25_12-11-47.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Explorer Hat. Kelly green" loading="lazy" decoding="async">
+        <a class="prod__go" href="product/explorer-hat-kelly-green/" aria-label="Explorer Hat. Kelly green"></a><div class="prod__sizes"><button class="sz sz--solo pom-ask" data-h="explorer-hat-kelly-green" data-s="">Add to bag</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/explorer-hat-kelly-green/">Explorer Hat. Kelly green</a></div><div class="prod__cat">(70% merino wool · 30% cashmere)</div></div><span class="prod__price"><s>$71.30</s>$35.65</span></div>
+    </article><!-- /GRID --></div>
     <p class="pg__empty" id="pgEmpty" hidden>Nothing matches that. Try one fewer filter.</p>
     <div class="pg__more"><button class="link" id="more" hidden>[ Show more ]</button></div>
     <!-- CATALOGUE -->
@@ -117,7 +284,7 @@
 
 <footer class="foot">
   <div class="foot__word">
-    <span class="wordmark"><img src="assets/logo.png" alt="MJ&Uacute;K Iceland" /></span>
+    <span class="wordmark"><img src="assets/logo-480.png" alt="MJ&Uacute;K Iceland" /></span>
   </div>
   <div class="foot__grid">
     <div><span class="mono">Shop</span><a href="shop.html?new=1">New this season</a><a href="fibres.html">By material</a><a href="shop.html">By piece</a><a href="shop.html?sale=1">Last of the line</a><a href="./#made">Made for you</a></div>
@@ -182,9 +349,9 @@
 
 <script defer src="assets/data.js"></script>
 <script defer src="assets/copy.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<script defer src="assets/vendor/gsap.min.js"></script>
+<script defer src="assets/vendor/ScrollTrigger.min.js"></script>
+<script defer src="assets/vendor/lenis.min.js"></script>
 <script defer src="app.js"></script>
 <script defer src="configurators.js"></script>
 <script defer src="pdp.js"></script>

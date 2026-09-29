@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<script>/* cross-fade (pages.css) is for going forward: Back, Forward and reload skip it, so a restored page never shows a fade first */addEventListener('pagereveal',function(e){var a=window.navigation&&navigation.activation;if(e.viewTransition&&a&&a.navigationType!=='push')e.viewTransition.skipTransition()})</script>
+<script>/* cross-fade (pages.css) is for going forward: Back, Forward and reload skip it, so a restored page never shows a fade first; a skipped or refused transition rejects its promises, which are caught here so they never reach the console */addEventListener('pagereveal',function(e){var v=e.viewTransition;if(!v)return;v.ready.catch(function(){});v.finished.catch(function(){});var a=window.navigation&&navigation.activation;if(a&&a.navigationType!=='push')v.skipTransition()})</script>
 <title>Verslun &mdash; MJ&Uacute;K Iceland</title>
 <meta name="description" content="Allt sem MJ&Uacute;K Iceland prjónar, eftir flík, hönnun og efni: húfur, treflar, hanskar, teppi og slár úr alpakkaull og silki, kasmír, merínóull, íslenskri ull og angóruull." />
 <meta name="theme-color" content="#f7f3ef" />
@@ -14,11 +14,10 @@
      A data URI has no URL to cache and cannot 404. -->
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAEyklEQVR42u2Xb0xVdRjHP7/fOYB/h1h3Np0Bwpw6xaQ1nKTiMv+AppFiappTgYldQjFtQiTL9EUvcivLrd5grSDFUpeWK7mBMjW1rVUmM2upcFPD3L1474Vzzq8X13v0CugFavai36uzc87O832e5/v9Ps8RPs81xX08kvt8/nsAkpNSGJY4hpQxaVy9ehUApW51KXTd/GczqakTSUpMIS+3EADTNHsOwLIUSim8nhvUflOPUirsw6ZpopSixnWEa81/YSkrDGCPAShLkRA/lH79+/Jx5W6EEEh56zUpJUIIqqqqiYuLRQiBaXWcuVIKwzDuWpn2HBAwZMhgsrKmc+rkd7jdl5FSYlkWlmUhpeTSxUa+PX6K+TnZCNlx6ZVSCCHQdR1N07pGwjbDZP78pxEIDh48dLM1QQAAez7dhx6lk5X5JJap2gWwLAshBD6fn02btpC70onLVRc5gJaWGzwyLoXYuFiqqqrt0ocCVVbuYcqUScQnxCMQaFKEBZdS4vcHyMt18uHOT3A4HiAt7bHIARhGK1JK5s6ZRcPP5zj/629278+caaCpsYnnlixA3azIncEDgQD5+YXU159gVcFytmzdRO/evSIHIEQwo+xnZoMQ7N930H5WVVlNTEwMEyak4fW2oG7ruaZptAZaycsr5EjdMZyF+RSvK8QwjE6V0iGAEOtHjRrB4CEPsWvXZ7YE9+7dz8wZU9F1nda2VkBhmMGet7W2BYPXHqNoTQFFRQUYhoGmaXZSXXJCKSU5Odk0XWriwu8X+fGHn7h+3cPCxTmhUgEQExODUoqCVWuoq61n3XonTmf+PYNHZMWzn5qJQnHgwCF2V+9jQNwAUlPHhunW7/dT9OIGXK4jWMriyuUr7drZ2dHvvKFpt9huWRaJCfGMGDGcioqP8Hq9LFqcYz+PitIBhaumDik1SkrX4aqpo6KiktRHxzFr1gwMw0DX9a5YMXg8njBvz1mQzR/uK3g8XubNm2MT6lzDeaSUREdHU/bqBlasWEr5ayX06hVDycZyLl64hK7rtn9EBGDy5HQmZUy8WY1gppmZ08mY8jhLn19EcnKSDWDbtu0oBenp41m2bDF+X4BhiQmUlr6E19PC2uKNWFZwVnSmAtHVhcQ0TTRNo+ZwLcuXFwAwbdoTvLvjTTtTXdfJXenk8Ne1FLywkuJiZ6etkB0FuLNkt2cQmgujx4xk5wfvAcI2oNDgUkqxZWsZAwfG8s729zlx/GSnPJDtSaiFTb8Qk402g0AgYLPa4XCQnDysHdNDAB0OB+WbS1FKsXp1MU2N7u7JMFSNNWtfJiMji+bmZjtLn9/XodQ0TcM0TTJnTmPJ0meJiormrbd3RCbDzo676TLuRretjNv3BCnba13TNJRSlJdvpKxsA/5AoGc7oR6lI6S462zvaKaEZkTfPn16BkApFZzziC6tXCEQnclQ78qHgLD1K9Jd8G52HDEATQikCErNNM1gZpaFFIJ+/ft1CVC3VPBw/FCEEJw+/b0t1S+/+AqEYGzK6G5vxfd0wtB+19DwC9lzF3LD52Pq1Mn4fa0cPXqMQYMe5PMD1cQNjIto+nXLikNOV1dXz+ub3+Ds2XOAIn3CeEpeWc/IkcPtd/7xCvz/c/pvn78BoQUwnQKgoGgAAAAASUVORK5CYII=" />
 <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAEyklEQVR42u2Xb0xVdRjHP7/fOYB/h1h3Np0Bwpw6xaQ1nKTiMv+AppFiappTgYldQjFtQiTL9EUvcivLrd5grSDFUpeWK7mBMjW1rVUmM2upcFPD3L1474Vzzq8X13v0CugFavai36uzc87O832e5/v9Ps8RPs81xX08kvt8/nsAkpNSGJY4hpQxaVy9ehUApW51KXTd/GczqakTSUpMIS+3EADTNHsOwLIUSim8nhvUflOPUirsw6ZpopSixnWEa81/YSkrDGCPAShLkRA/lH79+/Jx5W6EEEh56zUpJUIIqqqqiYuLRQiBaXWcuVIKwzDuWpn2HBAwZMhgsrKmc+rkd7jdl5FSYlkWlmUhpeTSxUa+PX6K+TnZCNlx6ZVSCCHQdR1N07pGwjbDZP78pxEIDh48dLM1QQAAez7dhx6lk5X5JJap2gWwLAshBD6fn02btpC70onLVRc5gJaWGzwyLoXYuFiqqqrt0ocCVVbuYcqUScQnxCMQaFKEBZdS4vcHyMt18uHOT3A4HiAt7bHIARhGK1JK5s6ZRcPP5zj/629278+caaCpsYnnlixA3azIncEDgQD5+YXU159gVcFytmzdRO/evSIHIEQwo+xnZoMQ7N930H5WVVlNTEwMEyak4fW2oG7ruaZptAZaycsr5EjdMZyF+RSvK8QwjE6V0iGAEOtHjRrB4CEPsWvXZ7YE9+7dz8wZU9F1nda2VkBhmMGet7W2BYPXHqNoTQFFRQUYhoGmaXZSXXJCKSU5Odk0XWriwu8X+fGHn7h+3cPCxTmhUgEQExODUoqCVWuoq61n3XonTmf+PYNHZMWzn5qJQnHgwCF2V+9jQNwAUlPHhunW7/dT9OIGXK4jWMriyuUr7drZ2dHvvKFpt9huWRaJCfGMGDGcioqP8Hq9LFqcYz+PitIBhaumDik1SkrX4aqpo6KiktRHxzFr1gwMw0DX9a5YMXg8njBvz1mQzR/uK3g8XubNm2MT6lzDeaSUREdHU/bqBlasWEr5ayX06hVDycZyLl64hK7rtn9EBGDy5HQmZUy8WY1gppmZ08mY8jhLn19EcnKSDWDbtu0oBenp41m2bDF+X4BhiQmUlr6E19PC2uKNWFZwVnSmAtHVhcQ0TTRNo+ZwLcuXFwAwbdoTvLvjTTtTXdfJXenk8Ne1FLywkuJiZ6etkB0FuLNkt2cQmgujx4xk5wfvAcI2oNDgUkqxZWsZAwfG8s729zlx/GSnPJDtSaiFTb8Qk402g0AgYLPa4XCQnDysHdNDAB0OB+WbS1FKsXp1MU2N7u7JMFSNNWtfJiMji+bmZjtLn9/XodQ0TcM0TTJnTmPJ0meJiormrbd3RCbDzo676TLuRretjNv3BCnba13TNJRSlJdvpKxsA/5AoGc7oR6lI6S462zvaKaEZkTfPn16BkApFZzziC6tXCEQnclQ78qHgLD1K9Jd8G52HDEATQikCErNNM1gZpaFFIJ+/ft1CVC3VPBw/FCEEJw+/b0t1S+/+AqEYGzK6G5vxfd0wtB+19DwC9lzF3LD52Pq1Mn4fa0cPXqMQYMe5PMD1cQNjIto+nXLikNOV1dXz+ub3+Ds2XOAIn3CeEpeWc/IkcPtd/7xCvz/c/pvn78BoQUwnQKgoGgAAAAASUVORK5CYII=" />
-<link rel="preload" href="../assets/logo.png" as="image" />
+<link rel="preload" href="../assets/logo-480.png" as="image" />
 <link rel="preconnect" href="https://i0.wp.com" crossorigin />
 <link rel="preconnect" href="https://i1.wp.com" crossorigin />
 <link rel="preconnect" href="https://i2.wp.com" crossorigin />
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
 <link rel="preload" href="../assets/fonts/Humane.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="preload" href="../assets/fonts/SpaceMono-Regular.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="preload" href="../assets/fonts/BodoniModa-500.woff2" as="font" type="font/woff2" crossorigin />
@@ -37,24 +36,24 @@
 
 <!-- NAV -->
 <header class="nav" id="nav">
-  <nav class="nav__mid" aria-label="Aðalvalmynd">
-    <a href="shop.html?new=1">Nýtt</a>
-    <a href="fibres.html">Efni</a>
-    <a href="shop.html">Verslun</a>
-    <a href="shop.html?sale=1">Útsala</a>
-    <a href="./#made">Sérsaumað</a>
-    <a href="store.html">Búðir</a>
+  <nav class="nav__mid" aria-label="Main">
+    <a href="shop.html?new=1">New</a>
+    <a href="fibres.html">Materials</a>
+    <a href="shop.html">Shop</a>
+    <a href="shop.html?sale=1">Sale</a>
+    <a href="./#made">Bespoke</a>
+    <a href="store.html">Stores</a>
   </nav>
   <a href="./" class="nav__brand" aria-label="MJ&Uacute;K Iceland">
-    <span class="wordmark"><img src="../assets/logo.png" alt="MJ&Uacute;K Iceland" /></span>
+    <span class="wordmark"><img src="../assets/logo-480.png" alt="MJ&Uacute;K Iceland" /></span>
   </a>
   <div class="nav__end">
     <a class="nav__lang" id="langBtn" href="../shop.html" hreflang="en" lang="en" aria-label="In English"><b>EN</b> / &Iacute;S</a>
-    <button class="nav__link" id="searchBtn">Leita</button>
-    <button class="nav__link" id="bagBtn">Karfa <span id="bagCount">(0)</span></button>
-    <button class="nav__burger sm-toggle" id="burger" aria-label="Valmynd" aria-expanded="false"
-            data-label-open="Valmynd" data-label-close="Loka">
-      <span class="sm-toggle-textwrap" aria-hidden="true"><span class="sm-toggle-textinner"><span class="sm-toggle-line">Valmynd</span></span></span>
+    <button class="nav__link" id="searchBtn">Search</button>
+    <button class="nav__link" id="bagBtn">Bag <span id="bagCount">(0)</span></button>
+    <button class="nav__burger sm-toggle" id="burger" aria-label="Menu" aria-expanded="false"
+            data-label-open="Menu" data-label-close="Close">
+      <span class="sm-toggle-textwrap" aria-hidden="true"><span class="sm-toggle-textinner"><span class="sm-toggle-line">Menu</span></span></span>
       <span class="sm-icon" aria-hidden="true"><span class="sm-icon-line"></span><span class="sm-icon-line sm-icon-line-v"></span></span>
     </button>
   </div>
@@ -62,42 +61,210 @@
 
 <!-- MOBILE MENU -->
 <div class="menu" id="menu" aria-hidden="true">
-  <a href="shop.html?new=1"><i>01</i>Nýtt</a>
-  <a href="fibres.html"><i>02</i>Efni</a>
-  <a href="shop.html"><i>03</i>Verslun</a>
-    <a href="shop.html?sale=1"><i>03</i>Útsala</a>
-    <a href="./#made"><i>03</i>Sérsaumað</a>
+  <a href="shop.html?new=1"><i>01</i>New</a>
+  <a href="fibres.html"><i>02</i>Materials</a>
+  <a href="shop.html"><i>03</i>Shop</a>
+    <a href="shop.html?sale=1"><i>03</i>Sale</a>
+    <a href="./#made"><i>03</i>Bespoke</a>
   <a href="./#lookbook"><i>04</i>Lookbook</a>
-  <a href="store.html"><i>05</i>Búðir</a>
-  <div class="menu__foot"><span>Laugavegur 23 &middot; 101 Reykjavík</span><a href="tel:+3548320567">+354 832 0567</a></div>
+  <a href="store.html"><i>05</i>Stores</a>
+  <div class="menu__foot"><span>Laugavegur 23 &middot; 101 Reykjav&iacute;k</span><a href="tel:+3548320567">+354 832 0567</a></div>
 </div>
 
 <main id="top">
 
   <section class="pg" id="shop">
     <div class="head">
-      <span class="head__n">Verslun</span>
-      <h2 class="head__t" id="shopTitle">Allt</h2>
+      <span class="head__n">Shop</span>
+      <h2 class="head__t" id="shopTitle">Everything</h2>
       <div class="head__end"><span class="mono" id="shopCount">&nbsp;</span></div>
     </div>
     <div class="filt" id="filt">
-      <div class="filt__row"><span class="mono">Flík</span><div class="filt__row" id="fType"></div></div>
-      <div class="filt__row filt__row--fam" hidden><span class="mono">Hönnun</span><div class="filt__row" id="fFam"></div></div>
-      <div class="filt__row"><span class="mono">Efni</span><div class="filt__row" id="fFibre"></div></div>
+      <div class="filt__row"><span class="mono">Piece</span><div class="filt__row" id="fType"></div></div>
+      <div class="filt__row filt__row--fam" hidden><span class="mono">Design</span><div class="filt__row" id="fFam"></div></div>
+      <div class="filt__row"><span class="mono">Material</span><div class="filt__row" id="fFibre"></div></div>
       <div class="filt__row">
-        <span class="mono">Sýna</span>
-        <label class="chk"><input type="checkbox" id="fNew"><span>Nýtt</span></label>
-        <label class="chk"><input type="checkbox" id="fSale"><span>Á útsölu</span></label>
-        <label class="chk"><input type="checkbox" id="fStock" checked><span>Aðeins til á lager</span></label>
+        <span class="mono">Show</span>
+        <label class="chk"><input type="checkbox" id="fNew"><span>New</span></label>
+        <label class="chk"><input type="checkbox" id="fSale"><span>On sale</span></label>
+        <label class="chk"><input type="checkbox" id="fStock" checked><span>In stock only</span></label>
         <div class="filt__end">
-          <label class="filt__q"><span class="mono">Leita</span><input id="fQ" type="search" placeholder="Á ensku: marshmallow, cashmere, red&hellip;" autocomplete="off"/></label>
-          <span class="sel"><select id="fSort" aria-label="Röðun"><option value="featured">Valið</option><option value="new">Nýjast</option><option value="low">Verð, lægst fyrst</option><option value="high">Verð, hæst fyrst</option></select></span>
+          <label class="filt__q"><span class="mono">Search</span><input id="fQ" type="search" placeholder="Marshmallow, cashmere, red&hellip;" autocomplete="off"/></label>
+          <span class="sel"><select id="fSort" aria-label="Sort"><option value="featured">Featured</option><option value="new">Newest</option><option value="low">Price, low to high</option><option value="high">Price, high to low</option></select></span>
         </div>
       </div>
     </div>
-    <div class="pgrid" id="pgrid" data-wait></div>
-    <p class="pg__empty" id="pgEmpty" hidden>Ekkert passar við þetta. Prófaðu einni síu færra.</p>
-    <div class="pg__more"><button class="link" id="more" hidden>[ Sýna meira ]</button></div>
+    <div class="pgrid" id="pgrid" data-static="faf3ecaa"><!-- GRID --><article class="prod rv in" style="--i: 0;">
+      <div class="prod__im">
+        <span class="prod__ix">01</span>
+        <img class="main" src="https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07638-scaled.jpg?w=620&amp;ssl=1" srcset="https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07638-scaled.jpg?w=380&amp;ssl=1 380w, https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07638-scaled.jpg?w=620&amp;ssl=1 620w, https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07638-scaled.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Roots beanie. Beige melange. With 2 cream pom poms" loading="eager" fetchpriority="high" decoding="async">
+        <a class="prod__go" href="product/roots-beanie-beige-melange-with-2-cream-pom-poms/" aria-label="Roots beanie. Beige melange. With 2 cream pom poms"></a><div class="prod__sizes"><button class="sz sz--solo" data-h="roots-beanie-beige-melange-with-2-cream-pom-poms" data-s="">Setja í körfu</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/roots-beanie-beige-melange-with-2-cream-pom-poms/">Roots beanie. Beige melange. With 2 cream pom poms</a></div><div class="prod__cat">(70% angora · 20% nylon · 10% merino wool)</div></div><span class="prod__price">$131</span></div>
+    </article><article class="prod rv in" style="--i: 1;">
+      <div class="prod__im">
+        <span class="prod__ix">02</span>
+        <img class="main" src="https://i2.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07628-scaled.jpg?w=620&amp;ssl=1" srcset="https://i2.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07628-scaled.jpg?w=380&amp;ssl=1 380w, https://i2.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07628-scaled.jpg?w=620&amp;ssl=1 620w, https://i2.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07628-scaled.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Roots beanie. Calm blue/navy melange. With 2 matching pom poms" loading="eager" fetchpriority="high" decoding="async">
+        <a class="prod__go" href="product/roots-beanie-calm-blue-navy-melange-with-2-matching-pom-poms/" aria-label="Roots beanie. Calm blue/navy melange. With 2 matching pom poms"></a><div class="prod__sizes"><button class="sz sz--solo" data-h="roots-beanie-calm-blue-navy-melange-with-2-matching-pom-poms" data-s="">Setja í körfu</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/roots-beanie-calm-blue-navy-melange-with-2-matching-pom-poms/">Roots beanie. Calm blue/navy melange. With 2 matching pom poms</a></div><div class="prod__cat">(70% angora · 20% nylon · 10% merino wool)</div></div><span class="prod__price">$131</span></div>
+    </article><article class="prod rv in" style="--i: 2;">
+      <div class="prod__im">
+        <span class="prod__ix">03</span>
+        <img class="main" src="https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07645-scaled.jpg?w=620&amp;ssl=1" srcset="https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07645-scaled.jpg?w=380&amp;ssl=1 380w, https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07645-scaled.jpg?w=620&amp;ssl=1 620w, https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07645-scaled.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Roots beanie. Mint melange with matching pom pom" loading="eager" fetchpriority="high" decoding="async">
+        <a class="prod__go" href="product/roots-beanie-mint-melange-with-matching-pom-pom/" aria-label="Roots beanie. Mint melange with matching pom pom"></a><div class="prod__sizes"><button class="sz sz--solo" data-h="roots-beanie-mint-melange-with-matching-pom-pom" data-s="">Setja í körfu</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/roots-beanie-mint-melange-with-matching-pom-pom/">Roots beanie. Mint melange with matching pom pom</a></div><div class="prod__cat">(70% angora · 20% nylon · 10% merino wool)</div></div><span class="prod__price">$97</span></div>
+    </article><article class="prod rv in" style="--i: 3;">
+      <div class="prod__im">
+        <span class="prod__ix">04</span>
+        <img class="main" src="https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07649-scaled.jpg?w=620&amp;ssl=1" srcset="https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07649-scaled.jpg?w=380&amp;ssl=1 380w, https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07649-scaled.jpg?w=620&amp;ssl=1 620w, https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07649-scaled.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Roots beanie. Purple/yellow melange .With 2 purple pom poms" loading="eager" fetchpriority="high" decoding="async">
+        <a class="prod__go" href="product/roots-beanie-with-2-blue-orange-pom-poms/" aria-label="Roots beanie. Purple/yellow melange .With 2 purple pom poms"></a><div class="prod__sizes"><button class="sz sz--solo" data-h="roots-beanie-with-2-blue-orange-pom-poms" data-s="">Setja í körfu</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/roots-beanie-with-2-blue-orange-pom-poms/">Roots beanie. Purple/yellow melange .With 2 purple pom poms</a></div><div class="prod__cat">(70% angora · 20% nylon · 10% merino wool)</div></div><span class="prod__price">$131</span></div>
+    </article><article class="prod rv in" style="--i: 0;">
+      <div class="prod__im">
+        <span class="prod__ix">05</span>
+        <img class="main" src="https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07694-scaled.jpg?w=620&amp;ssl=1" srcset="https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07694-scaled.jpg?w=380&amp;ssl=1 380w, https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07694-scaled.jpg?w=620&amp;ssl=1 620w, https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07694-scaled.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Roots beanie.Mint/lemon melange" loading="lazy" decoding="async">
+        <a class="prod__go" href="product/roots-beanie-mint-grey-melange-copy/" aria-label="Roots beanie.Mint/lemon melange"></a><div class="prod__sizes"><button class="sz sz--solo pom-ask" data-h="roots-beanie-mint-grey-melange-copy" data-s="">Setja í körfu</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/roots-beanie-mint-grey-melange-copy/">Roots beanie.Mint/lemon melange</a></div><div class="prod__cat">(70% angora · 20% nylon · 10% merino wool)</div></div><span class="prod__price">$97</span></div>
+    </article><article class="prod rv in" style="--i: 1;">
+      <div class="prod__im">
+        <span class="prod__ix">06</span>
+        <img class="main" src="https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07656-scaled.jpg?w=620&amp;ssl=1" srcset="https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07656-scaled.jpg?w=380&amp;ssl=1 380w, https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07656-scaled.jpg?w=620&amp;ssl=1 620w, https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07656-scaled.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Roots beanie.Tutquoise melange. With 2 aqua pom poms" loading="lazy" decoding="async">
+        <a class="prod__go" href="product/roots-beanie-tutquoise-melange-with-2-aqua-pom-poms/" aria-label="Roots beanie.Tutquoise melange. With 2 aqua pom poms"></a><div class="prod__sizes"><button class="sz sz--solo" data-h="roots-beanie-tutquoise-melange-with-2-aqua-pom-poms" data-s="">Setja í körfu</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/roots-beanie-tutquoise-melange-with-2-aqua-pom-poms/">Roots beanie.Tutquoise melange. With 2 aqua pom poms</a></div><div class="prod__cat">(70% angora · 20% nylon · 10% merino wool)</div></div><span class="prod__price">$131</span></div>
+    </article><article class="prod rv in" style="--i: 2;">
+      <div class="prod__im">
+        <span class="prod__ix">07</span>
+        <img class="main" src="https://i2.wp.com/mjukiceland.com/wp-content/uploads/2026/02/IMG_9490.jpg?w=620&amp;ssl=1" srcset="https://i2.wp.com/mjukiceland.com/wp-content/uploads/2026/02/IMG_9490.jpg?w=380&amp;ssl=1 380w, https://i2.wp.com/mjukiceland.com/wp-content/uploads/2026/02/IMG_9490.jpg?w=620&amp;ssl=1 620w, https://i2.wp.com/mjukiceland.com/wp-content/uploads/2026/02/IMG_9490.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Fluffy Kitty Hat. Camel" loading="lazy" decoding="async">
+        <a class="prod__go" href="product/fluffy-kitty-hat-camel/" aria-label="Fluffy Kitty Hat. Camel"></a><div class="prod__sizes"><button class="sz sz--solo pom-ask" data-h="fluffy-kitty-hat-camel" data-s="">Setja í körfu</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/fluffy-kitty-hat-camel/">Fluffy Kitty Hat. Camel</a></div><div class="prod__cat">(60% angora · 40% nylon)</div></div><span class="prod__price">$78</span></div>
+    </article><article class="prod rv in" style="--i: 3;">
+      <div class="prod__im">
+        <span class="prod__ix">08</span>
+        <img class="main" src="https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07325-scaled.jpg?w=620&amp;ssl=1" srcset="https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07325-scaled.jpg?w=380&amp;ssl=1 380w, https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07325-scaled.jpg?w=620&amp;ssl=1 620w, https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07325-scaled.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Marshmallow hat. Aqua melange" loading="lazy" decoding="async">
+        <a class="prod__go" href="product/marshmallow-hat-aqua-melange/" aria-label="Marshmallow hat. Aqua melange"></a><div class="prod__sizes"><button class="sz sz--solo pom-ask" data-h="marshmallow-hat-aqua-melange" data-s="">Setja í körfu</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/marshmallow-hat-aqua-melange/">Marshmallow hat. Aqua melange</a></div><div class="prod__cat">(Loðin angóruull)</div></div><span class="prod__price">$78</span></div>
+    </article><article class="prod rv in" style="--i: 0;">
+      <div class="prod__im">
+        <span class="prod__ix">09</span>
+        <img class="main" src="https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07334-scaled.jpg?w=620&amp;ssl=1" srcset="https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07334-scaled.jpg?w=380&amp;ssl=1 380w, https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07334-scaled.jpg?w=620&amp;ssl=1 620w, https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07334-scaled.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Marshmallow hat. Grey/cold beige melange" loading="lazy" decoding="async">
+        <a class="prod__go" href="product/marshmallow-hat-grey-cold-beige-melange/" aria-label="Marshmallow hat. Grey/cold beige melange"></a><div class="prod__sizes"><button class="sz sz--solo pom-ask" data-h="marshmallow-hat-grey-cold-beige-melange" data-s="">Setja í körfu</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/marshmallow-hat-grey-cold-beige-melange/">Marshmallow hat. Grey/cold beige melange</a></div><div class="prod__cat">(Loðin angóruull)</div></div><span class="prod__price">$78</span></div>
+    </article><article class="prod rv in" style="--i: 1;">
+      <div class="prod__im">
+        <span class="prod__ix">10</span>
+        <img class="main" src="https://i2.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07307-scaled.jpg?w=620&amp;ssl=1" srcset="https://i2.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07307-scaled.jpg?w=380&amp;ssl=1 380w, https://i2.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07307-scaled.jpg?w=620&amp;ssl=1 620w, https://i2.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07307-scaled.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Marshmallow hat. Light peach melange" loading="lazy" decoding="async">
+        <a class="prod__go" href="product/marshmallow-hat-light-peach-melange/" aria-label="Marshmallow hat. Light peach melange"></a><div class="prod__sizes"><button class="sz sz--solo pom-ask" data-h="marshmallow-hat-light-peach-melange" data-s="">Setja í körfu</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/marshmallow-hat-light-peach-melange/">Marshmallow hat. Light peach melange</a></div><div class="prod__cat">(Loðin angóruull)</div></div><span class="prod__price">$78</span></div>
+    </article><article class="prod rv in" style="--i: 2;">
+      <div class="prod__im">
+        <span class="prod__ix">11</span>
+        <img class="main" src="https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07284-scaled.jpg?w=620&amp;ssl=1" srcset="https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07284-scaled.jpg?w=380&amp;ssl=1 380w, https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07284-scaled.jpg?w=620&amp;ssl=1 620w, https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07284-scaled.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Marshmallow hat. Mint/grey melange with mint pom pom" loading="lazy" decoding="async">
+        <a class="prod__go" href="product/marshmallow-hat-mint-grey-melange/" aria-label="Marshmallow hat. Mint/grey melange with mint pom pom"></a><div class="prod__sizes"><button class="sz sz--solo" data-h="marshmallow-hat-mint-grey-melange" data-s="">Setja í körfu</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/marshmallow-hat-mint-grey-melange/">Marshmallow hat. Mint/grey melange with mint pom pom</a></div><div class="prod__cat">(Loðin angóruull)</div></div><span class="prod__price">$97</span></div>
+    </article><article class="prod rv in" style="--i: 3;">
+      <div class="prod__im">
+        <span class="prod__ix">12</span>
+        <img class="main" src="https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07322-scaled.jpg?w=620&amp;ssl=1" srcset="https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07322-scaled.jpg?w=380&amp;ssl=1 380w, https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07322-scaled.jpg?w=620&amp;ssl=1 620w, https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07322-scaled.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Marshmallow hat. Navy/sky blue melange" loading="lazy" decoding="async">
+        <a class="prod__go" href="product/marshmallow-hat-navy-sky-blue-melange/" aria-label="Marshmallow hat. Navy/sky blue melange"></a><div class="prod__sizes"><button class="sz sz--solo pom-ask" data-h="marshmallow-hat-navy-sky-blue-melange" data-s="">Setja í körfu</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/marshmallow-hat-navy-sky-blue-melange/">Marshmallow hat. Navy/sky blue melange</a></div><div class="prod__cat">(Loðin angóruull)</div></div><span class="prod__price">$78</span></div>
+    </article><article class="prod rv in" style="--i: 0;">
+      <div class="prod__im">
+        <span class="prod__ix">13</span>
+        <img class="main" src="https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07268-scaled.jpg?w=620&amp;ssl=1" srcset="https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07268-scaled.jpg?w=380&amp;ssl=1 380w, https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07268-scaled.jpg?w=620&amp;ssl=1 620w, https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07268-scaled.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Marshmallow hat. Sky blue/navy melange" loading="lazy" decoding="async">
+        <a class="prod__go" href="product/marshmallow-hat-sky-blue-navy-melange/" aria-label="Marshmallow hat. Sky blue/navy melange"></a><div class="prod__sizes"><button class="sz sz--solo pom-ask" data-h="marshmallow-hat-sky-blue-navy-melange" data-s="">Setja í körfu</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/marshmallow-hat-sky-blue-navy-melange/">Marshmallow hat. Sky blue/navy melange</a></div><div class="prod__cat">(Loðin angóruull)</div></div><span class="prod__price">$78</span></div>
+    </article><article class="prod rv in" style="--i: 1;">
+      <div class="prod__im">
+        <span class="prod__ix">14</span>
+        <img class="main" src="https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07312-scaled.jpg?w=620&amp;ssl=1" srcset="https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07312-scaled.jpg?w=380&amp;ssl=1 380w, https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07312-scaled.jpg?w=620&amp;ssl=1 620w, https://i0.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07312-scaled.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Marshmallow hat. Sky blue/white melange" loading="lazy" decoding="async">
+        <a class="prod__go" href="product/marshmallow-hat-sky-blue-white-melange/" aria-label="Marshmallow hat. Sky blue/white melange"></a><div class="prod__sizes"><button class="sz sz--solo pom-ask" data-h="marshmallow-hat-sky-blue-white-melange" data-s="">Setja í körfu</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/marshmallow-hat-sky-blue-white-melange/">Marshmallow hat. Sky blue/white melange</a></div><div class="prod__cat">(Loðin angóruull)</div></div><span class="prod__price">$78</span></div>
+    </article><article class="prod rv in" style="--i: 2;">
+      <div class="prod__im">
+        <span class="prod__ix">15</span>
+        <img class="main" src="https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07566-scaled.jpg?w=620&amp;ssl=1" srcset="https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07566-scaled.jpg?w=380&amp;ssl=1 380w, https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07566-scaled.jpg?w=620&amp;ssl=1 620w, https://i1.wp.com/mjukiceland.com/wp-content/uploads/2026/02/DSC07566-scaled.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Marshmallow hat. Violet" loading="lazy" decoding="async">
+        <a class="prod__go" href="product/marshmallow-hat-violet/" aria-label="Marshmallow hat. Violet"></a><div class="prod__sizes"><button class="sz sz--solo pom-ask" data-h="marshmallow-hat-violet" data-s="">Setja í körfu</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/marshmallow-hat-violet/">Marshmallow hat. Violet</a></div><div class="prod__cat">(Loðin angóruull)</div></div><span class="prod__price">$78</span></div>
+    </article><article class="prod rv in" style="--i: 3;">
+      <div class="prod__im">
+        <span class="prod__ix">16</span>
+        <img class="main" src="https://i0.wp.com/mjukiceland.com/wp-content/uploads/2025/07/DSC05515-scaled.jpg?w=620&amp;ssl=1" srcset="https://i0.wp.com/mjukiceland.com/wp-content/uploads/2025/07/DSC05515-scaled.jpg?w=380&amp;ssl=1 380w, https://i0.wp.com/mjukiceland.com/wp-content/uploads/2025/07/DSC05515-scaled.jpg?w=620&amp;ssl=1 620w, https://i0.wp.com/mjukiceland.com/wp-content/uploads/2025/07/DSC05515-scaled.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Alpaca Hat Brushed. White." loading="lazy" decoding="async">
+        <a class="prod__go" href="product/alpaca-hat-boucle-white/" aria-label="Alpaca Hat Brushed. White."></a><div class="prod__sizes"><button class="sz sz--solo pom-ask" data-h="alpaca-hat-boucle-white" data-s="">Setja í körfu</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/alpaca-hat-boucle-white/">Alpaca Hat Brushed. White.</a></div><div class="prod__cat">(88% alpaca · 12% silk)</div></div><span class="prod__price">$100</span></div>
+    </article><article class="prod rv in" style="--i: 0;">
+      <div class="prod__im">
+        <span class="prod__ix">17</span>
+        <img class="main" src="https://i0.wp.com/mjukiceland.com/wp-content/uploads/2024/12/AVF2_BubbleOrange_Orange_front.jpg?w=620&amp;ssl=1" srcset="https://i0.wp.com/mjukiceland.com/wp-content/uploads/2024/12/AVF2_BubbleOrange_Orange_front.jpg?w=380&amp;ssl=1 380w, https://i0.wp.com/mjukiceland.com/wp-content/uploads/2024/12/AVF2_BubbleOrange_Orange_front.jpg?w=620&amp;ssl=1 620w, https://i0.wp.com/mjukiceland.com/wp-content/uploads/2024/12/AVF2_BubbleOrange_Orange_front.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Lined Aviator hat. Bubblegum and orange with 2 orange pompoms" loading="lazy" decoding="async">
+        <a class="prod__go" href="product/lined-aviator-hat-bubblegum-and-orange-with-2-orange-pompoms/" aria-label="Lined Aviator hat. Bubblegum and orange with 2 orange pompoms"></a><div class="prod__sizes"><button class="sz sz--solo" data-h="lined-aviator-hat-bubblegum-and-orange-with-2-orange-pompoms" data-s="">Setja í körfu</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/lined-aviator-hat-bubblegum-and-orange-with-2-orange-pompoms/">Lined Aviator hat. Bubblegum and orange with 2 orange pompoms</a></div><div class="prod__cat">(Loðin angóruull)</div></div><span class="prod__price">$131</span></div>
+    </article><article class="prod rv in" style="--i: 1;">
+      <div class="prod__im">
+        <span class="prod__ix">18</span>
+        <img class="main" src="https://i1.wp.com/mjukiceland.com/wp-content/uploads/2024/01/photo_2024-01-19_19-35-32.jpg?w=620&amp;ssl=1" srcset="https://i1.wp.com/mjukiceland.com/wp-content/uploads/2024/01/photo_2024-01-19_19-35-32.jpg?w=380&amp;ssl=1 380w, https://i1.wp.com/mjukiceland.com/wp-content/uploads/2024/01/photo_2024-01-19_19-35-32.jpg?w=620&amp;ssl=1 620w, https://i1.wp.com/mjukiceland.com/wp-content/uploads/2024/01/photo_2024-01-19_19-35-32.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Marshmallow hat. Red" loading="lazy" decoding="async">
+        <a class="prod__go" href="product/marshmallow-hat-red/" aria-label="Marshmallow hat. Red"></a><div class="prod__sizes"><button class="sz sz--solo pom-ask" data-h="marshmallow-hat-red" data-s="">Setja í körfu</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/marshmallow-hat-red/">Marshmallow hat. Red</a></div><div class="prod__cat">(Loðin angóruull)</div></div><span class="prod__price"><s>$78</s>$61</span></div>
+    </article><article class="prod rv in" style="--i: 2;">
+      <div class="prod__im">
+        <span class="prod__ix">19</span>
+        <img class="main" src="https://i2.wp.com/mjukiceland.com/wp-content/uploads/2020/03/Tenderness-lilac-blush-e1622262449198.jpg?w=620&amp;ssl=1" srcset="https://i2.wp.com/mjukiceland.com/wp-content/uploads/2020/03/Tenderness-lilac-blush-e1622262449198.jpg?w=380&amp;ssl=1 380w, https://i2.wp.com/mjukiceland.com/wp-content/uploads/2020/03/Tenderness-lilac-blush-e1622262449198.jpg?w=620&amp;ssl=1 620w, https://i2.wp.com/mjukiceland.com/wp-content/uploads/2020/03/Tenderness-lilac-blush-e1622262449198.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Tenderness angora hat. Lilac blush" loading="lazy" decoding="async">
+        <a class="prod__go" href="product/tenderness-angora-hat-nude-4/" aria-label="Tenderness angora hat. Lilac blush"></a><div class="prod__sizes"><button class="sz sz--solo pom-ask" data-h="tenderness-angora-hat-nude-4" data-s="">Setja í körfu</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/tenderness-angora-hat-nude-4/">Tenderness angora hat. Lilac blush</a></div><div class="prod__cat">(50% angora · 25% nylon · 15% viscose · 10% wool)</div></div><span class="prod__price">$65.55</span></div>
+    </article><article class="prod rv in" style="--i: 3;">
+      <div class="prod__im">
+        <span class="prod__ix">20</span>
+        <img class="main" src="https://i2.wp.com/mjukiceland.com/wp-content/uploads/2023/11/Fuchsia-1.jpg?w=620&amp;ssl=1" srcset="https://i2.wp.com/mjukiceland.com/wp-content/uploads/2023/11/Fuchsia-1.jpg?w=380&amp;ssl=1 380w, https://i2.wp.com/mjukiceland.com/wp-content/uploads/2023/11/Fuchsia-1.jpg?w=620&amp;ssl=1 620w, https://i2.wp.com/mjukiceland.com/wp-content/uploads/2023/11/Fuchsia-1.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Tenderness angora hat. Fuchsia." loading="lazy" decoding="async">
+        <a class="prod__go" href="product/tenderness-angora-hat-fuchsia/" aria-label="Tenderness angora hat. Fuchsia."></a><div class="prod__sizes"><button class="sz sz--solo pom-ask" data-h="tenderness-angora-hat-fuchsia" data-s="">Setja í körfu</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/tenderness-angora-hat-fuchsia/">Tenderness angora hat. Fuchsia.</a></div><div class="prod__cat">(50% angora · 25% nylon · 15% viscose · 10% wool)</div></div><span class="prod__price"><s>$65.55</s>$32</span></div>
+    </article><article class="prod rv in" style="--i: 0;">
+      <div class="prod__im">
+        <span class="prod__ix">21</span>
+        <img class="main" src="https://i0.wp.com/mjukiceland.com/wp-content/uploads/2023/02/IMG_4191-scaled.jpeg?w=620&amp;ssl=1" srcset="https://i0.wp.com/mjukiceland.com/wp-content/uploads/2023/02/IMG_4191-scaled.jpeg?w=380&amp;ssl=1 380w, https://i0.wp.com/mjukiceland.com/wp-content/uploads/2023/02/IMG_4191-scaled.jpeg?w=620&amp;ssl=1 620w, https://i0.wp.com/mjukiceland.com/wp-content/uploads/2023/02/IMG_4191-scaled.jpeg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Marshmallow hat. Fuchsia. Arctic fox pompom." loading="lazy" decoding="async">
+        <a class="prod__go" href="product/marshmallow-hat-raspberry-arctic-fox-pompom/" aria-label="Marshmallow hat. Fuchsia. Arctic fox pompom."></a><div class="prod__sizes"><button class="sz sz--solo" data-h="marshmallow-hat-raspberry-arctic-fox-pompom" data-s="">Setja í körfu</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/marshmallow-hat-raspberry-arctic-fox-pompom/">Marshmallow hat. Fuchsia. Arctic fox pompom.</a></div><div class="prod__cat">(Loðin angóruull)</div></div><span class="prod__price"><s>$97</s>$48</span></div>
+    </article><article class="prod rv in" style="--i: 1;">
+      <div class="prod__im">
+        <span class="prod__ix">22</span>
+        <img class="main" src="https://i0.wp.com/mjukiceland.com/wp-content/uploads/2024/01/IMG_0463.jpeg-1.jpg?w=620&amp;ssl=1" srcset="https://i0.wp.com/mjukiceland.com/wp-content/uploads/2024/01/IMG_0463.jpeg-1.jpg?w=380&amp;ssl=1 380w, https://i0.wp.com/mjukiceland.com/wp-content/uploads/2024/01/IMG_0463.jpeg-1.jpg?w=620&amp;ssl=1 620w, https://i0.wp.com/mjukiceland.com/wp-content/uploads/2024/01/IMG_0463.jpeg-1.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Marshmallow hat. Kelly green with fuchsia pompom (arctic fox)" loading="lazy" decoding="async">
+        <a class="prod__go" href="product/marshmallow-hat-color-color-arctic-fox-pompom-1/" aria-label="Marshmallow hat. Kelly green with fuchsia pompom (arctic fox)"></a><div class="prod__sizes"><button class="sz sz--solo" data-h="marshmallow-hat-color-color-arctic-fox-pompom-1" data-s="">Setja í körfu</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/marshmallow-hat-color-color-arctic-fox-pompom-1/">Marshmallow hat. Kelly green with fuchsia pompom (arctic fox)</a></div><div class="prod__cat">(Loðin angóruull)</div></div><span class="prod__price"><s>$97</s>$48</span></div>
+    </article><article class="prod rv in" style="--i: 2;">
+      <div class="prod__im">
+        <span class="prod__ix">23</span>
+        <img class="main" src="https://i1.wp.com/mjukiceland.com/wp-content/uploads/2023/02/IMG_4226-scaled.jpeg?w=620&amp;ssl=1" srcset="https://i1.wp.com/mjukiceland.com/wp-content/uploads/2023/02/IMG_4226-scaled.jpeg?w=380&amp;ssl=1 380w, https://i1.wp.com/mjukiceland.com/wp-content/uploads/2023/02/IMG_4226-scaled.jpeg?w=620&amp;ssl=1 620w, https://i1.wp.com/mjukiceland.com/wp-content/uploads/2023/02/IMG_4226-scaled.jpeg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Marshmallow hat. Kelly green. Arctic fox pompom." loading="lazy" decoding="async">
+        <a class="prod__go" href="product/marshmallow-hat-kelly-green-arctic-fox-pompom/" aria-label="Marshmallow hat. Kelly green. Arctic fox pompom."></a><div class="prod__sizes"><button class="sz sz--solo" data-h="marshmallow-hat-kelly-green-arctic-fox-pompom" data-s="">Setja í körfu</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/marshmallow-hat-kelly-green-arctic-fox-pompom/">Marshmallow hat. Kelly green. Arctic fox pompom.</a></div><div class="prod__cat">(Loðin angóruull)</div></div><span class="prod__price"><s>$97</s>$48</span></div>
+    </article><article class="prod rv in" style="--i: 3;">
+      <div class="prod__im">
+        <span class="prod__ix">24</span>
+        <img class="main" src="https://i2.wp.com/mjukiceland.com/wp-content/uploads/2025/12/photo_2025-12-25_12-11-47.jpg?w=620&amp;ssl=1" srcset="https://i2.wp.com/mjukiceland.com/wp-content/uploads/2025/12/photo_2025-12-25_12-11-47.jpg?w=380&amp;ssl=1 380w, https://i2.wp.com/mjukiceland.com/wp-content/uploads/2025/12/photo_2025-12-25_12-11-47.jpg?w=620&amp;ssl=1 620w, https://i2.wp.com/mjukiceland.com/wp-content/uploads/2025/12/photo_2025-12-25_12-11-47.jpg?w=940&amp;ssl=1 940w" sizes="(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw" alt="Explorer Hat. Kelly green" loading="lazy" decoding="async">
+        <a class="prod__go" href="product/explorer-hat-kelly-green/" aria-label="Explorer Hat. Kelly green"></a><div class="prod__sizes"><button class="sz sz--solo pom-ask" data-h="explorer-hat-kelly-green" data-s="">Setja í körfu</button></div>
+      </div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="product/explorer-hat-kelly-green/">Explorer Hat. Kelly green</a></div><div class="prod__cat">(70% merino wool · 30% cashmere)</div></div><span class="prod__price"><s>$71.30</s>$35.65</span></div>
+    </article><!-- /GRID --></div>
+    <p class="pg__empty" id="pgEmpty" hidden>Nothing matches that. Try one fewer filter.</p>
+    <div class="pg__more"><button class="link" id="more" hidden>[ Show more ]</button></div>
     <!-- CATALOGUE -->
     <details class="idx" id="every">
       <summary class="idx__s"><span class="mono">Allar flíkurnar, A til Ö</span><span class="mono idx__n">769</span></summary>
@@ -117,19 +284,19 @@
 
 <footer class="foot">
   <div class="foot__word">
-    <span class="wordmark"><img src="../assets/logo.png" alt="MJ&Uacute;K Iceland" /></span>
+    <span class="wordmark"><img src="../assets/logo-480.png" alt="MJ&Uacute;K Iceland" /></span>
   </div>
   <div class="foot__grid">
-    <div><span class="mono">Verslun</span><a href="shop.html?new=1">Nýtt á tímabilinu</a><a href="fibres.html">Eftir efni</a><a href="shop.html">Eftir flík</a><a href="shop.html?sale=1">Síðustu eintökin</a><a href="./#made">Eftir máli</a></div>
-    <div><span class="mono">MJ&Uacute;K</span><a href="story.html">Verkstæðið</a><a href="./#lookbook">Lookbook</a><a href="store.html#stockists">Söluaðilar</a></div>
-    <div><span class="mono">Heimsókn</span><a href="store.html">Laugavegur 23</a><a href="store.html">Klapparstígur 29</a><a href="store.html">Skólavörðustígur 4 &amp; 36</a></div>
-    <div><span class="mono">Hafa samband</span><a href="mailto:customersupport@mjukiceland.com">Þjónusta</a><a href="mailto:anna@mjukiceland.com">Heildsala</a><a href="tel:+3548320567">+354 832 0567</a></div>
+    <div><span class="mono">Shop</span><a href="shop.html?new=1">New this season</a><a href="fibres.html">By material</a><a href="shop.html">By piece</a><a href="shop.html?sale=1">Last of the line</a><a href="./#made">Made for you</a></div>
+    <div><span class="mono">MJ&Uacute;K</span><a href="story.html">The workshop</a><a href="./#lookbook">Lookbook</a><a href="store.html#stockists">Stockists</a></div>
+    <div><span class="mono">Visit</span><a href="store.html">Laugavegur 23</a><a href="store.html">Klapparst&iacute;gur 29</a><a href="store.html">Sk&oacute;lav&ouml;r&eth;ust&iacute;gur 4 &amp; 36</a></div>
+    <div><span class="mono">Contact</span><a href="mailto:customersupport@mjukiceland.com">Customer support</a><a href="mailto:anna@mjukiceland.com">Wholesale</a><a href="tel:+3548320567">+354 832 0567</a></div>
     <!-- her own pages, which stay on her WordPress (the router hands them over): absolute, so the Icelandic host and the preview reach them too -->
-    <div><span class="mono">Hjálp</span><a href="https://mjukiceland.com/shipping/" hreflang="en">Sendingar</a><a href="https://mjukiceland.com/return-policy/" hreflang="en">Skilaréttur</a><a href="https://mjukiceland.com/privacy-policy/" hreflang="en">Persónuvernd</a></div>
+    <div><span class="mono">Help</span><a href="https://mjukiceland.com/shipping/" hreflang="en">Shipping</a><a href="https://mjukiceland.com/return-policy/" hreflang="en">Return policy</a><a href="https://mjukiceland.com/privacy-policy/" hreflang="en">Privacy policy</a></div>
   </div>
   <div class="foot__base">
-    <span class="mono">&copy; 2026 Mjúk Iceland ehf &middot; Kennitala 451199-2189 &middot; Hraungata 24, 210 Garðabær</span>
-    <a class="sndr" href="https://sndrstudio.is" target="_blank" rel="noopener" aria-label="Hannað af SNDR Studio" data-logotype><span class="mono">Hannað af</span><span class="sndr__mark">SN<i>&#10022;</i>DR</span><span class="sndr__studio">STUDIO</span></a>
+    <span class="mono">&copy; 2026 Mj&uacute;k Iceland ehf &middot; Kennitala 451199-2189 &middot; Hraungata 24, 210 Gar&eth;ab&aelig;r</span>
+    <a class="sndr" href="https://sndrstudio.is" target="_blank" rel="noopener" aria-label="Designed by SNDR Studio" data-logotype><span class="mono">Designed by</span><span class="sndr__mark">SN<i>&#10022;</i>DR</span><span class="sndr__studio">STUDIO</span></a>
   </div>
 </footer>
 
@@ -138,14 +305,14 @@
   <div class="bag__scrim" id="bagScrim"></div>
   <aside class="bag__panel" role="dialog" aria-modal="true" aria-labelledby="bagTitle">
     <header class="bag__head">
-      <h2 class="bag__title" id="bagTitle">Karfan þín <span id="bagQty">(0)</span></h2>
-      <button class="link" id="bagClose">[ Loka ]</button>
+      <h2 class="bag__title" id="bagTitle">Your bag <span id="bagQty">(0)</span></h2>
+      <button class="link" id="bagClose">[ Close ]</button>
     </header>
     <div class="bag__items" id="bagItems"></div>
     <footer class="bag__foot" id="bagFoot">
-      <div class="bag__sum"><span class="mono">Samtals</span><span class="bag__total" id="bagTotal">$0</span></div>
-      <p class="mono bag__note">Sendingarkostnaður reiknast við greiðslu.</p>
-      <button class="bag__go" id="bagGo">Fara í greiðslu</button>
+      <div class="bag__sum"><span class="mono">Total</span><span class="bag__total" id="bagTotal">$0</span></div>
+      <p class="mono bag__note">Shipping calculated at checkout.</p>
+      <button class="bag__go" id="bagGo">Go to checkout</button>
     </footer>
   </aside>
 </div>
@@ -153,29 +320,29 @@
 <!-- POMPOM CHOOSER: opened when a plain hat goes in the bag -->
 <dialog class="pom" id="pom" aria-labelledby="pomName">
   <form method="dialog" class="pom__form" id="pomForm">
-    <button type="submit" value="cancel" class="pom__x" aria-label="Loka">&times;</button>
+    <button type="submit" value="cancel" class="pom__x" aria-label="Close">&times;</button>
     <div class="pom__hat">
       <img id="pomImg" src="" alt=""/>
       <div><div class="pom__name" id="pomName"></div><p class="pom__why" id="pomWhy"></p></div>
     </div>
     <fieldset>
-      <legend class="legend">Dúskar</legend>
+      <legend class="legend">Pompoms</legend>
       <div class="seg">
-        <label><input type="radio" name="n" value="0" checked><span>Ekkert</span></label>
-        <label><input type="radio" name="n" value="1"><span>Einn</span></label>
-        <label><input type="radio" name="n" value="2"><span>Tveir</span></label>
+        <label><input type="radio" name="n" value="0" checked><span>None</span></label>
+        <label><input type="radio" name="n" value="1"><span>One</span></label>
+        <label><input type="radio" name="n" value="2"><span>Two</span></label>
       </div>
     </fieldset>
     <div id="pomPick" hidden>
       <div class="pom__slots">
-        <button type="button" class="pom__slot" data-slot="0"><span class="dot"></span><span class="pom__slotname">Veldu lit</span></button>
-        <button type="button" class="pom__slot" data-slot="1" hidden><span class="dot"></span><span class="pom__slotname">Dúskur 2</span></button>
+        <button type="button" class="pom__slot" data-slot="0"><span class="dot"></span><span class="pom__slotname">Pick a colour</span></button>
+        <button type="button" class="pom__slot" data-slot="1" hidden><span class="dot"></span><span class="pom__slotname">Pompom 2</span></button>
       </div>
-      <div class="pom__grid" id="pomGrid" role="group" aria-label="Litir á dúskum"></div>
+      <div class="pom__grid" id="pomGrid" role="group" aria-label="Pompom colours"></div>
     </div>
     <div class="pom__foot">
       <span class="pom__total" id="pomTotal"></span>
-      <button type="submit" value="add" class="pom__add" id="pomAdd">Setja í körfu</button>
+      <button type="submit" value="add" class="pom__add" id="pomAdd">Add to bag</button>
     </div>
   </form>
 </dialog>
@@ -183,9 +350,9 @@
 <script src="../assets/i18n-is.js"></script>
 <script defer src="../assets/data.js"></script>
 <script defer src="../assets/copy.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<script defer src="../assets/vendor/gsap.min.js"></script>
+<script defer src="../assets/vendor/ScrollTrigger.min.js"></script>
+<script defer src="../assets/vendor/lenis.min.js"></script>
 <script defer src="../app.js"></script>
 <script defer src="../configurators.js"></script>
 <script defer src="../pdp.js"></script>
