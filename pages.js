@@ -18,6 +18,9 @@
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const Q = new URLSearchParams(location.search);
+  // a link that scrolls to something (a materials chapter, a store) may only do it when the page is
+  // opened afresh: on reload or Back the browser puts the shopper back where they were
+  const freshVisit = () => { const n = performance.getEntriesByType('navigation')[0]; return !n || n.type === 'navigate'; };
   /* the catalogue helpers and the product page itself live in pdp.js, shared with the build that
      writes every product page's text into its HTML (tools/build-products.mjs) */
   const V = window.CMPDP({ CM, COPY, t, isIS, px, usd });
@@ -40,7 +43,10 @@
 
   /* ── the shell's card, with a link on it and an honest sold-out state ── */
   const card = (p, i, opt = {}) => {
-    const tpl = document.createElement('template'); tpl.innerHTML = prod(p, i).trim();
+    // the shop's first row is what the shopper sees first: it loads at once and at high priority (lazy
+    // loading held the largest image back 3 s on a slow phone), and every card gets sized copies of its
+    // photo so a phone does not download a desktop-sized one (opt.eager = how many, opt.sizes = layout)
+    const tpl = document.createElement('template'); tpl.innerHTML = prod(p, i, { sizes: opt.sizes, eager: opt.eager && i < opt.eager }).trim();
     const el = tpl.content.firstElementChild;
     el.style.setProperty('--i', String(i % 4));
     const im = $('.prod__im', el);
@@ -62,6 +68,11 @@
       sale: Q.get('sale') === '1', nw: Q.get('new') === '1', stock: Q.get('all') !== '1',
       sort: Q.get('sort') || 'featured', q: Q.get('q') || '', n: 24,
     };
+    /* How many pieces "Show more" had brought in when the shopper left. It lives on this history
+       entry (not in the address), so Back rebuilds the same list at the same height and the browser
+       can put them back on the exact spot; before, Back rebuilt 24 pieces and the place was lost. */
+    const kept = history.state && Number.isInteger(history.state.n) ? history.state.n : 0;
+    if (kept > 24) st.n = Math.min(kept, Math.ceil(CM.all.length / 24) * 24);
     if (!GRP[st.type]) st.type = '';
     if (!FAM[st.family]) st.family = '';
     if (!MAT[st.material]) st.material = '';
@@ -115,23 +126,25 @@
     };
     const heading = () => st.q ? (isIS ? `„${st.q}“` : `“${st.q}”`) : st.sale ? t('Last of the line') : st.nw ? t('New this season')
       : st.family ? famName(st.family) : st.type ? typeName(st.type) : st.material ? matName(st.material) : t('Everything');
-    const apply = reset => {
-      if (reset) st.n = 24;
+    const apply = (reset, keepCount) => {
+      if (reset && !keepCount) st.n = 24;
       const L = list();
       title.textContent = heading();
       document.title = heading() + ' — ' + t('Shop') + ' — MJÚK Iceland';
       count.textContent = pieces(L.length) + (st.stock ? '' : ' ' + t('incl. sold out'));
       const shownL = L.slice(0, st.n);
-      if (reset) fill(grid, shownL);
-      else { const have = grid.children.length; const add = shownL.slice(have).map((p, i) => card(p, have + i)); grid.append(...add); reveal(grid); }
+      const img = { sizes: '(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw', eager: 4 };
+      if (reset) fill(grid, shownL, img);
+      else { const have = grid.children.length; const add = shownL.slice(have).map((p, i) => card(p, have + i, img)); grid.append(...add); reveal(grid); }
+      grid.removeAttribute('data-wait');   // filled: the space kept for it (pages.css) is no longer needed
       more.hidden = L.length <= st.n; empty.hidden = L.length > 0;
       const u = new URLSearchParams();
       if (st.type) u.set('type', st.type); if (st.family) u.set('family', st.family); if (st.material) u.set('material', st.material);
       if (st.sale) u.set('sale', '1'); if (st.nw) u.set('new', '1');
       if (!st.stock) u.set('all', '1'); if (st.sort !== 'featured') u.set('sort', st.sort); if (st.q) u.set('q', st.q);
-      history.replaceState(null, '', location.pathname + (u.toString() ? '?' + u : ''));
+      history.replaceState({ ...(history.state || {}), n: st.n }, '', location.pathname + (u.toString() ? '?' + u : ''));
     };
-    apply(true);
+    apply(true, true);
     if (Q.get('focus') === 'q') fQ.focus();
   }
 
@@ -146,6 +159,35 @@
     document.title = p.t + ' — MJÚK Iceland';
     const v = V.view(p);
     $('#crumb').innerHTML = v.crumb;
+    /* Arrived from one of our shop lists in this tab? Then "back" goes back to THAT list: its filters,
+       the pieces already loaded and the exact place on the page all come back, which a plain link to
+       shop.html (a fresh list at the top) cannot do. The Shop / category crumbs that name the same
+       list do the same. Anywhere else (a search engine, a new tab, another piece) they stay links. */
+    const from = (() => { try { const u = new URL(document.referrer); return u.origin === location.origin && /\/shop\.html$/.test(u.pathname) ? u : null; } catch { return null; } })();
+    if (from && history.length > 1) {
+      const crumb = $('#crumb');
+      crumb.insertAdjacentHTML('afterbegin', `<button type="button" class="crumb__back">&larr; ${esc(t('Back to results'))}</button>`);
+      crumb.addEventListener('click', e => {
+        const b = e.target.closest('.crumb__back, a');
+        if (!b || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        /* the referrer is a hint, not proof of the previous history entry. Where the browser can tell us
+           the previous entry (Navigation API), go back only if it IS that list, otherwise open the list
+           itself; elsewhere trust the referrer. No timers: a slow Back must never be overtaken. */
+        const goBack = () => {
+          const nav = window.navigation;
+          if (nav && nav.entries && nav.currentEntry) {
+            const prev = nav.entries()[nav.currentEntry.index - 1];
+            let same = false; try { const u = new URL(prev.url); same = u.pathname === from.pathname && u.search === from.search; } catch (e) {}
+            if (same) history.back(); else location.href = from.href;
+            return;
+          }
+          history.back();
+        };
+        if (b.matches('.crumb__back')) { e.preventDefault(); goBack(); return; }
+        const to = new URL(b.href, document.baseURI);
+        if (to.pathname === from.pathname && to.search === from.search) { e.preventDefault(); goBack(); }
+      });
+    }
     const gal = $('#gal');
     gal.classList.toggle('two', v.imgs.length > 1);
     gal.innerHTML = v.gal;
@@ -232,10 +274,11 @@
         </div>
       </article>`;
     }).join('');
+    host.removeAttribute('data-wait');
     $$('[data-name]', host).forEach(splitWords);
     $$('.fib__ch', host).forEach(ch => { const key = ch.id; fill($('[data-mini]', ch), CM.all.filter(p => p.mat === key && !p.oos).slice(0, 3), { index: false }); });
     reveal(host);
-    if (location.hash) { const t = $(location.hash); if (t) setTimeout(() => t.scrollIntoView({ block: 'start', behavior: reduced ? 'auto' : 'smooth' }), 250); }
+    if (location.hash && freshVisit()) { const t = $(location.hash); if (t) setTimeout(() => t.scrollIntoView({ block: 'start', behavior: reduced ? 'auto' : 'smooth' }), 250); }
   }
 
   /* ═══════════════════════════ STORES ═══════════════════════════ */
@@ -244,6 +287,7 @@
     if (!s) return;
     const el = document.getElementById(s); if (!el) return;
     el.classList.add('is-here');
+    if (!freshVisit()) return;   // on reload or Back the shopper's own place wins over the link's
     setTimeout(() => { el.scrollIntoView({ block: 'center', behavior: reduced ? 'auto' : 'smooth' }); const b = $('.store__map-btn', el); if (b && !el.classList.contains('is-open')) b.click(); }, 300);
   }
 

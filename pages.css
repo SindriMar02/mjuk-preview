@@ -10,10 +10,13 @@ body[data-page] main > section:first-child{padding-top:calc(66px + clamp(36px,5v
 body[data-page] .bars{opacity:.18}
 
 /* ── breadcrumb ──────────────────────────────────────────────── */
-.crumb{display:flex;flex-wrap:wrap;gap:10px;padding:0 var(--pad);margin-bottom:clamp(22px,3vw,40px)}
+.crumb{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:0 var(--pad);margin-bottom:clamp(22px,3vw,40px)}
 .crumb a{color:var(--dim);transition:color .3s}
 .crumb a:hover{color:var(--accent)}
 .crumb i{font-style:normal;color:var(--faint)}
+.crumb__back{font:inherit;letter-spacing:inherit;text-transform:inherit;color:var(--ink);background:none;border:0;border-right:1px solid var(--line);padding:0 14px 0 0;margin:0 4px 0 0;cursor:pointer;min-height:44px;display:inline-flex;align-items:center;transition:color .3s}
+@media (hover:hover) and (pointer:fine){.crumb__back:hover{color:var(--accent)}}
+.crumb__back:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 .crumb span{color:var(--ink)}
 
 /* ── text reveal: words rise out of their own line ───────────── */
@@ -242,3 +245,23 @@ body[data-page] .bars{opacity:.18}
 .idx li a:hover{background-size:100% 1px;color:var(--accent)}
 .idx li.oos a{color:var(--dim)}
 .idx li small{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin-left:4px}
+
+/* ── page changes ───────────────────────────────────────────────
+   Between inner pages (this file is on every one of them, and not on the home page with its
+   preloader) the old page and the new one cross-fade: opacity only, 200 ms, ease-out, the same curve
+   both ways so the two always add up to one. Skipped on Back, Forward and reload (head script on each
+   page) and with reduced motion. Browsers without cross-document view transitions just cut, as before. */
+@view-transition{navigation:auto}
+::view-transition-group(root){animation-duration:200ms;animation-timing-function:cubic-bezier(.23,1,.32,1)}
+@media (prefers-reduced-motion:reduce){@view-transition{navigation:none}}
+
+/* iOS Safari zooms the page when an input under 16px gets focus: touch devices get 16px in the shop's search and sort */
+@media (pointer:coarse){.filt__q input,.sel select{font-size:16px}.filt__q{min-width:min(100%,300px)}}
+
+/* ── nothing jumps while the page fills in ──────────────────────
+   The shop's chips, its grid and the materials chapters are built by script after the page has drawn,
+   which pushed everything below them (and the footer) down: layout shift 0.49 on the shop, 0.56 on the
+   materials page. The space is kept until the script has filled them (data-wait, removed by pages.js). */
+#fType,#fFibre{min-height:37px}
+.pgrid[data-wait]{min-height:120vh}
+.fib[data-wait]{min-height:150vh}

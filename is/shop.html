@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<script>/* cross-fade (pages.css) is for going forward: Back, Forward and reload skip it, so a restored page never shows a fade first */addEventListener('pagereveal',function(e){var a=window.navigation&&navigation.activation;if(e.viewTransition&&a&&a.navigationType!=='push')e.viewTransition.skipTransition()})</script>
 <title>Verslun &mdash; MJ&Uacute;K Iceland</title>
 <meta name="description" content="Allt sem MJ&Uacute;K Iceland prjónar, eftir flík, hönnun og efni: húfur, treflar, hanskar, teppi og slár úr alpakkaull og silki, kasmír, merínóull, íslenskri ull og angóruull." />
 <meta name="theme-color" content="#f7f3ef" />
@@ -94,7 +95,7 @@
         </div>
       </div>
     </div>
-    <div class="pgrid" id="pgrid"></div>
+    <div class="pgrid" id="pgrid" data-wait></div>
     <p class="pg__empty" id="pgEmpty" hidden>Ekkert passar við þetta. Prófaðu einni síu færra.</p>
     <div class="pg__more"><button class="link" id="more" hidden>[ Sýna meira ]</button></div>
     <!-- CATALOGUE -->

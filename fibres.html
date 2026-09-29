@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<script>/* cross-fade (pages.css) is for going forward: Back, Forward and reload skip it, so a restored page never shows a fade first */addEventListener('pagereveal',function(e){var a=window.navigation&&navigation.activation;if(e.viewTransition&&a&&a.navigationType!=='push')e.viewTransition.skipTransition()})</script>
 <title>Materials &mdash; MJ&Uacute;K Iceland</title>
 <meta name="description" content="What MJ&Uacute;K knits with, in Anna&rsquo;s own words: alpaca and silk, cashmere, cashmere and merino, merino, Icelandic wool, fluffy angora, smooth angora and merino." />
 <meta name="theme-color" content="#f7f3ef" />
@@ -79,7 +80,7 @@
       <h2 class="head__t">What we knit with</h2>
       <div class="head__end"><span class="mono">In Anna&rsquo;s own ranking</span></div>
     </div>
-    <div class="fib" id="fib"></div>
+    <div class="fib" id="fib" data-wait></div>
   </section>
 
 </main>

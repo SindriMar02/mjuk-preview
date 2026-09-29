@@ -54,7 +54,7 @@
   // everything from her catalogue goes through here before it meets HTML: a product name is data,
   // never markup (Codex 2026-09-26: a name with markup in it would have run on the home page)
   const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  const prod = (p, i) => {
+  const prod = (p, i, o = {}) => {
     // cards render at most 380px wide, so 620 still covers 2x screens. Hover no longer swaps to
     // the second gallery shot: on her shop that is usually a close-up of the knit, which read as
     // a huge zoom (Sindri, 25 Sep). The photo only eases in a little.
@@ -74,7 +74,7 @@
     return `<article class="prod rv">
       <div class="prod__im">
         <span class="prod__ix">${String(i + 1).padStart(2, '0')}</span>
-        <img class="main" src="${main}" alt="${esc(p.t)}" loading="lazy"/>
+        <img class="main" src="${main}"${o.sizes ? ` srcset="${px(p.img[0], 380)} 380w, ${px(p.img[0], 620)} 620w, ${px(p.img[0], 940)} 940w" sizes="${o.sizes}"` : ''} alt="${esc(p.t)}" loading="${o.eager ? 'eager' : 'lazy'}"${o.eager ? ' fetchpriority="high"' : ''} decoding="async"/>
         <div class="prod__sizes">${sizes}</div>
       </div>
       <div class="prod__meta"><div><div class="prod__name">${esc(p.t)}</div><div class="prod__cat">(${catLabel(p)})</div></div>${price}</div>
@@ -214,9 +214,18 @@
     } }
   { const lang = $('#langBtn');
     if (lang) lang.addEventListener('click', () => {
-      let to; try { to = new URL(lang.getAttribute('href'), location.href); } catch (e) { return; }
-      to.hash = '';
-      if (to.origin !== location.origin && lines.length) to.hash = 'bag=' + b64u.to(JSON.stringify(lines));
+      /* lang.href is already resolved against the page's <base>: a prerendered product page sits two
+         folders down (base "../../"), and resolving the raw attribute against the page's own address
+         sent every EN/IS click there to a page that does not exist. */
+      let to; try { to = new URL(lang.href, document.baseURI); } catch (e) { return; }
+      if (to.origin === location.origin) {
+        // same host: the other language of THIS view, its filters and section included
+        if (!to.search) to.search = location.search;
+        to.hash = location.hash;
+      } else {
+        // the other language lives on another host: the bag travels in the hash
+        to.hash = lines.length ? 'bag=' + b64u.to(JSON.stringify(lines)) : '';
+      }
       lang.href = to.href;
     }); }
   // screen readers hear what the drawer shows: added, already in the bag, sold since
@@ -254,6 +263,9 @@
   const bagN = () => lines.filter(live).reduce((n, l) => n + l.q, 0);
   const bagSum = () => lines.filter(live).reduce((n, l) => n + l.q * priceOf(l), 0);
 
+  // Lenis swallows the mouse wheel everywhere it is not told otherwise, and stops the page while the
+  // drawer is open: mark the scrolling regions so the wheel scrolls THEM (data-lenis-prevent)
+  if (bagItems) bagItems.setAttribute('data-lenis-prevent', '');
   function renderBag() {
     const n = bagN();
     if (bagCount) bagCount.textContent = '(' + n + ')';
@@ -264,6 +276,10 @@
     const out = lines.length && wentOut();
     const top = notices.map(t => `<p class="bag__notice" role="status">${html(t)}</p>`).join('')
       + (out ? `<div class="bag__notice" role="status">${fmt('This bag went to checkout at {time}. If you placed the order,', { time: out.toLocaleTimeString(isIS ? 'is-IS' : 'en-GB', { hour: '2-digit', minute: '2-digit' }) })} <button class="bag__clear" data-clear>${t('empty the bag')}</button>.</div>` : '');
+    /* every change rebuilds the list, which would drop the focused button: remember which control had
+       focus and give it back (or, if its line is gone, to the next line's, or to Close) */
+    const ae = document.activeElement;
+    const back = ae && bagItems.contains(ae) ? (ae.dataset.q !== undefined ? `[data-q="${ae.dataset.q}"][data-i="${ae.dataset.i}"]` : ae.dataset.rm !== undefined ? `[data-rm="${ae.dataset.rm}"]` : null) : null;
     bagItems.innerHTML = top + (!lines.length
       ? `<p class="bag__empty">${t('Your bag is empty.')}<br>${t('Add any piece to it.')}</p>`
       : lines.map((l, i) => live(l) ? `<div class="bag__it">
@@ -293,6 +309,7 @@
             <button class="bag__x" data-rm="${i}">${t('Remove')}</button>
           </div>
         </div>`).join(''));
+    if (back) (bagItems.querySelector(back) || $('#bagClose') || bagItems).focus({ preventScroll: true });
   }
   /* the drawer is a modal: it takes focus while open, keeps Tab inside, and gives focus back */
   let bagOpen = false, lastFocus = null;
@@ -444,8 +461,14 @@
       burger.setAttribute('aria-expanded', String(o));
       burger.setAttribute('aria-label', o ? labelClose : labelOpen);
       menu.setAttribute('aria-hidden', String(!o));
+      /* closed, the panel's links must leave the tab order (clip-path and pointer-events do not); open,
+         focus goes in, and shutting it gives focus back to the button */
+      menu.inert = !o;
+      if (o) { const first = menu.querySelector('a'); if (first) first.focus({ preventScroll: true }); }
+      else if (menu.contains(document.activeElement)) burger.focus({ preventScroll: true });
       animateIcon(o); animateText(o);
     };
+    menu.inert = true;
 
     burger.addEventListener('click', () => setMenu(!document.body.classList.contains('menu-open')));
     /* Menu links navigate explicitly: the generic anchor handler relied on

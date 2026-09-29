@@ -196,6 +196,7 @@
  "Find": "Finna",
  "Name or product number": "Nafn eða vörunúmer",
  "Tap the button once, then again to confirm. Prototype: for now the change stays in this browser. When the shop connection is live, the same two taps update the website itself, from any phone in any of the four stores.": "Smelltu einu sinni á hnappinn og svo aftur til að staðfesta. Frumgerð: í bili geymist breytingin aðeins í þessum vafra. Þegar tengingin við vefverslunina er komin uppfæra sömu tvö smellin vefinn sjálfan, úr hvaða síma sem er í hvaða búð sem er.",
+ "js:Back to results": "Til baka í niðurstöður",
  "js:, none, one or two.": ", enginn, einn eða tveir.",
  "js:, to be confirmed": ", verður staðfest",
  "js:A bag carries up to {n} pieces at once. Check out these first, then start a second bag.": "Í körfu komast allt að {n} flíkur í einu. Kláraðu þessa pöntun fyrst og byrjaðu svo nýja körfu.",

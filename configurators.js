@@ -41,6 +41,7 @@
   /* ════════════════════ 1 · POMPOM CHOOSER ════════════════════ */
   const dlg = $('#pom');
   if (dlg && POMS.length) {
+    dlg.setAttribute('data-lenis-prevent', '');   // the wheel scrolls this dialog, not the page behind it (Lenis would swallow it)
     const grid = $('#pomGrid'), img = $('#pomImg'), name = $('#pomName'), total = $('#pomTotal'),
           add = $('#pomAdd'), slots = $$('.pom__slot', dlg), why = $('#pomWhy');
     let hat = null, count = 0, active = 0, chosen = [null, null];
@@ -82,9 +83,12 @@
 
     const open = h => {
       hat = h; count = 0; active = 0; chosen = [null, null];
+      // one price if they all cost the same, otherwise the range: the catalogue has $29 pompoms and a $32 one
+      const ps = [...new Set(POMS.map(s => s.price))].sort((a, b) => a - b);
+      const pomPrice = ps.length === 1 ? usd(ps[0]) : `${usd(ps[0])} to ${usd(ps[ps.length - 1])}`;
       $$('input[name="n"]', dlg).forEach(r => (r.checked = r.value === '0'));
       img.src = px(h.img[0], 300); img.alt = h.t; name.textContent = h.t;
-      if (why) why.innerHTML = `Any pompom goes on any hat. In the shop you pick from the cabinet of eighty. Here are the ones we have photographed, <b>${usd(POMS[0].price)} each</b>, attached before it ships.`;
+      if (why) why.innerHTML = `Any pompom goes on any hat. In the shop you pick from the cabinet of eighty. Here are the ones we have photographed, <b>${pomPrice} each</b>, attached before it ships.`;
       paint();
       if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
       $('input[name="n"][value="0"]', dlg).focus();
