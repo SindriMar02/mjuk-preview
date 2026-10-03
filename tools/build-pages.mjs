@@ -69,7 +69,7 @@ const PAGES = {
   </section>`,
   },
   product: {
-    title: 'MJ&Uacute;K Iceland', desc: 'Knitted in Reykjav&iacute;k.',
+    title: 'MJ&Uacute;K Iceland', desc: 'Made in Iceland.',
     main: `
   <section class="pdp" id="pdp">
     <nav class="crumb mono" id="crumb" aria-label="Breadcrumb"></nav>
@@ -117,12 +117,13 @@ const PAGES = {
       <div class="head__end"><span class="mono">All within a ten minute walk</span></div>
     </div>
     <div class="stores__grid">
-${store('laugavegur-23', '01', 'Store &amp; workshop', 'Laugavegur 23', 'The 1916 house with the Viking mural on the main street. Capes, ponchos and shawls are sewn on the upper floor and made to order.', [['Made here', 'Capes, ponchos and shawls, cut from our blankets. About two hours.'], ['Telephone', '<a href="tel:+3548320567">+354 832 0567</a>']])}
-${store('klapparstigur-29', '02', 'Outlet &amp; workshop', 'Klapparst&iacute;gur 29', 'Prototypes and samples at a discount, next door to Laugavegur. Order a custom neckwarmer and watch it come together from scratch.', [['Made here', 'A neckwarmer knitted in front of you in about twenty minutes.'], ['Telephone', '<a href="tel:+3548320567">+354 832 0567</a>']])}
-${store('skolavordustigur-36', '03', 'Step-free access', 'Sk&oacute;lav&ouml;r&eth;ust&iacute;gur 36', 'Our largest store, a minute from Hallgr&iacute;mskirkja. Level entry for strollers and wheelchairs.', [['Access', 'Level entry'], ['Telephone', '<a href="tel:+3548320567">+354 832 0567</a>']])}
-${store('skolavordustigur-4', '04', 'Step-free access', 'Sk&oacute;lav&ouml;r&eth;ust&iacute;gur 4', 'At the Rainbow, in a 19th century house built of natural stone. Small, warm, and full of colour.', [['Access', 'Level entry'], ['Telephone', '<a href="tel:+3548320567">+354 832 0567</a>']])}
+${store('laugavegur-23', '01', 'Store &amp; workshop', 'Laugavegur 23', 'The 1916 house with the Viking mural on the main street. Capes, ponchos and shawls cut from our blankets are sewn on the upper floor and made to order.', [['Open', 'Every day, 10 to 20'], ['Made here', 'Capes, ponchos and shawls, cut from our blankets. About two hours.'], ['Telephone', '<a href="tel:+3548320567">+354 832 0567</a>']])}
+${store('klapparstigur-29', '02', 'Outlet &amp; workshop', 'Klapparst&iacute;gur 29', 'Prototypes and samples at a discount, next door to Laugavegur. Order a custom neckwarmer and watch it come together from scratch.', [['Open', 'Every day, 10 to 19'], ['Made here', 'A neckwarmer knitted in front of you in about twenty minutes.'], ['Telephone', '<a href="tel:+3548320567">+354 832 0567</a>']])}
+${store('skolavordustigur-36', '03', 'Step-free access', 'Sk&oacute;lav&ouml;r&eth;ust&iacute;gur 36', 'Our largest store, a minute from Hallgr&iacute;mskirkja. Level entry for strollers and wheelchairs.', [['Open', 'Every day, 10 to 20'], ['Access', 'Level entry'], ['Telephone', '<a href="tel:+3548320567">+354 832 0567</a>']])}
+${store('skolavordustigur-4', '04', 'Step-free access', 'Sk&oacute;lav&ouml;r&eth;ust&iacute;gur 4', 'At the Rainbow, in a 19th century house built of natural stone. Small, warm, and full of colour.', [['Open', 'Every day, 10 to 20'], ['Access', 'Level entry'], ['Telephone', '<a href="tel:+3548320567">+354 832 0567</a>']])}
     </div>
     <div class="stores__foot">
+      <div class="budin__row"><span class="mono">Opening hours</span><span>Every day of the year. 23 December, 10 to 22.</span></div>
       <div class="budin__row"><span class="mono">Online orders</span><a href="mailto:customersupport@mjukiceland.com">customersupport@mjukiceland.com</a></div>
       <div class="budin__row"><span class="mono">Telephone</span><a href="tel:+3548320567">+354 832 0567</a></div>
       <div class="budin__row"><span class="mono">Wholesale</span><a href="mailto:anna@mjukiceland.com">anna@mjukiceland.com</a></div>
@@ -145,8 +146,8 @@ ${store('skolavordustigur-4', '04', 'Step-free access', 'Sk&oacute;lav&ouml;r&et
         <div class="story__im rv"><img id="storyImg" src="" alt="MJ&Uacute;K Iceland, Laugavegur 23" loading="lazy"/></div>
         <div class="story__col">
           <p class="rv">MJ&Uacute;K is a family knitwear house in Reykjav&iacute;k. The knitting started at home, more than thirty years ago, and grew into a workshop and four stores within a ten minute walk of each other.</p>
-          <h3 class="rv">Designed and made here</h3>
-          <p class="rv">Every design is Anna&rsquo;s. The hats, scarves and blankets are knitted in Reykjav&iacute;k, and the capes and ponchos are cut from those blankets and sewn on the upper floor of Laugavegur 23, above the shop floor.</p>
+          <h3 class="rv">Designed here, made in Iceland</h3>
+          <p class="rv">Every design is Anna&rsquo;s. Everything is made in Iceland, knitted in Reykjav&iacute;k and in Akureyri. The capes and shawls cut from the blankets are sewn on the upper floor of Laugavegur 23, above the shop floor.</p>
           <h3 class="rv">The fibres</h3>
           <p class="rv">Angora, superfine merino, cashmere, Icelandic wool, and an alpaca-and-silk yarn developed with a spinner in Italy for Anna&rsquo;s daughter Lia. <a class="link" href="fibres.html">[ Read about the fibres ]</a></p>
           <h3 class="rv">Small batches</h3>

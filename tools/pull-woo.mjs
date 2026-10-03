@@ -154,6 +154,8 @@ function originOf(p, cc, shortText, longText) {
   if (m) { const verb = m[1].toLowerCase().replace(' ', '-'); return verb[0].toUpperCase() + verb.slice(1) + ' in ' + (/^i/i.test(m[2]) ? 'Iceland' : 'Reykjavík'); }
   // capes: her website says they are sewn at Laugavegur 23 (the customs catalogue's source)
   if (/laugavegur 23/i.test(cc.originFrom || '')) return 'Sewn at Laugavegur 23, Reykjavík';
+  // Anna, questions file 2026-09-25 (Q30): "we only produce in Iceland"
+  if (/^Anna/.test(cc.originFrom || '')) return 'Made in Iceland';
   return '';
 }
 
@@ -311,6 +313,9 @@ const all = listed.map(p => {
     sz: [], comp, fam: fam ? fam.key : '', mat, tyk, id: p.id, live: true,
     oos: p.stock_status === 'outofstock', cats,
   };
+  // a second material the piece is also listed under (her XL double-faced scarves under Icelandic wool, Q25)
+  const mx = fam && Array.isArray(fam.alsoMaterials) ? fam.alsoMaterials.filter(k => MAT_KEYS.has(k) && k !== mat) : [];
+  if (mx.length) o.mx = mx;
   if (p.manage_stock && Number.isInteger(p.stock_quantity)) o.q = p.stock_quantity;
   const mi = prev ? prev.mi : originOf(p, cc, shortText, longText); if (mi) o.mi = mi;
   return o;
@@ -329,7 +334,7 @@ function pool(items, n = 24) {
 }
 // her nine materials in her ranking, her groups and families in her sheet's order; the ones with
 // nothing listed yet stay in, with a count of 0, for the pages to leave out
-const materials = MATERIALS.map(({ key, name, is }) => { const items = all.filter(p => p.mat === key); return { key, name, is, count: items.length, pool: pool(items) }; });
+const materials = MATERIALS.map(({ key, name, is }) => { const items = all.filter(p => p.mat === key || (p.mx || []).includes(key)); return { key, name, is, count: items.length, pool: pool(items) }; });
 const groups = G.groups.map(({ key, name, is }) => { const items = all.filter(p => p.tyk === key); return { key, name, is, count: items.length, pool: pool(items) }; });
 const families = [...G.families, ...addedFams].map(f => ({ key: f.key, name: f.name, is: f.is, group: f.group, mat: f.material || '', ...(f.said ? { said: f.said, saidIs: f.saidIs } : {}),
   ...(f.sizes ? { sizes: f.sizes } : {}), goes: f.goes || [], ...(f.added ? { added: true } : {}), count: all.filter(p => p.fam === f.key).length }));

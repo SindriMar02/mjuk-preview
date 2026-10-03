@@ -29,8 +29,6 @@
   6469,
   7816,
   6425,
-  13867,
-  11466,
   9576,
   6217,
   3845,
@@ -75,10 +73,8 @@
   "https://i1.wp.com/mjukiceland.com/wp-content/uploads/2021/11/IMG-20220401-WA0113.jpg"
  ],
  "made": {
-  "_about": "Made-for-you prices in USD, set by Anna: one per row of her Bespoke clothing list (tools/groups.json bespoke.rows, her own row names), plus the salmon leather trim. null = not given yet: the page then shows no number and says price on request; the request goes to the workshop by email.",
+  "_about": "Made-for-you prices in USD, set by Anna: one per row of her Bespoke clothing list (tools/groups.json bespoke.rows, her own row names). null = not given yet: the page then shows no number and says price on request; the request goes to the workshop by email. Salmon leather is never priced here: it is a special request by email (Anna, questions file 2026-09-25, Q13).",
   "prices": {
-   "Cashmere shawl": null,
-   "Cashmere poncho": null,
    "Cashmere and Merino shawl": null,
    "Icelandic wool shawl": null,
    "Cashmere and Merino shawl with pockets": null,
@@ -99,7 +95,6 @@
    "Icelandic Wool Grace cape with fur": null,
    "Cashmere and Merino Empress cape with fur": null,
    "Icelandic Wool Empress cape with fur": null
-  },
-  "salmonLeather": null
+  }
  }
 }

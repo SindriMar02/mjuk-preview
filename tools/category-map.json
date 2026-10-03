@@ -27,15 +27,15 @@
   },
   "explorer-scarfs-cashmere-and-merino": {
    "path": "sales/explorer-hats-cashmere-and-merino-wool/explorer-scarfs-cashmere-and-merino",
-   "to": "shop.html?type=scarves&material=cashmere-merino",
-   "why": "1 of its 1 pieces are scarves in cashmere-merino",
-   "n": 1
+   "to": "shop.html",
+   "why": "no piece in the shop today",
+   "n": 0
   },
   "explorer-scarves-cashmere-and-merino": {
    "path": "explorer-scarves-cashmere-and-merino",
-   "to": "shop.html?type=scarves&material=cashmere-merino",
-   "why": "2 of its 2 pieces are scarves in cashmere-merino",
-   "n": 2
+   "to": "shop.html",
+   "why": "no piece in the shop today",
+   "n": 0
   },
   "gudmundur": {
    "path": "our-collections/gudmundur",
@@ -70,8 +70,8 @@
   "our-collections": {
    "path": "our-collections",
    "to": "shop.html",
-   "why": "its 658 pieces share no single design, group or material",
-   "n": 658
+   "why": "its 643 pieces share no single design, group or material",
+   "n": 643
   },
   "alpaca-and-silk": {
    "path": "our-collections/alpaca-and-silk",
@@ -249,8 +249,8 @@
   },
   "icelandic-wool": {
    "path": "our-collections/icelandic-wool",
-   "to": "shop.html?material=icelandic-wool",
-   "why": "19 of its 21 pieces are icelandic-wool",
+   "to": "shop.html",
+   "why": "its 21 pieces share no single design, group or material",
    "n": 21
   },
   "gudmundur-beanies": {
@@ -261,15 +261,15 @@
   },
   "logomania-scarves": {
    "path": "our-collections/icelandic-wool/logomania-scarves",
-   "to": "shop.html?type=scarves",
-   "why": "4 of its 4 pieces are scarves",
+   "to": "shop.html?family=xl-double-scarves",
+   "why": "4 of its 4 pieces are her design \"xl-double-scarves\"",
    "n": 4
   },
   "merino-wool": {
    "path": "our-collections/merino-wool",
    "to": "shop.html?material=merino",
-   "why": "116 of its 116 pieces are merino",
-   "n": 116
+   "why": "102 of its 102 pieces are merino",
+   "n": 102
   },
   "ragnar-beanies": {
    "path": "our-collections/merino-wool/ragnar-beanies",
@@ -298,14 +298,14 @@
   "merino-aviator-hat": {
    "path": "our-collections/merino-wool/merino-aviator-hat",
    "to": "shop.html?family=unisex-aviator",
-   "why": "24 of its 25 pieces are her design \"unisex-aviator\"",
-   "n": 25
+   "why": "10 of its 11 pieces are her design \"unisex-aviator\"",
+   "n": 11
   },
   "merino-aviator-hat-merino-aviator-hat": {
    "path": "our-collections/merino-wool/merino-aviator-hat/merino-aviator-hat-merino-aviator-hat",
-   "to": "shop.html?family=unisex-aviator",
-   "why": "14 of its 14 pieces are her design \"unisex-aviator\"",
-   "n": 14
+   "to": "shop.html",
+   "why": "no piece in the shop today",
+   "n": 0
   },
   "merino-aviator-hat-with-fleece": {
    "path": "our-collections/merino-wool/merino-aviator-hat/merino-aviator-hat-with-fleece",
@@ -364,20 +364,20 @@
   "colors": {
    "path": "colors",
    "to": "shop.html?type=hats",
-   "why": "41 of its 44 pieces are hats",
-   "n": 44
+   "why": "38 of its 39 pieces are hats",
+   "n": 39
   },
   "black": {
    "path": "colors/black",
-   "to": "shop.html",
-   "why": "its 2 pieces share no single design, group or material",
-   "n": 2
+   "to": "shop.html?family=viking",
+   "why": "1 of its 1 pieces are her design \"viking\"",
+   "n": 1
   },
   "blue": {
    "path": "colors/blue",
    "to": "shop.html?type=hats",
-   "why": "5 of its 5 pieces are hats",
-   "n": 5
+   "why": "4 of its 4 pieces are hats",
+   "n": 4
   },
   "green": {
    "path": "colors/green",
@@ -417,33 +417,33 @@
   },
   "neutralcolors": {
    "path": "colors/neutralcolors",
-   "to": "shop.html",
-   "why": "its 9 pieces share no single design, group or material",
-   "n": 9
+   "to": "shop.html?type=hats",
+   "why": "7 of its 7 pieces are hats",
+   "n": 7
   },
   "pinkhats": {
    "path": "colors/pinkhats",
    "to": "shop.html",
-   "why": "its 7 pieces share no single design, group or material",
-   "n": 7
+   "why": "its 6 pieces share no single design, group or material",
+   "n": 6
   },
   "sales": {
    "path": "sales",
    "to": "shop.html?sale=1",
    "why": "her sale category",
-   "n": 94
+   "n": 71
   },
   "explorer-hats-cashmere-and-merino-wool": {
    "path": "sales/explorer-hats-cashmere-and-merino-wool",
-   "to": "shop.html?material=cashmere-merino",
-   "why": "2 of its 2 pieces are cashmere-merino",
-   "n": 2
+   "to": "shop.html",
+   "why": "no piece in the shop today",
+   "n": 0
   },
   "uncategorised": {
    "path": "uncategorised",
    "to": "shop.html",
-   "why": "its 37 pieces share no single design, group or material",
-   "n": 37
+   "why": "its 29 pieces share no single design, group or material",
+   "n": 29
   },
   "blankets": {
    "path": "blankets",
@@ -527,7 +527,7 @@
    "path": "hats",
    "to": "shop.html?type=hats",
    "why": "named after her piece group",
-   "n": 201
+   "n": 187
   },
   "divashittheroads5": {
    "path": "hats/divashittheroads5",
@@ -538,8 +538,8 @@
   "pompomhats": {
    "path": "hats/pompomhats",
    "to": "shop.html?type=hats",
-   "why": "31 of its 32 pieces are hats",
-   "n": 32
+   "why": "30 of its 31 pieces are hats",
+   "n": 31
   },
   "pompom": {
    "path": "hats/pompom",
@@ -550,8 +550,8 @@
   "unisexhats": {
    "path": "hats/unisexhats",
    "to": "shop.html?type=hats",
-   "why": "62 of its 62 pieces are hats",
-   "n": 62
+   "why": "48 of its 48 pieces are hats",
+   "n": 48
   },
   "information": {
    "path": "information",
@@ -569,7 +569,7 @@
    "path": "scarves",
    "to": "shop.html?type=scarves",
    "why": "named after her piece group",
-   "n": 17
+   "n": 11
   },
   "clothesmadeinreykjavik": {
    "path": "clothesmadeinreykjavik",

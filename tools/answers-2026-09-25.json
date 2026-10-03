@@ -1,0 +1,35 @@
+{
+ "_about": "What Anna's questions file (02-clients/clients/mjuk/_from-anna/questions-answers-2026-09-25.md) changes in her WooCommerce: names customers see, pieces that leave the web shop, the private listings she said to delete, two typing slips, and her shipping wishes. tools/apply-answers.mjs runs it on a local stack only; her live shop gets each part with her yes. Slugs never change, so every product keeps its address.",
+ "renames": [
+  { "q": "Q18", "find": "^Alpaca Hat Boucle\\.?\\s*", "to": "Lía beanie. Boucle Alpaca. ", "why": "\"it must be Lía beanie. Brushed Alpaca and Lía beanie. Boucle Alpaca\"" },
+  { "q": "Q18", "find": "^Alpaca Hat Brushed\\.?\\s*", "to": "Lía beanie. Brushed Alpaca. ", "why": "\"it must be Lía beanie. Brushed Alpaca and Lía beanie. Boucle Alpaca\"" },
+  { "q": "Q19", "find": "^Tender Kitty hat\\.?\\s*", "to": "Smooth Kitty beanie. ", "why": "\"Smooth sounds better\"; her sheet names them Smooth Kitty beanies" },
+  { "q": "Q20", "find": "^Logo scarf\\. Double-sided\\.\\s*", "to": "XL double-faced scarf. ", "why": "\"we will stop making a huge logo, therefore we will change the name\"" },
+  { "q": "Q25", "find": "^[“\"]Sustainable statement/ logomania[”\"] scarf\\.\\s*(Pure Icelandic wool\\.\\s*)?(Extra large\\.\\s*)?", "to": "XL double-faced scarf. ", "why": "\"They are XL scarves you mentioned earlier ... made of two sides with different composition\": the old \"Pure Icelandic wool\" and \"Extra large\" go from the name (Codex 2026-10-03)" },
+  { "q": "Q25", "find": "^XL double-faced scarf\\. Pure Icelandic wool\\.\\s*(Extra large\\.\\s*)?", "to": "XL double-faced scarf. ", "why": "the same, for a stack where the first version of this rename already ran (2026-10-03)" },
+  { "q": "Q21", "find": "^Angora\\+merino wool headband\\.?\\s*", "to": "Tenderness headband. ", "why": "\"yes\" (her Tenderness headbands)" },
+  { "q": "Q23", "find": "^Unicorn blanket\\.\\s*", "to": "Icelandic wool blanket. ", "why": "\"Let's stop calling them Unicorn blankets and write Icelandic wool blankets instead\"" },
+  { "q": "Q23", "find": "^Gradient Unicorn blanket\\.\\s*", "to": "Icelandic wool blanket. Gradient. ", "why": "the Gradient blankets are Icelandic wool blankets too (Codex 2026-10-03)" },
+  { "q": "Q23", "find": "^Leaves blanket\\.\\s*", "to": "Icelandic wool blanket. Leaves. ", "why": "the Leaves blankets are Icelandic wool blankets (her text begins \"Unicorn blanket\")" },
+  { "q": "Q4", "find": "Grapefrui0$", "to": "Grapefruit", "why": "typing slip, \"yes, thank you\"" },
+  { "q": "Q4", "find": "pompo11$", "to": "pompom", "why": "typing slip, \"yes, thank you\"" }
+ ],
+ "design": [
+  { "q": "Q25", "find": "logomania", "design": "xl-double-scarves", "why": "the logomania scarves are her XL double-faced scarves" }
+ ],
+ "offWeb": [
+  { "q": "Q24", "name": "^explorer (hat|scarf)\\b", "why": "\"we will remove them from the webstore, since they are almost sold out and we won't produce them again\"" },
+  { "q": "Q22", "name": "^merino aviator hat\\b", "text": "merino wool without fleece", "why": "\"We will discontinue those without fleece and sell them out in the outlet\"" }
+ ],
+ "trash": {
+  "q": "Q26", "why": "\"delete them\" (moved to WooCommerce's bin, which can be undone; the bin is never emptied by us)",
+  "_note": "ids only: this repository is public and these are private orders",
+  "ids": [15745, 14445, 13706, 13692, 13769, 13837, 14273]
+ },
+ "shipping": {
+  "q": "Q1 Q2 Q17",
+  "freeFirst": "free shipping is the first method in every zone, so an order that has reached the amount gets it without ticking anything (Q1)",
+  "norway": { "zone": "European Union, Switzerland, Norway, UK", "add": "NO", "why": "\"Yes, please, include them\" (Q2)" },
+  "iceland": { "zone": "Iceland", "freeFrom": 100, "why": "\"let's offer free shipping from 100 $\" (Q17)" }
+ }
+}

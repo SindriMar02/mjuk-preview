@@ -30,11 +30,16 @@
   // one typo on her live shop ("Grapefrui0") corrected here for the swatch label only
   const FIX = { Grapefrui0: 'Grapefruit' };
   // a pompom with no price in her shop is not offered: the chooser shows her price, never a stand-in (Codex 2026-09-26)
+  // merino pompoms are heavier and go on merino beanies only; every other pompom suits every hat
+  // (Anna, questions file 2026-09-25, Q7)
   const POMS = CM.all
     .filter(p => /\bpom ?pom\b/i.test(p.t) && !/beanie|hat|aviator|cap\b/i.test(p.t) && p.img && p.img[0] && p.p > 0)
     .map(p => { const raw = p.t.replace(/^.*?pom ?pom\.?\s*/i, '').replace(/\.$/, '').trim() || 'Raccoon';
-      return { h: p.h, name: FIX[raw] || raw, kind: /raccoon/i.test(p.t) ? 'Raccoon' : 'Polar fox', price: p.p, img: p.img[0] }; })
-    .sort((a, b) => a.name.localeCompare(b.name));
+      const merino = p.fam === 'merino-pompoms' || /\bmerino\b/i.test(p.t);
+      return { h: p.h, name: FIX[raw] || raw, kind: merino ? 'Merino wool' : /raccoon/i.test(p.t) ? 'Raccoon' : 'Polar fox', merino, price: p.p, img: p.img[0] }; })
+    .sort((a, b) => a.merino - b.merino || a.name.localeCompare(b.name));
+  const BEANIE = new Set((CM.families || []).filter(f => /beanies?\b/i.test(f.name)).map(f => f.key));
+  const fits = (s, hat) => !s.merino || (!!hat && hat.mat === 'merino' && BEANIE.has(hat.fam));   // beanies, never the aviators (Codex 2026-10-03)
 
   const escA = x => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); // her names are data, not markup
 
@@ -83,12 +88,15 @@
 
     const open = h => {
       hat = h; count = 0; active = 0; chosen = [null, null];
+      $$('.sw', grid).forEach(b => { b.hidden = !fits(POMS[+b.dataset.i], h); });
       // one price if they all cost the same, otherwise the range: the catalogue has $29 pompoms and a $32 one
-      const ps = [...new Set(POMS.map(s => s.price))].sort((a, b) => a - b);
+      const ps = [...new Set(POMS.filter(s => fits(s, h)).map(s => s.price))].sort((a, b) => a - b);
       const pomPrice = ps.length === 1 ? usd(ps[0]) : `${usd(ps[0])} to ${usd(ps[ps.length - 1])}`;
       $$('input[name="n"]', dlg).forEach(r => (r.checked = r.value === '0'));
       img.src = px(h.img[0], 300); img.alt = h.t; name.textContent = h.t;
-      if (why) why.innerHTML = `Any pompom goes on any hat. In the shop you pick from the cabinet of eighty. Here are the ones we have photographed, <b>${pomPrice} each</b>, attached before it ships.`;
+      if (why) why.innerHTML = fmt(POMS.some(s => s.merino) && !POMS.every(s => fits(s, h))
+        ? 'Any of these goes on this hat; the heavier merino pompoms go on merino beanies only. Here are the ones we have photographed, {price} each, attached before it ships.'
+        : 'Any pompom goes on any hat. In the shop you pick from the cabinet of eighty. Here are the ones we have photographed, {price} each, attached before it ships.', { price: `<b>${pomPrice}</b>` });
       paint();
       if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
       $('input[name="n"][value="0"]', dlg).focus();
@@ -122,14 +130,15 @@
        the fabrics she makes it in, with or without fur. Only her rows can be chosen. In the
        11 Sep meeting: the customer picks the style, the colour of the fabric (the fabric is one
        of her blankets), the salmon skin and the fur, and sees one price. Prices are hers to set,
-       one per row, in tools/curation.json (CM.made); until then the request goes by email. */
+       one per row, in tools/curation.json (CM.made); until then the request goes by email.
+       Her questions file (2026-09-25): salmon leather is a special request by email, never a
+       price on the page (Q13); a change in length or pockets needs a message (Q9). */
     const B = CM.bespoke || { models: [], fabrics: [], rows: [] };
     const isIS = document.documentElement.lang === 'is';
     const nm = x => (x ? (isIS && x.is) || x.name : '');
     const MODEL = Object.fromEntries(B.models.map(m => [m.key, m])), FABRIC = Object.fromEntries(B.fabrics.map(f => [f.key, f]));
     const ROWS = B.rows.map(([name, model, fabric, fur]) => ({ name, model, fabric, fur }));
-    const PRICE = (CM.made && CM.made.prices) || {}, SALMON = CM.made ? CM.made.salmonLeather : null;
-    const tr = $('[data-price="salmonLeather"]', cfg); if (tr) { tr.textContent = SALMON == null ? '' : '+ ' + usd(SALMON); tr.hidden = SALMON == null; }
+    const PRICE = (CM.made && CM.made.prices) || {};
 
     const v = n => { const el = cfg.querySelector(`input[name="${n}"]:checked`); return el ? el.value : ''; };
     const set = (n, val) => { const el = cfg.querySelector(`input[name="${n}"][value="${val}"]`); if (el) el.checked = true; };
@@ -137,10 +146,10 @@
 
     /* the fabric's colours are her blankets in it, in stock and photographed: the one it is cut from */
     const blankets = key => CM.all.filter(p => FABRIC[key] && FABRIC[key].blankets.includes(p.fam) && !p.oos && p.img && p.img[0]);
-    const famShort = { konungur: 'Konungur', akureyri: 'Akureyri', unicorn: 'Unicorn' };
+    const famShort = { konungur: 'Konungur', unicorn: 'Icelandic wool' };
     /* the colour from her product name, colour first and pattern after ("Camel, Fishbone"), so
        a short label still says the colour; a design inside the family ("Leaves") comes last */
-    const PATTERN = /^(fishbone( pattern)?|striped|rainbow pattern|double-sided)$/i;
+    const PATTERN = /^(fishbone( pattern)?|striped|rainbow pattern|double-sided|gradient|leaves)$/i;
     const colourName = p => {
       const [head, ...rest] = p.t.split(/\.\s+/);
       const parts = rest.flatMap(x => x.replace(/\.$/, '').split(/,\s+/)).map(x => x.trim()).filter(x => x && !/^\d+% ?wool$/i.test(x));
@@ -186,8 +195,9 @@
       paintColours();
     };
 
-    const priceEl = $('#cfgPrice'), noteEl = $('#cfgNote'), lenEl = $('#cfgLen'), done = $('#cfgDone');
-    const parts = () => { const r = row(); return [r ? PRICE[r.name] : null, v('trim') === 'yes' ? SALMON : 0]; };
+    const priceEl = $('#cfgPrice'), noteEl = $('#cfgNote'), lenEl = $('#cfgLen'), trimEl = $('#cfgTrim'), done = $('#cfgDone');
+    // salmon leather has no price on the page: choosing it makes the piece a request (Q13)
+    const parts = () => { const r = row(); return [r ? PRICE[r.name] : null, v('trim') === 'yes' ? null : 0]; };
     const priced = () => parts().every(n => n != null);
     const total = () => parts().reduce((a, n) => a + n, 0);
     const paint = () => {
@@ -196,6 +206,7 @@
       priceEl.classList.toggle('is-ask', !priced());
       const adj = v('len') === 'adjusted';   // never name a field "length": form.elements.length is the control count
       lenEl.hidden = !adj;
+      if (trimEl) trimEl.hidden = v('trim') !== 'yes';
       noteEl.textContent = t(!priced() ? 'We write back with the price before anything is cut.'
         : adj ? 'Indicative. We confirm the price with the length.' : 'The whole price. We confirm by email before anything is cut.');
     };
@@ -213,9 +224,9 @@
         [t('Colour'), blanket ? blanket.t : t('To tell you in this email')],
         [t('Fur'), fur ? t('With fur, colour to tell you in this email') : t('Without fur')],
         [t('Salmon leather'), trim ? t('At the edges, colour to tell you in this email') : t('None')],
-        [t('Length'), t(adj ? 'Adjusted, we will write to you' : 'Standard')], [t('Price'), price]];
+        [t('Length'), t(adj ? 'A change, written below' : 'Standard')], [t('Price'), price]];
       const to = 'customersupport@mjukiceland.com';
-      const body = t('Made for you') + '\n\n' + rows.map(x => x[0] + ': ' + x[1]).join('\n') + '\n\n' + (adj ? t('How I would like the length:') + '\n\n' : '');
+      const body = t('Made for you') + '\n\n' + rows.map(x => x[0] + ': ' + x[1]).join('\n') + '\n\n' + (adj ? t('How I would like it (length, pockets):') + '\n\n' : '');
       const mail = `mailto:${to}?subject=${encodeURIComponent(t('Made for you') + ': ' + nm(MODEL[r.model]))}&body=${encodeURIComponent(body)}`;
       const escH = x => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;');
       done.setAttribute('role', 'status');

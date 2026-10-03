@@ -118,7 +118,7 @@
     const list = () => {
       const q = st.q.toLowerCase();
       let L = CM.all.filter(p =>
-        (!st.type || p.tyk === st.type) && (!st.family || p.fam === st.family) && (!st.material || p.mat === st.material) &&
+        (!st.type || p.tyk === st.type) && (!st.family || p.fam === st.family) && (!st.material || p.mat === st.material || (p.mx || []).includes(st.material)) &&
         (!st.sale || p.cp > 0) && (!st.nw || isNew(p)) && (!st.stock || !p.oos) && (!q || words(p).includes(q)));
       if (st.sort === 'low') L.sort((a, b) => a.p - b.p);
       else if (st.sort === 'high') L.sort((a, b) => b.p - a.p);
@@ -244,14 +244,14 @@
       p: 'One hundred percent in the Viking beanies. Ninety-eight in the Greenland beanies, with two percent elastane to hold the edge.',
       q: ['“Made of certified ethically sourced pure cashmere.”'] },
     'cashmere-merino': { lead: 'Cashmere carried on superfine merino.',
-      p: 'Ten percent cashmere in the Akureyri blankets, twenty in the Konungur blankets and the Empress cape, thirty in the Explorer hats and scarves.',
+      p: 'Ten percent cashmere in the Akureyri blankets, twenty in the Konungur blankets and the Empress cape.',
       q: ['“Irresistibly soft blend of cashmere and the highest sort of superfine merino wool.”'] },
     'merino': { lead: 'Superfine merino, smooth against the skin and never scratchy.',
       p: 'On its own in the Arctic and Ragnar beanies, the unisex aviator hats, and the Ragnar scarves and gloves.',
       q: ['“This is superfine Merino wool in its truest form: smooth, clean, and refined.”', '“Merino is nature’s own regulator. It traps heat when you’re out in the frost but breathes the moment you step into a warm café.”'] },
-    'icelandic-wool': { lead: 'Icelandic wool, from the Unicorn blankets to the Gudmundur beanies.',
+    'icelandic-wool': { lead: 'Icelandic wool, from the blankets to the Gudmundur beanies.',
       p: 'The Gudmundur beanies are ninety percent Icelandic wool, softened with five percent angora and five percent superfine merino.',
-      q: ['“Unicorn is thicker than Akureyri blankets, thicker and more rough wool, but has got higher resistance against wind and rain.”', '“90% top quality Icelandic wool, 5% angora, 5% superfine merino wool.”'] },
+      q: ['“90% top quality Icelandic wool, 5% angora, 5% superfine merino wool.”'] },
     'fluffy-angora': { lead: 'The fluffiest pieces in the shop, light and weightless.',
       p: 'Angora blended so it holds its shape: seventy percent with nylon and merino in the Roots beanies, sixty with nylon in the Fluffy Kitty hats.',
       q: ['“Fluffy and soft angora wool blend. Flexible adjustable fit.”', '“The name of the hat was the best to describe how soft and weightless it is.”'] },
@@ -264,9 +264,10 @@
     const mats = shown(CM.materials).filter(m => FIBRES[m.key]);
     host.innerHTML = mats.map((m, i) => {
       const f = FIBRES[m.key];
-      const pool = CM.all.filter(p => p.mat === m.key && !p.oos);
+      const inMat = (p, k) => p.mat === k || (p.mx || []).includes(k);   // a second material (her XL double-faced scarves, Q25)
+      const pool = CM.all.filter(p => inMat(p, m.key) && !p.oos);
       const im = pool[0] ? px(pool[0].img[0], 900) : '';
-      const designs = shown(CM.families).filter(x => CM.all.some(p => p.fam === x.key && p.mat === m.key));
+      const designs = shown(CM.families).filter(x => CM.all.some(p => p.fam === x.key && inMat(p, m.key)));
       return `<article class="fib__ch" id="${esc(m.key)}">
         <div class="fib__im rv"><span class="head__n">0${i + 1}.</span>${im ? `<img src="${im}" alt="${esc(nm(m))}" loading="${i ? 'lazy' : 'eager'}"/>` : ''}</div>
         <div class="fib__body">
@@ -282,7 +283,7 @@
     }).join('');
     host.removeAttribute('data-wait');
     $$('[data-name]', host).forEach(splitWords);
-    $$('.fib__ch', host).forEach(ch => { const key = ch.id; fill($('[data-mini]', ch), CM.all.filter(p => p.mat === key && !p.oos).slice(0, 3), { index: false }); });
+    $$('.fib__ch', host).forEach(ch => { const key = ch.id; fill($('[data-mini]', ch), CM.all.filter(p => (p.mat === key || (p.mx || []).includes(key)) && !p.oos).slice(0, 3), { index: false }); });
     reveal(host);
     if (location.hash && freshVisit()) { const t = $(location.hash); if (t) setTimeout(() => t.scrollIntoView({ block: 'start', behavior: reduced ? 'auto' : 'smooth' }), 250); }
   }

@@ -1,0 +1,761 @@
+# Shop report
+
+sandbox wc/v3 http://127.0.0.1:9410 · 739 pieces on the shop
+
+## Published but not on the shop (5)
+
+By WordPress id (Products, then search the id, or open post.php?post=<id>&action=edit). Everything else she publishes is on the shop.
+
+- #1044: hidden from her catalogue in WordPress
+- #2021: hidden from her catalogue in WordPress
+- #5734: hidden from her catalogue in WordPress
+- #6402: hidden from her catalogue in WordPress
+- #7872: hidden from her catalogue in WordPress
+
+## On the shop, but no design chosen (737)
+
+Listed by its name for now. In WordPress: Products, filter "Not chosen", choose a Design.
+
+- 11646 Arctic Beanie. Black with matching raccoon pompom
+- 11649 Arctic beanie. Dark Grey with matching raccoon pompom
+- 11651 Arctic beanie. Deep Purple with matching raccoon pompom
+- 11643 Arctic beanie. Green Moss with matching raccoon pompom
+- 11642 Arctic Beanie. Jeans with matching raccoon pompom
+- 11647 Arctic beanie. Light Grey with matching raccoon pompom
+- 11653 Arctic beanie. Light Peach with matching raccoon pompom
+- 11641 Arctic Beanie. Mango with matching raccoon pompom
+- 11590 Arctic beanie. Oatmeal with matching raccoon pompom
+- 11644 Arctic Beanie. Orchid with matching raccoon pompom
+- 11652 Arctic Beanie. Light Peach with matching raccoon pompom
+- 11654 Arctic Beanie. Purple with matching raccoon pompom
+- 11650 Arctic Beanie. Rose with matching raccoon pompom
+- 11648 Arctic Beanie.Salt and Pepper with matching raccoon pompom
+- 11566 Arctic beanie. Turquoise with matching raccoon pompom
+- 11645 Arctic Beanie. White with matching raccoon pompom
+- 12167 Slouchy hat. Light grey.
+- 14893 Slouchy hat. Lilac Blush
+- 14910 Slouchy hat. Nude
+- 14912 Slouchy hat. Beige melange
+- 14913 Slouchy hat. Sky blue
+- 14915 Slouchy hat. Cloudy sky
+- 14917 Slouchy hat. Black
+- 14938 Slouchy hat. Lilac
+- 14939 Slouchy hat. Purple burgundy
+- 14940 Slouchy hat. Cold pink
+- 14941 Slouchy hat. White
+- 14942 Slouchy hat. Salt and pepper
+- 14943 Slouchy hat. Navy
+- 12939 “Princess” cape. Soft pink fishbone
+- 12936 Grace cape with a hood and fur, pockets and zip. Forest/Mustard
+- 11901 Grace cape with a hood and fur, pockets and zip. Grey.
+- 11903 Grace cape with a hood and fur, pockets and zip. Light pink/light grey.
+- 11904 Grace cape with a hood and fur, pockets and zip. Mint/forest.
+- 12937 Grace cape with a hood and fur, pockets and zip. Mustard/olive
+- 11907 Grace cape with a hood and fur, pockets and zip. Sky blue/ice blue.
+- 13161 Grace cape with a hood and fur, pockets and zip. Sky blue/ice blue. Muff with fur.
+- 11902 Grace cape with a hood and fur, pockets and zip. White.
+- 15592 Empress cape with a hood and fur. Extra long. White.
+- 12938 Grace cape with a hood, pockets and zip. Black
+- 10650 Lia Scarf. Alpaca and silk. Calm blue
+- 10641 Lia Scarf. Alpaca and silk. Cream
+- 10645 Lia Scarf. Alpaca and silk. Grey
+- 10648 Lia Scarf. Alpaca and silk. Ice blue
+- 10652 Lia Scarf. Alpaca and silk. Ice blue, white and calm blue
+- 10642 Lia Scarf. Alpaca and silk. Light peach
+- 10647 Lia Scarf. Alpaca and silk. Lilac
+- 10646 Lia Scarf. Alpaca and silk. Lilac , white and grey
+- 10643 Lia Scarf. Alpaca and silk. Peach and pine green
+- 10644 Lia Scarf. Alpaca and silk. Pine green
+- 6405 Marshmallow hat. Blue lilac
+- 11094 Ragnar Gloves
+- 10799 Viking beanie. Black
+- 10797 Viking beanie. Camel
+- 10725 Viking beanie. Cashmere. Fuchsia
+- 10792 Viking beanie. Cashmere. Mint
+- 10790 Viking beanie. Cashmere. Moss
+- 10789 Viking beanie. Cashmere. Rose
+- 10788 Viking beanie. Cashmere. Royal blue
+- 10787 Viking beanie. Cashmere. Spring green
+- 10796 Viking beanie. Navy
+- 10795 Viking beanie. Grey
+- 10793 Viking beanie. Light jeans blue
+- 10798 Viking beanie. Mediterranean blue
+- 10481 Viking cashmere beanie. White
+- 7630 XL double-faced scarf. 100%Icelandic Wool/Angora+Super fine merino wool. Ocean blue/Marigold
+- 5266 Marshmallow hat. Sky blue with lilac polar fox pompom.
+- 3657 Icelandic wool blanket. Fishbone pattern. Moss green. 100% wool
+- 5806 “Konungur” cashmere blanket. Double-sided camel/cream.
+- 9717 “Konungur” cashmere blanket. Double-sided, Cappucino/Cream
+- 9718 “Konungur” cashmere blanket. Fishbone, Camel
+- 9716 “Konungur” cashmere blanket. Fishbone, Cappuccino
+- 5805 “Konungur” cashmere blanket. Double-sided. Yellow with forest green.
+- 12316 Chunky Aviator hat. Aqua.
+- 12515 Chunky Aviator hat. Beige melange/grey with 2 pompoms.
+- 12314 Chunky Aviator hat. Beige melange.
+- 12501 Chunky Aviator hat. Black.
+- 12519 Chunky Aviator hat. Blue lilac with 2 pompoms.
+- 12319 Chunky Aviator hat. Blue lilac.
+- 12522 Chunky Aviator hat. Bubble gum with 2 lemon pompoms.
+- 12520 Chunky Aviator hat. Calm blue with 2 matching pompoms
+- 12504 Chunky Aviator hat. Calm blue.
+- 12514 Chunky Aviator hat. Camel with 2 cream pompoms.
+- 12317 Chunky Aviator hat. Camel.
+- 10972 Chunky Aviator hat. Chocolate brown with 2 peach pompoms
+- 12509 Chunky Aviator hat. Cloudy sky.
+- 12508 Chunky Aviator hat. Cold pink.
+- 12315 Chunky Aviator hat. Cream
+- 12517 Chunky Aviator hat. Cream with 2 peach pompoms.
+- 12503 Chunky Aviator hat. Dark grey.
+- 10971 Chunky Aviator hat. Moss green with 2 peach pompoms
+- 12512 Chunky Aviator hat. Grey/ice blue/white melange
+- 12513 Chunky Aviator hat. Grey/mint/white melange
+- 12511 Chunky Aviator hat. Ice blue.
+- 12521 Chunky Aviator hat. Lemon with 2 bubble gum pompoms.
+- 12502 Chunky Aviator hat. Light grey.
+- 12507 Chunky Aviator hat. Light lilac blush.
+- 12516 Chunky Aviator hat. Light peach 2 pompoms.
+- 12312 Chunky Aviator hat. Lilac
+- 12500 Chunky Aviator hat. Lilac blush.
+- 10970 Chunky Aviator hat. Lilac with 2 mint pompoms
+- 12318 Chunky Aviator hat. Mint/lilac
+- 10955 Chunky Aviator hat. Orange with 2 purple pompoms
+- 12510 Chunky Aviator hat. Pine green.
+- 12505 Chunky Aviator hat. Royal blue.
+- 12523 Chunky Aviator hat. White with 2 orchid pompoms.
+- 12506 Chunky Aviator hat. Yellow.
+- 9565 Lined Aviator hat. Aqua
+- 9566 Lined Aviator hat. Aqua with bubblegum pink
+- 9592 Lined Aviator hat. Beige melange
+- 10542 Lined Aviator hat. Beige Melange with 2 cream pompoms
+- 9586 Lined Aviator hat. Black
+- 9559 Lined Aviator hat. Blue Lilac
+- 9564 Lined Aviator hat. Bright mint
+- 9573 Lined Aviator hat. Bright yellow
+- 10533 Lined Aviator hat. Bubblegum and orange with 2 orange pompoms
+- 9567 Lined Aviator hat. Bubblegum pink
+- 10528 Lined Aviator hat. Bubblegum with 2 purple fur pompoms
+- 9569 Lined Aviator hat. Bubblegum with orange
+- 10529 Lined Aviator hat. Burgundy with 2 sky blue fur pompoms
+- 9554 Lined Aviator hat. Calm blue
+- 9472 Lined Aviator hat. Calm blue with navy
+- 9579 Lined Aviator hat. Camel with cream stripe
+- 9578 Lined Aviator hat. Chocolate
+- 9587 Lined Aviator hat. Cold pink
+- 10541 Lined Aviator hat. Cold pink and grey with 2 grey pompoms
+- 10540 Lined Aviator hat. Cold pink white melange with 2 white pompoms
+- 9591 Lined Aviator hat. Cold pink with light grey
+- 9593 Lined Aviator hat. Cold pink with white
+- 9581 Lined Aviator hat. Cream
+- 9584 Lined Aviator hat. Dark grey
+- 9577 Lined Aviator hat. Moss green
+- 12797 Lined Aviator hat. Grey-mint
+- 12793 Lined Aviator hat. Grey-mint melange/mint with 2 bright mint pom poms
+- 9563 Lined Aviator hat. Ice blue
+- 10532 Lined Aviator hat. Ice blue and white with 2 white fur pompoms
+- 9594 Lined Aviator hat. Ice blue with white
+- 9560 Lined Aviator hat. Jeans
+- 9576 Lined Aviator hat. Kelly green
+- 9574 Lined Aviator hat. Lemon (buttercup yellow)
+- 9583 Lined Aviator hat. Light grey
+- 9589 Lined Aviator hat. Light peach
+- 10548 Lined Aviator hat. Light Peach and peach with 2 peach pompom
+- 9558 Lined Aviator hat. Lilac
+- 10543 Lined Aviator hat. Lilac and mint with 2 mint pompoms
+- 9588 Lined Aviator hat. Lilac blush
+- 12795 Lined Aviator hat. Lilac melange with 2 lilac pom poms
+- 14963 Lined Aviator hat. Violet/aqua with 2 aqua pom poms
+- 14964 Lined Aviator hat. Cream/white with 2 white pom poms
+- 14965 Lined Aviator hat. Olive/bubble gum with 2 bubble gum pom poms
+- 9590 Lined Aviator hat. Lilac with light mint
+- 12794 Lined Aviator hat. Lilac-mint melange with bright mint pom poms
+- 9572 Lined Aviator hat. Mango
+- 10546 Lined Aviator hat. Mint and lilac with 2 lilac pompoms
+- 10531 Lined Aviator hat. Mint with 2 cold pink fur pompoms
+- 9570 Lined Aviator hat. Orange
+- 10547 Lined Aviator hat. Peach and pine green with 2 pine green pompoms
+- 9575 Lined Aviator hat. Pine green
+- 10530 Lined Aviator hat. Pine green with 2 peach fur pompoms
+- 9571 Lined Aviator hat. Red
+- 9555 Lined Aviator hat. Royal blue
+- 9561 Lined Aviator hat. Sky blue
+- 12792 Lined Aviator hat. Sky Blue melange/navy with 2 navy pom poms
+- 9557 Lined Aviator hat. Violet
+- 9582 Lined Aviator hat. White
+- 10535 Lined Aviator hat. White with pine green fur pompom
+- 7916 Marshmallow hat. Cream with cream pompom
+- 8012 Marshmallow hat. Aqua with Bubblegum pink pompom . A special style created for Zhao Zhao Yi
+- 8047 Marshmallow hat. Aqua. Zhao Zhao Yi
+- 7926 Marshmallow hat. Black with a Silver fox pompom
+- 7925 Marshmallow hat. Bright mint with bright mint pompom
+- 7924 Marshmallow hat. Bright red with a pompom
+- 7917 Marshmallow hat. Bright yellow with bright yellow pompom
+- 7921 Marshmallow hat. Bubblegum pink with bubblegum pink pompom
+- 8056 Marshmallow hat. Camel with cream pompom. A special style created for Xin Zhi Lei
+- 7922 Marshmallow hat. Camel. Raccoon fur pompom
+- 7923 Marshmallow hat. Chocolate with chocolate pompom
+- 7928 Marshmallow hat. Cloudy sky with cream pompom
+- 7918 Marshmallow hat. Cloudy sky with navy pompom
+- 7877 Marshmallow hat. Cold pink with cold pink pompom
+- 8060 Marshmallow hat. Dark grey with 2 cloudy sky pompoms. A special style created for Qin Lan
+- 7876 Marshmallow hat. Fuchsia with fuchsia pompom
+- 7816 Marshmallow hat. Kelly green with fuchsia pompom (arctic fox)
+- 8053 Marshmallow hat. Light mint with matching pompom. A special style created for Qin Hai Lu
+- 8055 Marshmallow hat. Light mint. Qin Hai Lu
+- 7875 Marshmallow hat. Lilac blush with cold pink pompom
+- 7878 Marshmallow hat. Lilac with violet pompom
+- 7676 Marshmallow hat. Lilac. Blue lilac Arctic fox pompom.
+- 7915 Marshmallow hat. Mango with mango pompom
+- 7919 Marshmallow hat. Moss with raccoon pompom
+- 7882 Marshmallow hat. Navy with navy pompom
+- 7871 Marshmallow hat. Olive with olive pompom
+- 3836 Marshmallow hat. Orange. Style of Dilraba
+- 7879 Marshmallow hat. Pine green with pine green pompom
+- 7880 Marshmallow hat. Purple with lilac pompom
+- 8253 Marshmallow hat. Red
+- 11201 Merino Aviator hat with fleece. Black
+- 11206 Merino Aviator hat with fleece. Brown
+- 11208 Merino Aviator hat with fleece. Dark grey
+- 11202 Merino Aviator hat with fleece. Deep blue
+- 11203 Merino Aviator hat with fleece. Green moss
+- 11205 Merino Aviator hat with fleece. Ice pink
+- 11200 Merino Aviator hat with fleece. Light grey
+- 11210 Merino Aviator hat with fleece. Oatmeal
+- 11204 Merino Aviator hat with fleece. Turquoise
+- 11144 Merino Aviator hat with fleece. White
+- 13373 Sailor’s hat. Light grey
+- 3683 Icelandic wool blanket. Rainbow pattern. Aurora Borealis colors. 100% wool
+- 6475 Marshmallow hat. Lilac. Arctic fox pompom.
+- 5803 “Konungur” cashmere blanket. Fishbone pattern. Vivid Yellow.
+- 6401 Marshmallow hat. Deep Purple.
+- 190 Akureyri cashmere blanket. Sky blue
+- 2230 Marshmallow mittens. Peach
+- 3825 Marshmallow hat. Kelly green.
+- 2144 Marshmallow hat. White.
+- 2118 Marshmallow hat. Olive. Raccoon pompom.
+- 1398 Tenderness angora hat. Lilac blush
+- 1375 Tenderness angora scarf. Nude
+- 3602 Tenderness angora hat. Nude
+- 1391 Tenderness angora hat. Pine green
+- 2151 Marshmallow hat. Bubble gum.
+- 5231 Roots beanie. Olive
+- 5296 Roots beanie. Lively forest.
+- 1378 Tenderness angora scarf. Cold pink
+- 2147 Marshmallow hat. Blue lilac
+- 5303 Roots beanie. Camel.
+- 5297 Roots beanie. Violet
+- 6321 Icelandic wool blanket. 100% wool. Striped. Cream/ Oatmeal/ Beige.
+- 6352 Icelandic wool blanket. 100% wool. Striped. Light grey/ Grey/ Cream.
+- 6353 Icelandic wool blanket. 100% wool. Striped. Mint/ Cream/ Oatmeal.
+- 6308 Icelandic wool blanket. Fishbone pattern. 100% wool. Mint.
+- 6292 Icelandic wool blanket. Fishbone pattern. 100% wool. Sky blue.
+- 5302 Roots beanie. Orchid
+- 3603 Tenderness angora hat. Cloudy sky
+- 5293 Roots beanie. Turquoise.
+- 3681 Icelandic wool blanket. Fishbone pattern. Dark grey. 100% wool
+- 6246 Akureyri cashmere blanket. Cream Oatmeal Chocolate.
+- 6255 Akureyri cashmere blanket. Cream/Grey/ Dark grey.
+- 192 Akureyri cashmere blanket. Dark grey
+- 5488 Icelandic wool blanket. Aurora Borealis. Shades of grey.
+- 6243 Icelandic wool blanket. Aurora. Icy Sunset.
+- 6241 Icelandic wool blanket. Aurora. Snowy forest.
+- 5843 Icelandic wool blanket. Puffin. Dark Grey.
+- 5481 Icelandic wool blanket. Christmas Aurora Borealis.
+- 3606 Tenderness angora hat. Light Grey.
+- 5301 Roots beanie. Light Grey.
+- 3611 Tenderness angora hat. Deep blue
+- 2139 Marshmallow hat. Olive.
+- 3931 Tenderness angora hat. Brown
+- 3937 Tenderness angora hat. Lilac
+- 3942 Tenderness angora hat. Mustard
+- 3945 Tenderness angora hat. Cloudy sky
+- 3604 Tenderness angora hat. Sky blue
+- 191 Akureyri cashmere blanket. Light grey
+- 11222 Ragnar hat with fleece. Dark Grey
+- 1686 Ragnar hat without fleece. Dark Grey
+- 189 Akureyri cashmere blanket. Tender pink
+- 11220 Ragnar hat with fleece. Black
+- 1684 Ragnar hat without fleece. Black
+- 11213 Ragnar hat with fleece. Burgundy
+- 1677 Ragnar hat without fleece. Burgundy
+- 6217 XL double-faced scarf. 100%Icelandic Wool/Angora+Super fine merino wool. Kelly green/ Fuchsia
+- 1382 Tenderness angora scarf. Grey
+- 1711 Ragnar hat with pompom. White with white raccoon fur pompom
+- 6171 4 in 1. Reversible soft slouchy beanie. Lilac blush/ dusty lilac.
+- 7248 4 in 1. Reversible soft slouchy beanie. Ocean/ Mango.
+- 14265 4 in 1. Reversible soft slouchy beanie. Cold pink/light grey
+- 14266 4 in 1. Reversible soft slouchy beanie. Burgundy/salt and pepper
+- 14268 4 in 1. Reversible soft slouchy beanie. Pine green/lilac
+- 7247 4 in 1. Reversible soft slouchy beanie. Pine green/ Cold pink.
+- 6173 4 in 1. Reversible soft slouchy beanie. Purple burgundy/ violet.
+- 6169 4 in 1. Reversible soft slouchy beanie. Black/ grey.
+- 6170 4 in 1. Reversible soft slouchy beanie. Burgundy/navy.
+- 6066 4 in 1. Reversible soft slouchy beanie. White/gray.
+- 6168 4 in 1. Reversible soft slouchy beanie.Deep blue/ sky blue
+- 1370 Tenderness angora scarf. Deep blue
+- 1381 Tenderness angora scarf. White
+- 1047 Marshmallow hat. Moss Green. Raccoon pompom.
+- 1038 Marshmallow hat. Lemon. Silver fox pompom.
+- 6306 Icelandic wool blanket. Fishbone pattern. 100% wool. Chocolate.
+- 1046 Marshmallow hat. Lilac. Silver fox fur pompom.
+- 2153 Marshmallow hat. Black.
+- 1258 Marshmallow hat. Black. Silver fox pompom.
+- 2143 Marshmallow hat. Burgundy.
+- 1259 Marshmallow hat. Burgundy. Raccoon pompom.
+- 2138 Marshmallow hat. Cold pink. Cold pink pompom.
+- 2146 Marshmallow hat. Cream.
+- 1031 Marshmallow hat. Cream. Silver fox pompom.
+- 1045 Marshmallow hat. Salt and Pepper with Raccoon pompom. Qin Lan
+- 2150 Marshmallow hat. Moss Green.
+- 6468 Marshmallow hat. Bubblegum pink. Arctic fox pompom.
+- 6471 Marshmallow hat. Bubblegum with pink Arctic fox pompom.
+- 6470 Marshmallow hat. Cold pink. Arctic fox pompom.
+- 6469 Marshmallow hat. Fuchsia. Arctic fox pompom.
+- 6480 Marshmallow hat. Ice blue. Arctic fox pompom
+- 6472 Marshmallow hat. Jeans. Arctic fox pompom.
+- 6425 Marshmallow hat. Kelly green. Arctic fox pompom.
+- 8251 Marshmallow hat. Light Grey. Racoon pompom.
+- 6478 Marshmallow hat. Lilac blush. Arctic fox pompom.
+- 6479 Marshmallow hat. Mint. Arctic fox pompom.
+- 6473 Marshmallow hat. Orange. Arctic fox pompom.
+- 6477 Marshmallow hat. Peach. Arctic fox pompom.
+- 6474 Marshmallow hat. Purple. Arctic fox pompom.
+- 2154 Marshmallow hat. Icy mint.
+- 3839 Marshmallow hat. Bright yellow
+- 11216 Ragnar hat with fleece. Mango
+- 1678 Ragnar hat without fleece. Mango
+- 3838 Marshmallow hat. Bright Red
+- 5306 Roots beanie. Black.
+- 5304 Roots beanie. Bubblegum.
+- 6492 Roots beanie. Bubblegum. Arctic fox pompom.
+- 5299 Roots beanie. Camel. With raccoon pompom.
+- 6493 Roots beanie. Ice pink. Arctic fox pompom.
+- 14392 Roots beanie. Turquoise. Arctic fox pompom. Ice blue fur pom pom
+- 14398 Roots beanie. Blue lilac. With calm blue fur pom pom
+- 14400 Roots beanie. Cream. With raccoon pom pom
+- 14410 Roots beanie. Calm blue. With calm blue fur pom pom
+- 14411 Roots beanie. Lilac. With purple fur pom pom
+- 14412 Roots beanie. Cold pink. With fuchsia fur pom pom
+- 14413 Roots beanie. Beige melange. With cream fur pom pom
+- 14417 Roots beanie. Mint/grey melange
+- 14421 Roots beanie.Mint/lemon melange
+- 14426 Roots beanie. Lemon with two blue lilac pom poms
+- 14441 Roots beanie. Light mint/light lilac melange with lilac blush fur pom pom
+- 14456 Roots beanie. Bubble gum/orange melange.With 2 blue orange pom poms
+- 14468 Roots beanie. Purple/yellow melange .With 2 purple pom poms
+- 14474 Roots beanie. Beige melange. With 2 cream pom poms
+- 14475 Roots beanie.Tutquoise melange. With 2 aqua pom poms
+- 14491 Roots beanie. Calm blue/navy melange. With 2 matching pom poms
+- 14507 Roots beanie. Mint melange with matching pom pom
+- 14603 Roots beanie. Cream
+- 14607 Roots beanie. White
+- 14966 Roots beanie. Mint/lilac melange with 2 lilac pom poms
+- 14967 Roots beanie. Salt and pepper with white pom pom
+- 6490 Roots beanie. Mango Olive with matching pompom. A special style created for Dilraba
+- 6491 Roots beanie. Violet. Purple Arctic fox pompom.
+- 10552 Roots beanie. White with 2 ice blue pompoms
+- 6481 Roots beanie. White. Arctic fox pompom.
+- 5298 Roots beanie. Light peach
+- 5294 Roots beanie. Soft sky.
+- 6410 Marshmallow hat. Aqua. Zhao Zhao Yi
+- 6409 Marshmallow hat. Bright mint.
+- 14014 Marshmallow hat. Cold Pink
+- 14286 Marshmallow hat. Sky blue/navy melange
+- 14289 Marshmallow hat. Lemon with lilac pom pom
+- 14292 Marshmallow hat. Lilac blush with orchid pom pom
+- 14297 Marshmallow hat. Cold pink with grey Pom pom
+- 14299 Marshmallow hat. Peach with ocean green pom pom
+- 14301 Marshmallow hat. Lilac with violet pom pom
+- 14304 Marshmallow hat. Mint with peach pom pom
+- 14305 Marshmallow hat. Moss with peach pom pom
+- 14310 Marshmallow hat. Mint/grey melange with mint pom pom
+- 14313 Marshmallow hat. Pine green with peach pom pom
+- 14315 Marshmallow hat. Sky blue with cream pom pom
+- 14317 Marshmallow hat. Cloudy sky with matching pom pom
+- 14319 Marshmallow hat. Aqua with two bubble gum pom pom
+- 14321 Marshmallow hat. Olive with purple pom pom
+- 14324 Marshmallow hat. Cream with camel pom pom
+- 14329 Marshmallow hat. Bubble gum with aqua pom pom
+- 14330 Marshmallow hat. Light peach with light mint pom pom
+- 14331 Marshmallow hat. Light peach melange
+- 14337 Marshmallow hat. Light lilac blush with orchid pom pom
+- 14344 Marshmallow hat. Lilac/mint melange
+- 14347 Marshmallow hat. Sky blue/white melange
+- 14355 Marshmallow hat. Purple/yellow melange
+- 14364 Marshmallow hat. Neon pink
+- 14368 Marshmallow hat. Navy/sky blue melange
+- 14369 Marshmallow hat. Aqua melange
+- 14370 Marshmallow hat. Grey/cold beige melange
+- 14371 Marshmallow hat. Camel/cream melange
+- 14510 Marshmallow hat. Violet
+- 14537 Roots beanie. Violet/yellow melange
+- 14540 Roots beanie. Calm blue melange
+- 14542 Roots beanie. Lemon
+- 14544 Roots beanie. Beige melange
+- 14546 Roots beanie. Bright mint
+- 14576 Roots beanie. Cold pink
+- 14582 Roots beanie. White with white pom pom
+- 14585 Roots beanie. Cold pink with white pom pom
+- 14594 Roots beanie. Cream with 2 camel pompoms
+- 14654 Fluffy Kitty Hat. Arctic leopard lilac with mint
+- 14693 Fluffy Kitty Hat. Arctic leopard light mint light lilac
+- 14694 Fluffy Kitty Hat. Arctic leopard grey with cream
+- 14696 Fluffy Kitty Hat. Cream
+- 14715 Fluffy Kitty Hat. White
+- 14716 Fluffy Kitty Hat. Beige melange
+- 14717 Fluffy Kitty Hat. Peach
+- 14718 Fluffy Kitty Hat. Light peach melange
+- 14719 Fluffy Kitty Hat. Grey melange
+- 14720 Fluffy Kitty Hat. Lilac
+- 14757 Fluffy Kitty Hat. Arctic leopard with ice blue
+- 14874 Fluffy Kitty Hat. Camel
+- 6407 Marshmallow hat. Calm blue.
+- 3924 Marshmallow hat. Camel. Xin Zhi Lei
+- 6408 Marshmallow hat. Chocolate.
+- 6406 Marshmallow hat. Dark grey.
+- 6404 Marshmallow hat. Light peach.
+- 6403 Marshmallow hat. Lilac blush.
+- 3845 Marshmallow hat. Fuchsia
+- 3841 Marshmallow hat. Olive
+- 3843 Marshmallow hat. Ocean green
+- 2149 Marshmallow hat. Lemon.
+- 2145 Marshmallow hat. Navy blue.
+- 1039 Marshmallow hat. Navy blue. Silver fox pompom.
+- 2142 Marshmallow hat. Peach.
+- 1032 Marshmallow hat. Peach. Raccoon pompom.
+- 2117 Marshmallow hat. Red. Silver fox pompom.
+- 12931 Lía beanie. Boucle Alpaca. Camel
+- 12929 Lía beanie. Boucle Alpaca. Cream
+- 12932 Lía beanie. Boucle Alpaca. Light grey
+- 12930 Lía beanie. Boucle Alpaca. Lilac
+- 12935 Lía beanie. Boucle Alpaca. Pine green
+- 12928 Lía beanie. Boucle Alpaca. White
+- 12933 Lía beanie. Boucle Alpaca. Calm Blue
+- 12934 Lía beanie. Boucle Alpaca. Jeans
+- 12925 Lía beanie. Brushed Alpaca. Calm Blue
+- 12917 Lía beanie. Brushed Alpaca. Cream
+- 12920 Lía beanie. Brushed Alpaca. Deep navy
+- 12923 Lía beanie. Brushed Alpaca. Ice Blue
+- 12926 Lía beanie. Brushed Alpaca. Jeans
+- 12919 Lía beanie. Brushed Alpaca. Lilac
+- 12927 Lía beanie. Brushed Alpaca. Mint
+- 12918 Lía beanie. Brushed Alpaca. Peach
+- 12921 Lía beanie. Brushed Alpaca. Violet
+- 12846 Lía beanie. Brushed Alpaca. White.
+- 12922 Lía beanie. Brushed Alpaca. Orchid
+- 2124 Marshmallow hat. White. With a pompom
+- 11254 Marshmallow gloves. Icy mint
+- 11255 Marshmallow gloves. Lemon
+- 11256 Marshmallow gloves. Peach
+- 11252 Marshmallow gloves. White
+- 2237 Marshmallow mittens. White
+- 2236 Marshmallow mittens. Icy Mint
+- 2235 Marshmallow mittens. Cold Pink
+- 2234 Marshmallow mittens. Lilac
+- 2233 Marshmallow mittens. Bubblegum Pink
+- 2229 Marshmallow mittens. Light Peach
+- 2228 Marshmallow mittens. Cream
+- 2227 Marshmallow mittens. Lemon yellow
+- 2226 Marshmallow mittens. Moss Green
+- 2225 Marshmallow mittens. Sky Blue
+- 3951 Tenderness mittens. Black
+- 4029 Tenderness mittens. Burgundy
+- 4014 Tenderness mittens. Cloudy Sky
+- 4025 Tenderness mittens. Cold Beige
+- 4022 Tenderness mittens. Cold Pink
+- 4009 Tenderness mittens. Charcoal
+- 4019 Tenderness mittens. Dark Lilac Blush
+- 4011 Tenderness mittens. Deep blue
+- 4012 Tenderness mittens. Forest Green Melange
+- 4031 Tenderness mittens. Grey
+- 4017 Tenderness mittens. Lilac
+- 4020 Tenderness mittens. Lilac Blush
+- 4028 Tenderness mittens. Pine green
+- 4027 Tenderness mittens. Mustard yellow
+- 4024 Tenderness mittens. Nude
+- 4023 Tenderness mittens. Peach Pink
+- 4013 Tenderness mittens. Pine Green
+- 4030 Tenderness mittens. Purple Burgundy
+- 4016 Tenderness mittens. Sky blue
+- 4032 Tenderness mittens. White
+- 2224 Marshmallow mittens. Burgundy
+- 2223 Marshmallow mittens. Navy
+- 2222 Marshmallow mittens. Light Grey
+- 2221 Marshmallow mittens. Dark grey
+- 2220 Marshmallow mittens. Black
+- 1710 Ragnar hat with pompom. Black night
+- 2018 Ragnar hat with pompom. Blue lagoon
+- 2947 Ragnar hat with raccoon fur pompom. Moss Green
+- 2946 Ragnar hat with raccoon fur pompom. Mango
+- 2937 Ragnar hat with raccoon fur pompom. Jeans.
+- 2951 Ragnar hat with raccoon fur pompom. White
+- 3607 Ragnar hat with raccoon fur pompom. Oatmeal
+- 2952 Ragnar hat with silver fox fur pompom. Black
+- 3608 Ragnar hat with silver fox fur pompom. Light grey
+- 2953 Ragnar hat with raccoon fur pompom. Burgundy
+- 3785 Ragnar hat with peach polar fox fur pompom. Lemon
+- 6504 Gudmundur hat. Arctic fox pompom. Kelly green.
+- 10889 Gudmundur hat. Black
+- 10947 Gudmundur hat. Brown
+- 10904 Gudmundur hat. Cloudy sky
+- 10910 Gudmundur hat. Dark grey
+- 10929 Gudmundur hat. Fuchsia
+- 10950 Gudmundur hat. Light brown
+- 10921 Gudmundur hat. Light grey
+- 10896 Gudmundur hat. Lilac
+- 10856 Gudmundur hat. Mint
+- 10940 Gudmundur hat. Moss
+- 10949 Gudmundur hat. Mystical blue
+- 10900 Gudmundur hat. Navy
+- 10951 Gudmundur hat. Oatmeal
+- 10925 Gudmundur hat. Purple burgundy
+- 10915 Gudmundur hat. Turquoise
+- 10954 Gudmundur hat. White
+- 3795 Ragnar hat with cold pink polar fox fur pompom. Orchid color
+- 2949 Ragnar hat with silver fox fur pompom. Deep blue
+- 2950 Ragnar hat with silver fox fur pompom. White
+- 2936 Ragnar hat with silver fox pompom. Jeans.
+- 2020 Ragnar hat with pompom. Salt and Pepper
+- 1704 Ragnar hat with pompom. Green Moss
+- 1703 Ragnar hat with pompom. Deep Blue
+- 1681 Ragnar hat without fleece. Turquoise
+- 11225 Ragnar hat with fleece. Rose
+- 11215 Ragnar hat with fleece. Deep blue
+- 11211 Ragnar hat with fleece. Oatmeal.
+- 1689 Ragnar hat without fleece. Rose
+- 7332 Ragnar hat without fleece. Deep blue.
+- 7347 Ragnar hat without fleece. Oatmeal.
+- 7345 Ragnar hat without fleece. Turquoise.
+- 11221 Ragnar hat with fleece. Salt and Pepper
+- 1685 Ragnar hat without fleece. Salt and Pepper
+- 10410 Greenland cashmere beanie. Black
+- 10473 Greenland cashmere beanie. Black with black fur pompom
+- 10414 Greenland cashmere beanie. Brown
+- 10476 Greenland cashmere beanie. Brown with chocolate fur pompom
+- 14242 Greenland cashmere beanie. Dark grey with matching pompom
+- 14256 Greenland cashmere beanie. Orchid with matching pom pom.
+- 10415 Greenland cashmere beanie. Burgundy
+- 10477 Greenland cashmere beanie. Burgundy with burgundy fur pompom
+- 10411 Greenland cashmere beanie. Calm Blue
+- 10474 Greenland cashmere beanie. Calm blue with calm blue fur pompom
+- 10413 Greenland cashmere beanie. Ice Blue
+- 10475 Greenland cashmere beanie. Ice blue with ice blue fur pompom
+- 10416 Greenland cashmere beanie. Light grey
+- 10478 Greenland cashmere beanie. Light grey with light grey fur pompom
+- 10405 Greenland cashmere beanie. Light mint
+- 10480 Greenland cashmere beanie. Light Mint with light mint fur pompom
+- 10421 Greenland cashmere beanie. Light peach
+- 14253 Greenland cashmere beanie. Red.
+- 14254 Greenland cashmere beanie. Camel.
+- 14255 Greenland cashmere beanie. Pine green.
+- 10446 Greenland cashmere beanie. Light peach with peach raccoon fur pompom
+- 10408 Greenland cashmere beanie. Mint
+- 10479 Greenland cashmere beanie. Mint with raccoon turquoise fur pompom
+- 10418 Greenland cashmere beanie. Oatmeal
+- 10419 Greenland cashmere beanie. Emerald
+- 10482 Greenland cashmere beanie. Emerald with raccoon pompom
+- 10417 Greenland cashmere beanie. Royal Blue
+- 14986 Greenland cashmere beanie. Red
+- 14987 Greenland cashmere beanie. Camel
+- 14988 Greenland cashmere beanie. Pine green
+- 11224 Ragnar hat with fleece. Ice pink
+- 14796 Ragnar hat with fleece. Peach
+- 14797 Ragnar hat with fleece. Turquoise
+- 14799 Ragnar hat with fleece. Beige melange
+- 14801 Ragnar hat with fleece. Lilac
+- 14802 Ragnar hat with fleece. Light grey
+- 14804 Ragnar hat with fleece.Beige melange
+- 14807 Ragnar hat with fleece. Green moss
+- 14808 Ragnar hat with fleece.Deep blue
+- 14809 Ragnar hat with fleece. White
+- 14819 Ragnar scarf. Cold Pink
+- 14832 Ragnar scarf. Green moss
+- 14833 Ragnar scarf. Lemon
+- 14834 Ragnar scarf. White
+- 14857 Ragnar scarf. Orchid
+- 14858 Ragnar scarf. Light peach
+- 14859 Ragnar scarf. Peach
+- 14860 Ragnar scarf. Mango
+- 14861 Ragnar scarf. Oatmeal
+- 14862 Ragnar scarf. Light grey
+- 14863 Ragnar scarf. Salt and pepper
+- 14864 Ragnar scarf. Lighter purple
+- 14865 Ragnar scarf. Deep blue
+- 14866 Ragnar scarf. Rose
+- 15446 Ragnar hat with fleece. Dark purple
+- 15448 Ragnar hat without fleece. Dark purple
+- 1688 Ragnar hat without fleece. Ice pink
+- 11223 Ragnar hat with fleece. Light grey
+- 14556 Ragnar hat with fleece. Dark purple with purple pom pom
+- 14561 Ragnar hat with fleece. Black with black pom pom
+- 14562 Ragnar hat with fleece. Jeans with navy fur pom pom
+- 14563 Ragnar hat with fleece. Deep blue with navy pom pom
+- 14564 Ragnar hat with fleece. Chocolate with chocolate pom pom
+- 14565 Ragnar hat with fleece. Oatmeal with cream pom pom
+- 14566 Ragnar hat with fleece. Light grey with matching fur pom pom
+- 14567 Ragnar hat with fleece. White with matching fur pom pom
+- 14568 Ragnar hat with fleece. Orchid with blue lilac pom pom
+- 14569 Ragnar hat with fleece. Rose with pine green pom pom
+- 14570 Ragnar hat with fleece. Ligh peach with matching pom pom
+- 1687 Ragnar hat without fleece. Light grey
+- 11219 Ragnar hat with fleece. Jeans
+- 1682 Ragnar hat without fleece. Jeans
+- 1645 Ragnar hat. White
+- 1369 Tenderness angora scarf. Burgundy
+- 1397 Tenderness angora hat. Cold beige
+- 1374 Tenderness angora scarf. Cold beige
+- 1061 Tenderness angora hat. Cold pink.
+- 3889 Tenderness headband. Nude
+- 1368 Tenderness angora scarf. Forest green
+- 1371 Tenderness angora scarf. Navy blue
+- 1379 Tenderness angora scarf. Peach pink
+- 1367 Tenderness angora scarf. Pine green
+- 1364 Tenderness angora scarf. Sky blue
+- 7348 Tenderness angora hat. Bright red.
+- 3947 Tenderness angora hat. Dark lilac blush
+- 7351 Tenderness angora hat. Fuchsia.
+- 11553 Tenderness angora scarf. Beige Melange
+- 11073 Tenderness angora scarf. Bright red.
+- 11554 Tenderness angora scarf. Brown
+- 11557 Tenderness angora scarf. Lilac
+- 11558 Tenderness angora scarf. Mango
+- 11559 Tenderness angora scarf. Mustard
+- 11560 Tenderness angora scarf. Ocean Green
+- 11561 Tenderness angora scarf. Purple Burgundy
+- 11562 Tenderness angora scarf. Red
+- 11563 Tenderness angora scarf. Salt & Pepper
+- 2403 Akureyri cashmere blanket. Light grey with white and charcoal grey stripes
+- 2407 Akureyri cashmere blanket. Light Pink with white and light grey stripes
+- 2406 Akureyri cashmere blanket. Sky blue with white and navy blue stripes
+- 6274 Icelandic wool blanket. Gradient. 100% wool. Black/ Grey/ Light grey.
+- 6279 Icelandic wool blanket. Gradient. 100% wool. Cream/ Mint/ Oatmeal.
+- 6287 Icelandic wool blanket. Gradient. 100% wool. Mint/ Ocean green/ Dark grey.
+- 6283 Icelandic wool blanket. Gradient. 100% wool. Sky blue/ Sapphire/ Dark grey.
+- 3588 Icelandic wool blanket. Gradient. Lemon/ Mango/ Olive. 100% wool
+- 6269 Icelandic wool blanket. Leaves. 100% wool. Iced coffee
+- 6256 Icelandic wool blanket. Leaves. 100% wool. Mint.
+- 4504 Icelandic wool blanket. Leaves. Moss green. 100% wool.
+- 3690 Icelandic wool blanket. Fishbone pattern. Light Grey. 100% wool
+- 1390 Tenderness angora hat with raccoon pompom. Forest Green (melange)
+- 1389 Tenderness angora hat with pompom. Cold pink
+- 1070 Tenderness angora hat. Burgundy
+- 1362 Tenderness angora scarf. Dark Lilac Blush
+- 1365 Tenderness angora scarf. Cloudy sky
+- 12789 Tenderness headband. Cold beige
+- 12786 Tenderness headband. Cold Pink
+- 13073 Tenderness headband. Grey
+- 12788 Tenderness headband. Lilac
+- 12791 Tenderness headband. Lilac Blush
+- 14969 Tenderness headband. Niagara
+- 14970 Tenderness headband. Pine green
+- 14971 Tenderness headband. Black
+- 14972 Tenderness headband. Ocean
+- 14973 Tenderness headband. Mustard
+- 14974 Tenderness headband. Deep blue
+- 14975 Tenderness headband. Fuchsia
+- 14976 Tenderness headband. Burgundy
+- 14977 Tenderness headband. Purple/burgundy
+- 14985 Tenderness headband. Sky Blue
+- 12787 Tenderness headband. Nude.
+- 12790 Tenderness headband. Peach
+- 2661 Tenderness headband. White
+- 13072 Tenderness headband. Light Grey
+- 4249 Polar fox fur pompom. Orange
+- 1400 Tenderness angora hat. Peach pink
+- 11041 Polar fox fur pompom. Blue lilac
+- 4291 Polar fox fur pompom. Bubblegum
+- 11052 Polar fox fur pompom. Cream
+- 11051 Polar fox fur pompom. Grapefruit
+- 11023 Polar fox fur pompom. Pale sky blue
+- 11031 Polar fox fur pompom. Peach
+- 4279 Polar fox fur pompom. White
+- 4280 Polar fox fur pompom. Mint
+- 5732 Tenderness angora hat. Black.
+- 11783 New tenderness angora hat. Burgundy.
+- 11777 New tenderness angora hat. Charcoal.
+- 11780 New tenderness angora hat. Cold Pink
+- 11779 New tenderness angora hat. Dark Lilac Blush.
+- 11782 New tenderness angora hat. Lilac.
+- 11778 New tenderness angora hat. Purple Burgundy.
+- 11774 New tenderness angora hat. White
+- 11787 New tenderness angora hat.Red.
+- 14631 New tenderness angora hat. Mustard
+- 14632 New tenderness angora hat. Cloudy sky
+- 14634 New tenderness angora hat. Sky blue
+- 14635 New tenderness angora hat. Nude
+- 14636 New tenderness angora hat. Grey
+- 14637 New tenderness angora hat. Black
+- 14640 New tenderness angora hat. Salt and pepper
+- 14641 New tenderness angora hat. Purple burgundy
+- 14642 New tenderness angora hat. Lilac blush
+- 14643 New tenderness angora hat. Pine green
+- 14644 New tenderness angora hat. Beige melange
+- 14729 Smooth Kitty beanie. Peach
+- 14730 Smooth Kitty beanie. Nude
+- 14732 Smooth Kitty beanie. White
+- 14735 Smooth Kitty beanie. Lilac
+- 14736 Smooth Kitty beanie. Pine green
+- 14737 Smooth Kitty beanie. Brown/black melange
+- 14738 Smooth Kitty beanie. Salt and pepper
+- 14739 Smooth Kitty beanie. Lilac melange
+- 14751 Smooth Kitty beanie. Deep blue
+- 14754 Smooth Kitty beanie. Cold pink melange
+- 14875 Smooth Kitty beanie. Cold pink
+- 15437 New tenderness angora hat. Sky blue melange
+- 8181 Tenderness angora hat. White
+- 14944 Tenderness angora hat. Beige melange
+- 14946 Tenderness angora hat. Salt and pepper
+- 14947 Tenderness angora hat. Nude
+- 14948 Tenderness angora hat. Ocean green
+- 14950 Tenderness angora hat. Peach
+- 14951 Tenderness angora hat. Khaki green
+- 14953 Tenderness angora hat. Pine green
+- 14955 Tenderness angora hat. Charcoal
+- 14956 Tenderness angora hat. Purple burgundy
+- 14957 Tenderness angora hat. Cold pink
+- 14958 Tenderness angora hat. Red
+- 14959 Tenderness angora hat. Lilac
+- 14960 Tenderness angora hat. Lilac blush
+- 14962 Tenderness angora hat. Cold beige
+- 4281 Polar fox fur pompom. Lilac
+- 3751 Tenderness angora hat. White. With a pompom
+- 7655 Tenderness angora hat. White. With a white pompom
+- 4282 Polar fox fur pompom. Light grey
+- 4237 Tenderness angora neckwarmer/transformer. Black
+- 4283 Polar fox fur pompom. Lemon
+- 4285 Polar fox fur pompom. Cold pink
+- 4236 Tenderness angora neckwarmer/transformer. Burgundy
+- 12532 Polar fox fur pompom. Cream
+- 4284 Polar fox fur pompom. Fuchsia
+- 4235 Tenderness angora neckwarmer/transformer. Cloudy Sky
+- 4286 Polar fox fur pompom. Chocolate
+- 4234 Tenderness angora neckwarmer/transformer. Cold beige
+- 4287 Polar fox fur pompom. Burgundy
+- 4233 Tenderness angora neckwarmer/transformer. Cold pink
+- 4232 Tenderness angora neckwarmer/transformer. Charcoal
+- 4289 Polar fox fur pompom. Black
+- 11056 Polar fox fur pompom. Cold pink with black tips
+- 11055 Polar fox fur pompom. Dark lilac
+- 11054 Polar fox fur pompom. Ice blue
+- 11057 Polar fox fur pompom. Pine green
+- 11058 Polar fox fur pompom. Purple
+- 11059 Polar fox fur pompom. Royal blue
+- 4231 Tenderness angora neckwarmer/transformer. Dark lilac blush
+- 4290 Raccoon fur pompom
+- 4230 Tenderness angora neckwarmer/transformer. Red
+- 4228 Tenderness angora neckwarmer/transformer. Grey
+- 4227 Tenderness angora neckwarmer/transformer. Lemon
+- 4226 Tenderness angora neckwarmer/transformer. Lilac
+- 4225 Tenderness angora neckwarmer/transformer. Mustard
+- 4243 Tenderness angora neckwarmer/transformer. Deep blue
+- 4242 Tenderness angora neckwarmer/transformer. Niagara blue
+- 4241 Tenderness angora neckwarmer/transformer. Nude
+- 4149 Tenderness angora neckwarmer/transformer. Bright Red
+- 4222 Tenderness angora neckwarmer/transformer. Sky Blue
+- 4224 Tenderness angora neckwarmer/transformer. Cold pink
+- 4239 Tenderness angora neckwarmer/transformer. White
+
+## No photo (1)
+
+On the shop without a picture; add one in WordPress.
+
+- Ragnar Gloves (#11094)

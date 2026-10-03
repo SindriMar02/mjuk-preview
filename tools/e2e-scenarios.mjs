@@ -186,7 +186,7 @@ try {
     const D = await handoff([w(one), w(hat)]);
     check(lines(D.cart) === `${hat.id}×1` && /no longer available/i.test(notices(D.page)), `taken off her shop (draft): left out and said (${lines(D.cart)})`);
     await restore.pop()(); }
-  { const hidden = 6048; const h = await glue('product', { id: hidden }); // her Explorer Hat, black: published but hidden from her catalogue
+  { const hidden = 7872; const h = await glue('product', { id: hidden }); // her Marshmallow hat, peach with peach pompom: published but hidden from her catalogue (the Explorer hats left the web shop, Q24)
     const V = await handoff([{ id: hidden, q: 1 }, w(one)]);
     check(h && h.status === 'publish' && lines(V.cart) === `${one.id}×1` && /no longer available/i.test(notices(V.page)), `a product she hides from her catalogue never goes in, even from a bag built by hand (${lines(V.cart)})`);
     const draft = 6049; const D2 = await handoff([{ id: draft, q: 1 }, w(one)]); // a draft of hers, untouched
@@ -233,10 +233,12 @@ try {
     const H = await handoff([{ id: spare.id, q: qty, p: price }]); return { H, r: await review(H.b, H.page, { country }) }; };
   await setProduct(spare.id, {});
   const cases = [
-    ['IS', 149.99, 'flat_rate', 15, 'Iceland under $150: flat $15 (pickup offered too)'], ['IS', 150, 'free_shipping', 0, 'Iceland from $150: free, chosen for her'],
+    // her answers, 2026-09-25: Iceland free from $100 (Q17), Norway on the European terms (Q2), free shipping
+    // ticked for her once the order qualifies (Q1)
+    ['IS', 99.99, 'flat_rate', 15, 'Iceland under $100: flat $15 (pickup offered too)'], ['IS', 100, 'free_shipping', 0, 'Iceland from $100: free, chosen for her'],
     ['DE', 149.99, 'flat_rate', 50, 'Germany under $150: $50'], ['DE', 150, 'free_shipping', 0, 'Germany from $150: free'],
     ['GB', 150, 'free_shipping', 0, 'UK from $150: free'], ['CH', 150, 'free_shipping', 0, 'Switzerland from $150: free'],
-    ['NO', 150, 'flat_rate', 50, 'Norway at $150: $50, because her EU zone leaves Norway out (for Anna)'], ['NO', 250, 'free_shipping', 0, 'Norway from $250: free, the everywhere-else rule'],
+    ['NO', 149.99, 'flat_rate', 50, 'Norway under $150: $50, on the European terms'], ['NO', 150, 'free_shipping', 0, 'Norway from $150: free, on the European terms'],
     ['US', 249.99, 'flat_rate', 50, 'USA under $250: $50'], ['US', 250, 'free_shipping', 0, 'USA from $250: free'],
     ['AU', 299.99, 'flat_rate', 70, 'Australia under $300: $70'], ['AU', 300, 'free_shipping', 0, 'Australia from $300: free'],
   ];
@@ -249,12 +251,12 @@ try {
     const pick = r2.values.length ? (await review(H.b, H.page, { country: 'IS' })).values.find(v => v.startsWith('local_pickup')) : '';
     const r3 = await review(H.b, H.page, { country: 'IS', method: pick }); const r4 = await review(H.b, H.page, { country: 'IS' });
     check(!!pick && r3.chosen === pick && r4.chosen === pick, `a shopper who picks pickup in Iceland keeps it when the form updates (${r3.chosen}, then ${r4.chosen})`); }
-  { const { H, r } = await ship(100, 'IS');
+  { const { H, r } = await ship(60, 'IS');
     const basket = (await H.b.follow(WOO + CART)).html; const key = (basket.match(/name="cart\[([a-f0-9]+)\]\[qty\]"/) || [])[1];
     await H.b.follow(WOO + CART, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({ [`cart[${key}][qty]`]: '2', update_cart: 'Update basket', 'woocommerce-cart-nonce': form(basket, 'woocommerce-cart-nonce'), _wp_http_referer: CART }) });
     const co = (await H.b.follow(WOO + '/checkout/')).html; const r2 = await review(H.b, co, { country: 'IS' });
-    check(r.chosen.startsWith('flat_rate') && r2.chosen.startsWith('free_shipping') && Math.abs(r2.total - 200) < 0.01, `raising the quantity in the basket past $150 switches Iceland to free shipping (${r.chosen} → ${r2.chosen}, $${r2.total})`); }
+    check(r.chosen.startsWith('flat_rate') && r2.chosen.startsWith('free_shipping') && Math.abs(r2.total - 120) < 0.01, `raising the quantity in the basket past $100 switches Iceland to free shipping (${r.chosen} → ${r2.chosen}, $${r2.total})`); }
   await restore.pop()();
 
   /* ════════════════════════════════════════════════════════════════════════ */
