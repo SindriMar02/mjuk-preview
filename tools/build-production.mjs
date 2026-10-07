@@ -21,7 +21,7 @@ import path from 'node:path';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const OUT = path.join(ROOT, 'dist');
-const SKIP = new Set(['tools', 'product-category', 'functions', 'dist', 'node_modules', '.git', '.github', '.wrangler', '.stale', 'README.md', 'PRODUCT.md', '_serve.cjs', '.dev.vars', '.gitignore', '.DS_Store', 'robots.txt']);
+const SKIP = new Set(['tools', 'product-category', 'functions', 'edge', 'wrangler.jsonc', 'dist', 'node_modules', '.git', '.github', '.wrangler', '.stale', 'README.md', 'PRODUCT.md', '_serve.cjs', '.dev.vars', '.gitignore', '.DS_Store', 'robots.txt']);
 const NOINDEX = new Set(['staff.html', 'product.html']);
 const ICONS = '<link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96.png" />\n<link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon-192.png" />\n<link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon.png" />';
 

@@ -495,7 +495,13 @@ async function restoreAll(snaps, made, run, startMax) {
   }
   let same = 0;
   // every field that was written down is compared (categories and photos by id, in order)
-  const norm = (k, v) => k === 'categories' || k === 'images' ? (v || []).map(x => x.id).join() : JSON.stringify(v);
+  // a description written back through wc/v3 is passed through WordPress's kses, which drops the ";"
+  // that closes an inline style ("font-weight: 400;" → "font-weight: 400"): her text is the same to
+  // every reader, so the comparison reads both sides the way kses would (seen 2026-10-07; a save
+  // in her own editor as an administrator is not filtered and keeps her text byte for byte)
+  // (kses also drops attributes it does not allow, such as the aria-level="1" a Google Docs paste leaves on <li>)
+  const kses = v => String(v == null ? '' : v).replace(/\s+aria-level="[^"]*"/g, '').replace(/style="([^"]*)"/g, (m, x) => `style="${x.replace(/;\s*(?=")|;\s*$/g, '').replace(/\s*;\s*/g, '; ').trim()}"`);
+  const norm = (k, v) => k === 'categories' || k === 'images' ? (v || []).map(x => x.id).join() : k === 'description' || k === 'short_description' ? kses(v) : JSON.stringify(v);
   for (const [id, s] of snaps) {
     const now = await api(`/wc/v3/products/${id}?_fields=${SNAP_FIELDS}`).catch(() => null);
     const off = now ? Object.keys(s).filter(k => k !== 'id' && norm(k, now[k]) !== norm(k, s[k])) : ['(unreadable)'];

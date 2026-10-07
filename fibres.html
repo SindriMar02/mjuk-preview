@@ -121,7 +121,7 @@
 <!-- POMPOM CHOOSER: opened when a plain hat goes in the bag -->
 <dialog class="pom" id="pom" aria-labelledby="pomName">
   <form method="dialog" class="pom__form" id="pomForm">
-    <button type="submit" value="cancel" class="pom__x" aria-label="Close">&times;</button>
+    <button type="button" value="cancel" class="pom__x" aria-label="Close" onclick="this.closest('dialog').close('cancel')">&times;</button>
     <div class="pom__hat">
       <img id="pomImg" src="" alt=""/>
       <div><div class="pom__name" id="pomName"></div><p class="pom__why" id="pomWhy"></p></div>

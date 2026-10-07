@@ -261,7 +261,7 @@ const why0 = p => {
   if (!['visible', 'catalog'].includes(p.catalog_visibility)) return 'hidden from her catalogue in WordPress';
   if (p.type !== 'simple') return `a ${p.type} product: the shop sells simple products (one product per size or colour)`;
   if (!String(p.name || '').trim()) return 'it has no name';
-  if (p.price === '' || p.price == null || !(+p.price >= 0)) return 'it has no price';
+  if (p.price === '' || p.price == null || !(+p.price > 0)) return 'it has no price (or a price of 0)';
   // its page lives at product/<slug>/; WordPress makes Icelandic letters plain, but a hand-typed
   // emoji or other script arrives percent-encoded and cannot be a folder name safely
   if (!/^[a-z0-9_-]+$/i.test(String(p.slug || ''))) return 'its web address (slug) has characters the shop cannot use: give it a plain one in WordPress';

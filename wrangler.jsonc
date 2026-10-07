@@ -9,8 +9,13 @@
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
-    // every request meets the router first: it decides storefront or WordPress
-    "run_worker_first": true,
+    // every page request meets the router first (storefront or WordPress); the build's own static
+    // files are served straight from the asset store, so a page view costs one Worker request, not
+    // ten (Workers Free is 100k requests a day, and past it the route fails for basket and checkout
+    // too; the launch doc asks for Workers Paid regardless)
+    // (exact names: a glob like "!/*.css" would also catch her /wp-content/…/style.css, which is not
+    // in the build and must reach the Worker to be fetched from her WordPress)
+    "run_worker_first": ["/*", "!/assets/*", "!/styles.css", "!/pages.css", "!/configurators.css", "!/app.js", "!/pages.js", "!/pdp.js", "!/configurators.js"],
     // exact files only, so /shop.html is served as is and /product/<slug>/ maps in the router
     "html_handling": "none",
     "not_found_handling": "none"
@@ -18,10 +23,32 @@
   "vars": { "CHECKOUT_ORIGIN": "https://mjukiceland.com" },
   // .com is a ROUTE: fetch() to the zone's own hostname then reaches her Hostinger origin.
   // .is has no origin: a CUSTOM DOMAIN (the Worker is the origin).
+  // Launch is two deploys (the .is custom domains need the .is zone Active, which is its own step):
+  //   wrangler deploy --env is     the Icelandic host first (no origin, nothing to break)
+  //   wrangler deploy --env com    then the .com routes: the storefront appears on mjukiceland.com
+  //   wrangler deploy              both, once both zones are Active (every later refresh deploy)
   "routes": [
     { "pattern": "mjukiceland.com/*", "zone_name": "mjukiceland.com" },
     { "pattern": "www.mjukiceland.com/*", "zone_name": "mjukiceland.com" },
     { "pattern": "mjukiceland.is", "custom_domain": true },
     { "pattern": "www.mjukiceland.is", "custom_domain": true }
-  ]
+  ],
+  "env": {
+    "is": {
+      "name": "mjuk-router",
+      "vars": { "CHECKOUT_ORIGIN": "https://mjukiceland.com" },
+      "routes": [
+        { "pattern": "mjukiceland.is", "custom_domain": true },
+        { "pattern": "www.mjukiceland.is", "custom_domain": true }
+      ]
+    },
+    "com": {
+      "name": "mjuk-router",
+      "vars": { "CHECKOUT_ORIGIN": "https://mjukiceland.com" },
+      "routes": [
+        { "pattern": "mjukiceland.com/*", "zone_name": "mjukiceland.com" },
+        { "pattern": "www.mjukiceland.com/*", "zone_name": "mjukiceland.com" }
+      ]
+    }
+  }
 }

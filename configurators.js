@@ -16,7 +16,6 @@
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const px = (u, w) => (u ? u + '?w=' + w + '&ssl=1' : '');
-  const usd = n => '$' + (n || 0).toLocaleString('en-US');
   const byHandle = {}; CM.all.forEach(p => (byHandle[p.h] = p));
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   /* a price that changes should be seen to change: a 220ms blur crossfade, the shell's ease */
@@ -25,18 +24,23 @@
 
   // the two languages (app.js): t() for a string, fmt() for one with {slots}
   const U = window.CMUI || {}, t = U.t || (x => x), fmt = U.fmt || ((x, v) => x.replace(/\{(\w+)\}/g, (m, k) => (k in v ? v[k] : m)));
+  // the shell's price format ($85.10, not $85.1); a bare fallback only where app.js did not load
+  const usd = U.usd || (n => '$' + (n || 0).toLocaleString('en-US', { minimumFractionDigits: (n || 0) % 1 ? 2 : 0, maximumFractionDigits: 2 }));
 
   /* ── the real pompoms, from her own catalogue: 25 photographed colours ── */
   // one typo on her live shop ("Grapefrui0") corrected here for the swatch label only
   const FIX = { Grapefrui0: 'Grapefruit' };
+  const COLOUR = 'colour:';   // tools/is.json "js:colour:<her colour name>" → the Icelandic colour
   // a pompom with no price in her shop is not offered: the chooser shows her price, never a stand-in (Codex 2026-09-26)
   // merino pompoms are heavier and go on merino beanies only; every other pompom suits every hat
   // (Anna, questions file 2026-09-25, Q7)
   const POMS = CM.all
-    .filter(p => /\bpom ?pom\b/i.test(p.t) && !/beanie|hat|aviator|cap\b/i.test(p.t) && p.img && p.img[0] && p.p > 0)
+    .filter(p => (p.tyk === 'pompoms' || /pompoms$/.test(p.fam || '') || /\bpom ?pom\b/i.test(p.t)) && !/beanie|hat|aviator|cap\b/i.test(p.t) && p.img && p.img[0] && p.p > 0 && !p.oos)
     .map(p => { const raw = p.t.replace(/^.*?pom ?pom\.?\s*/i, '').replace(/\.$/, '').trim() || 'Raccoon';
       const merino = p.fam === 'merino-pompoms' || /\bmerino\b/i.test(p.t);
-      return { h: p.h, name: FIX[raw] || raw, kind: merino ? 'Merino wool' : /raccoon/i.test(p.t) ? 'Raccoon' : 'Polar fox', merino, price: p.p, img: p.img[0] }; })
+      // the colour in the page's language (tools/is.json "colour:…"); her English where there is none
+      const name = t(COLOUR + (FIX[raw] || raw)).replace(COLOUR, '');
+      return { h: p.h, name, kind: merino ? 'Merino wool' : /raccoon/i.test(p.t) ? 'Raccoon' : /polar fox|fox/i.test(p.t + ' ' + (p.fam || '')) ? 'Polar fox' : 'Fur', merino, price: p.p, img: p.img[0] }; })
     .sort((a, b) => a.merino - b.merino || a.name.localeCompare(b.name));
   const BEANIE = new Set((CM.families || []).filter(f => /beanies?\b/i.test(f.name)).map(f => f.key));
   const fits = (s, hat) => !s.merino || (!!hat && hat.mat === 'merino' && BEANIE.has(hat.fam));   // beanies, never the aviators (Codex 2026-10-03)
@@ -46,6 +50,7 @@
   /* ════════════════════ 1 · POMPOM CHOOSER ════════════════════ */
   const dlg = $('#pom');
   if (dlg && POMS.length) {
+    window.CMPomReady = true;   // app.js: a plain hat's button opens this; without it, the button adds the hat
     dlg.setAttribute('data-lenis-prevent', '');   // the wheel scrolls this dialog, not the page behind it (Lenis would swallow it)
     const grid = $('#pomGrid'), img = $('#pomImg'), name = $('#pomName'), total = $('#pomTotal'),
           add = $('#pomAdd'), slots = $$('.pom__slot', dlg), why = $('#pomWhy');
@@ -87,11 +92,13 @@
     });
 
     const open = h => {
+      if (window.CMBag && window.CMBag.room && window.CMBag.room(h.h) < 1) { window.CMBag.add(h.h, '', null, null); return; } // already at the limit: the drawer says so
+      dlg.returnValue = '';   // Escape, the X and the Android back button close with nothing, never with last time's "add"
       hat = h; count = 0; active = 0; chosen = [null, null];
       $$('.sw', grid).forEach(b => { b.hidden = !fits(POMS[+b.dataset.i], h); });
       // one price if they all cost the same, otherwise the range: the catalogue has $29 pompoms and a $32 one
       const ps = [...new Set(POMS.filter(s => fits(s, h)).map(s => s.price))].sort((a, b) => a - b);
-      const pomPrice = ps.length === 1 ? usd(ps[0]) : `${usd(ps[0])} to ${usd(ps[ps.length - 1])}`;
+      const pomPrice = ps.length === 0 ? '' : ps.length === 1 ? usd(ps[0]) : fmt('{a} to {b}', { a: usd(ps[0]), b: usd(ps[ps.length - 1]) });
       $$('input[name="n"]', dlg).forEach(r => (r.checked = r.value === '0'));
       img.src = px(h.img[0], 300); img.alt = h.t; name.textContent = h.t;
       if (why) why.innerHTML = fmt(POMS.some(s => s.merino) && !POMS.every(s => fits(s, h))
@@ -103,7 +110,8 @@
     };
 
     dlg.addEventListener('close', () => {
-      if (dlg.returnValue !== 'add' || !hat || !window.CMBag) return;
+      const add = dlg.returnValue === 'add'; dlg.returnValue = '';
+      if (!add || !hat || !window.CMBag) return;
       const picks = chosen.slice(0, count).filter(Boolean);
       const extra = picks.length ? {
         k: picks.map(s => s.h).join('+'),
@@ -174,7 +182,7 @@
       const key = v('fabric'); if (key === shownFabric) return; shownFabric = key;
       const L = blankets(key), many = new Set(L.map(p => p.fam)).size > 1;
       sw.innerHTML = L.map((p, i) => `<label class="csw" title="${p.t.replace(/"/g, '&quot;')}"><input type="radio" name="colour" value="${p.id}"${i ? '' : ' checked'}>
-        <span class="csw__im"><img src="${px(p.img[0], 160)}" alt="" loading="lazy"/></span><span class="csw__n">${short((many ? famShort[p.fam] + ' · ' : '') + colourName(p))}</span></label>`).join('');
+        <span class="csw__im"><img src="${px(p.img[0], 160)}" alt="" loading="lazy"/></span><span class="csw__n">${escA(short((many ? famShort[p.fam] + ' · ' : '') + colourName(p)))}</span></label>`).join('');
       sw.hidden = !L.length; ask.hidden = !!L.length;
     };
     /* only her rows: an option with no row for the current choice is switched off, and a choice

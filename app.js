@@ -193,8 +193,23 @@
   // the shipping line under the total comes from her shipping zones, like the product page's
   const bagNote = $('.bag__note'); if (bagNote && CM.ship && CM.ship.bag) bagNote.textContent = (isIS && CM.ship.bagIs) || CM.ship.bag;
   const MAX_EACH = 20, MAX_LINES = 40; // what functions/bag.js accepts, so a bag never fails there
+  /* A stored bag is browser data, and a #bag= link is anyone's: nothing in it is trusted. Each line
+     is rebuilt from the catalogue (name, image, price), the quantity is clamped, a pompom is kept only
+     when it is a real piece, and anything else is dropped. A line for a piece no longer in the catalogue
+     keeps its stored name and image for the "sold since" row, escaped where it meets HTML. */
+  const str = (v, n = 200) => (typeof v === 'string' ? v.slice(0, n) : '');
+  const clean = l => {
+    if (!l || typeof l !== 'object' || typeof l.h !== 'string' || !Number.isInteger(l.q) || l.q < 1) return null;
+    const p = byHandle[l.h];
+    const pompoms = (l.x && Array.isArray(l.x.pompoms) ? l.x.pompoms : []).filter(pm => pm && typeof pm.h === 'string' && byHandle[pm.h]).slice(0, 2)
+      .map(pm => ({ h: pm.h, name: str(pm.name, 60) || byHandle[pm.h].t }));
+    const x = l.x && typeof l.x === 'object' ? { k: str(l.x.k, 120), label: str(l.x.label, 160), price: +l.x.price > 0 ? +l.x.price : 0, pompoms } : null;
+    const h = l.h.slice(0, 160);
+    return { k: str(l.k, 300) || h + '|' + str(l.s, 40) + (x ? '|' + x.k : ''), h, t: p ? p.t : str(l.t, 160), s: str(l.s, 40),
+      p: p ? p.p + (x ? x.price : 0) : +l.p > 0 ? +l.p : 0, img: p ? (p.img && p.img[0]) || '' : str(l.img, 400), q: Math.min(l.q, MAX_EACH), x };
+  };
   const load = () => { try { const saved = JSON.parse(localStorage.getItem('mjuk_bag') || '[]');
-    return Array.isArray(saved) ? saved.filter(l => l && typeof l.h === 'string' && Number.isInteger(l.q) && l.q > 0) : []; } catch (e) { return []; } };
+    return Array.isArray(saved) ? saved.map(clean).filter(Boolean).slice(0, MAX_LINES) : []; } catch (e) { return []; } };
   let lines = load();
   const save = () => { try { localStorage.setItem('mjuk_bag', JSON.stringify(lines)); } catch (e) {} };
   const keep = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} };
@@ -255,10 +270,23 @@
       if (left[l.h] < 1) { trimmed.push(p.t); return false; }
       if (l.q > left[l.h]) { trimmed.push(p.t); l.q = left[l.h]; }
       left[l.h] -= l.q; return true; });
+    // then the pompoms: a line whose pompoms are no longer on the shelf in that number is trimmed, or dropped
+    lines = lines.filter(l => { const ps = poms(l); if (!ps.length || !pomsLive(l)) return true;
+      const need = {}; ps.forEach(pm => { need[pm.h] = (need[pm.h] || 0) + 1; });
+      const room = Math.min(...Object.keys(need).map(h => { const p = byHandle[h]; if (!(p.q > 0)) return MAX_EACH;
+        if (!(h in left)) left[h] = p.q; return Math.floor(left[h] / need[h]); }));
+      if (room < 1) { trimmed.push(ps.map(pm => byHandle[pm.h].t).join(', ')); return false; }
+      if (l.q > room) { trimmed.push(ps.map(pm => byHandle[pm.h].t).join(', ')); l.q = room; }
+      Object.keys(need).forEach(h => { if (h in left) left[h] -= need[h] * l.q; }); return true; });
     if (trimmed.length) { save(); notices.push(fmt('Fewer can be ordered now of {names}, so your bag holds what can be.', { names: [...new Set(trimmed)].join(', ') })); } }
+  /* Prices are today's. When hers changed since a piece went in, the drawer says so once. */
+  { const changed = lines.filter(l => live(l) && Math.abs(l.p - priceOf(l)) >= 0.005).map(l => { const was = l.p; l.p = priceOf(l); return { t: l.t, was }; });
+    if (changed.length) { save(); notices.push(fmt('The price of {names} has changed since you added it; the bag shows today\'s prices.', { names: [...new Set(changed.map(c => c.t))].join(', ') })); } }
   /* A bag that went to checkout may have been ordered. The link back from her order-received page
      (?ordered=1) empties it; otherwise the drawer asks, for a day. */
-  if (new URLSearchParams(location.search).get('ordered') === '1') { lines = []; save(); keep('mjuk_bag_out', null); }
+  if (new URLSearchParams(location.search).get('ordered') === '1') { lines = []; save(); keep('mjuk_bag_out', null);
+    // read once: a reload, or a bag filled after coming back, must not be emptied again
+    const u = new URL(location.href); u.searchParams.delete('ordered'); history.replaceState(history.state, '', u.pathname + (u.search || '') + u.hash); }
   const wentOut = () => { const t = +kept('mjuk_bag_out'); return t && Date.now() - t < 864e5 ? new Date(t) : null; };
   const bagN = () => lines.filter(live).reduce((n, l) => n + l.q, 0);
   const bagSum = () => lines.filter(live).reduce((n, l) => n + l.q * priceOf(l), 0);
@@ -283,15 +311,15 @@
     bagItems.innerHTML = top + (!lines.length
       ? `<p class="bag__empty">${t('Your bag is empty.')}<br>${t('Add any piece to it.')}</p>`
       : lines.map((l, i) => live(l) ? `<div class="bag__it">
-          <div class="bag__im"><img src="${px(l.img, 240)}" alt="${esc(l.t)}"/></div>
+          <div class="bag__im"><img src="${esc(px(l.img, 240))}" alt="${esc(l.t)}"/></div>
           <div>
             <div class="bag__n">${html(l.t)}</div>
-            ${l.s ? `<div class="bag__sz">Size ${html(l.s)}</div>` : ''}
+            ${l.s ? `<div class="bag__sz">${html(fmt('Size {s}', { s: l.s }))}</div>` : ''}
             ${l.x ? `<div class="bag__x2">${html(pomLabel(l))}</div>` : ''}
             <div class="bag__qty">
               <button data-q="-1" data-i="${i}" aria-label="${t('Decrease quantity')}">−</button>
               <span>${l.q}</span>
-              <button data-q="1" data-i="${i}" aria-label="${roomFor(byHandle[l.h]) < 1 ? t('No more can be ordered online') : t('Increase quantity')}"${roomFor(byHandle[l.h]) < 1 ? ' disabled' : ''}>+</button>
+              <button data-q="1" data-i="${i}" aria-label="${lineRoom(l) < 1 ? t('No more can be ordered online') : t('Increase quantity')}"${lineRoom(l) < 1 ? ' disabled' : ''}>+</button>
             </div>
           </div>
           <div class="bag__right">
@@ -299,7 +327,7 @@
             <button class="bag__x" data-rm="${i}">${t('Remove')}</button>
           </div>
         </div>` : `<div class="bag__it bag__it--gone">
-          <div class="bag__im"><img src="${px(l.img, 240)}" alt="${esc(l.t)}"/></div>
+          <div class="bag__im"><img src="${esc(px(l.img, 240))}" alt="${esc(l.t)}"/></div>
           <div>
             <div class="bag__n">${html(l.t)}</div>
             ${l.x ? `<div class="bag__x2">${html(pomLabel(l))}</div>` : ''}
@@ -329,9 +357,21 @@
      carry). Woo's stock is still the final word at checkout, since this is build-time data. */
   const inBag = h => lines.filter(l => l.h === h).reduce((n, l) => n + l.q, 0);
   // never more than functions/bag.js accepts for one line, even when her stock is larger (Codex 2026-09-26)
-  const roomFor = p => (p.oos ? 0 : Math.min(p.q > 0 ? p.q : MAX_EACH, MAX_EACH) - inBag(p.h));
+  const shelf = p => (p.oos ? 0 : Math.min(p.q > 0 ? p.q : MAX_EACH, MAX_EACH));
+  // a pompom is a piece of its own with its own shelf: count every hat it is chosen for (audit 2026-10-07)
+  const pomInBag = h => lines.reduce((n, l) => n + poms(l).filter(pm => pm.h === h).length * l.q, 0);
+  const pomRoom = h => (byHandle[h] ? shelf(byHandle[h]) - pomInBag(h) : 0);
+  const roomFor = p => shelf(p) - inBag(p.h);
+  // what one more of this line needs: the hat and each of its pompoms (a pompom twice on one hat needs two)
+  const lineRoom = l => { const p = byHandle[l.h]; if (!p) return 0;
+    const need = {}; poms(l).forEach(pm => { need[pm.h] = (need[pm.h] || 0) + 1; });
+    return Math.min(roomFor(p), ...Object.keys(need).map(h => Math.floor(pomRoom(h) / need[h]))); };
   function addToBag(handle, size, btn, extra) {
     const p = byHandle[handle]; if (!p) return;
+    // the chosen pompoms must be on the shelf too (the same colour twice needs two)
+    const need = {}; ((extra && extra.pompoms) || []).forEach(pm => { need[pm.h] = (need[pm.h] || 0) + 1; });
+    const short = Object.keys(need).find(h => pomRoom(h) < need[h]);
+    if (short) { say(fmt('{name} is already in your bag, as many as can be ordered online.', { name: byHandle[short].t })); openBag(true); return; }
     if (roomFor(p) < 1) {
       // short enough for a card chip; the drawer opens on the piece to show where it is
       if (btn && !btn.dataset.was) { btn.dataset.was = btn.textContent; btn.textContent = t('In your bag');
@@ -352,11 +392,11 @@
   }
   document.addEventListener('click', e => {
     const sz = e.target.closest('.sz');
-    if (sz && !sz.disabled && !sz.classList.contains('pom-ask')) { e.preventDefault(); addToBag(sz.dataset.h, sz.dataset.s || '', sz); return; }
+    if (sz && !sz.disabled && (!sz.classList.contains('pom-ask') || !window.CMPomReady)) { e.preventDefault(); addToBag(sz.dataset.h, sz.dataset.s || '', sz); return; }
     if (e.target.closest('#bagBtn')) { openBag(true); return; }
     if (e.target.closest('#bagClose') || e.target.closest('#bagScrim')) { openBag(false); return; }
     const q = e.target.closest('[data-q]');
-    if (q) { const l = lines[+q.dataset.i]; if (l) { const p = byHandle[l.h]; if (+q.dataset.q > 0 && p && roomFor(p) < 1) return; notices = []; l.q += +q.dataset.q; if (l.q < 1) lines.splice(+q.dataset.i, 1); save(); renderBag(); } return; }
+    if (q) { const l = lines[+q.dataset.i]; if (l) { if (+q.dataset.q > 0 && lineRoom(l) < 1) return; notices = []; l.q += +q.dataset.q; if (l.q < 1) lines.splice(+q.dataset.i, 1); save(); renderBag(); } return; }
     const rm = e.target.closest('[data-rm]');
     if (rm) { notices = []; lines.splice(+rm.dataset.rm, 1); save(); renderBag(); return; }
     if (e.target.closest('[data-clear]')) { lines = []; notices = []; save(); keep('mjuk_bag_out', null); renderBag(); say(t('Your bag is empty.')); const c = $('#bagClose'); if (c) c.focus(); return; }
@@ -378,10 +418,12 @@
     if (!items.length) return;
     if (bagGo) { bagGo.disabled = true; bagGo.textContent = t('Opening checkout…'); }
     // only a host that runs functions/bag.js can take the bag; a static preview says so instead
-    fetch(ROOT + 'bag', { cache: 'no-store' }).then(r => r.status === 204).catch(() => false).then(ready => {
-      if (!ready) {
-        if (bagGo) bagGo.textContent = t('Go to checkout');
-        notices = [t('Checkout is not connected in this preview. On the live shop this button opens your WooCommerce checkout with this bag.')];
+    fetch(ROOT + 'bag', { cache: 'no-store' }).then(r => (r.status === 204 ? 'ready' : r.status === 404 || r.status === 405 ? 'preview' : 'down')).catch(() => 'down').then(state => {
+      if (state !== 'ready') {
+        if (bagGo) { bagGo.disabled = false; bagGo.textContent = t('Go to checkout'); }
+        notices = [state === 'preview'
+          ? t('Checkout is not connected in this preview. On the live shop this button opens your WooCommerce checkout with this bag.')
+          : t('The checkout could not be reached just now. Your bag is kept; please try again in a moment.')];
         renderBag(); say(notices[0]);
         return;
       }
@@ -409,8 +451,8 @@
     if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
     else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
   });
-  renderBag();
-  window.CMBag = { add: addToBag, open: openBag };
+  try { renderBag(); } catch (e) { lines = []; save(); try { renderBag(); } catch (e2) {} }
+  window.CMBag = { add: addToBag, open: openBag, room: h => (byHandle[h] ? roomFor(byHandle[h]) : 0) };
   // the card renderer and helpers, so inner pages draw the same cards as the front page
   window.CMUI = { prod, px, usd, byHandle, pick, catLabel, t, fmt, pieces };
 

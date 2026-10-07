@@ -10,6 +10,11 @@ name: Stock and prices from her shop
 
 on:
   workflow_dispatch:
+    inputs:
+      reason:
+        description: "What asked for this run (a WooCommerce webhook topic via the router's /sndr/refresh, or 'by hand')"
+        required: false
+        default: by hand
   # schedule:
   #   - cron: '17 */6 * * *'
 
@@ -49,6 +54,25 @@ jobs:
           # anything she can enter; GitHub emails the repository owner when a run fails
           node tools/build-products.mjs
           node tools/check-seo.mjs
+      # The live site is the Worker's copy of dist/, not this repository: a pull that only commits
+      # leaves mjukiceland.com showing yesterday's prices and "in stock" on a sold piece. So every
+      # change is built for launch and deployed, when the repository variable MJUK_DEPLOY is "1"
+      # (set by Sindri at launch, step 10 of _docs/MJUK-LAUNCH-ROUTING-2026-09-25.md) and the
+      # Cloudflare token is in the secrets. Before launch this step says so and does nothing.
+      - name: Launch build and deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          MJUK_DEPLOY: ${{ vars.MJUK_DEPLOY }}
+        run: |
+          if git diff --quiet -- assets/data.js assets/copy.js; then echo "Nothing changed."; exit 0; fi
+          if [ "$MJUK_DEPLOY" != "1" ]; then echo "::notice::Not deployed: MJUK_DEPLOY is not 1 (before launch)."; exit 0; fi
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then echo "::error::MJUK_DEPLOY is 1 but the Cloudflare token or account id is missing: the live site was NOT refreshed."; exit 1; fi
+          node tools/build-pages.mjs && node tools/build-is.mjs && node tools/build-products.mjs
+          node tools/check-seo.mjs
+          node tools/build-production.mjs
+          npx -y wrangler@4 deploy
+          echo "Deployed the refreshed storefront." >> "$GITHUB_STEP_SUMMARY"
       - name: Publish if anything changed
         run: |
           # staged first, so a report that is new (not yet in the repository) counts as a change too

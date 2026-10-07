@@ -49,12 +49,14 @@ export async function sign(items, secret, now = Date.now(), lang = '') {
 
 // GET /bag: 204 when this host can take a bag. The storefront asks first, so a static preview
 // (no functions) shows a sentence instead of an error page.
+// the checkout host must be a full https address (a bare "mjukiceland.com" would throw at the hand-off)
+const checkoutOrigin = env => { try { const u = new URL(env.CHECKOUT_ORIGIN || ''); return /^https?:$/.test(u.protocol) && u.host ? u : null; } catch (e) { return null; } };
 export function onRequestGet({ env }) {
-  return new Response(null, { status: env.BAG_SECRET && env.CHECKOUT_ORIGIN ? 204 : 503, headers: { 'Cache-Control': 'no-store' } });
+  return new Response(null, { status: env.BAG_SECRET && checkoutOrigin(env) ? 204 : 503, headers: { 'Cache-Control': 'no-store' } });
 }
 
 export async function onRequestPost({ request, env }) {
-  if (!env.BAG_SECRET || !env.CHECKOUT_ORIGIN) return new Response('Checkout is not configured.', { status: 503 });
+  if (!env.BAG_SECRET || !checkoutOrigin(env)) return new Response('Checkout is not configured.', { status: 503 });
   // a real bag (40 lines at most) is a few kB; anything far larger is refused before it is read
   // into memory and parsed (Codex 2026-09-26). The storefront posts a plain urlencoded form.
   const MAX_BODY = 16 * 1024;
@@ -69,7 +71,9 @@ export async function onRequestPost({ request, env }) {
   const items = form && readBag(form.get('bag'));
   if (!items) return new Response('That bag could not be read. Go back and try again.', { status: 400, headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
   const { payload, sig } = await sign(items, env.BAG_SECRET, Date.now(), form.get('lang') === 'is' ? 'is' : '');
-  const to = new URL('/', env.CHECKOUT_ORIGIN);
+  // the link must fit a request line on her host (the plugin reads up to 12,000 characters; servers allow ~8 kB of URL)
+  if (payload.length > 6000) return new Response('That bag is too large for one checkout. Go back, check out part of it, then the rest.', { status: 413, headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
+  const to = new URL('/', checkoutOrigin(env));
   to.searchParams.set('sndr_bag', payload);
   to.searchParams.set('sig', sig);
   return new Response(null, { status: 303, headers: { Location: to.href, 'Cache-Control': 'no-store' } });

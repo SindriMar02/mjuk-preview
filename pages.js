@@ -160,8 +160,12 @@
     // address, so old links and bag links keep working and there is one address per piece
     const pre = document.body.dataset.p, h = pre || Q.get('p');
     if (!pre && h && byHandle[h]) { location.replace(purl(byHandle[h]) + location.hash); return; }
-    const p = byHandle[h] || (CM.featuredNew && byHandle[CM.featuredNew[0]]) || CM.all[0];
-    if (!p) return;
+    const p = byHandle[h];
+    if (!p) { // unpublished since this page was built, or a mistyped address: say so, never show another piece
+      document.title = t('This piece is no longer here') + ' — MJÚK Iceland';
+      const main = document.querySelector('#pdp') || document.querySelector('main') || document.body, root = document.documentElement.dataset.root || '';
+      main.innerHTML = `<section class="pdp-gone" style="padding:12vh 6vw;max-width:40rem"><h1 style="font-size:1.6rem;margin:0 0 .6em">${t('This piece is no longer here')}</h1><p>${t('It may have sold, or been taken off the web shop.')} <a href="${root}shop.html">${t('See every piece')}</a></p></section>`;
+      return; }
     document.title = p.t + ' — MJÚK Iceland';
     const v = V.view(p);
     $('#crumb').innerHTML = v.crumb;

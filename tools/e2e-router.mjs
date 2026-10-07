@@ -41,6 +41,8 @@ const head = s => console.log(`\n── ${s}`);
 
 const require = createRequire('/Users/sindri/.npm-global/lib/node_modules/wrangler/package.json');
 const { unstable_dev } = require('wrangler');
+const http = require('node:http');
+const crypto = require('node:crypto');
 // the real wrangler.jsonc minus its live routes: with routes, wrangler dev rewrites every request's URL
 // to the first route's host, and the router could not tell the two hosts apart
 const CFG = path.join(ROOT, '.wrangler', 'rehearsal.jsonc');
@@ -48,9 +50,15 @@ fs.mkdirSync(path.dirname(CFG), { recursive: true });
 { const c = JSON.parse(fs.readFileSync(path.join(ROOT, 'wrangler.jsonc'), 'utf8').replace(/^\s*\/\/.*$/gm, ''));
   delete c.routes; c.main = path.join(ROOT, c.main); c.assets.directory = path.join(ROOT, c.assets.directory);
   fs.writeFileSync(CFG, JSON.stringify(c, null, 1)); }
+// a stand-in for GitHub's workflow_dispatch address: every call the router makes is written down
+const dispatched = [];
+const github = http.createServer((rq, rs) => { let b = ''; rq.on('data', c => (b += c)); rq.on('end', () => { dispatched.push({ auth: rq.headers.authorization, body: b }); rs.writeHead(204); rs.end(); }); });
+await new Promise(r => github.listen(0, '127.0.0.1', r));
+const REFRESH_SECRET = 'rehearsal-refresh-secret';
 const worker = await unstable_dev(path.join(ROOT, 'edge/router.js'), {
   config: CFG, port: PORT, ip: '127.0.0.1', logLevel: 'error', experimental: { disableExperimentalWarning: true },
-  vars: { ORIGIN: WOO, EN_HOST: `localhost:${PORT}`, IS_HOST: ISHOST, CHECKOUT_ORIGIN: SHOP, BAG_SECRET: DEV.BAG_SECRET },
+  vars: { ORIGIN: WOO, EN_HOST: `localhost:${PORT}`, IS_HOST: ISHOST, CHECKOUT_ORIGIN: SHOP, BAG_SECRET: DEV.BAG_SECRET,
+    REFRESH_SECRET, REFRESH_DISPATCH: `http://127.0.0.1:${github.address().port}/repos/x/y/actions/workflows/stock.yml/dispatches`, REFRESH_TOKEN: 'rehearsal-token' },
 });
 
 /* one shopper's browser on the one hostname: cookies kept, each hop visible */
@@ -89,9 +97,16 @@ try {
     check(r.status === 200 && route(r) === 'storefront' && h.includes('"@type":"WebSite"') && !/noindex/.test(h), `/ is the storefront's homepage, indexable (${r.status} ${route(r)})`); }
   { const r = await req(`${SHOP}/product/${one.h}/`); const h = await r.text();
     check(r.status === 200 && route(r) === 'storefront' && h.includes(`<link rel="canonical" href="https://mjukiceland.com/product/${one.h}/"`), `her product address /product/${one.h}/ is our page`); }
-  for (const p of ['/shop.html', '/fibres.html', '/assets/logo.png', '/pdp.js', '/sitemap.xml']) { const r = await req(SHOP + p); check(r.status === 200 && route(r) === 'storefront', `${p} → storefront (${r.status})`); }
+  for (const p of ['/shop.html', '/fibres.html', '/sitemap.xml']) { const r = await req(SHOP + p); check(r.status === 200 && route(r) === 'storefront', `${p} → storefront (${r.status})`); }
+  // the build's static files are served by the asset store before the Worker runs (wrangler.jsonc run_worker_first): no route header, one request fewer
+  for (const p of ['/assets/logo.png', '/pdp.js', '/styles.css']) { const r = await req(SHOP + p); check(r.status === 200 && !r.headers.get('x-mjuk-route'), `${p} → the asset store, before the Worker (${r.status}${r.headers.get('x-mjuk-route') ? ', ran through the Worker' : ''})`); }
   { const r = await req(SHOP + '/robots.txt'); const t = await r.text(); check(r.status === 200 && /Sitemap: https:\/\/mjukiceland\.com\/sitemap\.xml/.test(t) && !/^Disallow: \/\s*$/m.test(t), 'robots.txt is the production one, with the sitemap'); }
   { const r = await req(SHOP + '/?utm_source=newsletter&fbclid=x'); check(r.status === 200 && route(r) === 'storefront', 'the homepage with tracking tags stays ours'); }
+  // Google Ads auto-tagging adds gad_source=1 and gbraid; Instagram igshid; Google Shopping srsltid: none are WordPress's
+  { const r = await req(SHOP + '/?gclid=abc&gad_source=1&gbraid=x&igshid=y&srsltid=z&_gl=1'); check(r.status === 200 && route(r) === 'storefront', 'an ad click with gad_source/gbraid/igshid/srsltid lands on the storefront'); }
+  for (const q of ['?p=29', '?page_id=29', '?s=hat', '?preview=true&p=29', '?rest_route=/wp/v2/posts', '?feed=rss2']) {
+    const r = await req(SHOP + '/' + q); check(route(r) === 'wordpress:query', `the homepage with ${q} is WordPress's (${route(r)})`);
+  }
 
   head('route table: hers, Host unchanged');
   for (const [p, want] of [['/basket/', 200], ['/checkout/', null], ['/my-account/', 200], ['/wp-json/', 200], ['/wp-sitemap.xml', null], ['/wp-login.php', 200], ['/?s=hat', null], ['/?p=1', null]]) {
@@ -109,7 +124,9 @@ try {
     const r = await req(SHOP + p); check(route(r) === 'wordpress:action' && /no-store/.test(r.headers.get('cache-control') || ''), `${p} → her WordPress, uncached (${r.status} ${route(r)})`);
   }
   { const r = await req(SHOP + '/shop.html', { headers: { Cookie: 'wp_woocommerce_session_abc=1' } }); check(route(r) === 'storefront', 'a WooCommerce session cookie does not take the storefront away'); }
-  { const r = await req(SHOP + '/wp-content/themes/mjuk-checkout/style.css', { headers: { Cookie: 'woocommerce_items_in_cart=1' } }); check(route(r).startsWith('wordpress') && /no-store/.test(r.headers.get('cache-control') || ''), 'with a cart cookie, even her files are fetched uncached'); }
+  { const r = await req(SHOP + '/wp-content/themes/mjuk-checkout/style.css', { headers: { Cookie: 'woocommerce_items_in_cart=1' } }); check(route(r).startsWith('wordpress') && !/no-store/.test(r.headers.get('cache-control') || ''), 'with a cart cookie, her theme\'s static files are still cacheable (same for everyone)'); }
+  { const r = await req(SHOP + '/basket/', { headers: { Cookie: 'woocommerce_items_in_cart=1' } }); check(route(r).startsWith('wordpress') && /no-store/.test(r.headers.get('cache-control') || ''), 'with a cart cookie, the basket page is never cached'); }
+  { const r = await req(SHOP + '/shipping/', { headers: { Cookie: 'woocommerce_items_in_cart=1' } }); check(route(r).startsWith('wordpress') && /no-store/.test(r.headers.get('cache-control') || ''), 'with a cart cookie, her pages are fetched fresh (they may greet the shopper)'); }
 
   head('her old addresses → ours (301)');
   const cat = Object.entries(CATS).find(([, c]) => c.path.includes('/') && c.to.includes('family='));
@@ -123,7 +140,8 @@ try {
     const r = await req(SHOP + from); check(r.status === 301 && r.headers.get('location') === `https://${ISHOST}${to}`, `${from} → ${to} on the Icelandic host in one hop (${r.status} ${r.headers.get('location')})`);
   }
   { const r = await req(SHOP + '/product-category/no-such-category/'); check(route(r).startsWith('wordpress'), 'a category she no longer has: WordPress answers for it'); }
-  { const r = await req(`http://www.localhost:${PORT}/shop.html`, { headers: { Host: `www.localhost:${PORT}` } }).catch(() => null); if (r) check(r.status === 301, 'www. → the bare host'); }
+  { const r = await req(`http://www.localhost:${PORT}/shop.html?a=1`, { headers: { Host: `www.localhost:${PORT}` } }).catch(e => ({ status: 0, headers: new Headers(), error: e.message }));
+    check(r.status === 301 && /\/shop\.html\?a=1$/.test(r.headers.get('location') || ''), `www. → the bare host, path and query kept (${r.status} ${r.headers.get('location') || r.error})`); }
 
   head('mjukiceland.is (played by 127.0.0.1:8787)');
   { const r = await req(`http://${ISHOST}/`); const h = await r.text(); check(r.status === 200 && /<html lang="is"/.test(h) && h.includes('"url":"https://mjukiceland.is/"'), 'the Icelandic homepage at the root of its host, with its own site name'); }
@@ -185,7 +203,21 @@ try {
     check(d.res.status === 200 && /Dashboard/.test(d.html), `the dashboard opens through the router (${d.res.status})`);
     const s = await a.go(SHOP + '/shop.html'); check(route(s) === 'storefront', 'signed in, the storefront is still the storefront');
     const j = await a.go(SHOP + '/wp-json/wp/v2/types/product'); check(route(j).startsWith('wordpress') && j.status < 500, `wp-json answers (${j.status})`); }
+  head('her edits reach the site: WooCommerce webhook → /sndr/refresh → the stock workflow');
+  { const sign = body => crypto.createHmac('sha256', REFRESH_SECRET).update(body).digest('base64');
+    const post = (body, headers = {}) => req(SHOP + '/sndr/refresh', { method: 'POST', headers: { 'Content-Type': 'application/json', ...headers }, body });
+    let r = await req(SHOP + '/sndr/refresh'); check(r.status === 405, `GET /sndr/refresh is refused (${r.status})`);
+    r = await post('{"id":1}'); check(r.status === 401 && dispatched.length === 0, `an unsigned webhook is refused and dispatches nothing (${r.status})`);
+    r = await post('{"id":1}', { 'x-wc-webhook-signature': sign('{"id":2}') }); check(r.status === 401 && dispatched.length === 0, `a wrong signature is refused (${r.status})`);
+    r = await post('webhook_id=7', { 'x-wc-webhook-signature': sign('webhook_id=7') }); check(r.status === 204 && dispatched.length === 0, `WooCommerce's first ping is accepted, nothing to refresh (${r.status})`);
+    const body = JSON.stringify({ id: one.id, name: 'edited', stock_quantity: 3 });
+    r = await post(body, { 'x-wc-webhook-signature': sign(body), 'x-wc-webhook-topic': 'product.updated' });
+    check(r.status === 202 && dispatched.length === 1, `a signed product.updated asks GitHub for a refresh (${r.status}, ${dispatched.length} dispatch)`);
+    const d = dispatched[0] || {}; let j = {}; try { j = JSON.parse(d.body); } catch (e) {}
+    check(d.auth === 'Bearer rehearsal-token' && j.ref === 'main' && j.inputs && j.inputs.reason === 'product.updated', `the dispatch carries the token, the branch and the reason (${d.auth}, ${d.body})`);
+    r = await req(SHOP + '/sndr/refresh', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'x=1' }); check(r.status === 401, `a POST to /sndr/refresh never reaches her WordPress (${r.status})`); }
 } finally {
+  github.close();
   if (orderId) { await glue('order_set', { id: orderId, body: { status: 'cancelled' } }); await glue('order_delete', { id: orderId }); }
   const left = await glue('orders').catch(() => []);
   check(Array.isArray(left) && left.filter(id => !KEEP.has(id)).length === 0, `the rehearsal leaves no orders behind (${Array.isArray(left) ? left.filter(id => !KEEP.has(id)).length : '?'}${KEEP.size ? `, ${KEEP.size} already there kept` : ''})`);

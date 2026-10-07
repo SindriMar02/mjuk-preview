@@ -82,6 +82,9 @@ async function handoff(items, { lang = '', b = browser() } = {}) {
 
 /* the checkout's own AJAX: country and shipping choice → the review table WooCommerce draws */
 async function review(b, page, { country, method, postcode = '101' } = {}) {
+  // a hand-off that lands on the basket (a notice to read) carries no checkout nonce on WooCommerce 11
+  // (3.5 printed the checkout params on every page): the shopper goes on to the checkout, so does this
+  if (!param(page, 'update_order_review_nonce')) page = (await b.follow(WOO + '/checkout/')).html;
   const body = new URLSearchParams({ security: param(page, 'update_order_review_nonce'), payment_method: '', country, state: '', postcode, city: 'Town', address: 'Street 1', address_2: '',
     s_country: country, s_state: '', s_postcode: postcode, s_city: 'Town', s_address: 'Street 1', s_address_2: '', has_full_address: 'true',
     post_data: new URLSearchParams({ billing_country: country, billing_postcode: postcode }).toString() });
@@ -89,6 +92,7 @@ async function review(b, page, { country, method, postcode = '101' } = {}) {
   const r = await b.go(WOO + '/?wc-ajax=update_order_review', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body });
   const j = await r.json();
   const table = j.fragments && j.fragments['.woocommerce-checkout-review-order-table'] || '';
+  if (!table) console.error('  [review] no order table in the answer:', JSON.stringify({ result: j.result, reload: j.reload, messages: String(j.messages || '').replace(/<[^>]+>/g, ' ').trim().slice(0, 300), fragments: Object.keys(j.fragments || {}), form: String((j.fragments || {})['form.woocommerce-checkout'] || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 300) }));
   const inputs = [...table.matchAll(/<input[^>]*name="shipping_method\[0\]"[^>]*>/g)].map(m => m[0]);
   const values = inputs.map(t => (t.match(/value="([^"]+)"/) || [])[1]);
   const chosen = (inputs.find(t => /checked/.test(t) || /type="hidden"/.test(t)) || '').match(/value="([^"]+)"/);
@@ -129,7 +133,8 @@ try {
   check(info.theme === 'mjuk-checkout' && info.manage_stock === 'yes', `checkout theme on, stock managed (${info.theme}, ${info.manage_stock})`);
   if (TARGET === 'replica') check(info.gateways.join() === 'paypal,ppec_paypal', `her two PayPal gateways are offered, as on her shop (${info.gateways})`);
   if (TARGET === 'upgraded') {
-    check(/^8\.5\./.test(info.php) && info.woocommerce === '11.1.2' && info.wp === '7.1.2', 'the upgraded copy: WooCommerce 11.1.2 and WordPress 7.1.2 on PHP 8.5');
+    // the copy takes WordPress's own minor auto-updates (7.1.2 → 7.1.3 on 2026-10-07), as her site will
+    check(/^8\.5\./.test(info.php) && /^11\./.test(info.woocommerce) && /^7\.1\./.test(info.wp), `the upgraded copy: WooCommerce 11.x and WordPress 7.1.x on PHP 8.5 (${info.woocommerce}, ${info.wp}, ${info.php})`);
     check(['paypal', 'ppec_paypal'].every(g => info.gateways.includes(g)), `her two PayPal gateways survived the upgrade (${info.gateways})`);
   }
   const CART = new URL(info.cart).pathname, PAY = TARGET !== 'sandbox' ? 'paypal' : 'cod';

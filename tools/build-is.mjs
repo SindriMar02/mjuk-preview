@@ -63,6 +63,10 @@ for (const file of PAGES) {
   let en = fs.readFileSync(path.join(ROOT, file), 'utf8');
   // the shop's plain catalogue is her product names, written per language by tools/build-products.mjs
   en = en.replace(/\s*<!-- CATALOGUE -->[\s\S]*?<!-- \/CATALOGUE -->/, '');
+  // the same for the first row of cards tools/build-products.mjs embeds (her product names, English on both
+  // sites): they are not static page text, and build-products writes them back after this step. The
+  // data-static key goes too, so a grid left empty is rebuilt by pages.js rather than kept empty.
+  en = en.replace(/<!-- GRID -->[\s\S]*?<!-- \/GRID -->/, '').replace(/ data-static="[^"]*"/, '');
   // English page: hreflang in, the language switch becomes a link to its Icelandic twin
   // and its own canonical, on its production host (Codex 2026-09-26: the static pages had none)
   en = en.replace(/<link rel="alternate" hreflang[^>]*\/>\n/g, '').replace(/<link rel="canonical"[^>]*\/>\n/g, '')
