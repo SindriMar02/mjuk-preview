@@ -93,6 +93,14 @@ body.ready .load__mark{transform:translateY(-14px) scale(.985);opacity:.85;trans
 .nav__mid{display:flex;gap:26px;justify-self:start}
 .nav__mid a,.nav__link{font-family:var(--ff-m);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);transition:opacity .3s;opacity:.85}
 .nav__mid a:hover,.nav__link:hover{opacity:1}
+/* header links roll on hover (2026-10-09): the word slides up out of its line and the same word
+   rises in rust from below. CSS only, two text shadows on the one word, so no extra markup and
+   screen readers hear it once. Keyboard focus rolls it too. */
+.nav__mid a{display:inline-block;overflow:hidden;height:1.5em;line-height:1.5;opacity:1;color:transparent;
+  text-shadow:0 0 var(--ink),0 1.5em var(--accent);transition:text-shadow .55s var(--ease)}
+.nav__mid a:hover,.nav__mid a:focus-visible{text-shadow:0 -1.5em var(--ink),0 0 var(--accent)}
+@media(prefers-reduced-motion:reduce){.nav__mid a{transition-duration:.01s}}
+@media(forced-colors:active){.nav__mid a{color:LinkText;text-shadow:none}}
 .nav__end{display:flex;gap:20px;align-items:center;justify-self:end}
 /* ── Menu toggle, ported from sndr-studio: text roller + plus that spins to an X.
       GSAP drives the icon rotation and the label roll (see app.js). ── */
@@ -542,3 +550,19 @@ section{padding:clamp(70px,12vw,180px) 0;position:relative}
 @media(hover:hover){.sndr:hover .sndr__mark,.sndr:hover .sndr__studio{color:var(--accent)}}
 /* four street names like Skólavörðustígur 36 need a card's full width on a phone */
 @media(max-width:560px){.stores__grid{grid-template-columns:1fr}}
+
+/* ══ PAGE TO PAGE (2026-10-09, Sindri: elegant, easy, never lag) ══
+   Every page, home included: the header stays exactly where it is, the old page fades out quickly
+   and the new one settles in from 8px below. Opacity and transform on two snapshots only, under
+   0.4 s, so it runs on the compositor and never holds a click up. Browsers without cross-document
+   view transitions cut, as before; reduced motion cuts too. */
+@view-transition{navigation:auto}
+.nav{view-transition-name:mjuk-nav}
+::view-transition-group(mjuk-nav){animation-duration:0s}
+::view-transition-old(root){animation:vtOut .16s cubic-bezier(.4,0,1,1) both}
+::view-transition-new(root){animation:vtIn .34s cubic-bezier(.23,1,.32,1) .05s both}
+@keyframes vtOut{to{opacity:0}}
+@keyframes vtIn{from{opacity:0;transform:translateY(8px)}}
+@media (prefers-reduced-motion:reduce){@view-transition{navigation:none}}
+/* the home page's logo intro plays once per visit to the site, not every time she comes back to it */
+.intro-seen .load{display:none}

@@ -74,7 +74,7 @@
     return `<article class="prod rv">
       <div class="prod__im">
         <span class="prod__ix">${String(i + 1).padStart(2, '0')}</span>
-        <img class="main" src="${main}"${o.sizes ? ` srcset="${px(p.img[0], 380)} 380w, ${px(p.img[0], 620)} 620w, ${px(p.img[0], 940)} 940w" sizes="${o.sizes}"` : ''} alt="${esc(p.t)}" loading="${o.eager ? 'eager' : 'lazy'}"${o.eager ? ' fetchpriority="high"' : ''} decoding="async"/>
+        <img class="main" src="${main}"${o.sizes && p.img[0] ? ` srcset="${px(p.img[0], 380)} 380w, ${px(p.img[0], 620)} 620w, ${px(p.img[0], 940)} 940w" sizes="${o.sizes}"` : ''} alt="${esc(p.t)}" loading="${o.eager ? 'eager' : 'lazy'}"${o.eager ? ' fetchpriority="high"' : ''} decoding="async"/>
         <div class="prod__sizes">${sizes}</div>
       </div>
       <div class="prod__meta"><div><div class="prod__name">${esc(p.t)}</div><div class="prod__cat">(${catLabel(p)})</div></div>${price}</div>
@@ -1123,7 +1123,22 @@ void main() {
     heads.forEach(x => watch.observe(x, { childList: true, characterData: true, subtree: true }));
   }
 
-  const hold = document.body.dataset.page ? 0.05 : 2.5;
+  // the intro holds 2.5 s on the first visit only; coming back home is instant (head script in index.html)
+  const seen = document.documentElement.classList.contains('intro-seen');
+  try { sessionStorage.setItem('mjuk_intro', '1'); } catch (e) {}
+  const hold = document.body.dataset.page || seen ? 0.05 : 2.5;
+
+  /* Her pages are fetched the moment a link is hovered (or pressed on a phone), so the click finds
+     the page already there. Storefront pages only, never her WordPress pages, basket or checkout:
+     her host is shared and must not be hit by people just moving a mouse. Chrome and Edge; others ignore it. */
+  if (window.HTMLScriptElement && HTMLScriptElement.supports && HTMLScriptElement.supports('speculationrules')) {
+    const sr = document.createElement('script'); sr.type = 'speculationrules';
+    sr.textContent = JSON.stringify({ prefetch: [{ where: { and: [
+      // relative to the page's base, so the same rules hold on the preview's sub-folder and on her domain
+      { or: [{ href_matches: './' }, { href_matches: '*.html' }, { href_matches: '*.html\\?*' }, { href_matches: 'product/*' }, { href_matches: 'is/*' }] },
+      { not: { href_matches: 'assets/*' } }] }, eagerness: 'moderate' }] });
+    document.head.appendChild(sr);
+  }
   if (reduced || !hasGsap) boot();
   else gsap.delayedCall(hold, boot);               // hold on the glitch, then wipe
 })();

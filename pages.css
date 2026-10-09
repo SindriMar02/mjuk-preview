@@ -53,6 +53,14 @@ body[data-page] .bars{opacity:.18}
 .chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .chip small{margin-left:6px;color:var(--dim);letter-spacing:.02em}
 .chip[aria-pressed="true"] small{color:var(--faint)}
+.filt__sw{gap:10px}
+/* a colour is a swatch, never a word: a soft round of the knit's colour, a ring when chosen */
+.chip.sw{width:24px;height:24px;padding:0;border-radius:999px;border:0;background:var(--sw);
+  box-shadow:inset 0 0 0 1px rgba(23,18,26,.12),0 0 0 0 var(--bg),0 0 0 0 var(--ink);
+  transition:box-shadow .3s var(--ease),transform .3s var(--ease)}
+.chip.sw:hover{transform:scale(1.12)}
+.chip.sw[aria-pressed="true"]{background:var(--sw);box-shadow:inset 0 0 0 1px rgba(23,18,26,.12),0 0 0 3px var(--bg),0 0 0 4px var(--ink)}
+.chip.sw:focus-visible{outline:1px solid var(--accent);outline-offset:5px}
 .filt__end{margin-left:auto;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
 .filt__q{display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);padding-bottom:6px;min-width:200px}
 .filt__q input{flex:1;background:none;border:0;color:var(--ink);font-family:var(--ff-m);font-size:13px;letter-spacing:.02em}
@@ -158,10 +166,11 @@ body[data-page] .bars{opacity:.18}
   /* the filter grid's one column must not grow to the unwrapped rows' width */
   .filt{grid-template-columns:minmax(0,1fr)}
   .filt__row{min-width:0}
-  #fType,#fFam,#fFibre{width:100%;min-width:0;flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;
+  #fType,#fFam,#fFibre,#fCol{width:100%;min-width:0;flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;
     margin-right:calc(-1 * var(--pad));padding-right:var(--pad);padding-bottom:2px}
-  #fType::-webkit-scrollbar,#fFam::-webkit-scrollbar,#fFibre::-webkit-scrollbar{display:none}
-  #fType .chip,#fFam .chip,#fFibre .chip{flex:none}
+  #fType::-webkit-scrollbar,#fFam::-webkit-scrollbar,#fFibre::-webkit-scrollbar,#fCol::-webkit-scrollbar{display:none}
+  #fType .chip,#fFam .chip,#fFibre .chip,#fCol .chip{flex:none}
+  #fCol{padding:5px 0 5px 5px;margin-left:-5px}
 }
 .fib__mini{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:6px}
 .fib__mini .prod{width:auto}
@@ -251,9 +260,7 @@ body[data-page] .bars{opacity:.18}
    preloader) the old page and the new one cross-fade: opacity only, 200 ms, ease-out, the same curve
    both ways so the two always add up to one. Skipped on Back, Forward and reload (head script on each
    page) and with reduced motion. Browsers without cross-document view transitions just cut, as before. */
-@view-transition{navigation:auto}
-::view-transition-group(root){animation-duration:200ms;animation-timing-function:cubic-bezier(.23,1,.32,1)}
-@media (prefers-reduced-motion:reduce){@view-transition{navigation:none}}
+/* (moved to styles.css 2026-10-09 so the home page takes part too) */
 
 /* iOS Safari zooms the page when an input under 16px gets focus: touch devices get 16px in the shop's search and sort */
 @media (pointer:coarse){.filt__q input,.sel select{font-size:16px}.filt__q{min-width:min(100%,300px)}}

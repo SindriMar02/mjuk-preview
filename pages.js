@@ -61,10 +61,39 @@
 
   const shown = list => (list || []).filter(x => x.count);
 
+  /* Colour: her pieces carry no colour field, only the colour in the name ("Roots beanie. Mint/grey
+     melange. With 2 cream pom poms"). The part after the design name, up to "with", is read against
+     her own colour words (all 739 names checked 2026-10-09: 732 get at least one colour; two-tone
+     pieces count under both; a pompom's colour is not the piece's). A new word of hers that is not
+     listed simply leaves that piece out of the colour filter, never in a wrong one. */
+  const COL = [
+    ['white', '#f4f1ea', /\b(white|cream|snowy|ivory|polar)\b/, 'White'],
+    ['beige', '#d6c09f', /\b(beige|oatmeal|camel|nude|cappuc+ino|khaki|sand)\b/, 'Beige'],
+    ['brown', '#7a5238', /\b(brown|chocolate|coffee|mocha)\b/, 'Brown'],
+    ['grey', '#9b9a9d', /\b(gr[ae]y|silver|charcoal|cloudy|pepper)\b/, 'Grey'],
+    ['black', '#1c1a1d', /\bblack\b/, 'Black'],
+    ['pink', '#e9a2b6', /\b(pink|blush|bubble ?gum|rose|fuchsia)\b/, 'Pink'],
+    ['red', '#9e2333', /\b(red|burgundy)\b/, 'Red'],
+    ['orange', '#e9965c', /\b(orange|mango|peach|grapefruit|apricot)\b/, 'Orange'],
+    ['yellow', '#e8cd58', /\b(yellow|lemon|mustard|marigold|buttercup)\b/, 'Yellow'],
+    ['green', '#6e9a69', /\b(green|mint|pine|moss|olive|forest|kelly|emerald)\b/, 'Green'],
+    ['teal', '#4fb1ae', /\b(aqua|turquoise|tutquoise|lagoon)\b/, 'Teal'],
+    ['blue', '#4a6ea8', /\b(blue|navy|jeans|ocean|royal|sapphire|denim|sky)\b/, 'Blue'],
+    ['purple', '#9a83c3', /\b(lilac|purple|violet|orchid)\b/, 'Purple'],
+  ];
+  const colCache = new Map();
+  const coloursOf = p => {
+    if (colCache.has(p.h)) return colCache.get(p.h);
+    const n = String(p.t || '').toLowerCase(), d = n.indexOf('.');
+    const part = (d > 0 && d < n.length - 1 ? n.slice(d + 1) : n).split(/\bwith\b/)[0];
+    const out = COL.filter(c => c[2].test(part)).map(c => c[0]);
+    colCache.set(p.h, out); return out;
+  };
+
   /* ════════════════════════════ SHOP ════════════════════════════ */
   function shopPage() {
     const st = {
-      type: Q.get('type') || '', family: Q.get('family') || '', material: Q.get('material') || '',
+      type: Q.get('type') || '', family: Q.get('family') || '', material: Q.get('material') || '', colour: Q.get('colour') || '',
       sale: Q.get('sale') === '1', nw: Q.get('new') === '1', stock: Q.get('all') !== '1',
       sort: Q.get('sort') || 'featured', q: Q.get('q') || '', n: 24,
     };
@@ -76,20 +105,25 @@
     if (!GRP[st.type]) st.type = '';
     if (!FAM[st.family]) st.family = '';
     if (!MAT[st.material]) st.material = '';
+    if (!COL.some(c => c[0] === st.colour)) st.colour = '';
     if (st.family) st.type = FAM[st.family].group;   // a design always sits in its group
     // same as tools/build-products.mjs rowKey: a short fingerprint of which pieces, in which order
     const rowKey = list => { let h = 0x811c9dc5; for (const c of list.map(purl).join('|')) h = Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0; return h.toString(16); };
     const grid = $('#pgrid'), title = $('#shopTitle'), count = $('#shopCount'), more = $('#more'), empty = $('#pgEmpty');
     /* her groups, then (once a group is chosen) her designs in it, and her materials in her ranking */
-    const rows = { type: $('#fType'), family: $('#fFam'), material: $('#fFibre') };
+    const rows = { type: $('#fType'), family: $('#fFam'), material: $('#fFibre'), colour: $('#fCol') };
     const lists = {
       type: () => shown(CM.groups),
       family: () => st.type ? shown(CM.families).filter(f => f.group === st.type) : [],
       material: () => shown(CM.materials),
+      colour: () => COL.map(c => ({ key: c[0], hex: c[1], name: c[3], count: CM.all.filter(p => !p.oos && coloursOf(p).includes(c[0])).length })).filter(c => c.count),
     };
     const paintChips = key => {
       const L = lists[key](), host = rows[key];
-      host.innerHTML = L.map(c => `<button class="chip" type="button" data-v="${esc(c.key)}" aria-pressed="${st[key] === c.key}">${esc(nm(c))}<small>${c.count}</small></button>`).join('');
+      host.innerHTML = key === 'colour'
+        // swatches only, no names on screen (Sindri 2026-10-09); the name is there for screen readers
+        ? L.map(c => `<button class="chip sw" type="button" data-v="${esc(c.key)}" aria-pressed="${st[key] === c.key}" aria-label="${esc(t(c.name))}" style="--sw:${c.hex}"></button>`).join('')
+        : L.map(c => `<button class="chip" type="button" data-v="${esc(c.key)}" aria-pressed="${st[key] === c.key}">${esc(nm(c))}<small>${c.count}</small></button>`).join('');
       if (key === 'family') host.closest('.filt__row--fam').hidden = !L.length;
       // on a phone each row scrolls sideways: bring the chosen one into view
       const on = $('[aria-pressed="true"]', host);
@@ -118,7 +152,7 @@
     const list = () => {
       const q = st.q.toLowerCase();
       let L = CM.all.filter(p =>
-        (!st.type || p.tyk === st.type) && (!st.family || p.fam === st.family) && (!st.material || p.mat === st.material || (p.mx || []).includes(st.material)) &&
+        (!st.type || p.tyk === st.type) && (!st.family || p.fam === st.family) && (!st.material || p.mat === st.material || (p.mx || []).includes(st.material)) && (!st.colour || coloursOf(p).includes(st.colour)) &&
         (!st.sale || p.cp > 0) && (!st.nw || isNew(p)) && (!st.stock || !p.oos) && (!q || words(p).includes(q)));
       if (st.sort === 'low') L.sort((a, b) => a.p - b.p);
       else if (st.sort === 'high') L.sort((a, b) => b.p - a.p);
@@ -145,7 +179,7 @@
       grid.removeAttribute('data-wait'); grid.removeAttribute('data-static');   // filled: the space kept for it (pages.css) is no longer needed, and the built-in row is now just cards
       more.hidden = L.length <= st.n; empty.hidden = L.length > 0;
       const u = new URLSearchParams();
-      if (st.type) u.set('type', st.type); if (st.family) u.set('family', st.family); if (st.material) u.set('material', st.material);
+      if (st.type) u.set('type', st.type); if (st.family) u.set('family', st.family); if (st.material) u.set('material', st.material); if (st.colour) u.set('colour', st.colour);
       if (st.sale) u.set('sale', '1'); if (st.nw) u.set('new', '1');
       if (!st.stock) u.set('all', '1'); if (st.sort !== 'featured') u.set('sort', st.sort); if (st.q) u.set('q', st.q);
       history.replaceState({ ...(history.state || {}), n: st.n }, '', location.pathname + (u.toString() ? '?' + u : ''));
