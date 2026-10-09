@@ -489,5 +489,9 @@
  "js:colour:Pine green": "furugrænn",
  "js:colour:Purple": "fjólublár",
  "js:colour:Royal blue": "kóngablár",
- "js:colour:Raccoon": "þvottabjörn"
+ "js:colour:Raccoon": "þvottabjörn",
+ "The store at Laugavegur 23": "Búðin á Laugavegi 23",
+ "The outlet at Klapparst&iacute;gur 29": "Útsölubúðin á Klapparstíg 29",
+ "The store at Sk&oacute;lav&ouml;r&eth;ust&iacute;gur 36": "Búðin á Skólavörðustíg 36",
+ "The store at Sk&oacute;lav&ouml;r&eth;ust&iacute;gur 4": "Búðin á Skólavörðustíg 4"
 }

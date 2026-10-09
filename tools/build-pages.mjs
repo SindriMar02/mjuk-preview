@@ -28,7 +28,20 @@ if (!tail.includes('pages.js')) throw new Error('configurators.js script tag not
 
 const rnav = id => `<div class="rnav"><button class="rnav__b" data-rail="${id}" data-dir="-1" aria-label="Scroll left">&larr;</button><button class="rnav__b" data-rail="${id}" data-dir="1" aria-label="Scroll right">&rarr;</button></div>`;
 
+// her shop-front photos (Anna, Drive "Shops photos", 2026-10-09), matched to each address by the photos' own
+// GPS or Street View, metadata stripped; the homepage cards in index.html carry the same four by hand.
+// [width, height of -sm, width of -lg, focus, alt]
+const PHOTO = {
+  'laugavegur-23': [800, 1067, 1600, '50% 64%', 'The store at Laugavegur 23'],
+  'klapparstigur-29': [800, 600, 1280, '58% 60%', 'The outlet at Klapparst&iacute;gur 29'],
+  'skolavordustigur-36': [800, 1067, 960, '62% 44%', 'The store at Sk&oacute;lav&ouml;r&eth;ust&iacute;gur 36'],
+  'skolavordustigur-4': [800, 600, 1600, '56% 50%', 'The store at Sk&oacute;lav&ouml;r&eth;ust&iacute;gur 4'],
+};
+const storePhoto = id => { const [w, h, lg, pos, alt] = PHOTO[id], a = `assets/stores/${id}`;
+  return `<figure class="store__ph"><img src="${a}-sm.webp" srcset="${a}-sm.webp 800w, ${a}-lg.webp ${lg}w" sizes="(max-width:760px) 90vw, 45vw" width="${w}" height="${h}" alt="${alt}" loading="lazy" decoding="async" style="--pos:${pos}" /></figure>`; };
+
 const store = (id, n, tag, name, note, facts) => `      <article class="store rv" id="${id}">
+        ${storePhoto(id)}
         <div class="store__top"><span class="store__ix mono">${n}</span><span class="mono store__tag">${tag}</span></div>
         <h3 class="store__name">${name}</h3>
         <p class="store__note">${note}</p>
@@ -52,6 +65,7 @@ const PAGES = {
       <div class="filt__row"><span class="mono">Piece</span><div class="filt__row" id="fType"></div></div>
       <div class="filt__row filt__row--fam" hidden><span class="mono">Design</span><div class="filt__row" id="fFam"></div></div>
       <div class="filt__row"><span class="mono">Material</span><div class="filt__row" id="fFibre"></div></div>
+      <div class="filt__row"><span class="mono">Colour</span><div class="filt__row filt__sw" id="fCol" role="group" aria-label="Colour"></div></div>
       <div class="filt__row">
         <span class="mono">Show</span>
         <label class="chk"><input type="checkbox" id="fNew"><span>New</span></label>

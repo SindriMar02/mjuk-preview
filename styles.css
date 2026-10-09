@@ -326,9 +326,14 @@ section{padding:clamp(70px,12vw,180px) 0;position:relative}
 /* min-width:0 overrides the grid item's default min-width:auto — without it,
    the flex row inside (.store__top) can force this card wider than its own
    track rather than let its text wrap, blowing the grid out at narrow widths. */
-.store{display:flex;flex-direction:column;gap:12px;min-width:0;padding:clamp(18px,2vw,26px);
+.store{--sp:clamp(18px,2vw,26px);display:flex;flex-direction:column;gap:12px;min-width:0;padding:var(--sp);
   border:1px solid var(--line);background:var(--bg-2);transition:background .5s var(--ease),border-color .5s var(--ease)}
 .store:hover{background:var(--panel);border-color:var(--accent-soft)}
+/* her own shop-front photos (Anna, 2026-10-09), bled to the card edge above the text; --pos per photo
+   keeps the door and the sign in frame at every crop */
+.store__ph{margin:calc(var(--sp)*-1) calc(var(--sp)*-1) 4px;aspect-ratio:1;overflow:hidden;background:var(--panel);border-bottom:1px solid var(--line)}
+.store__ph img{width:100%;height:100%;display:block;object-fit:cover;object-position:var(--pos,50% 50%);transition:transform 1.1s var(--ease)}
+@media(hover:hover){.store:hover .store__ph img{transform:scale(1.03)}}
 .store__top{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
 .store__ix{color:var(--accent);flex:0 0 auto}
 /* the longest tag ("Store & workshop") sits opposite a fixed-width index, so it
@@ -549,7 +554,7 @@ section{padding:clamp(70px,12vw,180px) 0;position:relative}
 .sndr__studio{font-family:var(--ff-m);font-size:10px;letter-spacing:.12em;line-height:1;color:var(--dim)}
 @media(hover:hover){.sndr:hover .sndr__mark,.sndr:hover .sndr__studio{color:var(--accent)}}
 /* four street names like Skólavörðustígur 36 need a card's full width on a phone */
-@media(max-width:560px){.stores__grid{grid-template-columns:1fr}}
+@media(max-width:560px){.stores__grid{grid-template-columns:1fr}.store__ph{aspect-ratio:4/3}}
 
 /* ══ PAGE TO PAGE (2026-10-09, Sindri: elegant, easy, never lag) ══
    Every page, home included: the header stays exactly where it is, the old page fades out quickly
