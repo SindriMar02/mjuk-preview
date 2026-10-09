@@ -388,7 +388,14 @@
     notices = [];
     if (hit) hit.q++; else lines.push({ k: key, h: handle, t: p.t, s: size, p: p.p + (extra ? extra.price : 0), img: p.img[0], q: 1, x: extra || null });
     save(); renderBag(); openBag(true); say(fmt('Added to your bag: {name}.', { name: p.t + (extra ? ', ' + extra.label.toLowerCase() : '') }));
-    if (btn) { btn.classList.add('added'); setTimeout(() => btn.classList.remove('added'), 700); }
+    if (btn) {
+      // a card's bar says so in words for a moment; the drawer opening says the rest
+      const bar = btn.closest('.prod__sizes'), was = bar && !btn.dataset.was ? btn.textContent : null;
+      if (was) { btn.dataset.was = was; btn.textContent = t('Added'); }
+      btn.classList.add('added');
+      clearTimeout(btn._added);
+      btn._added = setTimeout(() => { btn.classList.remove('added'); if (btn.dataset.was) { btn.textContent = btn.dataset.was; delete btn.dataset.was; } }, bar ? 1600 : 700);
+    }
   }
   document.addEventListener('click', e => {
     const sz = e.target.closest('.sz');
@@ -402,6 +409,51 @@
     if (e.target.closest('[data-clear]')) { lines = []; notices = []; save(); keep('mjuk_bag_out', null); renderBag(); say(t('Your bag is empty.')); const c = $('#bagClose'); if (c) c.focus(); return; }
     if (e.target.closest('#bagGo')) checkout();
   });
+  /* Card photos: most of her pieces have two to four shots. Where the pointer sits across the photo
+     picks the shot (a hairline per shot shows which), so the knit close-up only appears when it is
+     looked for, never as a surprise zoom the moment the card is touched (Sindri, 25 Sep): the first
+     shot holds until the pointer has travelled a little inside the photo. Mouse only; the extra shots
+     load on first hover, not with the page. */
+  if (matchMedia('(hover:hover) and (pointer:fine)').matches && !reduced) {
+    const byH = new Map(((window.CM && CM.all) || []).map(p => [p.h, p]));
+    const handleOf = im => { const b = im.querySelector('[data-h]'); if (b) return b.dataset.h; const a = im.querySelector('.prod__go'); return a ? a.pathname.split('/').filter(Boolean).pop() : ''; };
+    const setup = im => {
+      if (im.dataset.g) return +im.dataset.g;
+      const p = byH.get(handleOf(im)), shots = p ? (p.img || []).filter(Boolean).slice(0, 4) : [];
+      im.dataset.g = String(shots.length);
+      const main = im.querySelector('img.main');
+      if (shots.length < 2 || !main) return (im.dataset.g = '1', 1);
+      const sizes = main.getAttribute('sizes');
+      shots.slice(1).reverse().forEach((u, j) => {
+        const img = document.createElement('img');
+        img.className = 'alt'; img.alt = ''; img.decoding = 'async'; img.dataset.k = String(shots.length - 1 - j);
+        if (sizes) { img.srcset = `${px(u, 380)} 380w, ${px(u, 620)} 620w, ${px(u, 940)} 940w`; img.sizes = sizes; }
+        img.src = px(u, 620);
+        main.after(img);
+      });
+      const dots = document.createElement('span'); dots.className = 'prod__dots'; dots.setAttribute('aria-hidden', 'true');
+      dots.innerHTML = shots.map((_, k) => `<i${k ? '' : ' class="on"'}></i>`).join('');
+      im.appendChild(dots);
+      return shots.length;
+    };
+    const show = (im, k) => {
+      if ((im._k || 0) === k) return; im._k = k;
+      im.querySelectorAll('img.alt').forEach(i => i.classList.toggle('on', +i.dataset.k === k));
+      im.querySelectorAll('.prod__dots i').forEach((d, j) => d.classList.toggle('on', j === k));
+    };
+    let cur = null, x0 = 0, live = false;
+    document.addEventListener('pointermove', e => {
+      if (e.pointerType !== 'mouse') return;
+      const im = e.target.closest && e.target.closest('.prod__im');
+      if (im !== cur) { if (cur) show(cur, 0); cur = im; x0 = e.clientX; live = false; if (!im) return; setup(im); }
+      if (!im) return;
+      const n = +im.dataset.g; if (n < 2) return;
+      if (!live) { if (Math.abs(e.clientX - x0) < 24) return; live = true; }
+      const r = im.getBoundingClientRect();
+      show(im, Math.min(n - 1, Math.max(0, Math.floor((e.clientX - r.left) / r.width * n))));
+    }, { passive: true });
+    document.addEventListener('pointerleave', () => { if (cur) show(cur, 0); cur = null; });
+  }
   /* Checkout: the bag goes to the edge function (functions/bag.js), which signs it and sends the
      browser to the WooCommerce checkout host, where the cart is filled first-party. Ids,
      quantities and notes only: Woo prices every line. A chosen pompom is its own product, with

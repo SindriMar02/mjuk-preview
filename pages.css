@@ -34,7 +34,7 @@ body[data-page] .bars{opacity:.18}
 .prod__name a{transition:color .3s}
 .prod__name a:hover{color:var(--accent)}
 .prod--oos .prod__im img{opacity:.55!important;filter:saturate(.7)}
-.prod--oos .prod__sizes{opacity:1;transform:none}
+.prod--oos .prod__sizes{transform:none;right:auto}
 .pg__more{display:flex;justify-content:center;padding:clamp(40px,6vw,70px) var(--pad) 0}
 .pg__empty{padding:clamp(40px,6vw,80px) var(--pad);font-family:var(--ff-s);font-size:clamp(20px,2.4vw,30px);color:var(--dim)}
 @media(max-width:1024px){.pgrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
