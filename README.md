@@ -12,6 +12,14 @@ shop is at [mjukiceland.com](https://mjukiceland.com).
 Static site: vanilla HTML/CSS/JS, GSAP + Lenis from a CDN, no build step.
 Run locally with `node _serve.cjs` and open http://127.0.0.1:5895.
 
+**Logo (Anna, 2026-10-10: "only the logo with a full name of the brand", never the MJK monogram).**
+No vector exists (her Drive, her WordPress media library and her `MJÚK-logo.pdf`, which only wraps
+a bitmap, were checked), so `assets/mjuk-iceland-logo.svg` is potrace's trace of her
+`wp-content/uploads/2025/01/Logo-frame.jpg` (4× Lanczos, threshold 67 %, alphamax 0.6; 99 % overlap
+with the JPEG), colour #74513b sampled from it. `assets/mjuk-iceland-name.svg` is the same trace cut
+to MJÚK / ICELAND, which matches her own `Logo-no-frame.png` (2024-12): header only. Favicons: her
+MJÚK letters in a closed frame of her colour (`favicon-96/192.png`, `favicon.png` 180, the 32 px data URI).
+
 ## Catalogue and checkout (storefront build, steps 1–3 of `_docs/MJUK-STOREFRONT-PLAN-2026-09-24.md`)
 
 - `node tools/pull-woo.mjs` writes `assets/data.js` and `assets/copy.js` from WooCommerce wc/v3:

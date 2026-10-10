@@ -99,7 +99,7 @@ try {
     check(r.status === 200 && route(r) === 'storefront' && h.includes(`<link rel="canonical" href="https://mjukiceland.com/product/${one.h}/"`), `her product address /product/${one.h}/ is our page`); }
   for (const p of ['/shop.html', '/fibres.html', '/sitemap.xml']) { const r = await req(SHOP + p); check(r.status === 200 && route(r) === 'storefront', `${p} → storefront (${r.status})`); }
   // the build's static files are served by the asset store before the Worker runs (wrangler.jsonc run_worker_first): no route header, one request fewer
-  for (const p of ['/assets/logo.png', '/pdp.js', '/styles.css']) { const r = await req(SHOP + p); check(r.status === 200 && !r.headers.get('x-mjuk-route'), `${p} → the asset store, before the Worker (${r.status}${r.headers.get('x-mjuk-route') ? ', ran through the Worker' : ''})`); }
+  for (const p of ['/assets/mjuk-iceland-name.svg', '/pdp.js', '/styles.css']) { const r = await req(SHOP + p); check(r.status === 200 && !r.headers.get('x-mjuk-route'), `${p} → the asset store, before the Worker (${r.status}${r.headers.get('x-mjuk-route') ? ', ran through the Worker' : ''})`); }
   { const r = await req(SHOP + '/robots.txt'); const t = await r.text(); check(r.status === 200 && /Sitemap: https:\/\/mjukiceland\.com\/sitemap\.xml/.test(t) && !/^Disallow: \/\s*$/m.test(t), 'robots.txt is the production one, with the sitemap'); }
   { const r = await req(SHOP + '/?utm_source=newsletter&fbclid=x'); check(r.status === 200 && route(r) === 'storefront', 'the homepage with tracking tags stays ours'); }
   // Google Ads auto-tagging adds gad_source=1 and gbraid; Instagram igshid; Google Shopping srsltid: none are WordPress's
@@ -146,7 +146,7 @@ try {
   head('mjukiceland.is (played by 127.0.0.1:8787)');
   { const r = await req(`http://${ISHOST}/`); const h = await r.text(); check(r.status === 200 && /<html lang="is"/.test(h) && h.includes('"url":"https://mjukiceland.is/"'), 'the Icelandic homepage at the root of its host, with its own site name'); }
   { const r = await req(`http://${ISHOST}/product/${one.h}/`); const h = await r.text(); check(r.status === 200 && /<html lang="is"/.test(h) && h.includes(`href="https://mjukiceland.com/product/${one.h}/"`), 'an Icelandic product page, its language switch to the English host'); }
-  for (const p of ['/assets/logo.png', '/styles.css', '/app.js', '/robots.txt', '/sitemap.xml']) { const r = await req(`http://${ISHOST}${p}`); check(r.status === 200, `${p} on the Icelandic host (${r.status})`); }
+  for (const p of ['/assets/mjuk-iceland-name.svg', '/styles.css', '/app.js', '/robots.txt', '/sitemap.xml']) { const r = await req(`http://${ISHOST}${p}`); check(r.status === 200, `${p} on the Icelandic host (${r.status})`); }
   { const r = await req(`http://${ISHOST}/robots.txt`); check((await r.text()).includes('Sitemap: https://mjukiceland.is/sitemap.xml'), 'its robots.txt names its own sitemap'); }
   { const r = await req(`http://${ISHOST}/wp-admin/`); check(r.status === 404, 'no WordPress behind the Icelandic host'); }
   { const r = await req(`http://${ISHOST}/bag`); check(r.status === 204, '/bag is there too (checkout is on .com)'); }
