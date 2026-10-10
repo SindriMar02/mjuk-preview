@@ -179,6 +179,18 @@ ${store('skolavordustigur-4', '04', 'Step-free access', 'Sk&oacute;lav&ouml;r&et
         <div class="rv"><b>2h</b><span class="mono">A cape, cut and sewn upstairs</span></div>
         <div class="rv"><b>20m</b><span class="mono">A neckwarmer, made in front of you</span></div>
       </div>
+      <!-- the team, from Anna's Drive "Story and pictures" (2026-10-10), metadata stripped -->
+      <div class="story__team">
+        <h3 class="rv">The team</h3>
+        <div class="story__team-grid">
+          <figure class="rv"><img src="assets/story/team-mural-sm.webp" srcset="assets/story/team-mural-sm.webp 640w, assets/story/team-mural-lg.webp 1200w" sizes="(max-width:900px) 46vw, 30vw" width="640" height="427" alt="The MJ&Uacute;K team outside the store at Laugavegur 23" loading="lazy" decoding="async"/></figure>
+          <figure class="rv"><img src="assets/story/team-blankets-sm.webp" srcset="assets/story/team-blankets-sm.webp 640w, assets/story/team-blankets-lg.webp 1200w" sizes="(max-width:900px) 46vw, 30vw" width="640" height="427" alt="The team among stacks of blankets" loading="lazy" decoding="async"/></figure>
+          <figure class="rv"><img src="assets/story/team-award-sm.webp" srcset="assets/story/team-award-sm.webp 640w, assets/story/team-award-lg.webp 1200w" sizes="(max-width:900px) 46vw, 30vw" width="640" height="427" alt="The team on stage at an award ceremony" loading="lazy" decoding="async"/></figure>
+          <figure class="rv"><img src="assets/story/team-family-sm.webp" srcset="assets/story/team-family-sm.webp 640w, assets/story/team-family-lg.webp 1200w" sizes="(max-width:900px) 46vw, 30vw" width="640" height="427" alt="The team with Anna&rsquo;s mother and models" loading="lazy" decoding="async"/></figure>
+          <figure class="rv"><img src="assets/story/team-outdoors-sm.webp" srcset="assets/story/team-outdoors-sm.webp 640w, assets/story/team-outdoors-lg.webp 1200w" sizes="(max-width:900px) 46vw, 30vw" width="640" height="427" alt="The team outdoors together" loading="lazy" decoding="async"/></figure>
+          <figure class="rv"><img src="assets/story/team-dinner-sm.webp" srcset="assets/story/team-dinner-sm.webp 640w, assets/story/team-dinner-lg.webp 1200w" sizes="(max-width:900px) 46vw, 30vw" width="640" height="427" alt="The team at dinner together" loading="lazy" decoding="async"/></figure>
+        </div>
+      </div>
       <div class="story__grid story__grid--flip">
         <div class="story__im rv"><img src="assets/story/anna-sm.webp" srcset="assets/story/anna-sm.webp 640w, assets/story/anna-lg.webp 1200w" sizes="(max-width:900px) min(520px, 92vw), 38vw" width="640" height="800" alt="Anna, designer and owner of MJ&Uacute;K Iceland" loading="lazy" decoding="async"/></div>
         <div class="story__col">
