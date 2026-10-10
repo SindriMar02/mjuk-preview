@@ -44,6 +44,11 @@ html.lenis,html.lenis body{height:auto}
    now the root, so the headline inverts against the ground and the grain too. */
 main{position:relative}
 .foot{position:relative;z-index:1}
+/* a far jump (header link, or home#section from another page): the content dips out quickly, the page
+   moves, and it comes back as gently as after a page change; the header stays */
+main,.foot{transition:opacity .38s cubic-bezier(.23,1,.32,1)}
+.go-jump main,.go-jump .foot{opacity:0;transition-duration:.16s;transition-timing-function:cubic-bezier(.4,0,1,1)}
+@media (prefers-reduced-motion:reduce){main,.foot{transition:none}}
 
 .mono{font-family:var(--ff-m);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
 
@@ -564,8 +569,12 @@ section{padding:clamp(70px,12vw,180px) 0;position:relative}
 @view-transition{navigation:auto}
 .nav{view-transition-name:mjuk-nav}
 ::view-transition-group(mjuk-nav){animation-duration:0s}
-::view-transition-old(root){animation:vtOut .16s cubic-bezier(.4,0,1,1) both}
-::view-transition-new(root){animation:vtIn .34s cubic-bezier(.23,1,.32,1) .05s both}
+/* out, then in: the old page is gone before the new one starts, so two headings never sit on top of
+   each other (measured: Stores to Shop showed "Four doors" through "Everything" for ~100 ms). The
+   gap shows the page's own ground, not white. */
+::view-transition{background:var(--bg)}
+::view-transition-old(root){animation:vtOut .14s cubic-bezier(.4,0,1,1) both}
+::view-transition-new(root){animation:vtIn .32s cubic-bezier(.23,1,.32,1) .14s both}
 @keyframes vtOut{to{opacity:0}}
 @keyframes vtIn{from{opacity:0;transform:translateY(8px)}}
 @media (prefers-reduced-motion:reduce){@view-transition{navigation:none}}

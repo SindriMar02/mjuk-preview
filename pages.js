@@ -333,7 +333,8 @@
     const el = document.getElementById(s); if (!el) return;
     el.classList.add('is-here');
     if (!freshVisit()) return;   // on reload or Back the shopper's own place wins over the link's
-    setTimeout(() => { el.scrollIntoView({ block: 'center', behavior: reduced ? 'auto' : 'smooth' }); const b = $('.store__map-btn', el); if (b && !el.classList.contains('is-open')) b.click(); }, 300);
+    // block 'start' + the card's scroll-margin: its photo sits just under the header instead of being cut by it
+    setTimeout(() => { el.scrollIntoView({ block: 'start', behavior: reduced ? 'auto' : 'smooth' }); const b = $('.store__map-btn', el); if (b && !el.classList.contains('is-open')) b.click(); }, 300);
   }
 
   /* ═══════════════════════════ STAFF ════════════════════════════

@@ -18,6 +18,8 @@ const relink = html => html.replace(/href="(#[a-z]+)"/g, (m, h) => `href="${MAP[
 
 let head = cut('<!DOCTYPE html>', '</head>');
 head = head.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>\n?/g, '');   // the store and the site name belong to the homepage only
+head = head.replace(/<!-- home only[^>]*-->\n<script data-home>[\s\S]*?<\/script>\n?/g, '');   // inner pages keep their own #anchors (a store, a material)
+if (head.includes('data-home')) throw new Error('the home-only head script was not stripped');
 head = head.replace('<link rel="stylesheet" href="configurators.css" />', '<link rel="stylesheet" href="configurators.css" />\n<link rel="stylesheet" href="pages.css" />');
 const bgAndNav = relink(cut('<!-- GRAIN-GRADIENT BACKGROUND', '<!-- PRELOADER -->')) + relink(cut('<!-- NAV -->', '<main id="top">'));
 const footer = relink(cut('<footer class="foot">', '<!-- BAG DRAWER -->'));
@@ -146,33 +148,47 @@ ${store('skolavordustigur-4', '04', 'Step-free access', 'Sk&oacute;lav&ouml;r&et
   ${cut('<!-- 09 STOCKISTS -->', '<!-- NEWSLETTER -->')}`,
   },
   story: {
-    title: 'The workshop &mdash; MJ&Uacute;K Iceland', desc: 'A family knitwear house in Reykjav&iacute;k with its own workshop above the store.',
+    title: 'Our story &mdash; MJ&Uacute;K Iceland', desc: 'MJ&Uacute;K Iceland today, a factory, two workshops and four stores, and the story of Anna, its designer and owner, in her own words.',
     main: `
   <section class="pg" id="story">
     <div class="head">
       <span class="head__n">MJ&Uacute;K</span>
-      <h2 class="head__t">Made upstairs</h2>
+      <h2 class="head__t">Our story</h2>
       <div class="head__end"><span class="mono">Family owned &middot; Reykjav&iacute;k</span></div>
     </div>
     <div class="story">
       <p class="story__lead tr" data-split-me>Mj&uacute;k means soft. It is also what everything in the shop is made to be.</p>
+      <!-- Anna's own words (her doc "MJÚK Iceland story", 2026-10-10, website version: cuts only, small fixes
+           listed in 02-clients/clients/mjuk/_from-anna/story-website-version-2026-10-10.html). They stay in her
+           English on the Icelandic site too (lang="en"); only our labels are translated. -->
       <div class="story__grid">
-        <div class="story__im rv"><img id="storyImg" src="" alt="MJ&Uacute;K Iceland, Laugavegur 23" loading="lazy"/></div>
+        <div class="story__im story__im--sq rv"><img src="assets/story/team-sm.webp" srcset="assets/story/team-sm.webp 640w, assets/story/team-lg.webp 1200w" sizes="(max-width:900px) min(520px, 92vw), 38vw" width="640" height="640" alt="The MJ&Uacute;K team at the knitting machines" loading="lazy" decoding="async"/></div>
         <div class="story__col">
-          <p class="rv">MJ&Uacute;K is a family knitwear house in Reykjav&iacute;k. The knitting started at home, more than thirty years ago, and grew into a workshop and four stores within a ten minute walk of each other.</p>
-          <h3 class="rv">Designed here, made in Iceland</h3>
-          <p class="rv">Every design is Anna&rsquo;s. Everything is made in Iceland, knitted in Reykjav&iacute;k and in Akureyri. The capes and shawls cut from the blankets are sewn on the upper floor of Laugavegur 23, above the shop floor.</p>
-          <h3 class="rv">The fibres</h3>
-          <p class="rv">Angora, superfine merino, cashmere, Icelandic wool, and an alpaca-and-silk yarn developed with a spinner in Italy for Anna&rsquo;s daughter Lia. <a class="link" href="fibres.html">[ Read about the fibres ]</a></p>
-          <h3 class="rv">Small batches</h3>
-          <p class="rv">Every MJ&Uacute;K piece is a limited edition.</p>
+          <h3 class="rv">MJ&Uacute;K Iceland today</h3>
+          <p class="rv" lang="en">Today MJÚK Iceland is an Icelandic manufacturing company with a factory, 2 workshops, 4 stores and 30 people in the team. It started from zero.</p>
+          <p class="rv" lang="en">It took us many years to build the production and it was even more difficult to build the team that feels the same way about making customers happy for many years after they purchase something from us.</p>
+          <p class="rv" lang="en">We don’t have bundle deals or seasonal discounts for two reasons: 1) MJÚK prefers to work fair and sell well: we put a small margin on our products to offer the best price possible to everyone coming to our stores — no tricks or catchy techniques; 2) we want you to buy only what you really love and will enjoy for many years ahead. That is better for you and more sustainable for nature.</p>
+          <p class="rv" lang="en">In 2024 and 2025 we got Company of the year awards from the Minister of Innovation and the President of Iceland. We continue growing organically, developing new designs and even raw materials (our special baby Suri alpaca with silk). As a company we support Icelandic and Ukrainian charities, organize cultural events for the locals and travelers and just do our best to be a good manufacturer and employer.</p>
+          <p class="rv" lang="en">We invite you to come and enjoy our murals. Our flagship store located at Laugavegur 23 is a historical house built by Guðjón Samúelsson. We have finished a full renovation of all exteriors and expanded the original mural.</p>
+          <p class="rv"><a class="link" href="fibres.html">[ Read about the fibres ]</a></p>
         </div>
       </div>
       <div class="story__facts">
         <div class="rv"><b>4</b><span class="mono">Stores in Reykjav&iacute;k</span></div>
-        <div class="rv"><b>5</b><span class="mono">Natural fibres</span></div>
+        <div class="rv"><b>30</b><span class="mono">People in the team</span></div>
         <div class="rv"><b>2h</b><span class="mono">A cape, cut and sewn upstairs</span></div>
         <div class="rv"><b>20m</b><span class="mono">A neckwarmer, made in front of you</span></div>
+      </div>
+      <div class="story__grid story__grid--flip">
+        <div class="story__im rv"><img src="assets/story/anna-sm.webp" srcset="assets/story/anna-sm.webp 640w, assets/story/anna-lg.webp 1200w" sizes="(max-width:900px) min(520px, 92vw), 38vw" width="640" height="800" alt="Anna, designer and owner of MJ&Uacute;K Iceland" loading="lazy" decoding="async"/></div>
+        <div class="story__col">
+          <h3 class="rv">The designer</h3>
+          <p class="rv" lang="en">Life is too short and too precious to choose things that “fit into trends or social expectations” instead of making yourself happy. I dedicate my work to designing and producing soft and cozy garments in hundreds of colors and textures, so that you can find the one that makes you feel really good. It might be too fuzzy or too romantic a color for someone else, but for you it feels just right. When a customer gasps and says “that’s my perfect beanie I have always imagined” or when you come to our store and we recognize a design we produced 10 years ago, that is what makes me obsessed with my job as a designer.</p>
+          <p class="rv" lang="en">Back in 1991 I was a little girl sitting on a stack of blankets while my mother and sister were selling nuts from our garden and pickled cucumbers in −20 °C frost in a big city 2,000 km from our home. We lived in Ukraine and tried to survive the economic turbulence of the 90s. We bought locally produced woolen blankets and food and drove to sell it in Samara where our granny lived. Times got better and worse: hyperinflation, robberies, corruption destroyed everything we had built several times, yet we always rebuilt it again. Once we had to sell our apartment and ate only instant noodles for half a year, but never failed to pay our employees and creditors. Even in the toughest times our parents took us to all museums and theaters in Kyiv to develop us culturally. They believe that strong spirit and belief in the beauty of the world is the most important element of education.</p>
+          <p class="rv" lang="en">Mom and sister developed the business, and I was with them all the time until I started university and corporate jobs in large multinational companies. I wanted to learn from the best and the biggest and be able to navigate this tough world. I got a Master’s degree in International Financial Management and learnt design and production in practice at the factory. From the age of 20, working at PwC and then a huge glass production holding in Switzerland taught me a lot and I came back to our family business with some radical ideas: 1) stop producing cheap products and switch to unique and high quality; 2) risk and bet everything on exporting to the west and north. That’s how we came to Iceland for the first time in 2009. First we failed but after years of effort we managed to start selling our blankets and hats here. Then I moved here in 2017 and this is when things really changed and we are grateful for an opportunity to live and work in this beautiful country. In 2019 we opened our first store, in 2020 started production here, in 2022 our factory in Ukraine was occupied and we expanded production in Iceland.</p>
+          <p class="rv" lang="en">My main job is to design and produce, but I try to have many shifts in the shops as well — to have direct conversations with customers, to understand you better and improve my designs constantly.</p>
+          <p class="rv story__sign" lang="en">Hugs,<br>Anna<br><span class="mono">Designer and owner of MJÚK Iceland</span></p>
+        </div>
       </div>
     </div>
   </section>`,

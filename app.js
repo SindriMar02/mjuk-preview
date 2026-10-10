@@ -609,10 +609,27 @@
      Always restarts Lenis first (it may have been stopped by the bag) and hard
      falls back to a native scroll if the smooth scroll never lands. */
   let lenis;
+  /* A far section is not scrolled to: racing 10,000 px in a second through the pinned reel and the film
+     reads as a glitch. The page dips out (html.go-jump), moves at once, and comes back, the same fade
+     as a page change. The move runs twice: the second, a frame later, follows the section if a pin
+     changed state on the way. */
+  const atTop = t => Math.max(0, t.getBoundingClientRect().top + window.scrollY - 40);
+  function jumpTo(target, wait) {
+    const root = document.documentElement;
+    const go = () => {
+      // Lenis clamps to the page height it last measured: right after the pins are built that is
+      // 5,000 px too short (measured: home#made landed 2,744 px above the section), so measure first
+      if (lenis) { lenis.start(); lenis.resize(); lenis.scrollTo(atTop(target), { immediate: true, force: true }); } else window.scrollTo(0, atTop(target));
+      if (window.ScrollTrigger) ScrollTrigger.update();
+    };
+    root.classList.add('go-jump');
+    setTimeout(() => { go(); requestAnimationFrame(() => { go(); root.classList.remove('go-jump'); }); }, wait);
+  }
   function goTo(target) {
     if (!target) return;
     const startY = window.scrollY;
-    const y = Math.max(0, target.getBoundingClientRect().top + startY - 40);
+    const y = atTop(target);
+    if (!reduced && Math.abs(y - startY) > innerHeight * 2.5) return jumpTo(target, 180);
     if (lenis && !reduced) { try { lenis.start(); lenis.scrollTo(y, { duration: 1.1 }); } catch (e) { window.scrollTo({ top: y }); } }
     else window.scrollTo({ top: y, behavior: reduced ? 'auto' : 'smooth' });
     /* Rescue only a genuinely dead scroll: if we have barely budged after 700ms
@@ -632,6 +649,14 @@
       e.preventDefault(); goTo(t);
     });
   });
+  /* Inner pages link home to a section (./#made). Go home without the # and leave the section in
+     sessionStorage: the home page moves there itself once its pinned reel has its height (see arrive). */
+  $$('a[href^="./#"], a[href^="index.html#"]').forEach(a => a.addEventListener('click', e => {
+    if (e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const u = new URL(a.href);
+    try { sessionStorage.setItem('mjuk_go', u.hash); } catch (err) { return; }   // no storage: the plain #link still works
+    e.preventDefault(); location.assign(u.pathname + u.search);
+  }));
 
   /* ── nav hide on scroll-down ── */
   const nav = $('#nav'); let lastY = 0;
@@ -1088,7 +1113,24 @@ void main() {
 
   /* ══ preloader ══ */
   let booted = false;
-  const boot = () => { if (booted) return; booted = true; document.body.classList.add('ready'); shaderBackground(); choreograph(); heroIn(); if (hasGsap) ScrollTrigger.refresh(); };
+  /* Arriving home for a section (another page's header, or a #link): the head script hid the page.
+     Once the pins exist, move there and show it; follow the section through the refreshes that photos
+     and fonts cause, until the visitor scrolls themselves. Our own links never carry the # (the inner-page link handler above):
+     the browser's own jump on load lands 5,248 px short, before the pinned reel has its height. */
+  const arrive = () => {
+    const h = window.__mjukGo; if (!h) return; window.__mjukGo = null;
+    const t = document.querySelector(h);
+    if (!t) { document.documentElement.classList.remove('go-jump'); return; }
+    jumpTo(t, 0);
+    try { history.replaceState(history.state, '', location.pathname + location.search + h); } catch (e) {}
+    if (!hasGsap) return;
+    let own = true; const mine = () => { own = false; };
+    ['wheel', 'touchstart', 'keydown', 'pointerdown'].forEach(ev => addEventListener(ev, mine, { once: true, passive: true }));
+    const follow = () => { if (own && Math.abs(t.getBoundingClientRect().top - 40) > 2) { if (lenis) { lenis.resize(); lenis.scrollTo(atTop(t), { immediate: true, force: true }); } else window.scrollTo(0, atTop(t)); } };
+    ScrollTrigger.addEventListener('refresh', follow);
+    setTimeout(() => ScrollTrigger.removeEventListener('refresh', follow), 6000);
+  };
+  const boot = () => { if (booted) return; booted = true; document.body.classList.add('ready'); shaderBackground(); choreograph(); heroIn(); if (hasGsap) ScrollTrigger.refresh(); arrive(); };
   setTimeout(boot, 3600);   // fail-safe: the loader can never stick
 
   // inner pages (body[data-page]) carry no preloader, so nothing to hold for
