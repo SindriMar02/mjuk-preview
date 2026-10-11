@@ -512,6 +512,7 @@
   if (nf) nf.addEventListener('submit', e => { e.preventDefault(); const v = $('#newsEmail').value.trim(), m = $('#newsMsg'); const ok = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v); m.textContent = ok ? t('You’re in. New colours reach you first.') : t('Enter a valid email.'); if (ok) nf.reset(); });
   /* ══ MOBILE MENU + the sndr-studio toggle animation ══ */
   const burger = $('#burger'), menu = $('#menu');
+  let closeMenu = () => {};   // the logo sits above the open menu: a tap on it must shut the panel too (anchor navigation, below)
   if (burger) {
     const icon = $('.sm-icon', burger), lineH = $('.sm-icon-line:not(.sm-icon-line-v)', burger),
           lineV = $('.sm-icon-line-v', burger), textInner = $('.sm-toggle-textinner', burger);
@@ -563,6 +564,7 @@
       animateIcon(o); animateText(o);
     };
     menu.inert = true;
+    closeMenu = () => { if (document.body.classList.contains('menu-open')) setMenu(false); };
 
     burger.addEventListener('click', () => setMenu(!document.body.classList.contains('menu-open')));
     /* Menu links navigate explicitly: the generic anchor handler relied on
@@ -646,7 +648,7 @@
     a.addEventListener('click', e => {
       const id = a.getAttribute('href'); if (!id || id[0] !== '#' || id.length < 2) return;   // inner pages link back with index.html#… — leave those to the browser
       const t = document.querySelector(id); if (!t) return;
-      e.preventDefault(); goTo(t);
+      e.preventDefault(); closeMenu(); goTo(t);
     });
   });
   /* Inner pages link home to a section (./#made). Go home without the # and leave the section in

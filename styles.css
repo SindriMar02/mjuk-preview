@@ -99,7 +99,8 @@ body.ready .load__mark{transform:translateY(-14px) scale(.985);opacity:.85;trans
 .nav__brand{display:flex;align-items:center;justify-self:center}
 .nav__brand .wordmark{height:38px}
 .nav__mid{display:flex;gap:26px;justify-self:start}
-/* 821-1100 px: six links beside the centred logo need tighter gaps, or the left column overflows into it */
+/* 961-1100 px: six links beside the centred logo need tighter gaps, or the left column runs into it;
+   below 961 they do not fit at all (Icelandic labels are longer), so the menu toggle takes their place (rule after the toggle's own, below) */
 @media(max-width:1100px){.nav__mid{gap:clamp(14px,1.9vw,26px)}}
 .nav__mid a,.nav__link{font-family:var(--ff-m);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);transition:opacity .3s;opacity:.85}
 .nav__mid a:hover,.nav__link:hover{opacity:1}
@@ -123,6 +124,11 @@ body.ready .load__mark{transform:translateY(-14px) scale(.985);opacity:.85;trans
 .sm-icon{position:relative;width:12px;height:12px;flex:0 0 12px;display:inline-flex;will-change:transform}
 .sm-icon-line{position:absolute;left:50%;top:50%;width:100%;height:2px;background:currentColor;border-radius:2px;
   transform:translate(-50%,-50%);will-change:transform}
+/* 821-960 px: the menu toggle instead of the six links (see the .nav__mid note above) */
+@media(min-width:821px) and (max-width:960px){
+  .nav__mid{display:none}
+  .nav__burger{display:flex;grid-column:1;justify-self:start;margin:0 0 0 -2px}
+}
 
 /* ══ MOBILE MENU ══ */
 .menu{position:fixed;inset:0;z-index:99;background:var(--bg);display:flex;flex-direction:column;justify-content:center;gap:2px;padding:0 var(--pad);clip-path:inset(0 0 100% 0);transition:clip-path .8s var(--ease);pointer-events:none}
