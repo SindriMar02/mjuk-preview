@@ -134,6 +134,8 @@
       st[key] = st[key] === b.dataset.v ? '' : b.dataset.v;
       if (key === 'type' && st.family && FAM[st.family].group !== st.type) st.family = '';
       Object.keys(rows).forEach(paintChips);
+      // the repaint replaced the button that had focus: hand focus to its replacement
+      if (document.activeElement === document.body) { const nb = [...rows[key].querySelectorAll('.chip')].find(c => c.dataset.v === b.dataset.v); nb && nb.focus({ preventScroll: true }); }
       apply(true);
     }));
     Object.keys(rows).forEach(paintChips);

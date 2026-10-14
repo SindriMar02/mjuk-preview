@@ -1107,9 +1107,15 @@ void main() {
       let timer = setInterval(() => go(1), 4000);
       const stop = () => { clearInterval(timer); timer = null; };
       const play = () => { if (!timer) timer = setInterval(() => go(1), 4000); };
+      // once the visitor takes the wheel (a tap, an arrow, keyboard focus) the reel stays where they put it
+      let held = false;
+      const hold = () => { held = true; stop(); };
       host.addEventListener('pointerenter', stop);
-      host.addEventListener('pointerleave', play);
-      document.addEventListener('visibilitychange', () => document.hidden ? stop() : play());
+      host.addEventListener('pointerleave', () => { if (!held) play(); });
+      host.addEventListener('pointerdown', hold);
+      host.addEventListener('focusin', hold);
+      ['#fcarNext', '#fcarPrev'].forEach(id => $(id) && $(id).addEventListener('click', hold));
+      document.addEventListener('visibilitychange', () => document.hidden ? stop() : (held || play()));
     }
   })();
 

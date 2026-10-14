@@ -66,6 +66,7 @@ body[data-page] .bars{opacity:.18}
 .filt__q input{flex:1;background:none;border:0;color:var(--ink);font-family:var(--ff-m);font-size:13px;letter-spacing:.02em}
 .filt__q input::placeholder{color:var(--dim)}
 .filt__q input:focus{outline:none}
+.filt__q:focus-within{border-bottom-color:var(--ink);box-shadow:0 1px 0 var(--ink)}
 .sel{position:relative}
 .sel select{appearance:none;-webkit-appearance:none;background:none;border:0;border-bottom:1px solid var(--line);padding:6px 20px 6px 0;color:var(--ink);
   font-family:var(--ff-m);font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
