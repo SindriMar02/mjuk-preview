@@ -309,6 +309,10 @@ section{padding:clamp(70px,12vw,180px) 0;position:relative}
 .camp__over{position:relative;z-index:2;padding:var(--pad);display:flex;flex-direction:column;gap:18px}
 .camp__over .mono{color:var(--ink);opacity:.75}
 .camp__line{font-size:clamp(34px,10vw,150px);line-height:.86;color:#f7f3ef;mix-blend-mode:difference}
+/* the made-for-you way in (Sindri 2026-10-17): a porcelain card, so it reads on the photo cropped or not */
+.camp__card{max-width:min(420px,100%);background:var(--bg);color:var(--ink);padding:clamp(16px,2vw,24px);display:grid;gap:14px;justify-items:start}
+.camp__card p{font-size:14px;line-height:1.6;text-wrap:pretty}
+.camp__over .camp__card .mono{color:var(--accent);opacity:1;font-size:11px;letter-spacing:.06em}
 
 /* ══ CATEGORIES — image grid, one tile per real collection ══ */
 .cats{padding:0 var(--pad);display:grid;gap:clamp(10px,1.4vw,20px);
@@ -375,6 +379,18 @@ section{padding:clamp(70px,12vw,180px) 0;position:relative}
   margin-top:12px;filter:grayscale(1) contrast(1.04);background:var(--bg-2)}
 
 .stores__foot{padding:clamp(30px,4vw,54px) var(--pad) 0}
+
+/* ══ VISIT (homepage): the four doors as one short list; photos and maps live on store.html ══ */
+.visit__list{list-style:none;margin:0;padding:0 var(--pad);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0 clamp(10px,1.4vw,20px)}
+.visit__list a{display:flex;flex-direction:column;gap:10px;padding:22px 0 24px;border-top:1px solid var(--line);min-width:0;transition:border-color .4s var(--ease)}
+.visit__nm{font-family:var(--ff-s);font-weight:500;font-size:clamp(19px,1.85vw,27px);line-height:1.2;letter-spacing:-.01em;color:var(--ink);overflow-wrap:break-word;transition:color .4s var(--ease)}
+.visit__tag{font-size:11px;color:var(--dim)}
+@media(hover:hover){.visit__list a:hover{border-color:var(--accent)}.visit__list a:hover .visit__nm{color:var(--accent)}}
+.visit__list a:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+.visit__foot{padding:clamp(22px,3vw,36px) var(--pad) 0;display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:12px 24px}
+.visit__foot p{font-size:14px;line-height:1.6;max-width:60ch}
+@media(max-width:900px){.visit__list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.visit__list{grid-template-columns:1fr}.visit__list a{flex-direction:row;align-items:baseline;justify-content:space-between;gap:12px;padding:16px 0}.visit__tag{text-align:right}}
 
 /* ══ STOCKISTS ══ */
 .stock__grid{padding:0 var(--pad);border-top:1px solid var(--line)}

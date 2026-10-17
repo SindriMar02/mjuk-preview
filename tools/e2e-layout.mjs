@@ -28,7 +28,7 @@ const MODES = QUICK
 const SITE = ['index.html', 'shop.html', 'product.html?p=79-beanie-black-with-matching-raccoon-pompom',
   ...['79-beanie-black-with-matching-raccoon-pompom', '79-beanie-dark-grey-with-matching-raccoon-pompom', 'slouchy-hat-black', 'ragnar-gloves',
     'logo-scarf-double-sided-100icelandic-wool-angorasuper-fine-merino-wool-kelly-green-bubble-gum', 'unicorn-blanket-fishbone-pattern-olive-100-wool', 'princess-poncho-cold-pink-fb'].map(h => `product/${h}/`),
-  'fibres.html', 'store.html', 'story.html', 'staff.html'];
+  'fibres.html', 'store.html', 'story.html', 'made.html', 'staff.html'];
 const PAGES = [...SITE.map(p => `${STORE}/${p}`), ...SITE.map(p => `${STORE}/is/${p}`), `${WOO}${CART}`, `${WOO}/checkout/`, `${WOO}/my-account/`];
 
 const browser = await puppeteer.launch({ executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', headless: 'new', protocolTimeout: 90000,

@@ -14,7 +14,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
-const PAGES = ['index.html', 'shop.html', 'product.html', 'fibres.html', 'store.html', 'story.html', 'staff.html'];
+const PAGES = ['index.html', 'shop.html', 'product.html', 'fibres.html', 'store.html', 'story.html', 'made.html', 'staff.html'];
 // the production hosts; the preview is noindex, so these only have to be right at launch
 const SITE = { en: 'https://mjukiceland.com/', is: 'https://mjukiceland.is/' };
 const REPORT = process.argv.includes('--report');

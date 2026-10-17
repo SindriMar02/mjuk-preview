@@ -172,9 +172,43 @@
       const p = blankets(tile.dataset.fabric)[0] || CM.all.find(x => x.mat === tile.dataset.fabric && x.img && x.img[0]), im = $('img', tile);
       if (p && im) { im.src = px(p.img[0], 480); im.alt = p.t; }
     });
-    const heroIm = $('#madeImg');
-    const cape = CM.all.find(p => p.tyk === 'clothing' && p.img && p.img[0]);
-    if (heroIm && cape) { heroIm.src = px(cape.img[0], 1100); heroIm.alt = cape.t; }
+    /* The model cards (made.html): her finished pieces of that model, from the shop, give the photo and
+       the "in the shop now" link; a model with none shows its name only, never a stand-in photo. Under each
+       name, what her rows allow: the fabrics, and fur. */
+    // in-stock pieces first, so a photo never sits beside "in the shop now" while showing a sold-out one (Codex 2026-10-17)
+    const madeOf = key => CM.all.filter(p => p.tyk === 'clothing' && p.fam === key && p.img && p.img[0]).sort((a, b) => a.oos - b.oos);
+    $$('.mfy__m[data-model]', cfg).forEach(card => {
+      const key = card.dataset.model, L = madeOf(key), live = L.filter(p => !p.oos);
+      const fabs = [...new Set(ROWS.filter(r => r.model === key).map(r => r.fabric))].map(f => nm(FABRIC[f]));
+      const furs = new Set(ROWS.filter(r => r.model === key).map(r => r.fur));
+      const opts = $('.mfy__opts', card);
+      if (opts) opts.textContent = fabs.join(' · ') + ' · ' + t(furs.size > 1 ? 'with or without fur' : furs.has(true) ? 'with fur' : 'without fur');
+      if (L[0]) {
+        const im = $('.mfy__im', card);
+        im.innerHTML = `<img src="${px(L[0].img[0], 520)}" width="520" height="693" alt="" loading="lazy" decoding="async"/>`;
+        card.classList.add('has-im');
+      }
+      const go = $('.mfy__shop', card);
+      if (go && live.length) {
+        go.textContent = fmt(live.length > 1 ? 'In the shop now, from {price}' : 'In the shop now, {price}', { price: usd(Math.min(...live.map(p => p.p))) });
+        go.hidden = false;
+      }
+    });
+    /* the picture beside the form: a finished piece of the chosen model where one exists, otherwise the
+       blanket it would be cut from, and the caption says which of the two it is */
+    const heroIm = $('#madeImg'), heroCap = $('#madeCap');
+    const paintPreview = () => {
+      if (!heroIm) return;
+      // with fur chosen, a piece with fur in her name first (and without, one without): the closest example she has
+      const fur = v('fur') === 'yes', L = madeOf(v('model'));
+      const piece = L.find(p => /\bfur\b/i.test(p.t) === fur) || L[0], blanket = CM.all.find(p => String(p.id) === v('colour'));
+      const src = piece || blanket || CM.all.find(p => p.tyk === 'clothing' && p.img && p.img[0]);
+      if (!src) return;
+      const next = px(src.img[0], 1100);
+      if (heroIm.getAttribute('src') !== next) { heroIm.src = next; heroIm.alt = src.t; pulse(heroIm); }
+      if (heroCap) heroCap.textContent = piece ? fmt('{model}, made before: an example of the cut', { model: nm(MODEL[v('model')]) })
+        : blanket ? fmt('The blanket it is cut from: {colour}', { colour: colourName(blanket) }) : '';
+    };
 
     const sw = $('#cfgColour'), ask = $('#cfgColourAsk'), furNote = $('#cfgFurNote');
     let shownFabric = '';
@@ -218,7 +252,7 @@
       noteEl.textContent = t(!priced() ? 'We write back with the price before anything is cut.'
         : adj ? 'Indicative. We confirm the price with the length.' : 'The whole price. We confirm by email before anything is cut.');
     };
-    cfg.addEventListener('change', e => { if (e.target.name !== 'colour') sync(); done.hidden = true; paint(); });
+    cfg.addEventListener('change', e => { if (e.target.name !== 'colour') sync(); done.hidden = true; paint(); paintPreview(); });
     /* The request is an email to the workshop, written out in full with her own name for the
        piece, so nothing is lost between the page and the shop. It opens the shopper's own mail
        app; the address is shown too. Fur and salmon leather colours are theirs to write in. */
@@ -247,7 +281,10 @@
       const h = $('h3', done); if (h) h.focus({ preventScroll: true });
       location.href = mail;
     });
-    sync(); paint();
+    // a link from elsewhere can open the page on one model: made.html?model=grace
+    const asked = new URLSearchParams(location.search).get('model');
+    if (asked && MODEL[asked]) set('model', asked);
+    sync(); paint(); paintPreview();
 
     /* ── scroll reveals for the section, on the shell's .rv grammar ──
        app.js reveals .head already; the copy, the image and each fieldset follow it, 70ms apart,
@@ -256,8 +293,10 @@
     if (lead) {
       lead.innerHTML = lead.textContent.trim().split(/\s+/).map((w, i) => `<span class="w"><span style="--i:${i}">${w}</span></span>`).join(' ');
     }
-    const items = [lead, ...$$('.made__copy > p:not(.made__lead), .made__im, .cfg > fieldset, .cfg__sum')].filter(Boolean);
-    items.forEach((el, i) => { el.classList.add('rv'); el.style.setProperty('--d', `${Math.min(i, 6) * 70}ms`); });
+    const items = [lead, ...$$('.made__copy > p:not(.made__lead), .mfy__steps > li, .mfy__m, .mfy__prev, .mfy__rest > fieldset, .cfg__sum')].filter(Boolean);
+    // the stagger counts within each group (the steps, the model cards, the fieldsets), so a group further
+    // down the page does not wait for the delays of the groups above it
+    items.forEach(el => { el.classList.add('rv'); el.style.setProperty('--d', `${Math.min([...el.parentElement.children].indexOf(el), 6) * 70}ms`); });
     if (reduced || !('IntersectionObserver' in window)) items.forEach(el => el.classList.add('in'));
     else {
       const io = new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } }),

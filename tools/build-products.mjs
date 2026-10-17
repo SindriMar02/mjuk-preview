@@ -235,7 +235,7 @@ for (const [file, lang] of [['shop.html', 'en'], ['is/shop.html', 'is']]) {
 }
 
 /* ── sitemaps, one per host, each page with its twin ── */
-const PAGES = ['', 'shop.html', 'fibres.html', 'store.html', 'story.html'];
+const PAGES = ['', 'shop.html', 'fibres.html', 'store.html', 'story.html', 'made.html'];
 const pairs = [...PAGES.map(f => [SITE.en + f, SITE.is + f]), ...CM.all.map(p => [url('en', p), url('is', p)])];
 const sitemap = lang => `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">

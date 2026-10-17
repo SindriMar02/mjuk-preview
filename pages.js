@@ -385,7 +385,15 @@
   const sb = $('#searchBtn'); if (sb) sb.addEventListener('click', () => { if (page === 'shop') { const f = $('#fQ'); f && f.focus(); } else location.href = 'shop.html?focus=q'; });
 
   const storyPage = () => { const im = $('#storyImg'); if (im && CM.campaign && CM.campaign[0]) im.src = px(CM.campaign[0], 1100); };
-  ({ shop: shopPage, product: productPage, fibres: fibresPage, stores: storesPage, staff: staffPage, story: storyPage })[page]?.();
+  /* made.html: the capes already made, in the shop now; the made-to-order form is configurators.js */
+  const madePage = () => {
+    const host = $('#readyT'); if (!host) return;
+    const L = CM.all.filter(p => p.tyk === 'clothing' && !p.oos);
+    if (!L.length) { $('#ready').remove(); return; }
+    fill(host, L, { index: false });
+    rails();
+  };
+  ({ shop: shopPage, product: productPage, fibres: fibresPage, stores: storesPage, staff: staffPage, story: storyPage, made: madePage })[page]?.();
   $$('[data-split-me]').forEach(splitWords);
   reveal();
 })();

@@ -165,9 +165,53 @@ fieldset{border:0;padding:0;margin:0;min-width:0}
 .pom__slot .dot{display:inline-block;background-size:cover;background-position:center}
 
 /* ── reveals, on the shell's own .rv grammar (22px rise, 1s, --ease), staggered per element ── */
-.made .rv{transition-delay:var(--d,0ms)}
+.made .rv,.mfy .rv{transition-delay:var(--d,0ms)}
 .made__lead .w{display:inline-block;overflow:hidden;vertical-align:bottom;padding-bottom:.08em;margin-bottom:-.08em}
 .made__lead .w>span{display:inline-block;transform:translateY(110%);transition:transform .8s var(--ease);transition-delay:calc(var(--i,0) * 14ms)}
 .made__lead.in .w>span{transform:none}
 .made__lead.rv{transform:none}   /* the words carry this reveal, not the block */
 @media(prefers-reduced-motion:reduce){.made__lead .w>span{transform:none}.sw{animation:none}}
+
+/* ══ MADE FOR YOU, its own page (made.html, Sindri 2026-10-17) ══
+   intro + three steps, the models as photo cards (the model radio), then the form beside a picture of
+   the chosen model or the blanket it is cut from, then her finished capes in the shop. */
+.mfy__intro,.mfy .cfg,.mfy__aside{margin-left:var(--pad);margin-right:var(--pad)}
+.mfy__intro{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:clamp(28px,5vw,72px);align-items:end;margin-bottom:clamp(44px,6vw,84px)}
+.mfy__steps{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.mfy__steps li{display:grid;grid-template-columns:34px 1fr;gap:4px 12px;padding:14px 0;border-bottom:1px solid var(--line)}
+.mfy__steps b{grid-row:span 2;font-weight:400;font-size:12px;color:var(--accent);padding-top:4px}
+.mfy__steps span{font-family:var(--ff-s);font-weight:500;font-size:clamp(17px,1.5vw,21px);line-height:1.25}
+.mfy__steps small{font-size:13px;line-height:1.55;color:var(--dim);text-wrap:pretty}
+.mfy .cfg{border-top:0;padding-top:0;gap:clamp(40px,5vw,64px)}
+.mfy__models{border-top:1px solid var(--line);padding-top:22px}
+/* seven models: one row of seven on a wide screen, four and three below that, two to a row on a phone */
+.mfy__grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(10px,1.4vw,18px)}
+@media(min-width:1200px){.mfy__grid{grid-template-columns:repeat(7,minmax(0,1fr))}}
+.mfy__m{display:grid;gap:8px;align-content:start;min-width:0}
+.mfy__m label{position:relative;display:grid;cursor:pointer}
+.mfy__m input{position:absolute;inset:0;opacity:0;pointer-events:none}
+.mfy__im{display:block;aspect-ratio:3/4;overflow:hidden;background:var(--panel);border:1px solid var(--line);transition:border-color .24s var(--ease),transform .16s var(--ease)}
+.mfy__im img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .9s var(--ease)}
+@media(hover:hover){.mfy__m label:hover .mfy__im img{transform:scale(1.035)}}
+.mfy__none{height:100%;display:flex;flex-direction:column;justify-content:flex-end;gap:8px;padding:14px;background:var(--bg-2)}
+.mfy__none em{font-family:var(--ff-s);font-style:normal;font-weight:500;font-size:clamp(22px,2.2vw,30px);line-height:1.1;color:var(--ink)}
+.mfy__none small{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim)}
+.mfy__meta{display:grid;gap:4px;padding:10px 0 0;border-top:2px solid transparent;margin-top:6px;transition:border-color .24s var(--ease)}
+.mfy__meta em{font-style:normal;font-family:var(--ff-m);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
+.mfy__opts{font-size:12px;line-height:1.45;color:var(--dim)}
+.mfy__m input:checked~.mfy__im{border-color:var(--ink)}
+.mfy__m input:checked~.mfy__meta{border-top-color:var(--ink)}
+.mfy__m input:checked~.mfy__meta em::before{content:"\2713\00a0";color:var(--accent)}
+.mfy__m input:focus-visible~.mfy__im{outline:2px solid var(--accent);outline-offset:2px}
+.mfy__m label:active .mfy__im{transform:scale(.985)}
+.mfy__shop{font-size:11px;letter-spacing:.04em;color:var(--accent);text-decoration:underline;text-underline-offset:3px;justify-self:start}
+.mfy__shop[hidden]{display:none}
+.mfy__prev{position:sticky;top:90px;margin:0;display:grid;gap:10px}
+.mfy__prev .made__im{margin-top:0}
+.mfy__prev figcaption{font-size:11px;letter-spacing:.04em;color:var(--dim)}
+.mfy__rest{display:grid;gap:30px}
+.mfy__aside{margin-top:clamp(36px,5vw,60px)}
+/* on a phone the model card already shows the piece and the swatches show the blanket: no third copy */
+@media(max-width:900px){.mfy__intro{grid-template-columns:1fr;align-items:start}.mfy__prev{display:none}}
+@media(max-width:560px){.mfy__grid{grid-template-columns:repeat(2,minmax(0,1fr))}.mfy__none em{font-size:20px}}
+@media(prefers-reduced-motion:reduce){.mfy__im img{transition:none}}

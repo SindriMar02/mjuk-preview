@@ -13,7 +13,7 @@ const cut = (a, b, from = src) => { const i = from.indexOf(a), j = from.indexOf(
 
 /* homepage anchors become real pages where one exists; the homepage itself is "./", its canonical
    address (mjukiceland.com/), never index.html, so no internal link goes through a redirect */
-const MAP = { '#new': 'shop.html?new=1', '#fibres': 'fibres.html', '#shop': 'shop.html', '#sale': 'shop.html?sale=1', '#made': './#made', '#stores': 'store.html', '#top': './', '#camp': 'story.html', '#lookbook': './#lookbook', '#stockists': 'store.html#stockists' };
+const MAP = { '#new': 'shop.html?new=1', '#fibres': 'fibres.html', '#shop': 'shop.html', '#sale': 'shop.html?sale=1', '#made': 'made.html', '#stores': 'store.html', '#top': './', '#camp': 'story.html', '#lookbook': 'story.html#lookbook', '#stockists': 'store.html#stockists' };
 const relink = html => html.replace(/href="(#[a-z]+)"/g, (m, h) => `href="${MAP[h] || './' + h}"`);
 
 let head = cut('<!DOCTYPE html>', '</head>');
@@ -145,7 +145,22 @@ ${store('skolavordustigur-4', '04', 'Step-free access', 'Sk&oacute;lav&ouml;r&et
       <div class="budin__row"><span class="mono">Wholesale</span><a href="mailto:anna@mjukiceland.com">anna@mjukiceland.com</a></div>
     </div>
   </section>
-  ${cut('<!-- 09 STOCKISTS -->', '<!-- NEWSLETTER -->')}`,
+  <section class="stock" id="stockists">
+    <div class="head">
+      <span class="head__n">Stockists</span>
+      <h2 class="head__t">Also stocked at</h2>
+      <div class="head__end"><span class="mono">Iceland and abroad</span></div>
+    </div>
+    <div class="stock__grid">
+      <div class="stock__row"><span class="stock__pl mono">Reykjav&iacute;k</span><span class="stock__nm">Perlan &middot; Scintilla</span></div>
+      <div class="stock__row"><span class="stock__pl mono">Egilssta&eth;ir</span><span class="stock__nm">H&uacute;s Handanna</span></div>
+      <div class="stock__row"><span class="stock__pl mono">Hvolsv&ouml;llur</span><span class="stock__nm">Seljalandsfoss</span></div>
+      <div class="stock__row"><span class="stock__pl mono">Copenhagen</span><span class="stock__nm">Helmers Magasin</span></div>
+      <div class="stock__row"><span class="stock__pl mono">Switzerland</span><span class="stock__nm">imi beauty &mdash; Luzern &amp; Interlaken</span></div>
+      <div class="stock__row"><span class="stock__pl mono">Michigan, USA</span><span class="stock__nm">Simply Stuga</span></div>
+      <div class="stock__row"><span class="stock__pl mono">China</span><span class="stock__nm">Fei Fei Travel Diary</span></div>
+    </div>
+  </section>`,
   },
   story: {
     title: 'Our story &mdash; MJ&Uacute;K Iceland', desc: 'MJ&Uacute;K Iceland today, a factory, two workshops and four stores, and the story of Anna, its designer and owner, in her own words.',
@@ -203,6 +218,113 @@ ${store('skolavordustigur-4', '04', 'Step-free access', 'Sk&oacute;lav&ouml;r&et
         </div>
       </div>
     </div>
+  </section>
+  <!-- the lookbook, moved here from the homepage (Sindri 2026-10-17); app.js fills and pins it wherever it is -->
+  <section class="pan" id="lookbook">
+    <div class="pan__track" id="panTrack">
+      <div class="pan__intro">
+        <div class="pan__bg"><img id="panBg" src="" alt="MJ&Uacute;K Iceland lookbook" loading="lazy"/></div>
+        <h2 class="pan__title">Lookbook</h2>
+        <span class="mono pan__hint">Keep scrolling &rarr;</span>
+      </div>
+    </div>
+    <div class="pan__prog" aria-hidden="true"><span id="panProg"></span></div>
+  </section>`,
+  },
+  made: {
+    title: 'Made for you &mdash; MJ&Uacute;K Iceland', desc: 'A shawl, poncho or cape cut from one of our blankets and sewn to order upstairs at Laugavegur 23, Reykjav&iacute;k. Choose the model, the fabric, the colour and fur, and send the request.',
+    main: `
+  <!-- Made for you (Sindri 2026-10-17: off the homepage, onto its own page). For a shopper: a cape, poncho
+       or shawl cut from one of Anna's blankets and sewn to order. The page answers in order: what can I get
+       (the models, with a photo where one of hers exists), how do I order it (three steps), then the form.
+       Behaviour: configurators.js (#cfg) and pages.js (the "already made" rail). -->
+  <section class="pg mfy" id="made">
+    <div class="head">
+      <span class="head__n">Bespoke</span>
+      <h1 class="head__t">Made for you</h1>
+      <div class="head__end"><span class="mono">Sewn upstairs at Laugavegur 23</span></div>
+    </div>
+    <div class="mfy__intro">
+      <div class="made__copy">
+        <p class="made__lead">A shawl, poncho or cape, sewn to order upstairs at Laugavegur 23. Within two hours, any day of the year.</p>
+        <p>Choose the model, the fabric and its colour, and fur or no fur. The standard cut needs nothing more. Shorter, longer, with pockets or with salmon leather: say so and we write back before anything is cut.</p>
+      </div>
+      <ol class="mfy__steps">
+        <li><b class="mono">01</b><span>Choose the model</span><small>Two shawls, a poncho and four capes.</small></li>
+        <li><b class="mono">02</b><span>Choose the blanket it is cut from</span><small>Cashmere and merino, or Icelandic wool, in the colours we have.</small></li>
+        <li><b class="mono">03</b><span>Send the request</span><small>It goes to the workshop by email. We write back with the price before anything is cut.</small></li>
+      </ol>
+    </div>
+    <form class="cfg cfg--page" id="cfg" novalidate>
+      <fieldset class="mfy__models">
+        <legend class="legend">Model</legend>
+        <div class="mfy__grid" id="cfgModel">
+${[['shawl', 'Shawl'], ['shawl-pockets', 'Shawl with pockets'], ['petite-poncho', 'Petite poncho'], ['princess', 'Princess cape'], ['angelina', 'Angelina cape'], ['grace', 'Grace cape'], ['empress', 'Empress cape']].map(([k, n], i) => `          <div class="mfy__m" data-model="${k}">
+            <label><input type="radio" name="model" value="${k}"${i ? '' : ' checked'}><span class="mfy__im"><span class="mfy__none" aria-hidden="true"><em>${n}</em><small class="mono">No photo yet</small></span></span><span class="mfy__meta"><em>${n}</em><small class="mfy__opts"></small></span></label>
+            <a class="mfy__shop mono" href="shop.html?family=${k}" hidden></a>
+          </div>`).join('\n')}
+        </div>
+      </fieldset>
+      <div class="made__grid">
+        <figure class="mfy__prev">
+          <div class="made__im"><img id="madeImg" src="" width="880" height="1100" alt="" decoding="async" /></div>
+          <figcaption class="mono" id="madeCap"></figcaption>
+        </figure>
+        <div class="mfy__rest">
+        <fieldset>
+          <legend class="legend">Fabric</legend>
+          <div class="tiles" id="cfgFabric">
+            <label class="tile" data-fabric="cashmere-merino"><input type="radio" name="fabric" value="cashmere-merino" checked><span class="t"><span class="t__im"><img src="" alt=""/></span><span class="t__m"><em>Cashmere and merino</em><small>Konungur blankets</small></span></span></label>
+            <label class="tile" data-fabric="icelandic-wool"><input type="radio" name="fabric" value="icelandic-wool"><span class="t"><span class="t__im"><img src="" alt=""/></span><span class="t__m"><em>Icelandic wool</em><small>Icelandic wool blankets</small></span></span></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend class="legend">Colour, the blanket it is cut from</legend>
+          <div class="cfg__sw" id="cfgColour"></div>
+          <p class="cfg__len" id="cfgColourAsk" hidden>Tell us the colour you would like in your request and we write back with what we have.</p>
+        </fieldset>
+        <fieldset>
+          <legend class="legend">Fur</legend>
+          <div class="seg" id="cfgFur">
+            <label><input type="radio" name="fur" value="no" checked><span><em>Without fur</em></span></label>
+            <label><input type="radio" name="fur" value="yes"><span><em>With fur</em></span></label>
+          </div>
+          <p class="cfg__len" id="cfgFurNote" hidden></p>
+        </fieldset>
+        <fieldset>
+          <legend class="legend">Salmon leather trim</legend>
+          <div class="seg">
+            <label><input type="radio" name="trim" value="no" checked><span><em>None</em></span></label>
+            <label><input type="radio" name="trim" value="yes"><span><em>At the edges</em><small>On request</small></span></label>
+          </div>
+          <p class="cfg__len" id="cfgTrim" hidden>Salmon leather is rare and suits only some colours, so we write back about it before anything is cut.</p>
+        </fieldset>
+        <fieldset>
+          <legend class="legend">Length</legend>
+          <div class="seg">
+            <label><input type="radio" name="len" value="standard" checked><span><em>Standard</em></span></label>
+            <label><input type="radio" name="len" value="adjusted"><span><em>I would like a change</em><small>Length, pockets</small></span></label>
+          </div>
+          <p class="cfg__len" id="cfgLen" hidden>Write how you would like it, shorter, longer or with pockets, and we write back with the exact price before anything is cut.</p>
+        </fieldset>
+        <div class="cfg__sum">
+          <span class="cfg__price" id="cfgPrice"></span>
+          <span class="cfg__note" id="cfgNote"></span>
+          <button type="submit" class="cfg__go">Request this piece</button>
+        </div>
+        <div class="cfg__done" id="cfgDone" hidden></div>
+        </div>
+      </div>
+    </form>
+    <p class="made__aside mfy__aside">At Klapparst&iacute;gur 29 a neckwarmer is made in front of you in twenty minutes. That one you have to come in for. <a class="link" href="store.html?s=klapparstigur-29">[ Klapparst&iacute;gur 29 ]</a></p>
+  </section>
+  <section class="pg" id="ready">
+    <div class="head">
+      <span class="head__n">In the shop</span>
+      <h2 class="head__t">Already made</h2>
+      <div class="head__end">${rnav('readyRail')}<a class="link" href="shop.html?type=clothing">[ See all ]</a></div>
+    </div>
+    <div class="rail" id="readyRail" data-page-rail tabindex="0" aria-label="Already made"><div class="rail__t" id="readyT"></div></div>
   </section>`,
   },
   staff: {
@@ -227,7 +349,7 @@ ${store('skolavordustigur-4', '04', 'Step-free access', 'Sk&oacute;lav&ouml;r&et
   },
 };
 
-const FILE = { shop: 'shop.html', product: 'product.html', fibres: 'fibres.html', stores: 'store.html', story: 'story.html', staff: 'staff.html' };
+const FILE = { shop: 'shop.html', product: 'product.html', fibres: 'fibres.html', stores: 'store.html', story: 'story.html', made: 'made.html', staff: 'staff.html' };
 for (const [key, p] of Object.entries(PAGES)) {
   let h = head
     .replace(/<title>[\s\S]*?<\/title>/, `<title>${p.title}</title>`)
