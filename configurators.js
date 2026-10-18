@@ -150,7 +150,10 @@
 
     const v = n => { const el = cfg.querySelector(`input[name="${n}"]:checked`); return el ? el.value : ''; };
     const set = (n, val) => { const el = cfg.querySelector(`input[name="${n}"][value="${val}"]`); if (el) el.checked = true; };
-    const row = () => ROWS.find(r => r.model === v('model') && r.fabric === v('fabric') && r.fur === (v('fur') === 'yes')) || null;
+    /* One decision per control (Sindri 2026-10-17): her two shawl rows ("shawl", "shawl with pockets") are one
+       shawl card plus a Pockets no/yes switch, so mdl() is the row's model: the card, or the shawl with pockets. */
+    const mdl = () => (v('model') === 'shawl' && v('pockets') === 'yes' ? 'shawl-pockets' : v('model'));
+    const row = () => ROWS.find(r => r.model === mdl() && r.fabric === v('fabric') && r.fur === (v('fur') === 'yes')) || null;
 
     /* the fabric's colours are her blankets in it, in stock and photographed: the one it is cut from */
     const blankets = key => CM.all.filter(p => FABRIC[key] && FABRIC[key].blankets.includes(p.fam) && !p.oos && p.img && p.img[0]);
@@ -165,8 +168,6 @@
       return [...parts.filter(x => !PATTERN.test(x)), ...parts.filter(x => PATTERN.test(x)),
         ...(design.toLowerCase() !== (famShort[p.fam] || '').toLowerCase() ? [design] : [])].join(', ') || p.t;
     };
-    // a swatch label holds two short lines; the whole name is in the title and in the request
-    const short = x => (x.length <= 30 ? x : x.slice(0, 30).replace(/\s+\S*$/, '') + '…');
     // fabric tiles: one of her blankets in that fabric, cropped close so the texture reads
     $$('.tile[data-fabric]', cfg).forEach(tile => {
       const p = blankets(tile.dataset.fabric)[0] || CM.all.find(x => x.mat === tile.dataset.fabric && x.img && x.img[0]), im = $('img', tile);
@@ -179,10 +180,6 @@
     const madeOf = key => CM.all.filter(p => p.tyk === 'clothing' && p.fam === key && p.img && p.img[0]).sort((a, b) => a.oos - b.oos);
     $$('.mfy__m[data-model]', cfg).forEach(card => {
       const key = card.dataset.model, L = madeOf(key), live = L.filter(p => !p.oos);
-      const fabs = [...new Set(ROWS.filter(r => r.model === key).map(r => r.fabric))].map(f => nm(FABRIC[f]));
-      const furs = new Set(ROWS.filter(r => r.model === key).map(r => r.fur));
-      const opts = $('.mfy__opts', card);
-      if (opts) opts.textContent = fabs.join(' · ') + ' · ' + t(furs.size > 1 ? 'with or without fur' : furs.has(true) ? 'with fur' : 'without fur');
       if (L[0]) {
         const im = $('.mfy__im', card);
         im.innerHTML = `<img src="${px(L[0].img[0], 520)}" width="520" height="693" alt="" loading="lazy" decoding="async"/>`;
@@ -200,13 +197,13 @@
     const paintPreview = () => {
       if (!heroIm) return;
       // with fur chosen, a piece with fur in her name first (and without, one without): the closest example she has
-      const fur = v('fur') === 'yes', L = madeOf(v('model'));
+      const fur = v('fur') === 'yes', L = madeOf(mdl());
       const piece = L.find(p => /\bfur\b/i.test(p.t) === fur) || L[0], blanket = CM.all.find(p => String(p.id) === v('colour'));
       const src = piece || blanket || CM.all.find(p => p.tyk === 'clothing' && p.img && p.img[0]);
       if (!src) return;
       const next = px(src.img[0], 1100);
       if (heroIm.getAttribute('src') !== next) { heroIm.src = next; heroIm.alt = src.t; pulse(heroIm); }
-      if (heroCap) heroCap.textContent = piece ? fmt('{model}, made before: an example of the cut', { model: nm(MODEL[v('model')]) })
+      if (heroCap) heroCap.textContent = piece ? fmt('{model}, made before: an example of the cut', { model: nm(MODEL[mdl()]) })
         : blanket ? fmt('The blanket it is cut from: {colour}', { colour: colourName(blanket) }) : '';
     };
 
@@ -215,14 +212,17 @@
     const paintColours = () => {
       const key = v('fabric'); if (key === shownFabric) return; shownFabric = key;
       const L = blankets(key), many = new Set(L.map(p => p.fam)).size > 1;
-      sw.innerHTML = L.map((p, i) => `<label class="csw" title="${p.t.replace(/"/g, '&quot;')}"><input type="radio" name="colour" value="${p.id}"${i ? '' : ' checked'}>
-        <span class="csw__im"><img src="${px(p.img[0], 160)}" alt="" loading="lazy"/></span><span class="csw__n">${escA(short((many ? famShort[p.fam] + ' · ' : '') + colourName(p)))}</span></label>`).join('');
+      // the swatch is the photo alone; its name is the input's label and shows beside "Colour" once chosen
+      const cname = p => escA((many ? famShort[p.fam] + ' · ' : '') + colourName(p));
+      sw.innerHTML = L.map((p, i) => `<label class="csw" title="${cname(p)}" data-name="${cname(p)}"><input type="radio" name="colour" value="${p.id}" aria-label="${cname(p)}"${i ? '' : ' checked'}>
+        <span class="csw__im"><img src="${px(p.img[0], 160)}" alt="" loading="lazy"/></span></label>`).join('');
       sw.hidden = !L.length; ask.hidden = !!L.length;
     };
     /* only her rows: an option with no row for the current choice is switched off, and a choice
        that has just become impossible moves to the nearest one that exists */
     const sync = () => {
-      const m = v('model');
+      const m = mdl();
+      $('#cfgPockets').hidden = v('model') !== 'shawl';   // pockets are a choice on the shawl only (her rows)
       const fabrics = new Set(ROWS.filter(r => r.model === m).map(r => r.fabric));
       $$('input[name="fabric"]', cfg).forEach(i => { i.disabled = !fabrics.has(i.value); i.closest('label').classList.toggle('is-off', i.disabled); });
       if (!fabrics.has(v('fabric'))) set('fabric', [...fabrics][0]);
@@ -246,29 +246,33 @@
       const next = priced() ? usd(total()) : t('Price on request');
       if (priceEl.textContent !== next) { priceEl.textContent = next; pulse(priceEl); }
       priceEl.classList.toggle('is-ask', !priced());
-      const adj = v('len') === 'adjusted';   // never name a field "length": form.elements.length is the control count
+      const adj = v('len') !== 'standard';   // never name a field "length": form.elements.length is the control count
       lenEl.hidden = !adj;
       if (trimEl) trimEl.hidden = v('trim') !== 'yes';
       noteEl.textContent = t(!priced() ? 'We write back with the price before anything is cut.'
         : adj ? 'Indicative. We confirm the price with the length.' : 'The whole price. We confirm by email before anything is cut.');
     };
-    cfg.addEventListener('change', e => { if (e.target.name !== 'colour') sync(); done.hidden = true; paint(); paintPreview(); });
+    const paintValues = () => $$('.cfg__val[data-for]', cfg).forEach(el => {
+      const i = cfg.querySelector(`input[name="${el.dataset.for}"]:checked`), l = i && i.closest('label');
+      el.textContent = !l ? '' : l.dataset.name || ($('em', l) || l).textContent.trim();
+    });
+    cfg.addEventListener('change', e => { if (e.target.name !== 'colour') sync(); done.hidden = true; paint(); paintPreview(); paintValues(); });
     /* The request is an email to the workshop, written out in full with her own name for the
        piece, so nothing is lost between the page and the shop. It opens the shopper's own mail
        app; the address is shown too. Fur and salmon leather colours are theirs to write in. */
     cfg.addEventListener('submit', e => {
       e.preventDefault();
       const r = row(); if (!r) return;
-      const adj = v('len') === 'adjusted', fur = v('fur') === 'yes', trim = v('trim') === 'yes';
+      const adj = v('len') !== 'standard', fur = v('fur') === 'yes', trim = v('trim') === 'yes';
       const blanket = CM.all.find(p => String(p.id) === v('colour'));
       const price = priced() ? usd(total()) + (adj ? t(', to be confirmed') : '') : t('Price on request');
       const rows = [[t('Piece'), r.name], [t('Model'), nm(MODEL[r.model])], [t('Fabric'), nm(FABRIC[r.fabric])],
         [t('Colour'), blanket ? blanket.t : t('To tell you in this email')],
         [t('Fur'), fur ? t('With fur, colour to tell you in this email') : t('Without fur')],
         [t('Salmon leather'), trim ? t('At the edges, colour to tell you in this email') : t('None')],
-        [t('Length'), t(adj ? 'A change, written below' : 'Standard')], [t('Price'), price]];
+        [t('Length'), adj ? fmt('{length}, how much written below', { length: t(v('len') === 'shorter' ? 'Shorter' : 'Longer') }) : t('Standard')], [t('Price'), price]];
       const to = 'customersupport@mjukiceland.com';
-      const body = t('Made for you') + '\n\n' + rows.map(x => x[0] + ': ' + x[1]).join('\n') + '\n\n' + (adj ? t('How I would like it (length, pockets):') + '\n\n' : '');
+      const body = t('Made for you') + '\n\n' + rows.map(x => x[0] + ': ' + x[1]).join('\n') + '\n\n' + (adj ? t('How much shorter or longer:') + '\n\n' : '');
       const mail = `mailto:${to}?subject=${encodeURIComponent(t('Made for you') + ': ' + nm(MODEL[r.model]))}&body=${encodeURIComponent(body)}`;
       const escH = x => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;');
       done.setAttribute('role', 'status');
@@ -283,8 +287,9 @@
     });
     // a link from elsewhere can open the page on one model: made.html?model=grace
     const asked = new URLSearchParams(location.search).get('model');
-    if (asked && MODEL[asked]) set('model', asked);
-    sync(); paint(); paintPreview();
+    if (asked === 'shawl-pockets') { set('model', 'shawl'); set('pockets', 'yes'); }
+    else if (asked && MODEL[asked] && $(`input[name="model"][value="${asked}"]`, cfg)) set('model', asked);
+    sync(); paint(); paintPreview(); paintValues();
 
     /* ── scroll reveals for the section, on the shell's .rv grammar ──
        app.js reveals .head already; the copy, the image and each fieldset follow it, 70ms apart,

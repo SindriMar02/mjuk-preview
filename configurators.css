@@ -131,7 +131,7 @@ fieldset{border:0;padding:0;margin:0;min-width:0}
 .cfg__len{font-size:13px;line-height:1.55;color:var(--ink);max-width:48ch}
 .cfg__len[hidden]{display:none}
 /* colour: her blankets in the chosen fabric, as round crops like the pompom swatches */
-.cfg__sw{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:14px 10px}
+.cfg__sw{display:grid;grid-template-columns:repeat(auto-fill,minmax(60px,1fr));gap:12px 10px;justify-items:start}
 .cfg__sw[hidden]{display:none}
 .csw{position:relative;cursor:pointer;display:grid;gap:6px;justify-items:center}
 .csw input{position:absolute;inset:0;opacity:0;pointer-events:none}
@@ -215,3 +215,17 @@ fieldset{border:0;padding:0;margin:0;min-width:0}
 @media(max-width:900px){.mfy__intro{grid-template-columns:1fr;align-items:start}.mfy__prev{display:none}}
 @media(max-width:560px){.mfy__grid{grid-template-columns:repeat(2,minmax(0,1fr))}.mfy__none em{font-size:20px}}
 @media(prefers-reduced-motion:reduce){.mfy__im img{transition:none}}
+
+/* ══ one decision per control (Sindri 2026-10-17) ══
+   the label carries the chosen value ("Fur  No"), the control carries one word per segment: a single
+   track split into equal parts, the chosen part filled, like a shop's size row. */
+.cfg .legend{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.cfg__val{font-family:var(--ff-s);font-size:15px;letter-spacing:0;text-transform:none;color:var(--ink)}
+.seg--even{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:0;max-width:420px;border:1px solid var(--line)}
+.seg--even label+label span{border-left:1px solid var(--line)}
+.seg--even span{width:100%;justify-content:center;min-height:46px;padding:10px 8px;border:0}
+.seg--even input:checked+span{border-color:var(--ink)}
+.seg--even label.is-off span{border-style:solid;opacity:.35}
+.seg--even label.is-off span em{text-decoration:line-through;text-decoration-thickness:1px}
+#cfgPockets[hidden]{display:none}
+.tile .t__m{justify-content:flex-start}

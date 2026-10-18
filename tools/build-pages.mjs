@@ -250,7 +250,7 @@ ${store('skolavordustigur-4', '04', 'Step-free access', 'Sk&oacute;lav&ouml;r&et
         <p>Choose the model, the fabric and its colour, and fur or no fur. The standard cut needs nothing more. Shorter, longer, with pockets or with salmon leather: say so and we write back before anything is cut.</p>
       </div>
       <ol class="mfy__steps">
-        <li><b class="mono">01</b><span>Choose the model</span><small>Two shawls, a poncho and four capes.</small></li>
+        <li><b class="mono">01</b><span>Choose the model</span><small>A shawl, a poncho and four capes.</small></li>
         <li><b class="mono">02</b><span>Choose the blanket it is cut from</span><small>Cashmere and merino, or Icelandic wool, in the colours we have.</small></li>
         <li><b class="mono">03</b><span>Send the request</span><small>It goes to the workshop by email. We write back with the price before anything is cut.</small></li>
       </ol>
@@ -259,8 +259,8 @@ ${store('skolavordustigur-4', '04', 'Step-free access', 'Sk&oacute;lav&ouml;r&et
       <fieldset class="mfy__models">
         <legend class="legend">Model</legend>
         <div class="mfy__grid" id="cfgModel">
-${[['shawl', 'Shawl'], ['shawl-pockets', 'Shawl with pockets'], ['petite-poncho', 'Petite poncho'], ['princess', 'Princess cape'], ['angelina', 'Angelina cape'], ['grace', 'Grace cape'], ['empress', 'Empress cape']].map(([k, n], i) => `          <div class="mfy__m" data-model="${k}">
-            <label><input type="radio" name="model" value="${k}"${i ? '' : ' checked'}><span class="mfy__im"><span class="mfy__none" aria-hidden="true"><em>${n}</em><small class="mono">No photo yet</small></span></span><span class="mfy__meta"><em>${n}</em><small class="mfy__opts"></small></span></label>
+${[['shawl', 'Shawl'], ['petite-poncho', 'Petite poncho'], ['princess', 'Princess cape'], ['angelina', 'Angelina cape'], ['grace', 'Grace cape'], ['empress', 'Empress cape']].map(([k, n], i) => `          <div class="mfy__m" data-model="${k}">
+            <label><input type="radio" name="model" value="${k}"${i ? '' : ' checked'}><span class="mfy__im"><span class="mfy__none" aria-hidden="true"><em>${n}</em><small class="mono">No photo yet</small></span></span><span class="mfy__meta"><em>${n}</em></span></label>
             <a class="mfy__shop mono" href="shop.html?family=${k}" hidden></a>
           </div>`).join('\n')}
         </div>
@@ -271,41 +271,51 @@ ${[['shawl', 'Shawl'], ['shawl-pockets', 'Shawl with pockets'], ['petite-poncho'
           <figcaption class="mono" id="madeCap"></figcaption>
         </figure>
         <div class="mfy__rest">
+        <!-- One decision per control, one word per button (Sindri 2026-10-17, after Mobbin: lululemon, adidas,
+             H&M, Apple): the label names the choice and shows what is chosen; help appears only when it applies. -->
         <fieldset>
-          <legend class="legend">Fabric</legend>
+          <legend class="legend">Fabric <span class="cfg__val" data-for="fabric" aria-hidden="true"></span></legend>
           <div class="tiles" id="cfgFabric">
-            <label class="tile" data-fabric="cashmere-merino"><input type="radio" name="fabric" value="cashmere-merino" checked><span class="t"><span class="t__im"><img src="" alt=""/></span><span class="t__m"><em>Cashmere and merino</em><small>Konungur blankets</small></span></span></label>
-            <label class="tile" data-fabric="icelandic-wool"><input type="radio" name="fabric" value="icelandic-wool"><span class="t"><span class="t__im"><img src="" alt=""/></span><span class="t__m"><em>Icelandic wool</em><small>Icelandic wool blankets</small></span></span></label>
+            <label class="tile" data-fabric="cashmere-merino"><input type="radio" name="fabric" value="cashmere-merino" checked><span class="t"><span class="t__im"><img src="" alt=""/></span><span class="t__m"><em>Cashmere and merino</em></span></span></label>
+            <label class="tile" data-fabric="icelandic-wool"><input type="radio" name="fabric" value="icelandic-wool"><span class="t"><span class="t__im"><img src="" alt=""/></span><span class="t__m"><em>Icelandic wool</em></span></span></label>
           </div>
         </fieldset>
         <fieldset>
-          <legend class="legend">Colour, the blanket it is cut from</legend>
+          <legend class="legend">Colour <span class="cfg__val" data-for="colour" aria-hidden="true"></span></legend>
           <div class="cfg__sw" id="cfgColour"></div>
           <p class="cfg__len" id="cfgColourAsk" hidden>Tell us the colour you would like in your request and we write back with what we have.</p>
         </fieldset>
+        <fieldset id="cfgPockets">
+          <legend class="legend">Pockets <span class="cfg__val" data-for="pockets" aria-hidden="true"></span></legend>
+          <div class="seg seg--even">
+            <label><input type="radio" name="pockets" value="no" checked><span><em>No</em></span></label>
+            <label><input type="radio" name="pockets" value="yes"><span><em>Yes</em></span></label>
+          </div>
+        </fieldset>
         <fieldset>
-          <legend class="legend">Fur</legend>
-          <div class="seg" id="cfgFur">
-            <label><input type="radio" name="fur" value="no" checked><span><em>Without fur</em></span></label>
-            <label><input type="radio" name="fur" value="yes"><span><em>With fur</em></span></label>
+          <legend class="legend">Fur <span class="cfg__val" data-for="fur" aria-hidden="true"></span></legend>
+          <div class="seg seg--even" id="cfgFur">
+            <label><input type="radio" name="fur" value="no" checked><span><em>No</em></span></label>
+            <label><input type="radio" name="fur" value="yes"><span><em>Yes</em></span></label>
           </div>
           <p class="cfg__len" id="cfgFurNote" hidden></p>
         </fieldset>
         <fieldset>
-          <legend class="legend">Salmon leather trim</legend>
-          <div class="seg">
-            <label><input type="radio" name="trim" value="no" checked><span><em>None</em></span></label>
-            <label><input type="radio" name="trim" value="yes"><span><em>At the edges</em><small>On request</small></span></label>
+          <legend class="legend">Salmon leather trim <span class="cfg__val" data-for="trim" aria-hidden="true"></span></legend>
+          <div class="seg seg--even">
+            <label><input type="radio" name="trim" value="no" checked><span><em>No</em></span></label>
+            <label><input type="radio" name="trim" value="yes"><span><em>Yes</em></span></label>
           </div>
           <p class="cfg__len" id="cfgTrim" hidden>Salmon leather is rare and suits only some colours, so we write back about it before anything is cut.</p>
         </fieldset>
         <fieldset>
-          <legend class="legend">Length</legend>
-          <div class="seg">
+          <legend class="legend">Length <span class="cfg__val" data-for="len" aria-hidden="true"></span></legend>
+          <div class="seg seg--even">
+            <label><input type="radio" name="len" value="shorter"><span><em>Shorter</em></span></label>
             <label><input type="radio" name="len" value="standard" checked><span><em>Standard</em></span></label>
-            <label><input type="radio" name="len" value="adjusted"><span><em>I would like a change</em><small>Length, pockets</small></span></label>
+            <label><input type="radio" name="len" value="longer"><span><em>Longer</em></span></label>
           </div>
-          <p class="cfg__len" id="cfgLen" hidden>Write how you would like it, shorter, longer or with pockets, and we write back with the exact price before anything is cut.</p>
+          <p class="cfg__len" id="cfgLen" hidden>Say how much in your request, and we write back with the exact price before anything is cut.</p>
         </fieldset>
         <div class="cfg__sum">
           <span class="cfg__price" id="cfgPrice"></span>
