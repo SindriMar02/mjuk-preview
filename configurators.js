@@ -51,7 +51,7 @@
   const dlg = $('#pom');
   if (dlg && POMS.length) {
     window.CMPomReady = true;   // app.js: a plain hat's button opens this; without it, the button adds the hat
-    dlg.setAttribute('data-lenis-prevent', '');   // the wheel scrolls this dialog, not the page behind it (Lenis would swallow it)
+    dlg.setAttribute('data-lenis-prevent', ''); dlg.setAttribute('tabindex', '-1');   // the wheel scrolls this dialog, not the page behind it (Lenis would swallow it)
     const grid = $('#pomGrid'), img = $('#pomImg'), name = $('#pomName'), total = $('#pomTotal'),
           add = $('#pomAdd'), slots = $$('.pom__slot', dlg), why = $('#pomWhy');
     let hat = null, count = 0, active = 0, chosen = [null, null];
@@ -91,7 +91,7 @@
       paint();
     });
 
-    const open = h => {
+    const open = (h, viaKey) => {
       if (window.CMBag && window.CMBag.room && window.CMBag.room(h.h) < 1) { window.CMBag.add(h.h, '', null, null); return; } // already at the limit: the drawer says so
       dlg.returnValue = '';   // Escape, the X and the Android back button close with nothing, never with last time's "add"
       hat = h; count = 0; active = 0; chosen = [null, null];
@@ -106,7 +106,9 @@
         : 'Any pompom goes on any hat. In the shop you pick from the cabinet of eighty. Here are the ones we have photographed, {price} each, attached before it ships.', { price: `<b>${pomPrice}</b>` });
       paint();
       if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
-      $('input[name="n"][value="0"]', dlg).focus();
+      /* a pointer opens onto the dialog itself, a keyboard onto its first choice: a script focus() with nothing focused
+         before paints :focus-visible's ring on the radio, which looks like a pre-selected, highlighted option */
+      if (viaKey) $('input[name="n"][value="0"]', dlg).focus(); else dlg.focus({ preventScroll: true });
     };
 
     dlg.addEventListener('close', () => {
@@ -127,7 +129,7 @@
     document.addEventListener('click', e => {
       const b = e.target.closest('.sz.pom-ask'); if (!b) return;
       e.preventDefault();
-      const h = byHandle[b.dataset.h]; if (h) open(h);
+      const h = byHandle[b.dataset.h]; if (h) open(h, e.detail === 0);
     });
   }
 

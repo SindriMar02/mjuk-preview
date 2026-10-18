@@ -551,7 +551,7 @@
       roll = gsap.to(textInner, { yPercent: -((seq.length - 1) / seq.length) * 100, duration: .9, ease: 'power4.out' });
     };
 
-    const setMenu = o => {
+    const setMenu = (o, viaKey) => {
       document.body.classList.toggle('menu-open', o);
       burger.setAttribute('aria-expanded', String(o));
       burger.setAttribute('aria-label', o ? labelClose : labelOpen);
@@ -559,14 +559,17 @@
       /* closed, the panel's links must leave the tab order (clip-path and pointer-events do not); open,
          focus goes in, and shutting it gives focus back to the button */
       menu.inert = !o;
-      if (o) { const first = menu.querySelector('a'); if (first) first.focus({ preventScroll: true }); }
+      /* focus goes in, but never as a ring a pointer did not ask for: a script focus() with nothing focused before
+         (Safari never focuses a clicked button, a touch tap neither) matches :focus-visible and paints the browser's
+         ring on the first link. A pointer opens onto the panel itself; a keyboard onto the first link. */
+      if (o) { const first = menu.querySelector('a'); const tgt = viaKey ? first : menu; if (tgt) tgt.focus({ preventScroll: true }); }
       else if (menu.contains(document.activeElement)) burger.focus({ preventScroll: true });
       animateIcon(o); animateText(o);
     };
-    menu.inert = true;
+    menu.setAttribute('tabindex', '-1'); menu.inert = true;
     closeMenu = () => { if (document.body.classList.contains('menu-open')) setMenu(false); };
 
-    burger.addEventListener('click', () => setMenu(!document.body.classList.contains('menu-open')));
+    burger.addEventListener('click', e => setMenu(!document.body.classList.contains('menu-open'), e.detail === 0));   // detail 0 = Enter/Space, not a pointer
     /* Menu links navigate explicitly: the generic anchor handler relied on
        lenis.scrollTo, which silently no-ops when Lenis is stopped or starved,
        so these links did nothing at all. */
