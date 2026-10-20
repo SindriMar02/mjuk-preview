@@ -255,6 +255,7 @@ section{padding:clamp(70px,12vw,180px) 0;position:relative}
 /* closed means gone, for screen readers and the page edge too: hidden once it has slid out */
 /* opening is the one to watch (.5s); closing answers a tap and gets out of the way (.32s) */
 .bag[aria-hidden="false"] .bag__panel{transform:none;visibility:visible;transition:transform .5s var(--ease),visibility 0s}
+.bag__panel:focus,.bag__panel:focus-visible{outline:none}   /* the panel takes focus on a pointer open; it must never draw a ring */
 .bag__head{display:flex;align-items:baseline;justify-content:space-between;gap:14px;padding:24px var(--bagpad,22px);border-bottom:1px solid var(--line)}
 .bag__title{font-family:var(--ff-d);font-weight:600;font-size:34px;line-height:1;text-transform:uppercase}
 .bag__title span{color:var(--accent);font-size:.5em}

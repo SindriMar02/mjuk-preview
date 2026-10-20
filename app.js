@@ -342,6 +342,11 @@
   /* the drawer is a modal: it takes focus while open, keeps Tab inside, and gives focus back */
   let bagOpen = false, lastFocus = null;
   if (bagEl) bagEl.inert = true; // closed: nothing in it can be tabbed to or keep focus
+  // how the last interaction happened decides where focus lands when a drawer opens (pointer: the panel; key: a control)
+  let lastInputWasKey = false;
+  document.addEventListener('keydown', () => { lastInputWasKey = true; }, true);
+  document.addEventListener('pointerdown', () => { lastInputWasKey = false; }, true);
+  if (bagEl) { const panel = bagEl.querySelector('.bag__panel'); if (panel && !panel.hasAttribute('tabindex')) panel.setAttribute('tabindex', '-1'); }
   const openBag = on => {
     if (!bagEl) return;
     bagEl.setAttribute('aria-hidden', String(!on));
@@ -350,7 +355,9 @@
     if (lenis) { on ? lenis.stop() : lenis.start(); }
     if (on === bagOpen) return;
     bagOpen = on;
-    if (on) { lastFocus = document.activeElement; setTimeout(() => { const c = $('#bagClose'); if (c) c.focus({ preventScroll: true }); }, 60); }
+    /* same rule as the menu: a pointer open focuses the panel itself (a script focus() on the close button
+       with nothing focused before paints a ring on Safari/iOS); a keyboard open focuses the close button */
+    if (on) { lastFocus = document.activeElement; setTimeout(() => { const panel = bagEl.querySelector('.bag__panel'), c = $('#bagClose'), tgt = lastInputWasKey ? c : panel; if (tgt) tgt.focus({ preventScroll: true }); }, 60); }
     else if (lastFocus && lastFocus.focus && document.contains(lastFocus)) lastFocus.focus({ preventScroll: true });
   };
   /* one of one: never more of a piece in the bag than she has on the shelf (or than a bag can
