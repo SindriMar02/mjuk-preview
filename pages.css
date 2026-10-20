@@ -49,7 +49,7 @@ body[data-page] .bars{opacity:.18}
   padding:8px 13px;border:1px solid var(--line);background:transparent;
   transition:border-color .24s var(--ease),background .24s var(--ease),color .24s var(--ease),transform .16s var(--ease)}
 .chip:active{transform:scale(.97)}
-.chip:hover{border-color:var(--ink)}
+@media(hover:hover){.chip:hover{border-color:var(--ink)}}
 .chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .chip small{margin-left:6px;color:var(--dim);letter-spacing:.02em}
 .chip[aria-pressed="true"] small{color:var(--faint)}
@@ -58,7 +58,7 @@ body[data-page] .bars{opacity:.18}
 .chip.sw{width:24px;height:24px;padding:0;border-radius:999px;border:0;background:var(--sw);
   box-shadow:inset 0 0 0 1px rgba(23,18,26,.12),0 0 0 0 var(--bg),0 0 0 0 var(--ink);
   transition:box-shadow .3s var(--ease),transform .3s var(--ease)}
-.chip.sw:hover{transform:scale(1.12)}
+@media(hover:hover){.chip.sw:hover{transform:scale(1.12)}}
 .chip.sw[aria-pressed="true"]{background:var(--sw);box-shadow:inset 0 0 0 1px rgba(23,18,26,.12),0 0 0 3px var(--bg),0 0 0 4px var(--ink)}
 .chip.sw:focus-visible{outline:1px solid var(--accent);outline-offset:5px}
 .filt__end{margin-left:auto;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
@@ -106,7 +106,7 @@ body[data-page] .bars{opacity:.18}
 .pdp__add{display:grid;gap:10px;padding-top:6px}
 .pdp__add .sz{width:100%;text-align:center;justify-content:center;padding:16px 18px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;
   background:var(--ink);color:var(--bg);border:1px solid var(--ink);transition:background .3s var(--ease),color .3s var(--ease),transform .16s var(--ease)}
-.pdp__add .sz:hover{background:var(--accent);border-color:var(--accent)}
+@media(hover:hover){.pdp__add .sz:hover{background:var(--accent);border-color:var(--accent)}}
 .pdp__add .sz:active{transform:scale(.99)}
 .pdp__add .sz:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 .pdp__oos{display:grid;gap:8px;padding:16px 18px;border:1px solid var(--line);background:var(--bg-2)}
