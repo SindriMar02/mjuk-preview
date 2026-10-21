@@ -148,6 +148,11 @@ try {
   const spare = CM.all.find(p => !p.oos && p.q >= 3 && ![hat.id, pom.id, one.id].includes(p.id) && !/pom ?pom/i.test(p.t)); // price is set per case
   const w = x => ({ id: x.id, q: 1, p: x.p });
   console.log(`      hat #${hat.id} $${hat.p} · pompom #${pom.id} $${pom.p} · one-of-one #${one.id} · sold out #${gone.id} · spare #${spare.id}`);
+  // her shop keeps selling between copies (the hat was sold out by 19 Oct): the fixed pieces are put on the shelf
+  // for the run and restored at the end like everything else
+  await setProduct(hat.id, { stock: 3, stock_status: 'instock', status: 'publish' });
+  await setProduct(pom.id, { stock: 3, stock_status: 'instock', status: 'publish' });
+  await setProduct(one.id, { stock: 1, stock_status: 'instock', status: 'publish' });
 
   /* ════════════════════════════════════════════════════════════════════════ */
   head('hand-off');
