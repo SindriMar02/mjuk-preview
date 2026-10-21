@@ -120,7 +120,7 @@ async function login(b, page, user, pass) {
 }
 
 const restore = []; // put back whatever a scenario changed, even if it fails
-const setProduct = async (id, change) => { const was = await glue('product', { id }); restore.push(() => glue('product_set', { id, body: { regular: was.regular, sale: was.sale, stock: was.stock, stock_status: was.stock_status, status: was.status } }));
+const setProduct = async (id, change) => { const was = await glue('product', { id }); restore.push(() => glue('product_set', { id, body: { regular: was.regular, sale: was.sale, stock: was.stock, stock_status: was.stock_status, status: was.status, visibility: was.visibility } }));
   await glue('product_set', { id, body: change }); return was; };
 
 let KEEP = new Set(); // orders present before the run (the upgraded copy's seeded ones)
@@ -196,7 +196,8 @@ try {
     const D = await handoff([w(one), w(hat)]);
     check(lines(D.cart) === `${hat.id}×1` && /no longer available/i.test(notices(D.page)), `taken off her shop (draft): left out and said (${lines(D.cart)})`);
     await restore.pop()(); }
-  { const hidden = 7872; const h = await glue('product', { id: hidden }); // her Marshmallow hat, peach with peach pompom: published but hidden from her catalogue (the Explorer hats left the web shop, Q24)
+  { const hidden = 7872; // her Marshmallow hat, peach with peach pompom: hidden from her catalogue on 5 Oct, visible again on 11 Oct (she decides); the run hides it itself and puts it back
+    await setProduct(hidden, { visibility: 'hidden' }); const h = await glue('product', { id: hidden });
     const V = await handoff([{ id: hidden, q: 1 }, w(one)]);
     check(h && h.status === 'publish' && lines(V.cart) === `${one.id}×1` && /no longer available/i.test(notices(V.page)), `a product she hides from her catalogue never goes in, even from a bag built by hand (${lines(V.cart)})`);
     const draft = 6049; const D2 = await handoff([{ id: draft, q: 1 }, w(one)]); // a draft of hers, untouched

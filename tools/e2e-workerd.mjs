@@ -46,7 +46,10 @@ try {
   check((await mf.fetch('/bag')).status === 204, 'workerd: GET /bag answers 204 when checkout is configured');
   { const bare = await worker({ BAG_SECRET: '', CHECKOUT_ORIGIN: '' }); /* wrangler also reads .dev.vars: blank them */ check((await bare.fetch('/bag')).status === 503, 'workerd: and 503 without its secret (the storefront then says so)'); await bare.stop(); }
 
-  const hat = CM.all.find(p => p.id === 12167), pom = CM.all.find(p => p.id === 4249);
+  // her shop keeps selling between copies: the fixed pieces when they are on the shelf, else any hat and pompom that are
+  const onShelf = p => p && !p.oos && p.q >= 1;
+  const hat = [CM.all.find(p => p.id === 12167)].find(onShelf) || CM.all.find(p => p.tyk === 'hats' && onShelf(p) && p.id !== 11646);
+  const pom = [CM.all.find(p => p.id === 4249)].find(onShelf) || CM.all.find(p => p.tyk === 'pompoms' && onShelf(p));
   const note = 'Attach to Húfa „Mjúk“ ljósgrá, ☃'; // not ASCII: the payload is UTF-8 in base64url
   const r = await post(mf, [{ id: hat.id, q: 1, p: hat.p }, { id: pom.id, q: 1, p: pom.p, note, for: hat.id }], 'is');
   const link = r.headers.get('location') || '';
