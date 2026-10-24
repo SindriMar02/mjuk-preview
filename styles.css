@@ -94,6 +94,9 @@ body.ready .load__mark{transform:translateY(-14px) scale(.985);opacity:.85;trans
 
 /* ══ NAV ══ */
 .nav{position:fixed;top:0;left:0;right:0;z-index:100;height:66px;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;padding:0 var(--pad);color:var(--ink);background:linear-gradient(180deg,rgba(247,243,239,.9),rgba(247,243,239,0))}
+/* scrolled down the page, the header gets its own ground so text never shows through it (Sindri, 24 Oct) */
+.nav::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--bg);box-shadow:0 1px 0 var(--line);opacity:0;transition:opacity .3s var(--ease);pointer-events:none}
+.nav.solid::before,.srch-open .nav::before{opacity:1}
 .nav.hide{transform:translateY(-100%);transition:transform .5s var(--ease)}
 .nav.show{transform:translateY(0);transition:transform .5s var(--ease)}
 .nav__brand{display:flex;align-items:center;justify-self:center}

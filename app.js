@@ -843,7 +843,7 @@
 
   /* ── nav hide on scroll-down ── */
   const nav = $('#nav'); let lastY = 0;
-  const navUpdate = y => { if (document.documentElement.classList.contains('srch-open')) return; if (y > lastY && y > 240) { nav.classList.add('hide'); nav.classList.remove('show'); } else { nav.classList.add('show'); nav.classList.remove('hide'); } lastY = y; };
+  const navUpdate = y => { nav.classList.toggle('solid', y > 80); if (document.documentElement.classList.contains('srch-open')) return; if (y > lastY && y > 240) { nav.classList.add('hide'); nav.classList.remove('show'); } else { nav.classList.add('show'); nav.classList.remove('hide'); } lastY = y; };
 
   /* ── reveal ── */
   const rv = $$('.head, .prod, .cat, .store, .stock__row, .budin__row, .news, .hero__cta');
