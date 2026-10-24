@@ -282,12 +282,13 @@
       bar = { el, lbl: $('.pdp-bar__b span', el) };
       // the same click as the button itself, as a pointer (detail 1), so the chooser opens without a focus ring
       $('.pdp-bar__b', el).addEventListener('click', () => cta.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, detail: 1 })));
-      if ('IntersectionObserver' in window) {
-        let gone = false, foot = false;
-        const sync = () => el.classList.toggle('on', gone && !foot);
-        new IntersectionObserver(([e]) => { gone = !e.isIntersecting && e.boundingClientRect.top < 0; sync(); }).observe(cta);
-        const f = $('.foot'); if (f) new IntersectionObserver(([e]) => { foot = e.isIntersecting; sync(); }).observe(f);
-      }
+      /* read on scroll, once per frame: an observer only reports crossings, and a jump from above the button (it starts
+         below the fold) to past it crosses nothing, so the bar never came (live test, 24 Oct) */
+      const f = $('.foot');
+      let queued = false;
+      const sync = () => { queued = false; const gone = cta.getBoundingClientRect().bottom < 0, foot = f && f.getBoundingClientRect().top < innerHeight; el.classList.toggle('on', gone && !foot); };
+      addEventListener('scroll', () => { if (!queued) { queued = true; requestAnimationFrame(sync); } }, { passive: true });
+      addEventListener('resize', sync); sync();
     }
     // pompoms: None, One or Two in one control; the button below says what happens next
     if (seg && cta && pom) {
