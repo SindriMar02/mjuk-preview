@@ -389,8 +389,10 @@
     if (short) { say(fmt('{name} is already in your bag, as many as can be ordered online.', { name: byHandle[short].t })); openBag(true); return; }
     if (roomFor(p) < 1) {
       // short enough for a card chip; the drawer opens on the piece to show where it is
-      if (btn && !btn.dataset.was) { btn.dataset.was = btn.textContent; btn.textContent = t('In your bag');
-        setTimeout(() => { btn.textContent = btn.dataset.was; delete btn.dataset.was; }, 1800); }
+      // only the label changes, so a product page button keeps its label element and arrow (Codex audit 3, 24 Oct)
+      const lbl = btn && (btn.querySelector('.pdp__ctal') || btn);
+      if (lbl && !btn.dataset.was) { btn.dataset.was = lbl.textContent; lbl.textContent = t('In your bag');
+        setTimeout(() => { lbl.textContent = lbl.dataset.want || btn.dataset.was; delete btn.dataset.was; }, 1800); }
       say(fmt('{name} is already in your bag, as many as can be ordered online.', { name: p.t }));
       openBag(true); return;
     }
@@ -565,7 +567,9 @@
       ['story.html', 'Our story', 'story about who workshop history saga'],
     ];
     // a few words to start from, all names in her own catalogue (one tap fills the field)
-    const POPULAR = ['Marshmallow', 'Pompom', 'Cashmere', 'Merino', 'Blanket', 'Gloves', 'Scarf'];
+    // (Icelandic: words that find pieces on the Icelandic pages, counted 24 Oct; Codex audit 3)
+    const POPULAR = isIS ? ['Marshmallow', 'Dúskar', 'Kasmír', 'Merínó', 'Teppi', 'Hanskar', 'Treflar']
+      : ['Marshmallow', 'Pompom', 'Cashmere', 'Merino', 'Blanket', 'Gloves', 'Scarf'];
     const dlg = document.createElement('dialog');
     dlg.className = 'srch'; dlg.id = 'srch'; dlg.setAttribute('aria-label', t('Search')); dlg.setAttribute('data-lenis-prevent', '');
     dlg.innerHTML = `<div class="srch__bar">
@@ -583,7 +587,8 @@
     let shown = new Set();   // pieces already on screen: typing on keeps them still, only new ones rise in
     // new content: the list eases from its old height to the new one instead of jumping
     const swap = html => {
-      const from = res.getBoundingClientRect().height;
+      const from = res.getBoundingClientRect().height;   // where it is now, mid-tween or not
+      res.getAnimations().forEach(a => a.cancel());       // so the new height is the content's own (Codex audit 3)
       res.innerHTML = html;
       res.querySelectorAll('img').forEach(i => { if (i.complete && i.naturalWidth) i.classList.add('ok'); });
       const to = res.getBoundingClientRect().height;
@@ -635,7 +640,9 @@
     const isOpen = () => dlg.classList.contains('is-open');
     // the panel sits flush under the header, whatever its height on this screen
     const place = () => {
-      document.documentElement.style.setProperty('--srch-top', (navEl ? Math.round(navEl.getBoundingClientRect().bottom) : 0) + 'px');
+      // offsetTop/offsetHeight ignore the header's transform: opened while it is sliding back in, the panel still sits
+      // where the header comes to rest (Codex audit 3)
+      document.documentElement.style.setProperty('--srch-top', (navEl ? navEl.offsetTop + navEl.offsetHeight : 0) + 'px');
       dlg.style.setProperty('--srch-bar', bar.offsetHeight + 'px');
     };
     // the page behind is still while it is open: no scrolling, nothing in it to tab to
@@ -674,6 +681,9 @@
     dlg.querySelector('#srchX').addEventListener('click', e => close(e.detail === 0));
     scrim.addEventListener('click', () => close(false));
     addEventListener('resize', () => { if (isOpen()) place(); });
+    // the bag and the phone menu are reachable from the header while the search is open: it rolls up first, so the
+    // two never stack and the page's scroll lock belongs to one panel at a time (Codex audit 3)
+    document.addEventListener('click', e => { if (isOpen() && e.target.closest('#bagBtn, #burger')) close(false); }, true);
     document.addEventListener('click', e => {
       const b = e.target.closest('#searchBtn'); if (!b) return;
       e.preventDefault(); e.stopImmediatePropagation();

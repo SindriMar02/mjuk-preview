@@ -266,12 +266,16 @@
     const cta = $('.pdp__cta', info), pom = $('.pdp__pom', info), seg = $('.pseg', info);
     // a label that changes slides out and the new one rises in
     const relabel = (el, txt, instant) => {
-      if (!el || el.textContent === txt) return;
-      if (instant || reduced || !el.animate) { el.getAnimations && el.getAnimations().forEach(a => a.cancel()); el.textContent = txt; return; }   // a key press changes it at once
-      el.getAnimations().forEach(a => a.cancel());
+      if (!el) return;
+      // the newest choice wins: anything still in flight is cancelled (its callback never runs) before comparing, so a
+      // quick One then None can never leave "Choose colours" on a button that adds a plain hat (Codex audit 3)
+      if (el.getAnimations) el.getAnimations().forEach(a => a.cancel());
+      el.dataset.want = txt;
+      if (el.textContent === txt) return;
+      if (instant || reduced || !el.animate) { el.textContent = txt; return; }   // a key press changes it at once
       const out = el.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(-35%)' }], { duration: 110, easing: EASE, fill: 'forwards' });
       // the held end state goes as the new label rises in, so nothing is left at opacity 0
-      out.onfinish = () => { el.textContent = txt; el.animate([{ opacity: 0, transform: 'translateY(35%)' }, { opacity: 1, transform: 'none' }], { duration: 240, easing: EASE }); out.cancel(); };
+      out.onfinish = () => { if (el.dataset.want !== txt) return; el.textContent = txt; el.animate([{ opacity: 0, transform: 'translateY(35%)' }, { opacity: 1, transform: 'none' }], { duration: 240, easing: EASE }); out.cancel(); };
     };
     // on a phone, once the button has scrolled away, a slim bar keeps the price and the same button in reach
     let bar = null;

@@ -101,10 +101,14 @@
       // one price if they all cost the same, otherwise the range: the catalogue has $29 pompoms and a $32 one
       const ps = [...new Set(POMS.filter(s => fits(s, h)).map(s => s.price))].sort((a, b) => a - b);
       pMin = ps[0] || 0; pSame = ps.length <= 1;
+      // no colour fits this hat today (only merino left, say): One and Two are off instead of a pompom at $0 (Codex audit 3)
+      const none = !ps.length;
+      if (none) count = 0;
+      $$('input[name="n"]', dlg).forEach(r => { r.disabled = none && r.value !== '0'; const l = r.closest('label'); if (l) l.classList.toggle('is-off', r.disabled); });
       const pomPrice = ps.length === 0 ? '' : ps.length === 1 ? usd(ps[0]) : fmt('{a} to {b}', { a: usd(ps[0]), b: usd(ps[ps.length - 1]) });
       $$('input[name="n"]', dlg).forEach(r => (r.checked = r.value === String(count)));
       img.src = px(h.img[0], 300); img.alt = h.t; name.textContent = h.t;
-      if (why) why.innerHTML = fmt(POMS.some(s => s.merino) && !POMS.every(s => fits(s, h))
+      if (why) why.innerHTML = none ? escA(t('No pompom colours fit this hat right now.')) : fmt(POMS.some(s => s.merino) && !POMS.every(s => fits(s, h))
         ? 'Any of these goes on this hat; the heavier merino pompoms go on merino beanies only. Here are the ones we have photographed, {price} each, attached before it ships.'
         : 'Any pompom goes on any hat. In the shop you pick from the cabinet of eighty. Here are the ones we have photographed, {price} each, attached before it ships.', { price: `<b>${pomPrice}</b>` });
       paint();
