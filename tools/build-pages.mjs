@@ -60,7 +60,7 @@ const PAGES = {
   <section class="pg" id="shop">
     <div class="head">
       <span class="head__n">Shop</span>
-      <h2 class="head__t" id="shopTitle">Everything</h2>
+      <h1 class="head__t" id="shopTitle">Everything</h1>
       <div class="head__end"><span class="mono" id="shopCount">&nbsp;</span></div>
     </div>
     <div class="filt" id="filt">
@@ -117,7 +117,7 @@ const PAGES = {
   <section class="pg" id="fibres">
     <div class="head">
       <span class="head__n">Materials</span>
-      <h2 class="head__t">What we knit with</h2>
+      <h1 class="head__t">What we knit with</h1>
       <div class="head__end"><span class="mono">In Anna&rsquo;s own ranking</span></div>
     </div>
     <div class="fib" id="fib"></div>
@@ -129,7 +129,7 @@ const PAGES = {
   <section class="stores stp" id="stores">
     <div class="head">
       <span class="head__n">Visit</span>
-      <h2 class="head__t">Four doors in Reykjav&iacute;k</h2>
+      <h1 class="head__t">Four doors in Reykjav&iacute;k</h1>
       <div class="head__end"><span class="mono">All within a ten minute walk</span></div>
     </div>
     <div class="stores__grid">
@@ -167,7 +167,7 @@ ${store('skolavordustigur-4', '04', 'Step-free access', 'Sk&oacute;lav&ouml;r&et
   <section class="pg" id="story">
     <div class="head">
       <span class="head__n">MJ&Uacute;K</span>
-      <h2 class="head__t">Our story</h2>
+      <h1 class="head__t">Our story</h1>
       <div class="head__end"><span class="mono">Family owned &middot; Reykjav&iacute;k</span></div>
     </div>
     <div class="story">

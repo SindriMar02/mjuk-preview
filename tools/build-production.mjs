@@ -94,6 +94,52 @@ fs.writeFileSync(path.join(OUT, 'is/robots.txt'), robots('mjukiceland.is'));
 for (const f of ['robots.txt', 'is/robots.txt']) if (/^Disallow:\s*\/\s*$/m.test(fs.readFileSync(path.join(OUT, f), 'utf8'))) bad.push(f + ': Disallow: /');
 for (const f of ['sitemap.xml', 'is/sitemap.xml']) if (!fs.existsSync(path.join(OUT, f))) bad.push(f + ' missing (run tools/build-products.mjs first)');
 
+/* llms.txt for each host (studio standard, SEO audit 24 Oct 2026): written here from the built pages, her catalogue and
+   the store schema, so it can never say anything the site does not. "# Title", a "> summary", plain lines, no dashes. */
+{
+  const W2 = {}; new Function('window', fs.readFileSync(path.join(ROOT, 'assets/data.js'), 'utf8'))(W2);
+  const CM2 = W2.CM || { all: [] };
+  const ENT = { mdash: '—', ndash: '–', amp: '&', quot: '"', rsquo: '’', hellip: '…', nbsp: ' ', Uacute: 'Ú', uacute: 'ú', Iacute: 'Í', iacute: 'í',
+    Aacute: 'Á', aacute: 'á', Eacute: 'É', eacute: 'é', Oacute: 'Ó', oacute: 'ó', Yacute: 'Ý', yacute: 'ý', ETH: 'Ð', eth: 'ð', THORN: 'Þ', thorn: 'þ', AElig: 'Æ', aelig: 'æ', Ouml: 'Ö', ouml: 'ö' };
+  const dec = x => String(x || '').replace(/&([a-z]+);/gi, (m, n) => (n in ENT ? ENT[n] : m)).replace(/&#(\d+);/g, (m, n) => String.fromCharCode(+n)).trim();
+  const noDash = x => x.replace(/\s*[—–]\s*/g, ', ');
+  const llms = lang => {
+    const IS = lang === 'is', host = IS ? 'https://mjukiceland.is/' : 'https://mjukiceland.com/';
+    const page = f => fs.readFileSync(path.join(OUT, (IS ? 'is/' : '') + f), 'utf8');
+    const meta = f => { const h = page(f); return { title: dec((h.match(/<title>([\s\S]*?)<\/title>/) || [])[1]).replace(/\s*—.*$/, ''), desc: dec((h.match(/<meta name="description" content="([^"]*)"/) || [])[1]) }; };
+    const store = JSON.parse((fs.readFileSync(path.join(OUT, 'index.html'), 'utf8').match(/<script type="application\/ld\+json">(\{"@context":"https:\/\/schema\.org","@type":"ClothingStore"[\s\S]*?)<\/script>/) || [])[1] || '{}');
+    const nm = x => (IS && x.is) || x.name;
+    const live = CM2.all;
+    const count = (k, v) => live.filter(p => p[k] === v).length;
+    const pieces = n => IS ? `${n} ${n === 1 ? 'vara' : 'vörur'}` : `${n} ${n === 1 ? 'piece' : 'pieces'}`;
+    const home = meta('index.html'), L = [];
+    L.push('# MJÚK Iceland', '', '> ' + noDash(home.desc), '');
+    if (!IS && store.description) L.push(noDash(store.description), '');
+    L.push(IS ? '## Verslun' : '## Shop', '');
+    const shop = meta('shop.html'); L.push(`[${shop.title}](${host}shop.html): ${noDash(shop.desc)}`);
+    for (const g of CM2.groups || []) { const n = count('tyk', g.key); if (n) L.push(`[${nm(g)}](${host}shop.html?type=${g.key}): ${pieces(n)}`); }
+    L.push('', IS ? '## Efni' : '## Materials', '');
+    const fib = meta('fibres.html'); L.push(`[${fib.title}](${host}fibres.html): ${noDash(fib.desc)}`);
+    for (const m of CM2.materials || []) { const n = count('mat', m.key); if (n) L.push(`[${nm(m)}](${host}shop.html?material=${m.key}): ${pieces(n)}`); }
+    L.push('', IS ? '## Síður' : '## Pages', '');
+    for (const f of ['made.html', 'story.html', 'store.html']) { const m = meta(f); L.push(`[${m.title}](${host}${f}): ${noDash(m.desc)}`); }
+    L.push('', IS ? '## Búðir í Reykjavík' : '## Stores in Reykjavík', '');
+    for (const loc of store.location || []) {
+      const a = loc.address || {}, oh = (loc.openingHoursSpecification || []).find(h => Array.isArray(h.dayOfWeek) && h.dayOfWeek.length === 7);
+      const hrs = oh ? (IS ? `opið alla daga ${oh.opens} til ${oh.closes}` : `open every day ${oh.opens} to ${oh.closes}`) : '';
+      L.push(noDash(`${a.streetAddress}, ${a.postalCode} ${a.addressLocality}: ${dec(loc.description || '')}${hrs ? ', ' + hrs : ''}`) + '.');
+    }
+    const ship = CM2.ship || {};
+    if (ship.delivery) L.push('', IS ? '## Afhending' : '## Delivery', '', noDash(IS ? ship.deliveryIs || ship.delivery : ship.delivery));
+    L.push('', IS ? '## Hafa samband' : '## Contact', '', [store.email, store.telephone].filter(Boolean).join(', '));
+    L.push('', IS ? '## Tungumál' : '## Languages', '', IS ? 'Á íslensku: https://mjukiceland.is/' : 'English: https://mjukiceland.com/', IS ? 'In English: https://mjukiceland.com/' : 'Íslenska: https://mjukiceland.is/', '');
+    const txt = L.join('\n');
+    if (/[—–]/.test(txt)) bad.push((IS ? 'is/' : '') + 'llms.txt: a dash left in');
+    fs.writeFileSync(path.join(OUT, IS ? 'is/llms.txt' : 'llms.txt'), txt);
+  };
+  llms('en'); llms('is');
+}
+
 /* A release is built from her live catalogue, pulled at most two days ago, and from pages generated
    after that pull: the file checks above compare pages only with each other, so stale or sandbox
    data would otherwise ship clean (Codex 2026-09-26). --rehearsal lets a local test build through. */

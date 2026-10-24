@@ -90,7 +90,11 @@ body[data-page] .bars{opacity:.18}
   transition:transform 1.6s var(--ease),clip-path 1.2s var(--ease)}
 .pdp__fig.in img{clip-path:inset(0 0 0 0);transform:scale(1)}
 .pdp__fig:nth-child(2) img{transition-delay:.12s}
-@media(prefers-reduced-motion:reduce){.pdp__fig img{clip-path:none;transform:none;transition:none}}
+/* the first photo is the page's largest image: it paints the moment it arrives and settles in by itself, with no
+   script to wait for (SEO audit 24 Oct: the reveal held it 4.2 s); the photos after it keep the scroll reveal */
+.pdp__fig:first-child img{clip-path:inset(0 0 0 0);transform:scale(1);animation:pdpFirst 1.1s var(--ease) both}
+@keyframes pdpFirst{from{clip-path:inset(0 0 14% 0);transform:scale(1.05)}}
+@media(prefers-reduced-motion:reduce){.pdp__fig img{clip-path:none;transform:none;transition:none}.pdp__fig:first-child img{animation:none}}
 .pdp__info{position:sticky;top:96px;display:grid;gap:22px}
 .pdp__kick{display:flex;gap:12px;flex-wrap:wrap}
 .pdp__kick .is-new{color:var(--accent)}

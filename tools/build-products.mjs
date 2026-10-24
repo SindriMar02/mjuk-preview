@@ -65,7 +65,11 @@ const mini = (lang, list) => list.map(x => `<article class="prod"><div class="pr
 function page(p, lang) {
   const L = LANG[lang], V = L.V, v = V.view(p);
   const canon = url(lang, p);
-  const plain = V.text(v.c.short) || V.text(v.c.long);
+  // her short text is lines without full stops ("Superfunctional / The softest hat in Iceland"): each line ends as a
+  // sentence, so a description reads "Superfunctional. The softest hat in Iceland." (SEO audit 24 Oct)
+  const prose = html => V.clean(html).replace(/<(?:br|\/p|\/li|\/ul|\/ol|\/h\d)\b[^>]*>/gi, '\n').replace(/<[^>]+>/g, ' ')
+    .split('\n').map(x => x.replace(/\s+/g, ' ').trim()).filter(Boolean).map(x => (/[.!?…:;,)\]"”’]$/.test(x) ? x : x + '.')).join(' ');
+  const plain = prose(v.c.short) || prose(v.c.long);
   const mat = V.matWords(p);
   const desc = plain ? cut(plain, 158) : [p.t, mat].filter(Boolean).join('. ');
   const img = v.imgs[0] ? px(v.imgs[0], 1200) : '';
@@ -205,6 +209,66 @@ async function snapshotGrids(files) {
   } catch (e) { return { why: e.message }; }
   finally { if (browser) await browser.close(); server.close(); }
   return out;
+}
+/* ── the front page rows (New this season, Last of the line), the same way: the real page builds them and the markup
+   is written into the HTML, so a reader that runs no script still finds the pieces (SEO audit 24 Oct). app.js
+   replaces them on load with the same cards, so a visitor sees no difference. Plus a preload for the photo the
+   front page reel opens on, its largest image, so it starts before the scripts have run. ── */
+const RAIL_RE = id => new RegExp(`(<div class="rail__t" id="${id}">)(?:<!-- RAIL -->[\\s\\S]*?<!-- \\/RAIL -->)?(<\\/div>)`);
+async function snapshotRails(files) {
+  const chrome = process.env.CHROME_BIN || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+  let puppeteer; try { puppeteer = (await import('puppeteer-core')).default; } catch { return { why: 'puppeteer-core is not installed' }; }
+  if (!fs.existsSync(chrome)) return { why: 'no Chrome at ' + chrome };
+  const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css', '.svg': 'image/svg+xml', '.woff2': 'font/woff2' };
+  const server = http.createServer((req, res) => {
+    let q = decodeURIComponent(req.url.split('?')[0]); if (q.endsWith('/')) q += 'index.html';
+    const f = path.join(ROOT, q);
+    if (!f.startsWith(ROOT) || !fs.existsSync(f) || fs.statSync(f).isDirectory()) { res.writeHead(404); return res.end(); }
+    res.writeHead(200, { 'content-type': MIME[path.extname(f)] || 'application/octet-stream' }); fs.createReadStream(f).pipe(res);
+  });
+  await new Promise(r => server.listen(0, '127.0.0.1', r));
+  const port = server.address().port, out = {};
+  let browser;
+  try {
+    browser = await puppeteer.launch({ executablePath: chrome, headless: 'new', args: ['--no-sandbox'] });
+    for (const file of files) {
+      const page = await browser.newPage();
+      await page.setViewport({ width: 412, height: 900 });
+      await page.evaluateOnNewDocument(() => { try { sessionStorage.setItem('mjuk_intro', '1'); } catch (e) {} });
+      await page.setRequestInterception(true);
+      page.on('request', rq => (['image', 'font', 'media'].includes(rq.resourceType()) ? rq.abort() : rq.continue()));
+      await page.goto(`http://127.0.0.1:${port}/${file}`, { waitUntil: 'domcontentloaded' });
+      await page.waitForFunction(() => document.querySelectorAll('#railT > .prod').length > 0, { timeout: 30000 });
+      // as app.js writes them, before any reveal: the same markup it puts there on load
+      out[file] = await page.evaluate(() => Object.fromEntries(['railT', 'railST'].map(id => {
+        const el = document.getElementById(id); if (!el) return [id, ''];
+        return [id, [...el.children].map(k => { const c = k.cloneNode(true); c.classList.remove('in'); return c.outerHTML; }).join('')];
+      })));
+      await page.close();
+    }
+  } catch (e) { return { why: e.message }; }
+  finally { if (browser) await browser.close(); server.close(); }
+  return out;
+}
+{
+  const HERO = (CM.hero || []).filter(Boolean).slice(0, 5);
+  const heroPre = HERO.length ? `<!-- HEROPRE --><link rel="preload" as="image" href="${esc(px(HERO[Math.floor(HERO.length / 2)], 900))}" fetchpriority="high" /><!-- /HEROPRE -->\n` : '';
+  const files = ['index.html', 'is/index.html'];
+  for (const file of files) {   // start from the plain page, as a visitor without the rows sees it
+    let s = read(file);
+    s = s.replace(RAIL_RE('railT'), '$1$2').replace(RAIL_RE('railST'), '$1$2').replace(/<!-- HEROPRE -->[\s\S]*?<!-- \/HEROPRE -->\n?/, '');
+    const css = s.indexOf('<link rel="stylesheet"'); if (css < 0) throw new Error(file + ': no stylesheet link');
+    write(file, s.slice(0, css) + heroPre + s.slice(css));
+  }
+  const snaps = await snapshotRails(files);
+  for (const file of files) {
+    const g = snaps[file];
+    if (!g || !g.railT) { console.warn(`  ! ${file}: front page rows NOT embedded (${snaps.why || 'empty'}); the page builds them from script as before`); continue; }
+    let s = read(file);
+    for (const id of ['railT', 'railST']) if (g[id]) s = s.replace(RAIL_RE(id), (m, a, b) => `${a}<!-- RAIL -->${g[id]}<!-- /RAIL -->${b}`);
+    write(file, s);
+    console.log(`  ${file}: front page rows embedded (${(g.railT.match(/class="prod /g) || []).length} + ${(g.railST.match(/class="prod /g) || []).length} cards)`);
+  }
 }
 for (const [file, lang] of [['shop.html', 'en'], ['is/shop.html', 'is']]) {
   let s = read(file);

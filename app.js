@@ -1293,12 +1293,15 @@ void main() {
     if (!host) return;
     const shots = (CM.hero || CM.campaign || []).filter(Boolean).slice(0, 5);
     if (!shots.length) return;
+    // the reel opens on its middle frame: that one is the page's largest image, so it loads first and at once, its two
+    // visible neighbours load with it, the hidden ones wait (SEO audit 24 Oct: the centre frame was lazy, LCP 6.9 s)
+    const start = Math.floor(shots.length / 2), near = i => Math.abs(i - start) <= 1;
     host.innerHTML = shots.map((u, i) =>
-      `<figure class="fcar__i" data-i="${i}"><img src="${px(u, 900)}" alt="MJÚK Iceland" ${i === 0 ? 'fetchpriority="high"' : 'loading="lazy"'}/></figure>`
+      `<figure class="fcar__i" data-i="${i}"><img src="${px(u, 900)}" alt="MJÚK Iceland" ${i === start ? 'fetchpriority="high"' : near(i) ? '' : 'loading="lazy"'}/></figure>`
     ).join('');
     const slides = $$('.fcar__i', host);
     const total = slides.length;
-    let cur = Math.floor(total / 2);
+    let cur = start;
 
     const layout = () => slides.forEach((el, i) => {
       let pos = (i - cur + total) % total;

@@ -58,6 +58,37 @@ function translate(html, file) {
 const url = (lang, file) => SITE[lang] + (file === 'index.html' ? '' : file);
 const hreflang = file => `<link rel="alternate" hreflang="en" href="${url('en', file)}" />\n<link rel="alternate" hreflang="is" href="${url('is', file)}" />\n<link rel="alternate" hreflang="x-default" href="${url('en', file)}" />\n`;
 
+/* ── share cards and page schema for the pages that are not products (SEO audit, 24 Oct 2026). Products get theirs
+   from tools/build-products.mjs. Both are written AFTER the translation, from each language's own title and
+   description, and removed first on every run, so the source page never collects copies. ── */
+globalThis.window = globalThis.window || {};
+new Function('window', fs.readFileSync(path.join(ROOT, 'assets/data.js'), 'utf8'))(globalThis.window);
+// the share photo: the frame the front page reel opens on (app.js featureCarousel: the middle of the first five)
+const HERO = ((globalThis.window.CM && globalThis.window.CM.hero) || []).filter(Boolean).slice(0, 5);
+const SHARE = HERO.length ? HERO[Math.floor(HERO.length / 2)] + '?w=1200&amp;ssl=1' : '';
+const CARDS = new Set(['index.html', 'shop.html', 'fibres.html', 'store.html', 'story.html', 'made.html']);
+const PAGE_TYPE = { 'shop.html': 'CollectionPage', 'story.html': 'AboutPage', 'store.html': 'WebPage', 'fibres.html': 'WebPage', 'made.html': 'WebPage' };
+const ENT = { mdash: '\u2014', ndash: '\u2013', amp: '&', quot: '"', rsquo: '\u2019', lsquo: '\u2018', ldquo: '\u201c', rdquo: '\u201d', hellip: '\u2026', nbsp: ' ',
+  Uacute: 'Ú', uacute: 'ú', Iacute: 'Í', iacute: 'í', Aacute: 'Á', aacute: 'á', Eacute: 'É', eacute: 'é', Oacute: 'Ó', oacute: 'ó', Yacute: 'Ý', yacute: 'ý',
+  ETH: 'Ð', eth: 'ð', THORN: 'Þ', thorn: 'þ', AElig: 'Æ', aelig: 'æ', Ouml: 'Ö', ouml: 'ö' };
+const plainText = x => String(x || '').replace(/&([a-z]+);/gi, (m, n) => (n in ENT ? ENT[n] : m)).replace(/<[^>]+>/g, '').trim();
+const stripCards = h => h.replace(/<meta (?:property="og:[^"]*"|name="twitter:card")[^>]*\/>\n/g, '').replace(/<script type="application\/ld\+json" data-page-ld>[\s\S]*?<\/script>\n/g, '');
+function cards(h, lang, file) {
+  const title = (h.match(/<title>([\s\S]*?)<\/title>/) || [])[1] || '';
+  const desc = (h.match(/<meta name="description" content="([^"]*)" \/>/) || [])[1] || '';
+  let out = `<meta property="og:type" content="website" />\n<meta property="og:site_name" content="MJ&Uacute;K Iceland" />\n<meta property="og:locale" content="${lang === 'is' ? 'is_IS' : 'en_US'}" />\n<meta property="og:title" content="${title}" />\n<meta property="og:description" content="${desc}" />\n<meta property="og:url" content="${url(lang, file)}" />\n`
+    + (SHARE ? `<meta property="og:image" content="${SHARE}" />\n<meta name="twitter:card" content="summary_large_image" />\n` : '');
+  if (PAGE_TYPE[file]) {
+    const name = plainText(title).replace(/\s*\u2014.*$/, '');
+    const ld = [
+      { '@context': 'https://schema.org', '@type': PAGE_TYPE[file], name, url: url(lang, file), inLanguage: lang, ...(desc ? { description: plainText(desc) } : {}), isPartOf: { '@type': 'WebSite', url: SITE[lang] } },
+      { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: lang === 'is' ? 'Forsíða' : 'Home', item: SITE[lang] }, { '@type': 'ListItem', position: 2, name, item: url(lang, file) }] },
+    ];
+    out += ld.map(x => `<script type="application/ld+json" data-page-ld>${JSON.stringify(x).replace(/</g, '\\u003c')}</script>\n`).join('');
+  }
+  return out;
+}
+
 let written = 0;
 for (const file of PAGES) {
   let en = fs.readFileSync(path.join(ROOT, file), 'utf8');
@@ -67,6 +98,9 @@ for (const file of PAGES) {
   // sites): they are not static page text, and build-products writes them back after this step. The
   // data-static key goes too, so a grid left empty is rebuilt by pages.js rather than kept empty.
   en = en.replace(/<!-- GRID -->[\s\S]*?<!-- \/GRID -->/, '').replace(/ data-static="[^"]*"/, '');
+  // the front page rows and the reel's first-photo hint, written back by tools/build-products.mjs (her product names)
+  en = en.replace(/<!-- RAIL -->[\s\S]*?<!-- \/RAIL -->/g, '').replace(/<!-- HEROPRE -->[\s\S]*?<!-- \/HEROPRE -->\n?/, '');
+  if (CARDS.has(file)) en = stripCards(en);
   // English page: hreflang in, the language switch becomes a link to its Icelandic twin
   // and its own canonical, on its production host (Codex 2026-09-26: the static pages had none)
   en = en.replace(/<link rel="alternate" hreflang[^>]*\/>\n/g, '').replace(/<link rel="canonical"[^>]*\/>\n/g, '')
@@ -88,6 +122,7 @@ for (const file of PAGES) {
       `<a class="nav__lang" id="langBtn" href="../${file}" hreflang="en" lang="en" aria-label="In English"><b>EN</b> / &Iacute;S</a>`)
     // the dictionary for strings the scripts write, before the scripts that use it
     .replace(/(<script defer src="\.\.\/assets\/data\.js"><\/script>)/, '<script src="../assets/i18n-is.js"></script>\n$1');
+  if (CARDS.has(file)) { en = en.replace('</head>', () => cards(en, 'en', file) + '</head>'); is = is.replace('</head>', () => cards(is, 'is', file) + '</head>'); }
   if (!REPORT) {
     fs.writeFileSync(path.join(ROOT, file), en);
     fs.mkdirSync(path.join(ROOT, 'is'), { recursive: true });
