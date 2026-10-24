@@ -91,15 +91,15 @@
       paint();
     });
 
-    const open = (h, viaKey) => {
+    const open = (h, viaKey, n = 0) => {
       if (window.CMBag && window.CMBag.room && window.CMBag.room(h.h) < 1) { window.CMBag.add(h.h, '', null, null); return; } // already at the limit: the drawer says so
       dlg.returnValue = '';   // Escape, the X and the Android back button close with nothing, never with last time's "add"
-      hat = h; count = 0; active = 0; chosen = [null, null];
+      hat = h; count = n === 1 || n === 2 ? n : 0; active = 0; chosen = [null, null];
       $$('.sw', grid).forEach(b => { b.hidden = !fits(POMS[+b.dataset.i], h); });
       // one price if they all cost the same, otherwise the range: the catalogue has $29 pompoms and a $32 one
       const ps = [...new Set(POMS.filter(s => fits(s, h)).map(s => s.price))].sort((a, b) => a - b);
       const pomPrice = ps.length === 0 ? '' : ps.length === 1 ? usd(ps[0]) : fmt('{a} to {b}', { a: usd(ps[0]), b: usd(ps[ps.length - 1]) });
-      $$('input[name="n"]', dlg).forEach(r => (r.checked = r.value === '0'));
+      $$('input[name="n"]', dlg).forEach(r => (r.checked = r.value === String(count)));
       img.src = px(h.img[0], 300); img.alt = h.t; name.textContent = h.t;
       if (why) why.innerHTML = fmt(POMS.some(s => s.merino) && !POMS.every(s => fits(s, h))
         ? 'Any of these goes on this hat; the heavier merino pompoms go on merino beanies only. Here are the ones we have photographed, {price} each, attached before it ships.'
@@ -108,7 +108,7 @@
       if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
       /* a pointer opens onto the dialog itself, a keyboard onto its first choice: a script focus() with nothing focused
          before paints :focus-visible's ring on the radio, which looks like a pre-selected, highlighted option */
-      if (viaKey) $('input[name="n"][value="0"]', dlg).focus(); else dlg.focus({ preventScroll: true });
+      if (viaKey) $(`input[name="n"][value="${count}"]`, dlg).focus(); else dlg.focus({ preventScroll: true });
     };
 
     dlg.addEventListener('close', () => {
@@ -125,11 +125,14 @@
     });
     $('#pomForm').addEventListener('submit', e => { if (!ready()) e.preventDefault(); });
 
-    // the card button on a plain hat opens the chooser instead of adding silently
+    // a plain hat's buttons: "None" adds the hat as it is, "1" / "2" open the chooser on that many (Anna, 23 Oct:
+    // the choice shows on the card and the product page, not only after Add to bag); a bare button opens it on none
     document.addEventListener('click', e => {
       const b = e.target.closest('.sz.pom-ask'); if (!b) return;
       e.preventDefault();
-      const h = byHandle[b.dataset.h]; if (h) open(h, e.detail === 0);
+      const h = byHandle[b.dataset.h]; if (!h) return;
+      if (b.dataset.n === '0') { window.CMBag.add(h.h, '', b, null); return; }
+      open(h, e.detail === 0, +b.dataset.n || 0);
     });
   }
 
@@ -210,6 +213,37 @@
     };
 
     const sw = $('#cfgColour'), ask = $('#cfgColourAsk'), furNote = $('#cfgFurNote');
+    /* the chosen colour, big: the swatches are too small to see a pattern or a shade (Anna, 23 Oct). A tap opens every
+       photo of that blanket full size; a pointer opens onto the dialog itself, a keyboard onto Close (no ring on open). */
+    const big = $('#cfgBig'), bigImg = $('#cfgBigImg'), bigCap = $('#cfgBigCap');
+    // the full-size view is built here, not in the page, so a page rebuild can never drop it (Codex audit, 23 Oct)
+    let zoom = null, zoomIn = null;
+    if (big) {
+      zoom = document.createElement('dialog'); zoom.className = 'zoom'; zoom.id = 'cfgZoom'; zoom.tabIndex = -1;
+      zoom.setAttribute('aria-label', t('Colour, full size')); zoom.setAttribute('data-lenis-prevent', '');   // the wheel scrolls the photos, not the page
+      zoom.innerHTML = `<div class="zoom__in" id="cfgZoomIn" data-lenis-prevent></div><button type="button" class="zoom__x" id="cfgZoomX">${escA(t('Close'))}</button>`;
+      document.body.appendChild(zoom); zoomIn = zoom.querySelector('#cfgZoomIn');
+    }
+    const chosenBlanket = () => CM.all.find(p => String(p.id) === v('colour'));
+    const paintBig = () => {
+      if (!big) return;
+      const b = chosenBlanket();
+      if (!b || !b.img || !b.img[0]) { big.hidden = true; return; }
+      big.hidden = false;
+      const next = px(b.img[0], 940);
+      if (bigImg.getAttribute('src') !== next) { bigImg.src = next; bigImg.alt = b.t; }
+      bigCap.textContent = colourName(b);
+    };
+    if (big && zoom) {
+      $('#cfgBigBtn').addEventListener('click', e => {
+        const b = chosenBlanket(); if (!b) return;
+        zoomIn.replaceChildren(...b.img.filter(Boolean).map((u, i) => { const im = document.createElement('img'); im.src = px(u, 1800); im.alt = b.t; im.decoding = 'async'; if (i > 1) im.loading = 'lazy'; return im; }));
+        if (typeof zoom.showModal === 'function') zoom.showModal(); else zoom.setAttribute('open', '');
+        if (e.detail === 0) zoom.querySelector('#cfgZoomX').focus(); else zoom.focus({ preventScroll: true });
+      });
+      zoom.querySelector('#cfgZoomX').addEventListener('click', () => zoom.close());
+      zoom.addEventListener('click', e => { if (e.target === zoom || e.target === zoomIn) zoom.close(); });
+    }
     let shownFabric = '';
     const paintColours = () => {
       const key = v('fabric'); if (key === shownFabric) return; shownFabric = key;
@@ -258,7 +292,7 @@
       const i = cfg.querySelector(`input[name="${el.dataset.for}"]:checked`), l = i && i.closest('label');
       el.textContent = !l ? '' : l.dataset.name || ($('em', l) || l).textContent.trim();
     });
-    cfg.addEventListener('change', e => { if (e.target.name !== 'colour') sync(); done.hidden = true; paint(); paintPreview(); paintValues(); });
+    cfg.addEventListener('change', e => { if (e.target.name !== 'colour') sync(); done.hidden = true; paint(); paintPreview(); paintValues(); paintBig(); });
     /* The request is an email to the workshop, written out in full with her own name for the
        piece, so nothing is lost between the page and the shop. It opens the shopper's own mail
        app; the address is shown too. Fur and salmon leather colours are theirs to write in. */
@@ -291,7 +325,7 @@
     const asked = new URLSearchParams(location.search).get('model');
     if (asked === 'shawl-pockets') { set('model', 'shawl'); set('pockets', 'yes'); }
     else if (asked && MODEL[asked] && $(`input[name="model"][value="${asked}"]`, cfg)) set('model', asked);
-    sync(); paint(); paintPreview(); paintValues();
+    sync(); paint(); paintPreview(); paintValues(); paintBig();
 
     /* ── scroll reveals for the section, on the shell's .rv grammar ──
        app.js reveals .head already; the copy, the image and each fieldset follow it, 70ms apart,

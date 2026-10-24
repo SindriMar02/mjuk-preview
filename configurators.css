@@ -58,6 +58,8 @@ fieldset{border:0;padding:0;margin:0;min-width:0}
 .pom__why b{font-weight:400;color:var(--accent)}
 
 .pom__slots{display:flex;gap:8px;flex-wrap:wrap}
+/* the display rule below beat the hidden attribute, so "One" still showed a second slot to pick (Anna's test, 23 Oct) */
+.pom__slot[hidden]{display:none}
 .pom__slot{display:inline-flex;align-items:center;gap:10px;padding:8px 12px 8px 8px;border:1px solid var(--line);cursor:pointer;
   font-family:var(--ff-m);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);background:transparent;
   transition:border-color .24s var(--ease),color .24s var(--ease),transform .16s var(--ease)}
@@ -229,3 +231,17 @@ fieldset{border:0;padding:0;margin:0;min-width:0}
 .seg--even label.is-off span em{text-decoration:line-through;text-decoration-thickness:1px}
 #cfgPockets[hidden]{display:none}
 .tile .t__m{justify-content:flex-start}
+
+/* the chosen colour, big, and full size on a tap (Anna, 23 Oct) */
+.cfg__big{margin:16px 0 0}
+.cfg__big[hidden]{display:none}
+.cfg__bigbtn{display:block;width:100%;padding:0;border:1px solid var(--line);background:var(--bg-2);cursor:zoom-in;aspect-ratio:4/3;overflow:hidden}
+.cfg__bigbtn img{width:100%;height:100%;object-fit:cover;display:block}
+.cfg__bigcap{display:flex;justify-content:space-between;gap:12px;margin-top:8px;font-size:13px}
+.cfg__bigcap .mono{font-size:10px;letter-spacing:.1em;text-transform:uppercase;opacity:.7}
+.zoom{padding:0;border:0;margin:0;width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;background:rgba(24,16,16,.94)}
+.zoom::backdrop{background:rgba(24,16,16,.6)}
+.zoom:focus{outline:none}
+.zoom__in{height:100%;overflow:auto;display:flex;flex-direction:column;align-items:center;gap:16px;padding:64px 16px 32px;box-sizing:border-box}
+.zoom__in img{display:block;max-width:min(1400px,100%);height:auto}
+.zoom__x{position:fixed;top:14px;right:16px;font-family:var(--ff-m);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#f7f3ef;background:rgba(24,16,16,.6);border:1px solid rgba(247,243,239,.45);padding:10px 14px;cursor:pointer}

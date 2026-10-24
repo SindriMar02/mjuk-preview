@@ -109,8 +109,12 @@
       <div class="pdp__add">
         ${p.oos
           ? `<div class="pdp__oos"><span class="mono">${t('Sold out online')}</span><span>${t('Every colourway is a limited edition.')} <a href="mailto:customersupport@mjukiceland.com?subject=${encodeURIComponent(p.t)}">${t('Ask the store')}</a> ${t('whether one is left on a shelf in Reykjavík.')}</span></div>`
-          : `<button class="sz sz--solo${plainHat ? ' pom-ask' : ''}" data-h="${esc(p.h)}" data-s="">${t('Add to bag')}</button>`}
-        ${plainHat && !p.oos ? `<p class="pdp__hint mono">${t('A plain hat.')} <b>${t('Pompoms are chosen in the next step')}</b>${t(', none, one or two.')}</p>` : ''}
+          : plainHat
+            // the pompom choice in plain sight (Anna, 23 Oct): none adds the hat, one or two opens the colours
+            ? `<p class="pdp__pomt mono">${t('Pompoms')}</p><div class="pdp__poms">${[['0', t('No pompom')], ['1', t('One pompom')], ['2', t('Two pompoms')]].map(([n, l]) =>
+                `<button class="sz sz--solo pom-ask" data-h="${esc(p.h)}" data-s="" data-n="${n}">${l}</button>`).join('')}</div>`
+            : `<button class="sz sz--solo" data-h="${esc(p.h)}" data-s="">${t('Add to bag')}</button>`}
+        ${plainHat && !p.oos ? `<p class="pdp__hint mono">${t('With one or two, you pick the colours next.')}</p>` : ''}
       </div>
       <dl class="pdp__facts">${facts.map(f => `<dt>${f[0]}</dt><dd>${f[2] ? f[1] : esc(f[1])}</dd>`).join('')}</dl>
       ${c.long && text(c.long) !== text(c.short) ? `<details class="pdp__desc" open><summary>${t('Description')}</summary><div class="pdp__body">${clean(c.long)}</div></details>` : ''}`;

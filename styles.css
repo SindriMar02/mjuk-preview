@@ -104,6 +104,7 @@ body.ready .load__mark{transform:translateY(-14px) scale(.985);opacity:.85;trans
 @media(max-width:1100px){.nav__mid{gap:clamp(14px,1.9vw,26px)}}
 .nav__mid a,.nav__link{font-family:var(--ff-m);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);transition:opacity .3s;opacity:.85}
 .nav__mid a:hover,.nav__link:hover{opacity:1}
+.nav__search{display:inline-flex;align-items:center;justify-content:center;line-height:0;padding:4px}
 /* header links roll on hover (2026-10-09): the word slides up out of its line and the same word
    rises in rust from below. CSS only, two text shadows on the one word, so no extra markup and
    screen readers hear it once. Keyboard focus rolls it too. */
@@ -514,7 +515,7 @@ section{padding:clamp(70px,12vw,180px) 0;position:relative}
 @media(max-width:820px){
   /* Bag MUST stay reachable on mobile: only the nav links and Search collapse. */
   .nav__mid{display:none}
-  #searchBtn{display:none}
+  .nav__search{padding:12px 6px}         /* the search stays on phones too: Anna could not find it (23 Oct) */
   .nav__burger{display:flex}
   /* the logo on the centre axis at every phone width: the menu toggle takes the left column,
      language and bag the right; two equal sides that cannot grow keep the logo centred.
@@ -626,3 +627,40 @@ section{padding:clamp(70px,12vw,180px) 0;position:relative}
 @media (prefers-reduced-motion:reduce){@view-transition{navigation:none}}
 /* the home page's logo intro plays once per visit to the site, not every time she comes back to it */
 .intro-seen .load{display:none}
+
+/* one search for the whole site (Anna, 23 Oct) */
+.srch{position:fixed;inset:0 0 auto 0;margin:0;padding:0;border:0;width:100%;max-width:100%;max-height:100dvh;background:var(--bg);color:var(--ink);box-shadow:0 18px 40px rgba(24,16,16,.18)}
+.srch::backdrop{background:rgba(24,16,16,.45)}
+.srch__bar{display:flex;align-items:center;gap:12px;padding:14px var(--pad,20px);border-bottom:1px solid var(--line)}
+.srch__bar input{flex:1;min-width:0;border:0;background:transparent;font-family:var(--ff-s);font-size:clamp(18px,2.4vw,26px);padding:8px 0;color:var(--ink);outline:none;-webkit-appearance:none;appearance:none;border-radius:0}
+.srch__bar input::-webkit-search-cancel-button{-webkit-appearance:none}
+.srch__x{font-family:var(--ff-m);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);background:none;border:1px solid var(--line);padding:10px 12px;cursor:pointer}
+.srch__res{max-height:calc(100dvh - 76px);overflow:auto;padding:4px var(--pad,20px) 24px;-webkit-overflow-scrolling:touch}
+.srch__res:empty{display:none}
+.srch__h{font-family:var(--ff-m);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim,inherit);margin:16px 0 4px}
+.srch__pg{display:block;padding:10px 0;border-bottom:1px solid var(--line);font-size:15px;color:var(--ink)}
+.srch__it{display:grid;grid-template-columns:52px 1fr auto;gap:14px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);color:var(--ink)}
+.srch__it img{width:52px;aspect-ratio:4/5;object-fit:cover;background:var(--bg-2);display:block}
+.srch__it.is-oos img{opacity:.55}
+.srch__nm{display:block;font-size:14px;line-height:1.3}
+.srch__sub{display:block;margin-top:3px;font-family:var(--ff-m);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim,inherit)}
+.srch__pr{font-family:var(--ff-m);font-size:12px;color:var(--accent)}
+.srch__all{display:inline-block;margin-top:16px;font-family:var(--ff-m);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+.srch__none{padding:16px 0;font-size:14px}.srch__none a{color:var(--accent)}
+
+/* the lookbook on a touch screen: a sideways swipe, no pin (Anna, 23 Oct); a mouse keeps the horizontal experience */
+.pan--swipe{overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none;position:relative}
+.pan--swipe::-webkit-scrollbar{display:none}
+.pan--swipe.drag{scroll-snap-type:none;cursor:grabbing}   /* a mouse drag (reduced motion) moves freely, then snaps */
+.no-poms .pom-ask[data-n="1"],.no-poms .pom-ask[data-n="2"],.no-poms .pdp__hint{display:none}   /* no chooser: only None stays */
+.pan--swipe .pan__track{height:auto;padding-top:clamp(24px,6vh,56px);padding-bottom:clamp(28px,7vh,64px);transform:none!important}
+.pan--swipe .pan__intro,.pan--swipe .pan__i{scroll-snap-align:center}
+.pan--swipe .pan__prog{position:sticky;left:var(--pad);bottom:auto;right:auto;width:calc(100vw - 2 * var(--pad));margin-top:calc(-1 * clamp(14px,3.5vh,32px))}
+/* the lookbook's photos all behave the same (Anna, 23 Oct: only the first two changed colour): with a mouse every
+   photo starts black and white and takes its colour under the pointer; on a touch screen, with no hover, all in colour */
+@media (hover:hover) and (pointer:fine){ .pan__i--prod img{filter:grayscale(1)} }
+@media (hover:none),(pointer:coarse){ .pan__bg img,.pan__i--tall img,.pan__i--prod img{filter:none} }
+/* the search icon shares the phone header's right side: the bag label never breaks ("KARFA (3)" did) */
+#bagBtn{white-space:nowrap}
+@media(max-width:820px){ .nav__end .nav__search{padding:12px 3px} }
+@media(max-width:360px){ .nav__end{gap:2px} #bagBtn{padding-left:2px;padding-right:2px} .nav__end .nav__lang{padding:6px 2px} }

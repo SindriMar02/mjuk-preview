@@ -150,12 +150,13 @@
 
     const featuredRank = {}; (CM.featuredNew || []).concat(CM.own || []).forEach((h, i) => { if (!(h in featuredRank)) featuredRank[h] = i; });
     // search reads her names too, in the page's language: "marshmallow", "cashmere", "húfur"
-    const words = p => (p.t + ' ' + (p.comp || '') + ' ' + famName(p.fam) + ' ' + matWords(p) + ' ' + typeName(p.tyk)).toLowerCase();
+    // the same matcher as the site search (app.js CMUI.search): plurals, pompom spellings, her material sentence
+    const SR = window.CMUI.search;
     const list = () => {
-      const q = st.q.toLowerCase();
+      const q = st.q.trim(), toks = SR.toks(q);
       let L = CM.all.filter(p =>
         (!st.type || p.tyk === st.type) && (!st.family || p.fam === st.family) && (!st.material || p.mat === st.material || (p.mx || []).includes(st.material)) && (!st.colour || coloursOf(p).includes(st.colour)) &&
-        (!st.sale || p.cp > 0) && (!st.nw || isNew(p)) && (!st.stock || !p.oos) && (!q || words(p).includes(q)));
+        (!st.sale || p.cp > 0) && (!st.nw || isNew(p)) && (!st.stock || !p.oos) && (!q || SR.hit(p, toks)));
       if (st.sort === 'low') L.sort((a, b) => a.p - b.p);
       else if (st.sort === 'high') L.sort((a, b) => b.p - a.p);
       else if (st.sort === 'new') L.sort((a, b) => (isNew(b) - isNew(a)) || (b.id - a.id));
@@ -259,11 +260,14 @@
   function rails() {
     $$('.rail[data-page-rail]').forEach(el => {
       let down = false, sx = 0, sl = 0, moved = 0;
-      el.addEventListener('pointerdown', e => { if (e.pointerType === 'touch') return; down = true; moved = 0; sx = e.clientX; sl = el.scrollLeft; el.classList.add('drag'); el.setPointerCapture(e.pointerId); });
-      el.addEventListener('pointermove', e => { if (!down) return; const d = e.clientX - sx; moved = Math.abs(d); el.scrollLeft = sl - d; });
-      const up = () => { down = false; el.classList.remove('drag'); };
+      el.addEventListener('pointerdown', e => { if (e.pointerType === 'touch') return; down = true; moved = 0; sx = e.clientX; sl = el.scrollLeft; });
+      el.addEventListener('pointermove', e => { if (!down) return; const d = e.clientX - sx; moved = Math.abs(d);
+        // capture only once it is a drag: capturing on pointerdown retargets the click to the rail, so no button or link in it worked with a mouse (Anna's test, 23 Oct)
+        if (moved > 6 && !el.classList.contains('drag')) { el.classList.add('drag'); el.setPointerCapture(e.pointerId); }
+        if (el.classList.contains('drag')) el.scrollLeft = sl - d; });
+      const up = () => { down = false; el.classList.remove('drag'); setTimeout(() => { moved = 0; }, 0); };   // the drag's own click comes first, then a later keyboard click is never eaten (Codex audit)
       el.addEventListener('pointerup', up); el.addEventListener('pointerleave', up);
-      el.addEventListener('click', e => { if (moved > 6) { e.preventDefault(); e.stopPropagation(); } }, true);
+      el.addEventListener('click', e => { if (moved > 6 && e.detail !== 0) { e.preventDefault(); e.stopPropagation(); } moved = 0; }, true);
       const btns = $$(`.rnav__b[data-rail="${el.id}"]`);
       const sync = () => { const max = el.scrollWidth - el.clientWidth - 2; btns.forEach(b => { b.disabled = +b.dataset.dir < 0 ? el.scrollLeft <= 2 : el.scrollLeft >= max; }); };
       btns.forEach(b => b.addEventListener('click', () => { const c = $('.prod', el); const step = c ? c.getBoundingClientRect().width + 24 : el.clientWidth * .8; el.scrollBy({ left: step * +b.dataset.dir, behavior: reduced ? 'auto' : 'smooth' }); }));
@@ -284,7 +288,7 @@
       p: 'One hundred percent in the Viking beanies. Ninety-eight in the Greenland beanies, with two percent elastane to hold the edge.',
       q: ['“Made of certified ethically sourced pure cashmere.”'] },
     'cashmere-merino': { lead: 'Cashmere carried on superfine merino.',
-      p: 'Ten percent cashmere in the Akureyri blankets, twenty in the Konungur blankets and the Empress cape.',
+      p: 'Twenty percent cashmere in the Konungur blankets and the Empress cape.',   // Akureyri blankets discontinued (Anna, 23 Oct)
       q: ['“Irresistibly soft blend of cashmere and the highest sort of superfine merino wool.”'] },
     'merino': { lead: 'Superfine merino, smooth against the skin and never scratchy.',
       p: 'On its own in the Arctic and Ragnar beanies, the unisex aviator hats, and the Ragnar scarves and gloves.',
@@ -381,8 +385,7 @@
     rows();
   }
 
-  /* ── search in the nav goes to the shop with the field focused ── */
-  const sb = $('#searchBtn'); if (sb) sb.addEventListener('click', () => { if (page === 'shop') { const f = $('#fQ'); f && f.focus(); } else location.href = 'shop.html?focus=q'; });
+  // the header search is the site-wide panel in app.js now (Anna, 23 Oct); the shop keeps its own filter field
 
   const storyPage = () => { const im = $('#storyImg'); if (im && CM.campaign && CM.campaign[0]) im.src = px(CM.campaign[0], 1100); };
   /* made.html: the capes already made, in the shop now; the made-to-order form is configurators.js */

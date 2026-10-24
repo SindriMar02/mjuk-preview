@@ -54,7 +54,7 @@
   </a>
   <div class="nav__end">
     <a class="nav__lang" id="langBtn" href="../made.html" hreflang="en" lang="en" aria-label="In English"><b>EN</b> / &Iacute;S</a>
-    <button class="nav__link" id="searchBtn">Leita</button>
+    <button class="nav__link nav__search" id="searchBtn" aria-label="Leita"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M15.4 15.4 21 21" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
     <button class="nav__link" id="bagBtn">Karfa <span id="bagCount">(0)</span></button>
   </div>
 </header>
@@ -142,6 +142,7 @@
         <fieldset>
           <legend class="legend">Litur <span class="cfg__val" data-for="colour" aria-hidden="true"></span></legend>
           <div class="cfg__sw" id="cfgColour"></div>
+          <figure class="cfg__big" id="cfgBig" hidden><button type="button" class="cfg__bigbtn" id="cfgBigBtn" aria-label="Sjá litinn í fullri stærð"><img id="cfgBigImg" src="" alt=""/></button><figcaption class="cfg__bigcap"><span id="cfgBigCap"></span><span class="mono">Smelltu til að sjá í fullri stærð</span></figcaption></figure>
           <p class="cfg__len" id="cfgColourAsk" hidden>Segðu okkur í beiðninni hvaða lit þú vilt og við svörum með því sem við eigum.</p>
         </fieldset>
         <fieldset id="cfgPockets">

@@ -139,7 +139,6 @@ ${store('skolavordustigur-36', '03', 'Step-free access', 'Sk&oacute;lav&ouml;r&e
 ${store('skolavordustigur-4', '04', 'Step-free access', 'Sk&oacute;lav&ouml;r&eth;ust&iacute;gur 4', 'At the Rainbow, in a 19th century house built of natural stone. Small, warm, and full of colour.', [['Open', 'Every day, 10 to 20'], ['Access', 'Level entry'], ['Telephone', '<a href="tel:+3548320567">+354 832 0567</a>']])}
     </div>
     <div class="stores__foot">
-      <div class="budin__row"><span class="mono">Opening hours</span><span>Every day of the year. 23 December, 10 to 22.</span></div>
       <div class="budin__row"><span class="mono">Online orders</span><a href="mailto:customersupport@mjukiceland.com">customersupport@mjukiceland.com</a></div>
       <div class="budin__row"><span class="mono">Telephone</span><a href="tel:+3548320567">+354 832 0567</a></div>
       <div class="budin__row"><span class="mono">Wholesale</span><a href="mailto:anna@mjukiceland.com">anna@mjukiceland.com</a></div>
@@ -191,8 +190,8 @@ ${store('skolavordustigur-4', '04', 'Step-free access', 'Sk&oacute;lav&ouml;r&et
       <div class="story__facts">
         <div class="rv"><b>4</b><span class="mono">Stores in Reykjav&iacute;k</span></div>
         <div class="rv"><b>30</b><span class="mono">People in the team</span></div>
-        <div class="rv"><b>2h</b><span class="mono">A cape, cut and sewn upstairs</span></div>
-        <div class="rv"><b>20m</b><span class="mono">A neckwarmer, made in front of you</span></div>
+        <div class="rv"><b>2<small>hours</small></b><span class="mono">A cape, cut and sewn upstairs</span></div>
+        <div class="rv"><b>20<small>minutes</small></b><span class="mono">A neckwarmer, made in front of you</span></div>
       </div>
       <!-- the team, from Anna's Drive "Story and pictures" (2026-10-10), metadata stripped -->
       <div class="story__team">
@@ -283,6 +282,7 @@ ${[['shawl', 'Shawl'], ['petite-poncho', 'Petite poncho'], ['princess', 'Princes
         <fieldset>
           <legend class="legend">Colour <span class="cfg__val" data-for="colour" aria-hidden="true"></span></legend>
           <div class="cfg__sw" id="cfgColour"></div>
+          <figure class="cfg__big" id="cfgBig" hidden><button type="button" class="cfg__bigbtn" id="cfgBigBtn" aria-label="See this colour full size"><img id="cfgBigImg" src="" alt=""/></button><figcaption class="cfg__bigcap"><span id="cfgBigCap"></span><span class="mono">Tap to see it full size</span></figcaption></figure>
           <p class="cfg__len" id="cfgColourAsk" hidden>Tell us the colour you would like in your request and we write back with what we have.</p>
         </fieldset>
         <fieldset id="cfgPockets">

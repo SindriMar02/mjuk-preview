@@ -113,6 +113,9 @@ body[data-page] .bars{opacity:.18}
 .pdp__oos a{color:var(--accent)}
 .pdp__hint{color:var(--dim)}
 .pdp__hint b{font-weight:400;color:var(--accent)}
+.pdp__pomt{margin:0 0 8px;color:var(--dim)}
+.pdp__poms{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.pdp__poms .sz--solo{width:100%;padding-left:6px;padding-right:6px}
 .pdp__facts{display:grid;grid-template-columns:110px 1fr;gap:9px 18px;border-top:1px solid var(--line);padding-top:18px;font-size:13px;line-height:1.55}
 .pdp__facts dt{font-family:var(--ff-m);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);padding-top:2px}
 .pdp__facts dd{margin:0}
@@ -208,6 +211,8 @@ body[data-page] .bars{opacity:.18}
 /* one line, also for the Icelandic units ("2 klst.", "20 mín." wrapped onto two lines at 92px) */
 .story__facts b{display:block;font-family:var(--ff-d);font-weight:600;font-size:clamp(40px,5vw,80px);line-height:.9;text-transform:uppercase;letter-spacing:.015em;white-space:nowrap}
 .story__facts span{display:block;margin-top:8px}
+/* the figure big, the unit a small word beside it: "2h" read as letters to visitors from other countries (Anna, 23 Oct) */
+.story__facts b small{font-family:var(--ff-m);font-weight:400;font-size:12px;letter-spacing:.1em;margin-left:.45em;vertical-align:baseline}
 /* Anna's story (2026-10-10): the company beside the team at the machines (square, so all seven fit),
    then the designer beside her portrait, mirrored, signed in her words */
 .story__im--sq{aspect-ratio:1}

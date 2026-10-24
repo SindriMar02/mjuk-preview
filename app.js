@@ -46,8 +46,9 @@
   // Anna's classification (tools/groups.json): her materials and piece groups, named in the page's language
   const nm = x => (x ? (isIS && x.is) || x.name : '');
   const MATS = Object.fromEntries((CM.materials || []).map(m => [m.key, m])), GRPS = Object.fromEntries((CM.groups || []).map(g => [g.key, g]));
-  // the fibre is the product story here, so the card states the real composition, else her material
-  const catLabel = p => (p.comp || nm(MATS[p.mat]) || nm(GRPS[p.tyk]) || '');
+  // a card names her material group ("Fluffy angora"); the exact percentages are on the product page only (Anna, 23 Oct:
+  // one format under the pictures, the composition was exact on some cards and general on others)
+  const catLabel = p => (nm(MATS[p.mat]) || nm(GRPS[p.tyk]) || '');
   const editorial = (CM.campaign || []);
 
   /* ── designed product card, with real size chips that add to bag ── */
@@ -69,8 +70,12 @@
           const label = String(v.s).split('/')[0].trim() || v.s;
           return `<button class="sz" data-h="${esc(p.h)}" data-s="${esc(label)}" title="${esc(v.s)}${v.a ? '' : ' — sold out'}"${v.a ? '' : ' disabled'}>${esc(label)}</button>`;
         }).join('')
-      // a plain hat (no pompom in its name) asks about pompoms instead of being added silently
-      : `<button class="sz sz--solo${p.tyk === 'hats' && !/pom ?pom/i.test(p.t) ? ' pom-ask' : ''}" data-h="${esc(p.h)}" data-s="">${t('Add to bag')}</button>`;
+      // a plain hat (no pompom in its name) shows its pompom choice right on the card: None adds it, 1 or 2 opens
+      // the chooser on that many (Anna, 23 Oct)
+      : p.tyk === 'hats' && !/pom ?pom/i.test(p.t)
+        ? `<span class="mono">${t('Pompoms')}</span>` + [['0', t('None')], ['1', '1'], ['2', '2']].map(([n, l]) =>
+            `<button class="sz pom-ask" data-h="${esc(p.h)}" data-s="" data-n="${n}" aria-label="${esc(n === '0' ? t('No pompom') : n === '1' ? t('One pompom') : t('Two pompoms'))}">${esc(l)}</button>`).join('')
+        : `<button class="sz sz--solo" data-h="${esc(p.h)}" data-s="">${t('Add to bag')}</button>`;
     return `<article class="prod rv">
       <div class="prod__im">
         <span class="prod__ix">${String(i + 1).padStart(2, '0')}</span>
@@ -162,11 +167,14 @@
   const dragify = el => {
     if (!el) return;
     let down = false, sx = 0, sl = 0, moved = 0;
-    el.addEventListener('pointerdown', e => { if (e.pointerType === 'touch') return; down = true; moved = 0; sx = e.clientX; sl = el.scrollLeft; el.classList.add('drag'); el.setPointerCapture(e.pointerId); });
-    el.addEventListener('pointermove', e => { if (!down) return; const d = e.clientX - sx; moved = Math.abs(d); el.scrollLeft = sl - d; });
-    const up = () => { down = false; el.classList.remove('drag'); };
+    el.addEventListener('pointerdown', e => { if (e.pointerType === 'touch') return; down = true; moved = 0; sx = e.clientX; sl = el.scrollLeft; });
+    el.addEventListener('pointermove', e => { if (!down) return; const d = e.clientX - sx; moved = Math.abs(d);
+      // capture only once it is a drag: capturing on pointerdown retargets the click to the rail, so no button or link in it worked with a mouse (Anna's test, 23 Oct)
+      if (moved > 6 && !el.classList.contains('drag')) { el.classList.add('drag'); el.setPointerCapture(e.pointerId); }
+      if (el.classList.contains('drag')) el.scrollLeft = sl - d; });
+    const up = () => { down = false; el.classList.remove('drag'); setTimeout(() => { moved = 0; }, 0); };   // the drag's own click comes first, then a later keyboard click is never eaten (Codex audit)
     el.addEventListener('pointerup', up); el.addEventListener('pointerleave', up);
-    el.addEventListener('click', e => { if (moved > 6) { e.preventDefault(); e.stopPropagation(); } }, true);
+    el.addEventListener('click', e => { if (moved > 6 && e.detail !== 0) { e.preventDefault(); e.stopPropagation(); } moved = 0; }, true);
   };
   dragify($('#rail')); dragify($('#railS'));
 
@@ -406,7 +414,10 @@
   }
   document.addEventListener('click', e => {
     const sz = e.target.closest('.sz');
-    if (sz && !sz.disabled && (!sz.classList.contains('pom-ask') || !window.CMPomReady)) { e.preventDefault(); addToBag(sz.dataset.h, sz.dataset.s || '', sz); return; }
+    if (sz && !sz.disabled && !sz.classList.contains('pom-ask')) { e.preventDefault(); addToBag(sz.dataset.h, sz.dataset.s || '', sz); return; }
+    // a plain hat without the chooser (no pompom for sale, or configurators.js did not run): None still adds the hat,
+    // 1 or 2 never adds it bare, as the customer asked for pompoms (Codex audit 2, 23 Oct)
+    if (sz && !sz.disabled && !window.CMPomReady) { e.preventDefault(); if (sz.dataset.n === '1' || sz.dataset.n === '2') say(t('Pompoms cannot be chosen right now.')); else addToBag(sz.dataset.h, '', sz); return; }
     if (e.target.closest('#bagBtn')) { openBag(true); return; }
     if (e.target.closest('#bagClose') || e.target.closest('#bagScrim')) { openBag(false); return; }
     const q = e.target.closest('[data-q]');
@@ -513,7 +524,88 @@
   try { renderBag(); } catch (e) { lines = []; save(); try { renderBag(); } catch (e2) {} }
   window.CMBag = { add: addToBag, open: openBag, room: h => (byHandle[h] ? roomFor(byHandle[h]) : 0) };
   // the card renderer and helpers, so inner pages draw the same cards as the front page
-  window.CMUI = { prod, px, usd, byHandle, pick, catLabel, t, fmt, pieces };
+  /* ── search text and matching, one for the site panel and the shop filter (pages.js reads CMUI.search). A word
+     matches as typed or as any singular of it ("gloves" -> glove, "scarves" -> scarf, "berries" -> berry); "pom pom",
+     "pom-pom" and "pompom" are one word; her design's own material sentence counts too (Codex audit, 23 Oct). ── */
+  const SEARCH = (() => {
+    const fold = x => String(x || '').toLowerCase().replace(/pom[\s\-–]*pom/g, 'pompom').replace(/[\-–]/g, ' ');
+    const alts = w => {
+      const a = [w];
+      if (w.length > 3) {
+        if (/ies$/.test(w)) a.push(w.slice(0, -3) + 'y');
+        if (/ves$/.test(w)) a.push(w.slice(0, -3) + 'f', w.slice(0, -3) + 'fe', w.slice(0, -1));
+        if (/(s|x|z|ch|sh)es$/.test(w)) a.push(w.slice(0, -2));
+        if (/[^s]s$/.test(w)) a.push(w.slice(0, -1));
+      }
+      return a;
+    };
+    const words = x => fold(x).replace(/[^\p{L}\p{N}]+/gu, ' ');
+    const toks = q => words(q).split(' ').filter(Boolean).map(alts);
+    const FAMS = Object.fromEntries((CM.families || []).map(f => [f.key, f]));
+    const said = f => (f && f.said ? (isIS && f.saidIs) || f.said : '');
+    const hay = new Map();
+    const text = p => { let w = hay.get(p); if (w == null) { w = ' ' + words([p.t, p.comp, nm(MATS[p.mat]), nm(GRPS[p.tyk]), nm(FAMS[p.fam]), p.mat ? '' : said(FAMS[p.fam])].join(' ')); hay.set(p, w); } return w; };
+    // the word as typed matches anywhere; a singular made from it only where a word starts (Codex audit 2, 23 Oct)
+    const hit = (p, tk) => { const w = text(p); return tk.every(a => a.some((k, i) => w.includes(i ? ' ' + k : k))); };
+    return { fold, toks, text, hit };
+  })();
+
+  /* ── one search for the whole site, at the top of every page (Anna and Veronika, 23 Oct: "we need one big search for
+     anything", not a jump to the small search in the shop). Pieces as you type, her pages too, Enter = all in the shop.
+     Words are matched one by one; a plural finds her singular name, and "pom pom", "pom-pom", "pompom" are one word. ── */
+  {
+    const { fold, toks: toksOf, hit } = SEARCH;
+    // her pages, found by what people type for them (both languages)
+    const PAGES = [
+      ['made.html', 'Made for you', 'made bespoke custom order sew sewn cape poncho shawl sérsaum sauma slá sjal'],
+      ['fibres.html', 'Materials', 'material fibre fiber angora cashmere merino wool alpaca silk care wash ull efni kasmír'],
+      ['store.html', 'Stores', 'store shop address hours open opening visit laugavegur stockist where búð verslun opið opnunartím'],
+      ['story.html', 'Our story', 'story about who workshop history saga'],
+    ];
+    const dlg = document.createElement('dialog');
+    dlg.className = 'srch'; dlg.id = 'srch'; dlg.setAttribute('aria-label', t('Search')); dlg.setAttribute('data-lenis-prevent', '');
+    dlg.innerHTML = `<div class="srch__bar"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M15.4 15.4 21 21" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <input type="search" id="srchQ" autocomplete="off" enterkeyhint="search" aria-label="${esc(t('Search'))}" placeholder="${esc(t('Search everything: marshmallow, cashmere, red…'))}"/>
+      <button type="button" class="srch__x" id="srchX">${esc(t('Close'))}</button></div><div class="srch__res" id="srchRes" aria-live="polite" data-lenis-prevent></div>`;
+    document.body.appendChild(dlg);
+    const q = dlg.querySelector('#srchQ'), res = dlg.querySelector('#srchRes');
+    const shopUrl = (v, all) => 'shop.html' + (v ? '?q=' + encodeURIComponent(v) + (all ? '&all=1' : '') : '');
+    const draw = () => {
+      const v = q.value.trim(), toks = toksOf(v);
+      if (!toks.length) { res.innerHTML = ''; return; }
+      const pages = PAGES.filter(([, , kw]) => toks.some(alts => fold(kw).split(' ').some(w => alts.some(k => w.startsWith(k) || k.startsWith(w) && w.length > 3))));
+      const inName = p => toks.every(alts => alts.some(k => fold(p.t).includes(k)));
+      const all = CM.all.filter(p => hit(p, toks)).sort((a, b) => (a.oos - b.oos) || (inName(b) - inName(a)));
+      const inStock = all.filter(p => !p.oos).length;
+      res.innerHTML = (pages.length ? `<p class="srch__h">${esc(t('Pages'))}</p>` + pages.map(([href, name]) => `<a class="srch__pg" href="${href}">${esc(t(name))}</a>`).join('') : '')
+        + (all.length ? `<p class="srch__h">${esc(fmt('{n} pieces', { n: all.length }))}</p>` + all.slice(0, 8).map(p => `<a class="srch__it${p.oos ? ' is-oos' : ''}" href="product/${encodeURIComponent(p.h)}/">
+            <img src="${px(p.img[0], 160)}" alt="" loading="lazy"/><span><span class="srch__nm">${esc(p.t)}</span><span class="srch__sub">${esc(catLabel(p))}${p.oos ? ' · ' + esc(t('Sold out')) : ''}</span></span><span class="srch__pr">${usd(p.p)}</span></a>`).join('')
+            + `<a class="srch__all" href="${shopUrl(v, !inStock)}">${esc(fmt('See all {n} in the shop', { n: inStock || all.length }))} &rarr;</a>`
+          : pages.length ? '' : `<p class="srch__none">${esc(fmt('Nothing found for “{q}”.', { q: v }))} <a href="shop.html">${esc(t('See everything in the shop'))}</a></p>`);
+    };
+    let qt; q.addEventListener('input', () => { clearTimeout(qt); qt = setTimeout(draw, 120); });
+    q.addEventListener('keydown', e => {
+      const v = q.value.trim(); if (e.key !== 'Enter' || !v) return;
+      // only sold-out pieces match: the shop opens with them shown, as "See all" does (Codex audit 2, 23 Oct)
+      const found = CM.all.filter(p => hit(p, toksOf(v)));
+      location.href = shopUrl(v, found.length > 0 && found.every(p => p.oos));
+    });
+    dlg.querySelector('#srchX').addEventListener('click', () => dlg.close());
+    dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+    document.addEventListener('click', e => {
+      const b = e.target.closest('#searchBtn'); if (!b) return;
+      e.preventDefault(); e.stopImmediatePropagation();
+      if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
+      // the field is what the person came for: the caret, never a highlighted button; a tap leaves earlier text
+      // unselected, a keyboard open selects it to type over (Codex audit 2, 23 Oct)
+      q.focus(); if (e.detail === 0) q.select(); else { const n = q.value.length; q.setSelectionRange(n, n); }
+    }, true);
+    if (new URLSearchParams(location.search).get('find') === '1') setTimeout(() => document.getElementById('searchBtn')?.click(), 300);
+  }
+
+  window.CMUI = { prod, px, usd, byHandle, pick, catLabel, t, fmt, pieces, search: SEARCH };
+  // every deferred script has run by now: without the pompom chooser, the 1 and 2 buttons go (styles.css .no-poms)
+  document.addEventListener('DOMContentLoaded', () => { if (!window.CMPomReady) document.documentElement.classList.add('no-poms'); });
 
   const nf = $('#newsForm');
   if (nf) nf.addEventListener('submit', e => { e.preventDefault(); const v = $('#newsEmail').value.trim(), m = $('#newsMsg'); const ok = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v); m.textContent = ok ? t('You’re in. New colours reach you first.') : t('Enter a valid email.'); if (ok) nf.reset(); });
@@ -1040,10 +1132,44 @@ void main() {
     }, { rootMargin: '200px' }).observe(seenEl);
   }
 
+  /* ══ the lookbook ══ With a mouse on a wide screen: the pinned horizontal experience, driven by scrolling down
+     (Sindri's design). On a touch or narrow screen: a sideways swipe, as it looks like it should (Anna, 23 Oct); with
+     reduced motion or without GSAP the same swipe, and a mouse can drag it. The mode follows the screen, so a resized
+     window or a turned tablet switches it, and reduced motion keeps its hint and progress line (Codex audit 2, 23 Oct). */
+  const lookbook = () => {
+    const wrap = $('#lookbook'), track = $('#panTrack'), prog = $('#panProg');
+    if (!wrap || !track) return;
+    const hint = $('.pan__hint', wrap), hint0 = hint ? hint.innerHTML : '';
+    const sync = () => { const max = wrap.scrollWidth - wrap.clientWidth; if (prog) prog.style.width = (max > 0 ? wrap.scrollLeft / max * 100 : 0).toFixed(2) + '%'; };
+    const swipe = touch => {
+      wrap.classList.add('pan--swipe');
+      if (hint) hint.innerHTML = t(touch ? 'Swipe' : 'Drag') + ' &rarr;';
+      wrap.addEventListener('scroll', sync, { passive: true }); sync();
+      return () => { wrap.classList.remove('pan--swipe'); wrap.removeEventListener('scroll', sync); wrap.scrollLeft = 0; if (hint) hint.innerHTML = hint0; if (prog) prog.style.width = '0%'; };
+    };
+    if (!hasGsap || reduced) { swipe(matchMedia('(max-width: 820px), (pointer: coarse)').matches); dragify(wrap); return; }
+    // "all" always matches, so this runs on every screen and runs again whenever narrow or coarse changes;
+    // gsap.matchMedia reverts the pin and the track's transform before the other mode starts
+    gsap.matchMedia().add({ any: 'all', narrow: '(max-width: 820px)', coarse: '(pointer: coarse)' }, ctx => {
+      const { narrow, coarse } = ctx.conditions;
+      if (narrow || coarse) return swipe(true);
+      const dist = () => Math.max(0, track.scrollWidth - vw());
+      gsap.to(track, {
+        x: () => -dist(), ease: 'none',
+        scrollTrigger: {
+          trigger: wrap, start: 'top top', end: () => '+=' + dist(), pin: true, scrub: 1, invalidateOnRefresh: true,
+          onUpdate: self => { if (prog) prog.style.width = (self.progress * 100).toFixed(2) + '%'; }
+        }
+      });
+      ScrollTrigger.sort();   // a pin made after a resize still counts before the triggers below it
+      return () => { if (prog) prog.style.width = '0%'; };
+    });
+  };
+
   /* ══ scroll choreography ══ */
   const choreograph = () => {
     if (!hasGsap || reduced) {
-      const wrap = $('#lookbook'); if (wrap) { wrap.style.overflowX = 'auto'; wrap.style.overflowY = 'hidden'; dragify(wrap); }
+      lookbook();
       return;
     }
     /* hero parallax */
@@ -1055,18 +1181,7 @@ void main() {
       gsap.to(o, { c: 0, ease: 'none', scrollTrigger: { trigger: '.camp', start: 'top bottom', end: 'top 12%', scrub: true }, onUpdate: () => (cf.style.clipPath = `inset(${o.c}% ${o.c * 1.45}%)`) });
       gsap.fromTo('.camp__img', { scale: 1.14 }, { scale: 1, ease: 'none', scrollTrigger: { trigger: '.camp', start: 'top bottom', end: 'bottom top', scrub: true } });
     }
-    /* horizontal scroll-hijack lookbook */
-    const wrap = $('#lookbook'), track = $('#panTrack'), prog = $('#panProg');
-    if (wrap && track) {
-      const dist = () => Math.max(0, track.scrollWidth - vw());
-      gsap.to(track, {
-        x: () => -dist(), ease: 'none',
-        scrollTrigger: {
-          trigger: wrap, start: 'top top', end: () => '+=' + dist(), pin: true, scrub: 1, invalidateOnRefresh: true,
-          onUpdate: self => { if (prog) prog.style.width = (self.progress * 100).toFixed(2) + '%'; }
-        }
-      });
-    }
+    lookbook();
     /* as-seen-on headline reveal */
     gsap.from('.seen__overlay > *', { y: 20, opacity: 0, duration: 1, stagger: .1, ease: 'power3.out', scrollTrigger: { trigger: '.seen', start: 'top 70%' } });
   };
