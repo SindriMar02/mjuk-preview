@@ -346,7 +346,8 @@
       const z = document.createElement('dialog');
       z.className = 'pzoom'; z.tabIndex = -1; z.setAttribute('autofocus', ''); z.setAttribute('aria-label', p.t); z.setAttribute('data-lenis-prevent', '');
       z.innerHTML = `<button type="button" class="pzoom__x"><span>${esc(t('Close'))}</span><svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true" focusable="false"><path d="M1 1l10 10M11 1 1 11" stroke="currentColor" stroke-width="1.4" fill="none"/></svg></button>`
-        + `<div class="pzoom__in" data-lenis-prevent>${v.imgs.map((u, i) => `<img src="${px(u, 1800)}" alt="${esc(p.t)}" loading="${i < 2 ? 'eager' : 'lazy'}" decoding="async"/>`).join('')}</div>`;
+        // lazy, all of them: the viewer is closed until a tap, so its big photos never compete with the page's own
+        + `<div class="pzoom__in" data-lenis-prevent>${v.imgs.map((u, i) => `<img src="${px(u, 1800)}" alt="${esc(p.t)}" loading="lazy" decoding="async"/>`).join('')}</div>`;
       document.body.appendChild(z);
       const zx = $('.pzoom__x', z), zin = $('.pzoom__in', z);
       let zt;
