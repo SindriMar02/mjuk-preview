@@ -239,6 +239,7 @@
     gal.classList.toggle('two', v.imgs.length > 1);
     gal.innerHTML = v.gal;
     $('#info').innerHTML = v.info;
+    wirePdp(p, v);
     splitWords($('#pdpT'));
     $$('.pdp__info > *').forEach((el, i) => { if (!el.classList.contains('tr')) { el.classList.add('rv'); el.style.transitionDelay = (i * 60) + 'ms'; } });
     // the text was already in the page: show it at once rather than hide it to reveal it again
@@ -254,6 +255,120 @@
       fill($('#withT'), v.withL);
     } else withSec.remove();
     rails();
+  }
+
+  /* ── the product page, alive (Sindri, 24 Oct: premium, smooth, easy to use): the pompom choice, the button that says
+     what happens next, the details opening and closing smoothly, a buy bar on phones once the button has scrolled away,
+     and every photo full size on a tap ── */
+  function wirePdp(p, v) {
+    const info = $('#info'); if (!info) return;
+    const EASE = 'cubic-bezier(.23,1,.32,1)';   // strong ease-out (review-animations STANDARDS)
+    const cta = $('.pdp__cta', info), pom = $('.pdp__pom', info), seg = $('.pseg', info);
+    // a label that changes slides out and the new one rises in
+    const relabel = (el, txt, instant) => {
+      if (!el || el.textContent === txt) return;
+      if (instant || reduced || !el.animate) { el.getAnimations && el.getAnimations().forEach(a => a.cancel()); el.textContent = txt; return; }   // a key press changes it at once
+      el.getAnimations().forEach(a => a.cancel());
+      const out = el.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(-35%)' }], { duration: 110, easing: EASE, fill: 'forwards' });
+      // the held end state goes as the new label rises in, so nothing is left at opacity 0
+      out.onfinish = () => { el.textContent = txt; el.animate([{ opacity: 0, transform: 'translateY(35%)' }, { opacity: 1, transform: 'none' }], { duration: 240, easing: EASE }); out.cancel(); };
+    };
+    // on a phone, once the button has scrolled away, a slim bar keeps the price and the same button in reach
+    let bar = null;
+    if (cta) {
+      const el = document.createElement('div'); el.className = 'pdp-bar'; el.setAttribute('aria-hidden', 'true');
+      el.innerHTML = `<div class="pdp-bar__t"><span class="pdp-bar__n">${esc(p.t)}</span><span class="pdp-bar__p">${usd(p.p)}</span></div><button type="button" class="pdp-bar__b" tabindex="-1"><span>${esc($('.pdp__ctal', cta).textContent)}</span></button>`;
+      document.body.appendChild(el);
+      bar = { el, lbl: $('.pdp-bar__b span', el) };
+      // the same click as the button itself, as a pointer (detail 1), so the chooser opens without a focus ring
+      $('.pdp-bar__b', el).addEventListener('click', () => cta.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, detail: 1 })));
+      if ('IntersectionObserver' in window) {
+        let gone = false, foot = false;
+        const sync = () => el.classList.toggle('on', gone && !foot);
+        new IntersectionObserver(([e]) => { gone = !e.isIntersecting && e.boundingClientRect.top < 0; sync(); }).observe(cta);
+        const f = $('.foot'); if (f) new IntersectionObserver(([e]) => { foot = e.isIntersecting; sync(); }).observe(f);
+      }
+    }
+    // pompoms: None, One or Two in one control; the button below says what happens next
+    if (seg && cta && pom) {
+      const choose = (b, viaKey) => {
+        const n = b.dataset.n;
+        $$('.pseg__o', seg).forEach(o => { const on = o === b; o.setAttribute('aria-checked', String(on)); o.tabIndex = on ? 0 : -1; });
+        // the highlight moves itself (no parent variable restyling its children); a key press moves it at once
+        const ind = $('.pseg__ind', seg); if (ind) { ind.style.transition = viaKey ? 'none' : ''; ind.style.transform = `translateX(${+n * 100}%)`; }
+        if (viaKey) b.focus();
+        cta.dataset.n = n;
+        const label = n === '0' ? pom.dataset.l0 : pom.dataset.l1;
+        relabel($('.pdp__ctal', cta), label, viaKey);
+        if (bar) relabel(bar.lbl, label, true);   // the bar is off screen whenever the control is in view
+      };
+      seg.addEventListener('click', e => { const b = e.target.closest('.pseg__o'); if (b) choose(b, false); });
+      seg.addEventListener('keydown', e => {
+        const k = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key]; if (!k) return;
+        e.preventDefault();
+        const os = $$('.pseg__o', seg), i = os.findIndex(o => o.getAttribute('aria-checked') === 'true');
+        choose(os[(i + k + os.length) % os.length], true);
+      });
+    }
+    // the details: a native <details> that eases open and shut instead of snapping
+    $$('.acc', info).forEach(d => {
+      const sum = $('summary', d), body = $('.acc__b', d);
+      sum.addEventListener('click', e => {
+        if (reduced || !body.animate) return;   // the native toggle, at once
+        e.preventDefault();
+        if (d.dataset.busy) return;
+        d.dataset.busy = '1';
+        const done = () => { d.classList.remove('closing'); delete d.dataset.busy; };
+        if (!d.open) {
+          d.open = true;
+          const h = body.scrollHeight;
+          const a = body.animate([{ height: '0px', opacity: 0 }, { height: h + 'px', opacity: 1 }], { duration: 320, easing: EASE });
+          a.onfinish = a.oncancel = done;
+        } else {
+          d.classList.add('closing');
+          const a = body.animate([{ height: body.offsetHeight + 'px', opacity: 1 }, { height: '0px', opacity: 0 }], { duration: 220, easing: EASE });
+          a.onfinish = () => { d.open = false; done(); };
+          a.oncancel = done;
+        }
+      });
+    });
+    // every photo full size: one tall page of them, the tapped one first in view
+    const gal = $('#gal');
+    if (gal && v.imgs.length) {
+      const z = document.createElement('dialog');
+      z.className = 'pzoom'; z.tabIndex = -1; z.setAttribute('autofocus', ''); z.setAttribute('aria-label', p.t); z.setAttribute('data-lenis-prevent', '');
+      z.innerHTML = `<button type="button" class="pzoom__x"><span>${esc(t('Close'))}</span><svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true" focusable="false"><path d="M1 1l10 10M11 1 1 11" stroke="currentColor" stroke-width="1.4" fill="none"/></svg></button>`
+        + `<div class="pzoom__in" data-lenis-prevent>${v.imgs.map((u, i) => `<img src="${px(u, 1800)}" alt="${esc(p.t)}" loading="${i < 2 ? 'eager' : 'lazy'}" decoding="async"/>`).join('')}</div>`;
+      document.body.appendChild(z);
+      const zx = $('.pzoom__x', z), zin = $('.pzoom__in', z);
+      let zt;
+      const openZ = (i, viaKey) => {
+        clearTimeout(zt);
+        if (!z.open) z.showModal();
+        const im = $$('img', zin)[i]; zin.scrollTop = i && im ? im.offsetTop - 64 : 0;   // the tapped photo first, below Close
+        z.getBoundingClientRect(); z.classList.add('on');
+        (viaKey ? zx : z).focus({ preventScroll: true });   // a tap opens onto the photos, a key onto Close
+        document.documentElement.style.overflow = 'hidden';
+      };
+      const closeZ = () => { z.classList.remove('on'); document.documentElement.style.overflow = ''; clearTimeout(zt); zt = setTimeout(() => { if (z.open) z.close(); }, reduced ? 0 : 200); };
+      zx.addEventListener('click', closeZ);
+      z.addEventListener('cancel', e => { e.preventDefault(); closeZ(); });
+      zin.addEventListener('click', e => { if (e.target === zin) closeZ(); });
+      const figAt = el => [...gal.children].indexOf(el);
+      gal.addEventListener('click', e => { const f = e.target.closest('.pdp__fig'); if (f) openZ(figAt(f), e.detail === 0); });
+      gal.addEventListener('keydown', e => { const f = e.target.closest('.pdp__fig'); if (f && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openZ(figAt(f), true); } });
+      // on a phone the photos swipe sideways: a slim line of segments says which one is showing
+      if (v.imgs.length > 1) {
+        gal.insertAdjacentHTML('afterend', `<div class="pdp__dots" aria-hidden="true">${v.imgs.map((_, i) => `<i${i ? '' : ' class="on"'}></i>`).join('')}</div>`);
+        const dots = $$('.pdp__dots i');
+        gal.addEventListener('scroll', () => {
+          const f = gal.children[0]; if (!f) return;
+          const step = f.getBoundingClientRect().width + parseFloat(getComputedStyle(gal).columnGap || 0);
+          const i = Math.min(dots.length - 1, Math.round(gal.scrollLeft / (step || 1)));
+          dots.forEach((d, k) => d.classList.toggle('on', k === i));
+        }, { passive: true });
+      }
+    }
   }
 
   /* horizontal rails on inner pages (app.js wired only the homepage's two) */

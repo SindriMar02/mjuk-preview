@@ -33,6 +33,20 @@
     const tgName = tg => tg[0] === '@' ? typeName(tg.slice(1).split('/')[0]) : famName(tg);
     const tgHref = tg => { if (tg[0] !== '@') return 'shop.html?family=' + encodeURIComponent(tg); const [g, m] = tg.slice(1).split('/'); return 'shop.html?type=' + g + (m ? '&material=' + m : ''); };
     const isNew = p => (p.cats || []).includes('new');
+    /* small line icons for the product page (Sindri, 24 Oct: "icons and navigability"): drawn on a 24 grid,
+       1.3 stroke, the ink colour of the text beside them */
+    const ICONS = {
+      pin: '<path d="M12 21s-6.5-6.2-6.5-11a6.5 6.5 0 0 1 13 0c0 4.8-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/>',
+      parcel: '<path d="M3.5 7.5 12 3.5l8.5 4v9L12 20.5l-8.5-4z"/><path d="M3.5 7.5 12 11.5l8.5-4M12 11.5v9M7.8 5.5l8.4 4"/>',
+      store: '<path d="M4 9.5 5.6 5h12.8L20 9.5M4 9.5h16V20H4zM9.5 20v-5h5v5"/>',
+      yarn: '<circle cx="12" cy="12" r="8"/><path d="M6.6 6.9c3.3 1.4 7.7 6 9.2 11.5M4.4 10.6c3.9.2 8.3 3.9 9.8 9.3M9.3 4.4c2.6 2.1 6.8 6.9 10.2 8.4"/>',
+      text: '<path d="M5 6.5h14M5 10.5h14M5 14.5h10M5 18.5h7"/>',
+      care: '<path d="M3.5 9.5h17l-1.7 8.6a2.2 2.2 0 0 1-2.2 1.9H7.4a2.2 2.2 0 0 1-2.2-1.9z"/><path d="M6.8 13.6c1.3-1 2.6-1 3.9 0s2.6 1 3.9 0 2.6-1 3.9 0"/>',
+      pair: '<circle cx="9" cy="12" r="5.2"/><circle cx="15" cy="12" r="5.2"/>',
+    };
+    const ic = k => `<svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${ICONS[k]}</svg>`;
+    // one section of the details: a native <details> (works with no script); pages.js eases it open and shut
+    const acc = (key, icon, title, body, open) => body ? `<details class="acc" data-acc="${key}"${open ? ' open' : ''}><summary>${ic(icon)}<span>${title}</span><i class="acc__pm" aria-hidden="true"></i></summary><div class="acc__b"><div class="acc__in">${body}</div></div></details>` : '';
 
     /* ── her copy: whitelist the tags WordPress wrote, drop everything else ── */
     const clean = html => String(html || '')
@@ -81,26 +95,39 @@
       const fam = FAM[p.fam] ? null : familyKey(p);   // her family first; outside her sheet, the shop's category
       const imgs = [...new Set((p.img || []).filter(Boolean))];
       const crumb = `<a href="shop.html">${t('Shop')}</a><i>/</i>${GRP[p.tyk] ? `<a href="shop.html?type=${esc(p.tyk)}">${esc(typeName(p.tyk))}</a><i>/</i>` : ''}${FAM[p.fam] ? `<a href="shop.html?family=${esc(p.fam)}">${esc(famName(p.fam))}</a><i>/</i>` : ''}<span>${esc(p.t)}</span>`;
-      const gal = imgs.map((u, i) => `<figure class="pdp__fig rv"><img src="${px(u, 1200)}" alt="${esc(p.t)}${i ? ', ' + t('detail') : ''}" ${i ? 'loading="lazy"' : 'fetchpriority="high"'}/></figure>`).join('');
+      const gal = imgs.map((u, i) => `<figure class="pdp__fig rv" tabindex="0" role="button" aria-label="${esc(t('View larger'))}"><img src="${px(u, 1200)}" alt="${esc(p.t)}${i ? ', ' + t('detail') : ''}" ${i ? 'loading="lazy"' : 'fetchpriority="high"'}/></figure>`).join('');
       const plainHat = p.tyk === 'hats' && !/pom ?pom/i.test(p.t);
       const price = p.cp
         ? `<s>${usd(p.cp)}</s><span>${usd(p.p)}</span><span class="pdp__save">${t('Save')} ${Math.round((1 - p.p / p.cp) * 100)}%</span>`
         : `<span>${usd(p.p)}</span>`;
       // her matching pieces that are in the shop today, as links to them
       const goes = goesFor(p).filter(tg => CM.all.some(x => x !== p && hits(tg, x)));
+      /* the buying column (Sindri, 24 Oct: premium, clear sections, icons): what it is, the price, her short line;
+         the pompom choice as one control with the button saying what happens next; three facts from her own data;
+         then the details in sections that open and close */
+      const comp = (p.comp || '').replace(/[A-Za-z][A-Za-z ]*[A-Za-z]/g, w => t(w));   // her fibre names, one by one
+      const care = c.care ? (x => isIS ? t(x) : CARE_FIX[x] || x)(c.care.replace(/-\s/g, ': ').replace(/\s+/g, ' ')) : '';
+      const delivery = (CM.ship && (isIS && CM.ship.deliveryIs || CM.ship.delivery)) || '';   // her own shipping zones, never a number written here
       const facts = [
         [t('Material'), matWords(p)],
-        // her fibre names, one by one ("50% angora · 25% nylon"); in Icelandic from tools/is.json
-        [t('Composition'), (p.comp || '').replace(/[A-Za-z][A-Za-z ]*[A-Za-z]/g, w => t(w))],
+        [t('Composition'), comp],
         /* facts only where her own text states them: size and origin come from it, never a default */
         [t('Size'), /\bone[- ]size\b/i.test(c.short + ' ' + c.long) ? t('One size') : ''],
         [t('Made'), t(p.mi || '')],
-        // her care line: in English with its grammar fixed (CARE_FIX), in Icelandic from tools/is.json
-        [t('Care'), c.care ? (care => isIS ? t(care) : CARE_FIX[care] || care)(c.care.replace(/-\s/g, ': ').replace(/\s+/g, ' ')) : ''],
-        /* from her own shipping zones (tools/pull-woo.mjs), never a number written here */
-        [t('Delivery'), (CM.ship && (isIS && CM.ship.deliveryIs || CM.ship.delivery)) || ''],
-        [t('Goes with'), goes.map(tg => `<a href="${tgHref(tg)}">${esc(tgName(tg))}</a>`).join(', '), true],
       ].filter(f => f[1]);
+      const promise = [
+        p.mi ? ['pin', t(p.mi)] : null,
+        delivery ? ['parcel', t('Ships worldwide')] : null,
+        /pickup/i.test((CM.ship && CM.ship.delivery) || '') ? ['store', t('Local pickup in Iceland')] : null,
+      ].filter(Boolean);
+      const arrow = '<svg class="pdp__ar" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M2 8h11M9 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>';
+      const cta = `<button class="sz sz--solo pdp__cta${plainHat ? ' pom-ask' : ''}" data-h="${esc(p.h)}" data-s=""${plainHat ? ' data-n="0"' : ''}><span class="pdp__ctal">${t('Add to bag')}</span>${arrow}</button>`;
+      const dots = n => `<span class="pseg__dots" aria-hidden="true">${n ? '<i></i>'.repeat(n) : '<i class="o"></i>'}</span>`;
+      const pomChoice = `<div class="pdp__pom" data-l0="${esc(t('Add to bag'))}" data-l1="${esc(t('Choose colours'))}">
+          <p class="pdp__pomt mono">${t('Pompoms')}</p>
+          <div class="pseg" role="radiogroup" aria-label="${esc(t('Pompoms'))}"><span class="pseg__ind" aria-hidden="true"></span>${[['0', t('None')], ['1', t('One')], ['2', t('Two')]].map(([n, l], i) =>
+            `<button type="button" class="pseg__o" role="radio" aria-checked="${i ? 'false' : 'true'}" tabindex="${i ? -1 : 0}" data-n="${n}">${dots(+n)}<span>${l}</span></button>`).join('')}</div>
+        </div>`;
       const info = `
       <div class="pdp__kick mono">${p.mat ? `<span>${esc(matName(p.mat))}</span>` : ''}${FAM[p.fam] ? `<span>${esc(famName(p.fam))}</span>` : GRP[p.tyk] ? `<span>${esc(typeName(p.tyk))}</span>` : ''}${isNew(p) ? `<span class="is-new">${t('New')}</span>` : ''}${p.cp ? `<span class="is-new">${t('Sale')}</span>` : ''}</div>
       <h1 class="pdp__t" id="pdpT">${esc(p.t)}</h1>
@@ -109,15 +136,16 @@
       <div class="pdp__add">
         ${p.oos
           ? `<div class="pdp__oos"><span class="mono">${t('Sold out online')}</span><span>${t('Every colourway is a limited edition.')} <a href="mailto:customersupport@mjukiceland.com?subject=${encodeURIComponent(p.t)}">${t('Ask the store')}</a> ${t('whether one is left on a shelf in Reykjavík.')}</span></div>`
-          : plainHat
-            // the pompom choice in plain sight (Anna, 23 Oct): none adds the hat, one or two opens the colours
-            ? `<p class="pdp__pomt mono">${t('Pompoms')}</p><div class="pdp__poms">${[['0', t('No pompom')], ['1', t('One pompom')], ['2', t('Two pompoms')]].map(([n, l]) =>
-                `<button class="sz sz--solo pom-ask" data-h="${esc(p.h)}" data-s="" data-n="${n}">${l}</button>`).join('')}</div>`
-            : `<button class="sz sz--solo" data-h="${esc(p.h)}" data-s="">${t('Add to bag')}</button>`}
-        ${plainHat && !p.oos ? `<p class="pdp__hint mono">${t('With one or two, you pick the colours next.')}</p>` : ''}
+          : (plainHat ? pomChoice : '') + cta}
       </div>
-      <dl class="pdp__facts">${facts.map(f => `<dt>${f[0]}</dt><dd>${f[2] ? f[1] : esc(f[1])}</dd>`).join('')}</dl>
-      ${c.long && text(c.long) !== text(c.short) ? `<details class="pdp__desc" open><summary>${t('Description')}</summary><div class="pdp__body">${clean(c.long)}</div></details>` : ''}`;
+      ${promise.length ? `<ul class="pdp__promise">${promise.map(([k, l]) => `<li>${ic(k)}<span>${esc(l)}</span></li>`).join('')}</ul>` : ''}
+      <div class="pdp__accs">
+        ${acc('details', 'yarn', t('Details'), facts.length ? `<dl class="pdp__facts">${facts.map(f => `<dt>${f[0]}</dt><dd>${esc(f[1])}</dd>`).join('')}</dl>` : '', true)}
+        ${acc('desc', 'text', t('Description'), c.long && text(c.long) !== text(c.short) ? `<div class="pdp__body">${clean(c.long)}</div>` : '')}
+        ${acc('care', 'care', t('Care'), care ? `<p>${esc(care)}</p>` : '')}
+        ${acc('delivery', 'parcel', t('Delivery'), delivery ? `<p>${esc(delivery)}</p>` : '')}
+        ${acc('goes', 'pair', t('Goes with'), goes.length ? `<p class="pdp__goes">${goes.map(tg => `<a href="${tgHref(tg)}">${esc(tgName(tg))}</a>`).join('')}</p>` : '')}
+      </div>`;
 
       /* rails: the same design in other colours (her family), then what she pairs it with (her
          Matching products), or, where she has not paired it, another piece in the same material */

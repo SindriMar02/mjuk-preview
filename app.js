@@ -55,11 +55,14 @@
   // everything from her catalogue goes through here before it meets HTML: a product name is data,
   // never markup (Codex 2026-09-26: a name with markup in it would have run on the home page)
   const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  // a pompom, drawn small: a soft dotted rim around a solid ball
+  const POM_ICON = '<svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="2.6" stroke-dasharray="1.1 1.3"/><circle cx="8" cy="8" r="4.2" fill="currentColor"/></svg>';
   const prod = (p, i, o = {}) => {
     // cards render at most 380px wide, so 620 still covers 2x screens. Hover no longer swaps to
     // the second gallery shot: on her shop that is usually a close-up of the knit, which read as
     // a huge zoom (Sindri, 25 Sep). The photo only eases in a little.
     const main = px(p.img[0], 620);
+    const plain = p.tyk === 'hats' && !/pom ?pom/i.test(p.t);
     const price = p.cp ? `<span class="prod__price"><s>${usd(p.cp)}</s>${usd(p.p)}</span>` : `<span class="prod__price">${usd(p.p)}</span>`;
     // chip shows just the size token ("S / Navy Blue" → "S"); full variant kept for the bag.
     // MJÚK's pieces are one-size, so the sized branch is unused here — and the "Add"
@@ -70,15 +73,12 @@
           const label = String(v.s).split('/')[0].trim() || v.s;
           return `<button class="sz" data-h="${esc(p.h)}" data-s="${esc(label)}" title="${esc(v.s)}${v.a ? '' : ' — sold out'}"${v.a ? '' : ' disabled'}>${esc(label)}</button>`;
         }).join('')
-      // a plain hat (no pompom in its name) shows its pompom choice right on the card: None adds it, 1 or 2 opens
-      // the chooser on that many (Anna, 23 Oct)
-      : p.tyk === 'hats' && !/pom ?pom/i.test(p.t)
-        ? `<span class="mono">${t('Pompoms')}</span>` + [['0', t('None')], ['1', '1'], ['2', '2']].map(([n, l]) =>
-            `<button class="sz pom-ask" data-h="${esc(p.h)}" data-s="" data-n="${n}" aria-label="${esc(n === '0' ? t('No pompom') : n === '1' ? t('One pompom') : t('Two pompoms'))}">${esc(l)}</button>`).join('')
-        : `<button class="sz sz--solo" data-h="${esc(p.h)}" data-s="">${t('Add to bag')}</button>`;
+      // a plain hat (no pompom in its name): Add to bag opens the pompom chooser (none, one or two), and a small tag on
+      // its photo says pompoms can go on it (Sindri, 24 Oct: the None/1/2 chips on the card looked generic)
+      : `<button class="sz sz--solo${plain ? ' pom-ask' : ''}" data-h="${esc(p.h)}" data-s="">${t('Add to bag')}</button>`;
     return `<article class="prod rv">
       <div class="prod__im">
-        <span class="prod__ix">${String(i + 1).padStart(2, '0')}</span>
+        <span class="prod__ix">${String(i + 1).padStart(2, '0')}</span>${plain ? `<span class="prod__pom" title="${esc(t('Pompoms can be added to this hat'))}">${POM_ICON}${t('Pompoms')}</span>` : ''}
         <img class="main" src="${main}"${o.sizes && p.img[0] ? ` srcset="${px(p.img[0], 380)} 380w, ${px(p.img[0], 620)} 620w, ${px(p.img[0], 940)} 940w" sizes="${o.sizes}"` : ''} alt="${esc(p.t)}" loading="${o.eager ? 'eager' : 'lazy'}"${o.eager ? ' fetchpriority="high"' : ''} decoding="async"/>
         <div class="prod__sizes">${sizes}</div>
       </div>
@@ -552,7 +552,9 @@
 
   /* ── one search for the whole site, at the top of every page (Anna and Veronika, 23 Oct: "we need one big search for
      anything", not a jump to the small search in the shop). Pieces as you type, her pages too, Enter = all in the shop.
-     Words are matched one by one; a plural finds her singular name, and "pom pom", "pom-pom", "pompom" are one word. ── */
+     Words are matched one by one; a plural finds her singular name, and "pom pom", "pom-pom", "pompom" are one word.
+     It unrolls from the top on the menu's own curve, the results grow and shrink to fit as you type, only pieces new
+     to the list rise in, and it rolls back up on close (Sindri, 24 Oct: "smooth animations", "expand", "collapse"). ── */
   {
     const { fold, toks: toksOf, hit } = SEARCH;
     // her pages, found by what people type for them (both languages)
@@ -562,26 +564,60 @@
       ['store.html', 'Stores', 'store shop address hours open opening visit laugavegur stockist where búð verslun opið opnunartím'],
       ['story.html', 'Our story', 'story about who workshop history saga'],
     ];
+    // a few words to start from, all names in her own catalogue (one tap fills the field)
+    const POPULAR = ['Marshmallow', 'Pompom', 'Cashmere', 'Merino', 'Blanket', 'Gloves', 'Scarf'];
     const dlg = document.createElement('dialog');
     dlg.className = 'srch'; dlg.id = 'srch'; dlg.setAttribute('aria-label', t('Search')); dlg.setAttribute('data-lenis-prevent', '');
-    dlg.innerHTML = `<div class="srch__bar"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M15.4 15.4 21 21" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-      <input type="search" id="srchQ" autocomplete="off" enterkeyhint="search" aria-label="${esc(t('Search'))}" placeholder="${esc(t('Search everything: marshmallow, cashmere, red…'))}"/>
-      <button type="button" class="srch__x" id="srchX">${esc(t('Close'))}</button></div><div class="srch__res" id="srchRes" aria-live="polite" data-lenis-prevent></div>`;
-    document.body.appendChild(dlg);
-    const q = dlg.querySelector('#srchQ'), res = dlg.querySelector('#srchRes');
+    dlg.innerHTML = `<div class="srch__bar">
+        <svg class="srch__ic" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M15.4 15.4 21 21" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        <input type="search" id="srchQ" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" aria-label="${esc(t('Search'))}" placeholder="${esc(t('Marshmallow, cashmere, red…'))}"/>
+        <button type="button" class="srch__x" id="srchX"><span>${esc(t('Close'))}</span><svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true" focusable="false"><path d="M1 1l10 10M11 1 1 11" stroke="currentColor" stroke-width="1.4" fill="none"/></svg></button>
+      </div><div class="srch__res" id="srchRes" aria-live="polite" data-lenis-prevent></div>`;
+    // it opens BELOW the header, which stays in place and keeps its search button as the toggle (Sindri, 24 Oct);
+    // a dimmed layer under it closes on a tap
+    const scrim = document.createElement('div'); scrim.className = 'srch-scrim'; scrim.setAttribute('aria-hidden', 'true');
+    document.body.append(dlg, scrim);
+    const q = dlg.querySelector('#srchQ'), res = dlg.querySelector('#srchRes'), bar = dlg.querySelector('.srch__bar');
+    const navEl = document.getElementById('nav'), sBtn = () => document.getElementById('searchBtn');
     const shopUrl = (v, all) => 'shop.html' + (v ? '?q=' + encodeURIComponent(v) + (all ? '&all=1' : '') : '');
+    let shown = new Set();   // pieces already on screen: typing on keeps them still, only new ones rise in
+    // new content: the list eases from its old height to the new one instead of jumping
+    const swap = html => {
+      const from = res.getBoundingClientRect().height;
+      res.innerHTML = html;
+      res.querySelectorAll('img').forEach(i => { if (i.complete && i.naturalWidth) i.classList.add('ok'); });
+      const to = res.getBoundingClientRect().height;
+      if (reduced || !res.animate || !dlg.classList.contains('is-open') || Math.abs(to - from) < 2) return;
+      res.animate([{ height: from + 'px' }, { height: to + 'px' }], { duration: 360, easing: 'cubic-bezier(.23,1,.32,1)' });   // height, on purpose: the asked-for expand and collapse; one small box, inside a fixed panel
+    };
+    res.addEventListener('load', e => { if (e.target.tagName === 'IMG') e.target.classList.add('ok'); }, true);   // photos fade in once loaded
+    const tile = (p, k, isNew) => {
+      const img = p.img && p.img[0];
+      return `<a class="srch__it${p.oos ? ' is-oos' : ''}${isNew ? ' is-new' : ''}" href="product/${encodeURIComponent(p.h)}/" style="--i:${k}">
+        <span class="srch__im">${img ? `<img src="${px(img, 380)}" srcset="${px(img, 380)} 380w, ${px(img, 620)} 620w" sizes="(max-width: 720px) 46vw, 22vw" alt="" loading="lazy" decoding="async"/>` : ''}</span>
+        <span class="srch__nm">${esc(p.t)}</span>
+        <span class="srch__meta"><span class="srch__sub">${esc(p.oos ? t('Sold out') : catLabel(p))}</span><span class="srch__pr">${p.cp ? `<s>${usd(p.cp)}</s>` : ''}${usd(p.p)}</span></span></a>`;
+    };
     const draw = () => {
       const v = q.value.trim(), toks = toksOf(v);
-      if (!toks.length) { res.innerHTML = ''; return; }
+      if (!toks.length) {
+        shown = new Set();
+        swap(`<div class="srch__sug"><p class="srch__h">${esc(t('Popular'))}</p>${POPULAR.map(w => `<button type="button" class="srch__s" data-s="${esc(w)}">${esc(w)}</button>`).join('')}</div>`);
+        return;
+      }
       const pages = PAGES.filter(([, , kw]) => toks.some(alts => fold(kw).split(' ').some(w => alts.some(k => w.startsWith(k) || k.startsWith(w) && w.length > 3))));
       const inName = p => toks.every(alts => alts.some(k => fold(p.t).includes(k)));
       const all = CM.all.filter(p => hit(p, toks)).sort((a, b) => (a.oos - b.oos) || (inName(b) - inName(a)));
-      const inStock = all.filter(p => !p.oos).length;
-      res.innerHTML = (pages.length ? `<p class="srch__h">${esc(t('Pages'))}</p>` + pages.map(([href, name]) => `<a class="srch__pg" href="${href}">${esc(t(name))}</a>`).join('') : '')
-        + (all.length ? `<p class="srch__h">${esc(fmt('{n} pieces', { n: all.length }))}</p>` + all.slice(0, 8).map(p => `<a class="srch__it${p.oos ? ' is-oos' : ''}" href="product/${encodeURIComponent(p.h)}/">
-            <img src="${px(p.img[0], 160)}" alt="" loading="lazy"/><span><span class="srch__nm">${esc(p.t)}</span><span class="srch__sub">${esc(catLabel(p))}${p.oos ? ' · ' + esc(t('Sold out')) : ''}</span></span><span class="srch__pr">${usd(p.p)}</span></a>`).join('')
-            + `<a class="srch__all" href="${shopUrl(v, !inStock)}">${esc(fmt('See all {n} in the shop', { n: inStock || all.length }))} &rarr;</a>`
-          : pages.length ? '' : `<p class="srch__none">${esc(fmt('Nothing found for “{q}”.', { q: v }))} <a href="shop.html">${esc(t('See everything in the shop'))}</a></p>`);
+      // one calm row of six on a wide screen, two rows of four in between, three rows of two on a phone
+      const cap = matchMedia('(min-width: 1100px)').matches ? 6 : matchMedia('(min-width: 721px)').matches ? 8 : 6;
+      const inStock = all.filter(p => !p.oos).length, top = all.slice(0, cap);
+      let k = 0;
+      swap((pages.length ? `<nav class="srch__pgs" aria-label="${esc(t('Pages'))}">${pages.map(([href, name]) => `<a class="srch__pg" href="${href}">${esc(t(name))}<span aria-hidden="true">&rarr;</span></a>`).join('')}</nav>` : '')
+        + (all.length
+          ? `<div class="srch__head"><p class="srch__h">${esc(fmt('{n} pieces', { n: all.length }))}</p><a class="srch__all" href="${shopUrl(v, !inStock)}">${esc(fmt('See all {n} in the shop', { n: inStock || all.length }))} <span aria-hidden="true">&rarr;</span></a></div>`
+            + `<div class="srch__grid">${top.map(p => shown.has(p.h) ? tile(p, 0, false) : tile(p, k++, true)).join('')}</div>`
+          : pages.length ? '' : `<p class="srch__none">${esc(fmt('Nothing found for “{q}”.', { q: v }))} <a href="shop.html">${esc(t('See everything in the shop'))}</a></p>`));
+      shown = new Set(top.map(p => p.h));
     };
     let qt; q.addEventListener('input', () => { clearTimeout(qt); qt = setTimeout(draw, 120); });
     q.addEventListener('keydown', e => {
@@ -590,15 +626,58 @@
       const found = CM.all.filter(p => hit(p, toksOf(v)));
       location.href = shopUrl(v, found.length > 0 && found.every(p => p.oos));
     });
-    dlg.querySelector('#srchX').addEventListener('click', () => dlg.close());
-    dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+    res.addEventListener('click', e => {
+      const s = e.target.closest('.srch__s'); if (!s) return;
+      q.value = s.dataset.s; clearTimeout(qt); draw();
+      if (e.detail === 0) q.focus();   // a tap leaves the phone keyboard down so the pieces can be seen
+    });
+    let ct;
+    const isOpen = () => dlg.classList.contains('is-open');
+    // the panel sits flush under the header, whatever its height on this screen
+    const place = () => {
+      document.documentElement.style.setProperty('--srch-top', (navEl ? Math.round(navEl.getBoundingClientRect().bottom) : 0) + 'px');
+      dlg.style.setProperty('--srch-bar', bar.offsetHeight + 'px');
+    };
+    // the page behind is still while it is open: no scrolling, nothing in it to tab to
+    const hold = on => {
+      document.documentElement.classList.toggle('srch-open', on);
+      document.documentElement.style.overflow = on ? 'hidden' : '';
+      if (lenis) { on ? lenis.stop() : lenis.start(); }
+      ['main', '.foot'].forEach(sel => { const el = $(sel); if (el) el.inert = on; });
+      const b = sBtn(); if (b) b.setAttribute('aria-expanded', String(on));
+    };
+    const open = kb => {
+      clearTimeout(ct);
+      closeMenu();   // the phone menu and the search never stack
+      if (navEl) { navEl.classList.add('show'); navEl.classList.remove('hide'); }
+      place();
+      if (!dlg.open) { if (typeof dlg.show === 'function') dlg.show(); else dlg.setAttribute('open', ''); }
+      dlg.classList.remove('is-closing'); shown = new Set();
+      dlg.getBoundingClientRect();   // the rolled-up state is laid out first, so the panel visibly unrolls
+      dlg.classList.add('is-open'); hold(true);
+      place();
+      draw();
+      // the field is what the person came for: the caret, never a highlighted button; a tap leaves earlier text
+      // unselected, a keyboard open selects it to type over (Codex audit 2, 23 Oct)
+      q.focus({ preventScroll: true }); if (kb) q.select(); else { const n = q.value.length; q.setSelectionRange(n, n); }
+    };
+    const close = viaKey => {
+      if (!dlg.open || dlg.classList.contains('is-closing')) return;
+      dlg.classList.remove('is-open'); dlg.classList.add('is-closing'); hold(false);
+      if (viaKey) { const b = sBtn(); if (b) b.focus({ preventScroll: true }); }   // a keyboard close hands focus back to the button
+      else if (dlg.contains(document.activeElement)) document.activeElement.blur();
+      clearTimeout(ct);
+      ct = setTimeout(() => { dlg.classList.remove('is-closing'); if (typeof dlg.close === 'function') dlg.close(); else dlg.removeAttribute('open'); }, reduced ? 0 : 300);
+    };
+    dlg.addEventListener('cancel', e => { e.preventDefault(); close(true); });
+    addEventListener('keydown', e => { if (e.key === 'Escape' && isOpen()) { e.preventDefault(); close(true); } });   // Esc rolls it up
+    dlg.querySelector('#srchX').addEventListener('click', e => close(e.detail === 0));
+    scrim.addEventListener('click', () => close(false));
+    addEventListener('resize', () => { if (isOpen()) place(); });
     document.addEventListener('click', e => {
       const b = e.target.closest('#searchBtn'); if (!b) return;
       e.preventDefault(); e.stopImmediatePropagation();
-      if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
-      // the field is what the person came for: the caret, never a highlighted button; a tap leaves earlier text
-      // unselected, a keyboard open selects it to type over (Codex audit 2, 23 Oct)
-      q.focus(); if (e.detail === 0) q.select(); else { const n = q.value.length; q.setSelectionRange(n, n); }
+      isOpen() ? close(e.detail === 0) : open(e.detail === 0);   // the header's button opens and closes it
     }, true);
     if (new URLSearchParams(location.search).get('find') === '1') setTimeout(() => document.getElementById('searchBtn')?.click(), 300);
   }
@@ -764,7 +843,7 @@
 
   /* ── nav hide on scroll-down ── */
   const nav = $('#nav'); let lastY = 0;
-  const navUpdate = y => { if (y > lastY && y > 240) { nav.classList.add('hide'); nav.classList.remove('show'); } else { nav.classList.add('show'); nav.classList.remove('hide'); } lastY = y; };
+  const navUpdate = y => { if (document.documentElement.classList.contains('srch-open')) return; if (y > lastY && y > 240) { nav.classList.add('hide'); nav.classList.remove('show'); } else { nav.classList.add('show'); nav.classList.remove('hide'); } lastY = y; };
 
   /* ── reveal ── */
   const rv = $$('.head, .prod, .cat, .store, .stock__row, .budin__row, .news, .hero__cta');

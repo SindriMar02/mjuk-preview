@@ -55,12 +55,14 @@
     const grid = $('#pomGrid'), img = $('#pomImg'), name = $('#pomName'), total = $('#pomTotal'),
           add = $('#pomAdd'), slots = $$('.pom__slot', dlg), why = $('#pomWhy');
     let hat = null, count = 0, active = 0, chosen = [null, null];
+    let pMin = 0, pSame = true;   // this hat's pompom price: a slot not yet picked counts at it (24 Oct: "$41, hat and one pompom" undercounted)
 
     grid.innerHTML = POMS.map((s, i) =>
       `<button type="button" class="sw" data-i="${i}" style="--i:${i}" aria-pressed="false" title="${t(s.kind)}, ${escA(s.name)}, ${usd(s.price)}">
          <img src="${px(s.img, 160)}" alt="" loading="lazy"/><span>${escA(s.name)}</span></button>`).join('');
 
-    const price = () => (hat ? hat.p : 0) + chosen.slice(0, count).reduce((n, s) => n + (s ? s.price : 0), 0);
+    const price = () => (hat ? hat.p : 0) + chosen.slice(0, count).reduce((n, s) => n + (s ? s.price : pMin), 0);
+    const guess = () => !pSame && chosen.slice(0, count).some(s => !s);   // a price still depends on the colour
     const ready = () => count === 0 || chosen.slice(0, count).every(Boolean);
     const paint = () => {
       slots.forEach((el, i) => {
@@ -73,7 +75,7 @@
       });
       $('#pomPick').hidden = count === 0;
       $$('.sw', grid).forEach(b => b.setAttribute('aria-pressed', String(chosen.slice(0, count).some(s => s && s.h === POMS[+b.dataset.i].h))));
-      const nextTotal = `${usd(price())}<small>${t(count === 0 ? 'hat only' : count === 1 ? 'hat and one pompom' : 'hat and two pompoms')}</small>`;
+      const nextTotal = `${guess() ? t('from') + ' ' : ''}${usd(price())}<small>${t(count === 0 ? 'hat only' : count === 1 ? 'hat and one pompom' : 'hat and two pompoms')}</small>`;
       if (total.innerHTML !== nextTotal) { total.innerHTML = nextTotal; if (hat) pulse(total); }
       add.disabled = !ready();
       add.textContent = t(count === 0 ? 'Add the hat as it is' : ready() ? 'Add to bag' : 'Pick a colour first');
@@ -98,6 +100,7 @@
       $$('.sw', grid).forEach(b => { b.hidden = !fits(POMS[+b.dataset.i], h); });
       // one price if they all cost the same, otherwise the range: the catalogue has $29 pompoms and a $32 one
       const ps = [...new Set(POMS.filter(s => fits(s, h)).map(s => s.price))].sort((a, b) => a - b);
+      pMin = ps[0] || 0; pSame = ps.length <= 1;
       const pomPrice = ps.length === 0 ? '' : ps.length === 1 ? usd(ps[0]) : fmt('{a} to {b}', { a: usd(ps[0]), b: usd(ps[ps.length - 1]) });
       $$('input[name="n"]', dlg).forEach(r => (r.checked = r.value === String(count)));
       img.src = px(h.img[0], 300); img.alt = h.t; name.textContent = h.t;
@@ -235,12 +238,20 @@
       bigCap.textContent = colourName(b);
     };
     if (big && zoom) {
-      $('#cfgBigBtn').addEventListener('click', e => {
-        const b = chosenBlanket(); if (!b) return;
+      const openZoom = e => {
+        const b = chosenBlanket(); if (!b || !b.img || !b.img[0]) return;
         zoomIn.replaceChildren(...b.img.filter(Boolean).map((u, i) => { const im = document.createElement('img'); im.src = px(u, 1800); im.alt = b.t; im.decoding = 'async'; if (i > 1) im.loading = 'lazy'; return im; }));
         if (typeof zoom.showModal === 'function') zoom.showModal(); else zoom.setAttribute('open', '');
         if (e.detail === 0) zoom.querySelector('#cfgZoomX').focus(); else zoom.focus({ preventScroll: true });
-      });
+      };
+      $('#cfgBigBtn').addEventListener('click', openZoom);
+      // wide screens: the side photo of the chosen blanket opens the same viewer
+      const side = $('.mfy__prev .made__im');
+      if (side) {
+        side.classList.add('is-zoom'); side.tabIndex = 0; side.setAttribute('role', 'button'); side.setAttribute('aria-label', t('View larger'));
+        side.addEventListener('click', openZoom);
+        side.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openZoom({ detail: 0 }); } });
+      }
       zoom.querySelector('#cfgZoomX').addEventListener('click', () => zoom.close());
       zoom.addEventListener('click', e => { if (e.target === zoom || e.target === zoomIn) zoom.close(); });
     }
