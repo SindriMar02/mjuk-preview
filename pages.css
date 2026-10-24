@@ -30,9 +30,6 @@ body[data-page] .bars{opacity:.18}
   gap:clamp(34px,4vw,60px) clamp(12px,1.6vw,26px)}
 .pgrid .prod{width:auto;min-width:0}
 .pgrid .prod.rv{transition-delay:calc((var(--i,0)) * 70ms)}
-.prod__go{position:absolute;inset:0;z-index:1}
-.prod__name a{transition:color .3s}
-.prod__name a:hover{color:var(--accent)}
 .prod--oos .prod__im img{opacity:.55!important;filter:saturate(.7)}
 .prod--oos .prod__sizes{transform:none;right:auto}
 .pg__more{display:flex;justify-content:center;padding:clamp(40px,6vw,70px) var(--pad) 0}

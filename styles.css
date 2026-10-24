@@ -194,7 +194,7 @@ section{padding:clamp(70px,12vw,180px) 0;position:relative}
   background:var(--bg-2)}
 .prod__im::before{content:"";position:absolute;inset:0;background:radial-gradient(60% 50% at 50% 55%,rgba(168,50,10,.08),transparent 70%);opacity:0;transition:opacity .6s var(--ease)}
 .prod:hover .prod__im::before{opacity:1}
-.prod__ix{position:absolute;top:12px;left:14px;z-index:2;font-family:var(--ff-m);font-size:10px;letter-spacing:.1em;color:var(--dim)}
+.prod__ix{position:absolute;top:12px;left:14px;z-index:2;pointer-events:none;font-family:var(--ff-m);font-size:10px;letter-spacing:.1em;color:var(--dim)}
 .prod__im img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:opacity .6s var(--ease),transform 1.1s var(--ease)}
 /* rail arrow buttons */
 .rnav{display:flex;gap:8px}
@@ -701,6 +701,11 @@ section{padding:clamp(70px,12vw,180px) 0;position:relative}
   .srch__bar>*,.srch__bar::after{transition:none;opacity:1;transform:none}
   .srch__it.is-new{animation:none}.srch__im img{transition:none}
 }
+/* the card's photo and name open its page, on every page (moved here from pages.css: the front page loads only this file) */
+.prod__go{position:absolute;inset:0;z-index:1}
+.prod__go:focus-visible{outline:1px solid var(--accent);outline-offset:-4px}
+.prod__name a{transition:color .3s var(--ease)}
+@media(hover:hover) and (pointer:fine){.prod__name a:hover{color:var(--accent)}}
 /* a hat that takes pompoms says so on its photo; Add to bag opens the choice (Sindri, 24 Oct) */
 .prod__pom{position:absolute;top:10px;right:10px;z-index:2;display:inline-flex;align-items:center;gap:6px;padding:5px 8px 5px 6px;border-radius:2px;background:rgba(247,243,239,.92);color:var(--ink);font-family:var(--ff-m);font-size:9.5px;line-height:1;letter-spacing:.1em;text-transform:uppercase;pointer-events:none}
 .prod__pom svg{flex:0 0 auto;color:var(--accent)}

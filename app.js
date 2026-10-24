@@ -63,6 +63,9 @@
     // a huge zoom (Sindri, 25 Sep). The photo only eases in a little.
     const main = px(p.img[0], 620);
     const plain = p.tyk === 'hats' && !/pom ?pom/i.test(p.t);
+    // every card opens its piece: the photo and the name are links on every page, the front page's rails too (Sindri,
+    // 24 Oct: the front page cards opened nothing, the link was only added by pages.js, which that page does not load)
+    const href = 'product/' + encodeURIComponent(p.h) + '/';
     const price = p.cp ? `<span class="prod__price"><s>${usd(p.cp)}</s>${usd(p.p)}</span>` : `<span class="prod__price">${usd(p.p)}</span>`;
     // chip shows just the size token ("S / Navy Blue" → "S"); full variant kept for the bag.
     // MJÚK's pieces are one-size, so the sized branch is unused here — and the "Add"
@@ -80,9 +83,10 @@
       <div class="prod__im">
         <span class="prod__ix">${String(i + 1).padStart(2, '0')}</span>${plain ? `<span class="prod__pom" title="${esc(t('Pompoms can be added to this hat'))}">${POM_ICON}${t('Pompoms')}</span>` : ''}
         <img class="main" src="${main}"${o.sizes && p.img[0] ? ` srcset="${px(p.img[0], 380)} 380w, ${px(p.img[0], 620)} 620w, ${px(p.img[0], 940)} 940w" sizes="${o.sizes}"` : ''} alt="${esc(p.t)}" loading="${o.eager ? 'eager' : 'lazy'}"${o.eager ? ' fetchpriority="high"' : ''} decoding="async"/>
+        <a class="prod__go" href="${href}" aria-label="${esc(p.t)}"></a>
         <div class="prod__sizes">${sizes}</div>
       </div>
-      <div class="prod__meta"><div><div class="prod__name">${esc(p.t)}</div><div class="prod__cat">(${catLabel(p)})</div></div>${price}</div>
+      <div class="prod__meta"><div><div class="prod__name"><a href="${href}">${esc(p.t)}</a></div><div class="prod__cat">(${catLabel(p)})</div></div>${price}</div>
     </article>`;
   };
   const railT = $('#railT'); if (railT) railT.innerHTML = pick(CM.featuredNew).map(prod).join('');

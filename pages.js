@@ -50,9 +50,9 @@
     const el = tpl.content.firstElementChild;
     el.style.setProperty('--i', String(i % 4));
     const im = $('.prod__im', el);
-    const go = document.createElement('a'); go.className = 'prod__go'; go.href = purl(p); go.setAttribute('aria-label', p.t);
-    im.insertBefore(go, $('.prod__sizes', el));
-    const name = $('.prod__name', el); name.innerHTML = `<a href="${purl(p)}">${esc(p.t)}</a>`;
+    // app.js prod() now carries the photo and name links itself; added here only if a card comes without them
+    if (!$('.prod__go', el)) { const go = document.createElement('a'); go.className = 'prod__go'; go.href = purl(p); go.setAttribute('aria-label', p.t); im.insertBefore(go, $('.prod__sizes', el)); }
+    const name = $('.prod__name', el); if (!$('a', name)) name.innerHTML = `<a href="${purl(p)}">${esc(p.t)}</a>`;
     if (p.oos) { el.classList.add('prod--oos'); $('.prod__sizes', el).innerHTML = `<span class="mono">${t('Sold out')}</span>`; }
     if (opt.index === false) { const ix = $('.prod__ix', el); if (ix) ix.remove(); }
     return el;
