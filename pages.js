@@ -181,6 +181,19 @@
       else { const have = grid.children.length; const add = shownL.slice(have).map((p, i) => card(p, have + i, img)); grid.append(...add); reveal(grid); }
       grid.removeAttribute('data-wait'); grid.removeAttribute('data-static');   // filled: the space kept for it (pages.css) is no longer needed, and the built-in row is now just cards
       more.hidden = L.length <= st.n; empty.hidden = L.length > 0;
+      /* nothing matches because a toggle narrows it (she came in from "New this season", say): say which,
+         and offer the same filters across everything with one tap instead of a dead end */
+      if (!L.length) {
+        const why = [['nw', fNew, 'None of the new pieces match.'], ['sale', fSale, 'Nothing on sale matches.'], ['stock', fStock, 'Nothing in stock matches.']]
+          .find(([k]) => { if (!st[k]) return false; st[k] = false; const n = list().length; st[k] = true; return n > 0; });
+        if (why) {
+          const [k, box, msg] = why; st[k] = false; const n = list().length; st[k] = true;
+          const b = document.createElement('button'); b.className = 'link'; b.type = 'button';
+          b.textContent = '[ ' + t('Show all') + ' ' + pieces(n) + ' ]';
+          b.addEventListener('click', () => { st[k] = false; box.checked = false; apply(true); });
+          empty.replaceChildren(document.createTextNode(t(msg) + ' '), b);
+        } else empty.textContent = t('Nothing matches that. Try one fewer filter.');
+      }
       const u = new URLSearchParams();
       if (st.type) u.set('type', st.type); if (st.family) u.set('family', st.family); if (st.material) u.set('material', st.material); if (st.colour) u.set('colour', st.colour);
       if (st.sale) u.set('sale', '1'); if (st.nw) u.set('new', '1');

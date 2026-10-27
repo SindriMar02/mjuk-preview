@@ -1,4 +1,9 @@
 {
+ "js:Nothing matches that. Try one fewer filter.": "Ekkert passar við þetta. Prófaðu einni síu færra.",
+ "js:Show all": "Sýna allar",
+ "js:Nothing in stock matches.": "Ekkert til á lager passar.",
+ "js:Nothing on sale matches.": "Ekkert á útsölu passar.",
+ "js:None of the new pieces match.": "Engin ný flík passar.",
  "Icelandic&nbsp;wool": "íslensk&nbsp;ull",
  "cashmere": "kasmír",
  "alpaca": "alpakkaull",
