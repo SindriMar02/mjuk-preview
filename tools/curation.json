@@ -75,26 +75,27 @@
  "made": {
   "_about": "Made-for-you prices in USD, set by Anna: one per row of her Bespoke clothing list (tools/groups.json bespoke.rows, her own row names). null = not given yet: the page then shows no number and says price on request; the request goes to the workshop by email. Salmon leather is never priced here: it is a special request by email (Anna, questions file 2026-09-25, Q13).",
   "prices": {
-   "Cashmere and Merino shawl": null,
-   "Icelandic wool shawl": null,
-   "Cashmere and Merino shawl with pockets": null,
-   "Icelandic Wool shawl with pockets": null,
-   "Cashmere and Merino Petite poncho": null,
-   "Icelandic Wool Petite poncho": null,
-   "Cashmere and Merino Princess cape": null,
-   "Icelandic Wool Princess cape": null,
-   "Cashmere and Merino Angelina cape": null,
-   "Icelandic Wool Angelina cape": null,
-   "Cashmere and Merino Grace cape": null,
-   "Icelandic Wool Grace cape": null,
-   "Cashmere and Merino shawl with fur": null,
-   "Icelandic wool shawl with fur": null,
-   "Cashmere and Merino Petite poncho with fur": null,
-   "Icelandic Wool Petite poncho with fur": null,
-   "Cashmere and Merino Grace cape with fur": null,
-   "Icelandic Wool Grace cape with fur": null,
-   "Cashmere and Merino Empress cape with fur": null,
-   "Icelandic Wool Empress cape with fur": null
-  }
+   "Cashmere and Merino shawl": 190,
+   "Icelandic wool shawl": 143,
+   "Cashmere and Merino shawl with pockets": 238,
+   "Icelandic Wool shawl with pockets": 171,
+   "Cashmere and Merino Petite poncho": 305,
+   "Icelandic Wool Petite poncho": 238,
+   "Cashmere and Merino Princess cape": 429,
+   "Icelandic Wool Princess cape": 333,
+   "Cashmere and Merino Angelina cape": 524,
+   "Icelandic Wool Angelina cape": 429,
+   "Cashmere and Merino Grace cape": 524,
+   "Icelandic Wool Grace cape": 429,
+   "Cashmere and Merino shawl with fur": 476,
+   "Icelandic wool shawl with fur": 381,
+   "Cashmere and Merino Petite poncho with fur": 476,
+   "Icelandic Wool Petite poncho with fur": 381,
+   "Cashmere and Merino Grace cape with fur": 714,
+   "Icelandic Wool Grace cape with fur": 619,
+   "Cashmere and Merino Empress cape with fur": 952,
+   "Icelandic Wool Empress cape with fur": 810
+  },
+  "_source": "Anna's Product groups sheet on Google Drive (edited 3 Oct 2026), column 'Price in global online store, USD'. Her sheet splits two rows finer than the form: 'shawl with fur' and 'Petite poncho with fur' use her 'with fur on the neckline' price; 'with long fur' (571/476) and 'with fur on the neckline and sleeves' (619/524) are not separate choices on the form."
  }
 }

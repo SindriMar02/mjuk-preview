@@ -418,11 +418,11 @@
      from her product copy on mjukiceland.com; the unquoted lines only state what the catalogue
      shows (compositions, designs, counts). The designs under each are her families, from the data. */
   const FIBRES = {
-    'alpaca-silk': { lead: 'Baby alpaca with silk, a yarn developed for MJÚK in Italy.',
-      p: 'Eighty-eight percent baby alpaca, twelve percent silk, in the Lía beanies and scarves, named after the daughter it was first made for.',
+    'alpaca-silk': { lead: 'Baby Suri alpaca with silk, a yarn developed for MJÚK in Italy.',
+      p: 'Eighty-eight percent baby Suri alpaca, twelve percent silk, in the Lía beanies and scarves, named after the daughter it was first made for.',
       q: ['“After more than one year, our designer in Iceland, Anna, and our yarn supplier in Italy have developed a totally new raw material: Alpaca with silk. Anna developed it for her baby daughter Lia.”', '“Light and non-itchy, even for sensitive skin.”'] },
     'cashmere': { lead: 'Pure cashmere.',
-      p: 'One hundred percent in the Viking beanies. Ninety-eight in the Greenland beanies, with two percent elastane to hold the edge.',
+      p: 'Ninety-eight percent in the Viking and Greenland beanies, with two percent elastane to hold the edge.',
       q: ['“Made of certified ethically sourced pure cashmere.”'] },
     'cashmere-merino': { lead: 'Cashmere carried on superfine merino.',
       p: 'Twenty percent cashmere in the Konungur blankets and the Empress cape.',   // Akureyri blankets discontinued (Anna, 23 Oct)

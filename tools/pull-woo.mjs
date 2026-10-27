@@ -128,6 +128,28 @@ const strip = h => String(h || '').replace(/<(script|style)[\s\S]*?<\/\1>/gi, ' 
 const video = h => String(h || '').replace(/<a\b[^>]*href="https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{6,20})[^"]*"[^>]*>[\s\S]*?<\/a>/gi, ' ⟦video:$1⟧ ');
 const txt = h => texturize(ownLink(decode(strip(video(h)))).replace(/\s+/g, ' ').trim());
 
+// Anna's docs are plain text: escape them, without WordPress's wording changes.
+const escape = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const annaDir = path.join(ROOT, 'tools/anna-descriptions');
+const annaDocs = fs.readdirSync(annaDir).filter(f => f.endsWith('.md') && f !== 'README.md').sort().map(file => {
+  const source = fs.readFileSync(path.join(annaDir, file), 'utf8').replace(/\r\n/g, '\n');
+  const front = source.match(/^---\n([\s\S]*?)\n---\n/);
+  if (!front) throw new Error(`Missing front matter: ${file}`);
+  const meta = Object.fromEntries([...front[1].matchAll(/^(family|match|notMatch):\s*(.+)$/gm)].map(m => [m[1], m[2].trim()]));
+  const body = source.slice(front[0].length), short = body.match(/^## Short\n([\s\S]*?)(?=^## |(?![\s\S]))/m);
+  const full = body.match(/^## Full\n([\s\S]*)/m);
+  if (!meta.family || !short || !full) throw new Error(`Missing family, Short or Full: ${file}`);
+  const bullets = [...short[1].matchAll(/^- (.+)$/gm)].map(m => `<li>${escape(m[1])}</li>`).join('');
+  const long = full[1].trim().split(/\n\s*\n/).map(block => {
+    const heading = block.match(/^### ([^\n]+)(?:\n([\s\S]*))?$/);
+    return heading ? `<p><strong>${escape(heading[1])}</strong></p>` + (heading[2] ? `<p>${escape(heading[2])}</p>` : '') : `<p>${escape(block)}</p>`;
+  }).join('');
+  return { ...meta, short: `<ul>${bullets}</ul>`, long };
+}).sort((a, b) => Number(!!b.match) - Number(!!a.match));
+const annaOf = (fam, name) => annaDocs.find(d => d.family === (fam && fam.key)
+  && (!d.match || name.toLowerCase().includes(d.match.toLowerCase()))
+  && (!d.notMatch || !name.toLowerCase().includes(d.notMatch.toLowerCase())));
+
 // Care is her own sentences: from the first washing phrase while the sentences keep talking
 // about washing or drying. Starts at the label when one sits just before it ("Wash Instructions:").
 const CARE = /(machine|hand)[- ]?wash|dry[- ]clean/i;
@@ -306,9 +328,11 @@ const all = listed.map(p => {
   why.mat[matWhy] = (why.mat[matWhy] || 0) + 1;
   const tyk = fam ? fam.group : group || groupOfType(prev ? prev.tyk : cc && (/\bneck ?warmer/i.test(p.name) ? 'neckwarmers' : cc.type));
   const price = +p.price || 0, regular = +p.regular_price || 0;
-  const s = addText(shortText), l = addText(longText);
+  // Classify from the catalogue first; her new prose mentions other designs and materials.
+  const doc = annaOf(fam, name);
+  const s = addText(doc ? doc.short : shortText), l = addText(doc ? doc.long : longText);
   map[p.id] = { s, l };
-  if (l >= 0 && !(l in care)) { const c = careOf(longText); if (c) care[l] = c; }
+  if (l >= 0 && !(l in care)) { const c = careOf(doc ? txt(doc.long) : longText); if (c) care[l] = c; }
   const o = {
     h: p.slug, t: name,
     p: price, cp: p.sale_price !== '' && regular > price ? regular : 0,
