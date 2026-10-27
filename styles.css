@@ -168,6 +168,8 @@ body.menu-open .menu{clip-path:inset(0 0 0 0);pointer-events:auto}
   -webkit-text-stroke:.9px #fff}
 .hero__cta{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap}
 .hero__tag{color:var(--dim)}
+.hero__tag a{color:inherit;text-decoration:none;background:linear-gradient(currentColor,currentColor) 0 100%/0 1px no-repeat;transition:background-size .3s ease}
+.hero__tag a:hover,.hero__tag a:focus-visible{background-size:100% 1px}
 .hero__cta .link{color:var(--accent);background-image:linear-gradient(var(--accent),var(--accent))}
 
 /* ══ SECTION RHYTHM ══ */
