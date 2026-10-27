@@ -192,6 +192,12 @@
           b.textContent = '[ ' + t('Show all') + ' ' + pieces(n) + ' ]';
           b.addEventListener('click', () => { st[k] = false; box.checked = false; apply(true); });
           empty.replaceChildren(document.createTextNode(t(msg) + ' '), b);
+        } else if (st.q) {
+          // a search with no hits is not a filter problem: offer to clear the words instead
+          const b = document.createElement('button'); b.className = 'link'; b.type = 'button';
+          b.textContent = '[ ' + t('Clear search') + ' ]';
+          b.addEventListener('click', () => { st.q = ''; fQ.value = ''; apply(true); });
+          empty.replaceChildren(document.createTextNode(t('Nothing matches your search.') + ' '), b);
         } else empty.textContent = t('Nothing matches that. Try one fewer filter.');
       }
       const u = new URLSearchParams();

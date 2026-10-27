@@ -1,5 +1,7 @@
 {
  "js:Watch the video": "Horfa á myndbandið",
+ "js:Nothing matches your search.": "Ekkert passar við leitina.",
+ "js:Clear search": "Hreinsa leit",
  "js:Nothing matches that. Try one fewer filter.": "Ekkert passar við þetta. Prófaðu einni síu færra.",
  "js:Show all": "Sýna allar",
  "js:Nothing in stock matches.": "Ekkert til á lager passar.",
