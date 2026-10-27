@@ -127,6 +127,13 @@ const strip = h => String(h || '').replace(/<(script|style)[\s\S]*?<\/\1>/gi, ' 
 // into a "Watch the video" link; stripping it left only its label, "Ragnar hat video" (Anna's test, 23 Oct).
 const video = h => String(h || '').replace(/<a\b[^>]*href="https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{6,20})[^"]*"[^>]*>[\s\S]*?<\/a>/gi, ' ⟦video:$1⟧ ');
 const txt = h => texturize(ownLink(decode(strip(video(h)))).replace(/\s+/g, ' ').trim());
+// What the product page shows keeps her paragraphs and list items as line breaks (pdp.js turns them into
+// <br>); everything read for detection still uses txt(), one flat line (swarm test 28 Oct: Ragnar's five
+// paragraphs ran together as one).
+const lines = h => String(h || '').replace(/<(script|style)[\s\S]*?<\/\1>/gi, ' ')
+  .replace(/<li\b[^>]*>/gi, '\n• ').replace(/<\/(p|div|h[1-6]|li|tr|blockquote)\s*>|<br\s*\/?>/gi, '\n')
+  .split('\n').map(txt).filter(Boolean)
+  .reduce((out, l, i, all) => out + (i ? (l.startsWith('• ') && all[i - 1].startsWith('• ') ? '\n' : '\n\n') : '') + l, '');
 
 // Anna's docs are plain text: escape them, without WordPress's wording changes.
 const escape = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -330,7 +337,7 @@ const all = listed.map(p => {
   const price = +p.price || 0, regular = +p.regular_price || 0;
   // Classify from the catalogue first; her new prose mentions other designs and materials.
   const doc = annaOf(fam, name);
-  const s = addText(doc ? doc.short : shortText), l = addText(doc ? doc.long : longText);
+  const s = addText(doc ? doc.short : lines(p.short_description)), l = addText(doc ? doc.long : lines(p.description));
   map[p.id] = { s, l };
   if (l >= 0 && !(l in care)) { const c = careOf(doc ? txt(doc.long) : longText); if (c) care[l] = c; }
   const o = {

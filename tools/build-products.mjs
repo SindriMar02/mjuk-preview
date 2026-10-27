@@ -67,8 +67,8 @@ function page(p, lang) {
   const canon = url(lang, p);
   // her short text is lines without full stops ("Superfunctional / The softest hat in Iceland"): each line ends as a
   // sentence, so a description reads "Superfunctional. The softest hat in Iceland." (SEO audit 24 Oct)
-  const prose = html => V.clean(html).replace(/<(?:br|\/p|\/li|\/ul|\/ol|\/h\d)\b[^>]*>/gi, '\n').replace(/<[^>]+>/g, ' ')
-    .split('\n').map(x => x.replace(/\s+/g, ' ').trim()).filter(Boolean).map(x => (/[.!?…:;,)\]"”’]$/.test(x) ? x : x + '.')).join(' ');
+  const prose = html => V.clean(html).replace(/<a class="pdp__video[\s\S]*?<\/a>/g, '').replace(/<(?:br|\/p|\/li|\/ul|\/ol|\/h\d)\b[^>]*>/gi, '\n').replace(/<[^>]+>/g, ' ')
+    .split('\n').map(x => x.replace(/^\s*•\s*/, '').replace(/\s+/g, ' ').trim()).filter(Boolean).map(x => (/[.!?…:;,)\]"”’]$/.test(x) ? x : x + '.')).join(' ');
   const plain = prose(v.c.short) || prose(v.c.long);
   const mat = V.matWords(p);
   const desc = plain ? cut(plain, 158) : [p.t, mat].filter(Boolean).join('. ');
