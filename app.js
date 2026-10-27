@@ -48,7 +48,9 @@
   const MATS = Object.fromEntries((CM.materials || []).map(m => [m.key, m])), GRPS = Object.fromEntries((CM.groups || []).map(g => [g.key, g]));
   // a card names her material group ("Fluffy angora"); the exact percentages are on the product page only (Anna, 23 Oct:
   // one format under the pictures, the composition was exact on some cards and general on others)
-  const catLabel = p => (nm(MATS[p.mat]) || nm(GRPS[p.tyk]) || '');
+  // two-sided designs have no single material (Anna: the XL double-faced scarves sit under Icelandic wool too), so their
+  // card takes the material she listed them under before falling back to the piece type
+  const catLabel = p => (nm(MATS[p.mat]) || nm(MATS[(p.mx || [])[0]]) || nm(GRPS[p.tyk]) || '');
   const editorial = (CM.campaign || []);
 
   /* ── designed product card, with real size chips that add to bag ── */

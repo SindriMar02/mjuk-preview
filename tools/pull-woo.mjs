@@ -123,7 +123,10 @@ const ownLink = s => s
   .replace(/https?:\/\/(?:www\.)?mjukiceland\.(?:com|is)\/([a-z0-9-]+)\/?(?=[\s,.;)]|$)/gi,
     (m, slug) => { const t = slug.replace(/-/g, ' '); return t.charAt(0).toUpperCase() + t.slice(1); });
 const strip = h => String(h || '').replace(/<(script|style)[\s\S]*?<\/\1>/gi, ' ').replace(/\[\/?[a-z_]+[^\]]*\]/gi, ' ').replace(/<[^>]+>/g, ' ');
-const txt = h => texturize(ownLink(decode(strip(h))).replace(/\s+/g, ' ').trim());
+// A YouTube link in her text (the Ragnar hats link their video) survives as a marker that pdp.js turns
+// into a "Watch the video" link; stripping it left only its label, "Ragnar hat video" (Anna's test, 23 Oct).
+const video = h => String(h || '').replace(/<a\b[^>]*href="https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{6,20})[^"]*"[^>]*>[\s\S]*?<\/a>/gi, ' ⟦video:$1⟧ ');
+const txt = h => texturize(ownLink(decode(strip(video(h)))).replace(/\s+/g, ' ').trim());
 
 // Care is her own sentences: from the first washing phrase while the sentences keep talking
 // about washing or drying. Starts at the label when one sits just before it ("Wash Instructions:").
@@ -310,7 +313,7 @@ const all = listed.map(p => {
     h: p.slug, t: name,
     p: price, cp: p.sale_price !== '' && regular > price ? regular : 0,
     img: [...new Set((p.images || []).map(i => String(i.src).split('?')[0]))].slice(0, 4),
-    sz: [], comp, fam: fam ? fam.key : '', mat, tyk, id: p.id, live: true,
+    sz: [], comp: (fam && fam.comp) || comp, fam: fam ? fam.key : '', mat, tyk, id: p.id, live: true,
     oos: p.stock_status === 'outofstock', cats,
   };
   // a second material the piece is also listed under (her XL double-faced scarves under Icelandic wool, Q25)

@@ -55,6 +55,7 @@
       .replace(/<(p|strong|em|b|i|ul|ol|li)\b[^>]*>/gi, '<$1>')
       .replace(/(<br\s*\/?>\s*){3,}/gi, '<br><br>')
       .replace(/\r?\n\s*\r?\n/g, '<br><br>').replace(/\r?\n/g, '<br>')   // WordPress keeps her line breaks as raw newlines
+      .replace(/⟦video:([\w-]{6,20})⟧/g, (m, id) => `<a class="pdp__video link" href="https://www.youtube.com/watch?v=${id}" target="_blank" rel="noopener">▶ ${t('Watch the video')}</a>`)
       .trim();
     const text = html => clean(html).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
     const copyOf = p => { const m = COPY.map[p.id] || {}; return { short: m.s >= 0 ? COPY.texts[m.s] : '', long: m.l >= 0 ? COPY.texts[m.l] : '', care: m.l >= 0 ? COPY.care[m.l] : '' }; };

@@ -38,7 +38,7 @@
   { "key": "hipster", "group": "hats", "name": "Hipster beanies", "is": "Hipster-húfur", "sheet": ["Hipster beanies"], "sizes": "2 sizes", "match": { "name": "^hipster" } },
   { "key": "sailor", "group": "hats", "name": "Sailor beanies", "is": "Sailor-húfur", "sheet": ["Sailor beanies"], "match": { "name": "^sailor" } },
   { "key": "marshmallow", "group": "hats", "name": "Marshmallow beanies", "is": "Marshmallow-húfur", "sheet": ["Marshmallow beanies"], "material": "fluffy-angora", "match": { "name": "^marshmallow (hat|beanie)" } },
-  { "key": "roots", "group": "hats", "name": "Roots beanies", "is": "Roots-húfur", "sheet": ["Roots beanies size S", "Roots beanies size L"], "material": "fluffy-angora", "match": { "name": "^roots beanie" },
+  { "key": "roots", "group": "hats", "name": "Roots beanies", "is": "Roots-húfur", "sheet": ["Roots beanies size S", "Roots beanies size L"], "material": "fluffy-angora", "comp": "60% angora · 40% nylon", "compWhy": "Anna, Telegram 23 Oct: most Roots colours are 60% angora, few are 70%; write 60% on all and she edits the few later. The 60% wording is her own listing (Roots beanie. White with 2 ice blue pompoms).", "match": { "name": "^roots beanie" },
     "note": "Size L is still a prototype and looks the same in a photo; when it comes, one page per colour with a Small/Large choice (Anna, questions file 2026-09-25, Q32, Q33)." },
   { "key": "chalet", "group": "hats", "name": "Chalet beanies", "is": "Chalet-húfur", "sheet": ["Chalet beanies"], "material": "fluffy-angora", "match": { "name": "^chalet" } },
   { "key": "fluffy-aviator", "group": "hats", "name": "Fluffy aviator hats with lining", "is": "Loðnar flugmannshúfur með fóðri", "sheet": ["Fluffy Aviator hats with lining"], "material": "fluffy-angora",
