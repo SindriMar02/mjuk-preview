@@ -434,7 +434,7 @@
       p: 'The Gudmundur beanies are ninety percent Icelandic wool, softened with five percent angora and five percent superfine merino.',
       q: ['“90% top quality Icelandic wool, 5% angora, 5% superfine merino wool.”'] },
     'fluffy-angora': { lead: 'The fluffiest pieces in the shop, light and weightless.',
-      p: 'Angora blended so it holds its shape: seventy percent with nylon and merino in the Roots beanies, sixty with nylon in the Fluffy Kitty hats.',
+      p: 'Angora blended so it holds its shape: sixty percent with nylon in the Roots beanies and the Fluffy Kitty hats.',
       q: ['“Fluffy and soft angora wool blend. Flexible adjustable fit.”', '“The name of the hat was the best to describe how soft and weightless it is.”'] },
     'smooth-angora-merino': { lead: 'Angora with a smooth, silky finish.',
       p: 'Half angora, with viscose for the silky feel, wool for warmth, and nylon or acrylic so it lasts.',
