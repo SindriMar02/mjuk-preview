@@ -49,14 +49,24 @@
     const acc = (key, icon, title, body, open) => body ? `<details class="acc" data-acc="${key}"${open ? ' open' : ''}><summary>${ic(icon)}<span>${title}</span><i class="acc__pm" aria-hidden="true"></i></summary><div class="acc__b"><div class="acc__in">${body}</div></div></details>` : '';
 
     /* ── her copy: whitelist the tags WordPress wrote, drop everything else ── */
-    const clean = html => String(html || '')
+    const clean = html => listed(String(html || '')
       .replace(/<\s*(script|style)[^>]*>[\s\S]*?<\s*\/\s*\1\s*>/gi, '')
       .replace(/<(?!\/?(p|br|strong|em|b|i|ul|ol|li)\b)[^>]*>/gi, '')
       .replace(/<(p|strong|em|b|i|ul|ol|li)\b[^>]*>/gi, '<$1>')
       .replace(/(<br\s*\/?>\s*){3,}/gi, '<br><br>')
       .replace(/\r?\n\s*\r?\n/g, '<br><br>').replace(/\r?\n/g, '<br>')   // WordPress keeps her line breaks as raw newlines
-      .replace(/⟦video:([\w-]{6,20})⟧/g, (m, id) => `<a class="pdp__video link" href="https://www.youtube.com/watch?v=${id}" target="_blank" rel="noopener">▶ ${t('Watch the video')}</a>`)
-      .trim();
+      .replace(/⟦video:([\w-]{6,20})⟧/g, (m, id) => `<a class="pdp__video link" href="https://www.youtube.com/watch?v=${id}" target="_blank" rel="noopener">${t('Watch the video')}</a>`)
+      .trim());
+    // her lists come as lines that start with "·" or "•": make them a real list, so they hang on the ember dots
+    const listed = h => { let out = '', ul = [], held = '';
+      const flush = () => { if (ul.length) out += `<ul>${ul.join('')}</ul>` + held.replace(/<br\s*\/?>/gi, ''); ul = []; held = ''; };
+      h.split(/(<br\s*\/?>|<\/?p>)/i).forEach(tok => {
+        const m = tok.match(/^\s*[·•]\s*(\S[\s\S]*?)\s*$/);
+        if (m) { if (!ul.length) out = out.replace(/(<br\s*\/?>\s*)+$/i, ''); ul.push(`<li>${m[1]}</li>`); held = ''; return; }
+        if (!tok.trim() || /^<(br|\/?p)\b/i.test(tok)) { if (ul.length) held += tok; else out += tok; return; }
+        flush(); out += tok; });
+      flush();
+      return out.replace(/<p>\s*<ul>/g, '<ul>').replace(/<\/ul>\s*<\/p>/g, '</ul>'); };
     const text = html => clean(html).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
     const copyOf = p => { const m = COPY.map[p.id] || {}; return { short: m.s >= 0 ? COPY.texts[m.s] : '', long: m.l >= 0 ? COPY.texts[m.l] : '', care: m.l >= 0 ? COPY.care[m.l] : '' }; };
 
@@ -122,12 +132,12 @@
         /pickup/i.test((CM.ship && CM.ship.delivery) || '') ? ['store', t('Local pickup in Iceland')] : null,
       ].filter(Boolean);
       const arrow = '<svg class="pdp__ar" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M2 8h11M9 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>';
-      const cta = `<button class="sz sz--solo pdp__cta${plainHat ? ' pom-ask' : ''}" data-h="${esc(p.h)}" data-s=""${plainHat ? ' data-n="0"' : ''}><span class="pdp__ctal">${t('Add to bag')}</span>${arrow}</button>`;
+      const cta = `<button class="sz sz--solo pdp__cta${plainHat ? ' pom-ask' : ''}" data-h="${esc(p.h)}" data-s=""><span class="pdp__ctal">${t('Add to bag')}</span>${arrow}</button>`;
       const dots = n => `<span class="pseg__dots" aria-hidden="true">${n ? '<i></i>'.repeat(n) : '<i class="o"></i>'}</span>`;
       const pomChoice = `<div class="pdp__pom" data-l0="${esc(t('Add to bag'))}" data-l1="${esc(t('Choose colours'))}">
-          <p class="pdp__pomt mono">${t('Pompoms')}</p>
+          <p class="pdp__pomt mono">${t('Pompoms')} <span class="pseg__hint">${t('(choose one)')}</span></p>
           <div class="pseg" role="radiogroup" aria-label="${esc(t('Pompoms'))}"><span class="pseg__ind" aria-hidden="true"></span>${[['0', t('None')], ['1', t('One')], ['2', t('Two')]].map(([n, l], i) =>
-            `<button type="button" class="pseg__o" role="radio" aria-checked="${i ? 'false' : 'true'}" tabindex="${i ? -1 : 0}" data-n="${n}">${dots(+n)}<span>${l}</span></button>`).join('')}</div>
+            `<button type="button" class="pseg__o" role="radio" aria-checked="false" tabindex="${i ? -1 : 0}" data-n="${n}">${dots(+n)}<span>${l}</span></button>`).join('')}</div>
         </div>`;
       const info = `
       <div class="pdp__kick mono">${p.mat ? `<span>${esc(matName(p.mat))}</span>` : ''}${FAM[p.fam] ? `<span>${esc(famName(p.fam))}</span>` : GRP[p.tyk] ? `<span>${esc(typeName(p.tyk))}</span>` : ''}${isNew(p) ? `<span class="is-new">${t('New')}</span>` : ''}${p.cp ? `<span class="is-new">${t('Sale')}</span>` : ''}</div>

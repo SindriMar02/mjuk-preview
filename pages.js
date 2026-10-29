@@ -146,7 +146,8 @@
     fStock.addEventListener('change', () => { st.stock = fStock.checked; apply(true); });
     fSort.addEventListener('change', () => { st.sort = fSort.value; apply(true); });
     let qt; fQ.addEventListener('input', () => { clearTimeout(qt); qt = setTimeout(() => { st.q = fQ.value.trim(); apply(true); }, 180); });
-    more.addEventListener('click', () => { st.n += 24; apply(false); });
+    more.addEventListener('click', e => { st.n += 24; apply(false, false, e.detail === 0); });
+    let moreFade = null;
 
     const featuredRank = {}; (CM.featuredNew || []).concat(CM.own || []).forEach((h, i) => { if (!(h in featuredRank)) featuredRank[h] = i; });
     // search reads her names too, in the page's language: "marshmallow", "cashmere", "húfur"
@@ -165,22 +166,25 @@
     };
     const heading = () => st.q ? (isIS ? `„${st.q}“` : `“${st.q}”`) : st.sale ? t('Last of the line') : st.nw ? t('New this season')
       : st.family ? famName(st.family) : st.type ? typeName(st.type) : st.material ? matName(st.material) : t('Everything');
-    const apply = (reset, keepCount) => {
+    const apply = (reset, keepCount, viaKey = false) => {
       if (reset && !keepCount) st.n = 24;
       const L = list();
       title.textContent = heading();
       document.title = heading() + ' — ' + t('Shop') + ' — MJÚK Iceland';
       count.textContent = pieces(L.length) + (st.stock ? '' : ' ' + t('incl. sold out'));
-      const shownL = L.slice(0, st.n);
+      const shownL = L.slice(0, st.n), focusIndex = reset ? 0 : grid.children.length;
       const img = { sizes: '(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw', eager: 4 };
       /* the build puts the first 24 cards into the page (tools/build-products.mjs), so they paint without
          waiting for these scripts. They are kept only when they are exactly the cards this would build
          (same pieces, same order); any other view, or a changed catalogue, rebuilds them */
       if (reset && grid.dataset.static && grid.dataset.static === rowKey(shownL)) { /* already in the page */ }
       else if (reset) fill(grid, shownL, img);
-      else { const have = grid.children.length; const add = shownL.slice(have).map((p, i) => card(p, have + i, img)); grid.append(...add); reveal(grid); }
+      else { const have = grid.children.length; const add = shownL.slice(have).map((p, i) => { const el = card(p, have + i, img); el.style.setProperty('--i', String(i % 4)); return el; }); grid.append(...add); reveal(grid); }
+      if (viaKey && shownL.length) { const first = grid.children[focusIndex], link = first && ($('.prod__go', first) || $('a', $('.prod__name', first))); link && link.focus({ preventScroll: true }); }
       grid.removeAttribute('data-wait'); grid.removeAttribute('data-static');   // filled: the space kept for it (pages.css) is no longer needed, and the built-in row is now just cards
-      more.hidden = L.length <= st.n; empty.hidden = L.length > 0;
+      if (moreFade) { moreFade.cancel(); moreFade = null; }
+      if (L.length <= st.n && !more.hidden) { if (reduced || !more.animate) more.hidden = true; else { const a = moreFade = more.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 200, easing: 'ease-out' }); a.onfinish = () => { if (moreFade !== a || L.length > st.n) return; more.hidden = true; a.cancel(); moreFade = null; }; } } else if (L.length > st.n) { more.hidden = false; more.style.opacity = ''; }
+      const wasEmpty = !empty.hidden; empty.hidden = L.length > 0; if (!empty.hidden && !wasEmpty && !reduced) { empty.getAnimations().forEach(a => a.cancel()); empty.animate([{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }], { duration: 500, easing: 'cubic-bezier(.19,1,.22,1)' }); }
       /* nothing matches because a toggle narrows it (she came in from "New this season", say): say which,
          and offer the same filters across everything with one tap instead of a dead end */
       if (!L.length) {
@@ -190,14 +194,14 @@
           const [k, box, msg] = why; st[k] = false; const n = list().length; st[k] = true;
           const b = document.createElement('button'); b.className = 'link'; b.type = 'button';
           b.textContent = '[ ' + t('Show all') + ' ' + pieces(n) + ' ]';
-          b.addEventListener('click', () => { st[k] = false; box.checked = false; apply(true); });
-          empty.replaceChildren(document.createTextNode(t(msg) + ' '), b);
+          b.addEventListener('click', e => { st[k] = false; box.checked = false; apply(true, false, e.detail === 0); });
+          empty.replaceChildren(document.createTextNode(t(msg)), document.createElement('br'), b);
         } else if (st.q) {
           // a search with no hits is not a filter problem: offer to clear the words instead
           const b = document.createElement('button'); b.className = 'link'; b.type = 'button';
           b.textContent = '[ ' + t('Clear search') + ' ]';
-          b.addEventListener('click', () => { st.q = ''; fQ.value = ''; apply(true); });
-          empty.replaceChildren(document.createTextNode(t('Nothing matches your search.') + ' '), b);
+          b.addEventListener('click', e => { st.q = ''; fQ.value = ''; apply(true, false, e.detail === 0); });
+          empty.replaceChildren(document.createTextNode(t('Nothing matches your search.')), document.createElement('br'), b);
         } else empty.textContent = t('Nothing matches that. Try one fewer filter.');
       }
       const u = new URLSearchParams();
@@ -322,7 +326,11 @@
         const n = b.dataset.n;
         $$('.pseg__o', seg).forEach(o => { const on = o === b; o.setAttribute('aria-checked', String(on)); o.tabIndex = on ? 0 : -1; });
         // the highlight moves itself (no parent variable restyling its children); a key press moves it at once
-        const ind = $('.pseg__ind', seg); if (ind) { ind.style.transition = viaKey ? 'none' : ''; ind.style.transform = `translateX(${+n * 100}%)`; }
+        // nothing is chosen until she picks (Anna, 28 Oct: Add to bag on None put the hat in without asking), so the
+        // first pick places the highlight at once instead of sliding it in from None
+        const first = !seg.classList.contains('is-set'); seg.classList.add('is-set');
+        const ind = $('.pseg__ind', seg); if (ind) { ind.style.transition = viaKey || first ? 'none' : ''; ind.style.transform = `translateX(${+n * 100}%)`; if (first && !viaKey && !reduced) { ind.animate([{ opacity: 0, scale: '.94' }, { opacity: 1, scale: '1' }], { duration: 260, easing: EASE }); } }
+        { const dots = $('.pseg__dots', b); if (dots && !reduced) { [...dots.children].forEach((dot, i) => { dot.getAnimations().forEach(a => a.cancel()); dot.animate([{ transform: 'scale(.6)' }, { transform: 'scale(1)' }], { duration: 220, delay: i * 40, easing: EASE }); }); } }
         if (viaKey) b.focus();
         cta.dataset.n = n;
         const label = n === '0' ? pom.dataset.l0 : pom.dataset.l1;
@@ -349,6 +357,7 @@
         if (!d.open) {
           d.open = true;
           const h = body.scrollHeight;
+          const kids = $$('.acc__in > *', body).slice(0, 6); kids.forEach(el => el.animate([{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], { duration: 360, delay: kids.indexOf(el) * 30, easing: EASE }));
           const a = body.animate([{ height: '0px', opacity: 0 }, { height: h + 'px', opacity: 1 }], { duration: 320, easing: EASE });
           a.onfinish = a.oncancel = done;
         } else {

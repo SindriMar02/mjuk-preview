@@ -126,13 +126,36 @@
 
   /* ── store maps: the embed is created on first open, so four Google iframes
      never load for a visitor who only wanted to read the addresses ── */
-  $$('.store__map-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
+  $$('.store__map-btn').forEach((btn, i) => {
+    const panel = btn.nextElementSibling, frame = panel && $('iframe', panel);
+    btn.setAttribute('aria-controls', panel && (panel.id || (panel.id = `storeMap${i + 1}`)));
+    const wrap = panel && $('div', panel); if (wrap) wrap.dataset.loading = t('Loading map…');
+    // the empty frame's own about:blank load is not the map, so only a load with a src counts
+    if (frame) frame.addEventListener('load', () => { if (!frame.getAttribute('src')) return; frame.classList.add('is-loaded'); wrap && wrap.classList.add('is-loaded'); });
+    btn.addEventListener('click', e => {
       const card = btn.closest('.store');
       const open = card.classList.toggle('is-open');
       btn.setAttribute('aria-expanded', String(open));
-      const frame = $('iframe', card);
+      const label = $('.store__map-label', btn), next = open ? t('Close map') : t('See on map');
+      if (label) {
+        label.dataset.want = next;
+        if (label.getAnimations) label.getAnimations().forEach(a => a.cancel());
+        if (reduced || !label.animate || label.textContent === next) label.textContent = next;
+        else {
+          const out = label.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(-35%)' }],
+            { duration: 110, easing: 'cubic-bezier(.23,1,.32,1)', fill: 'forwards' });
+          out.onfinish = () => {
+            if (label.dataset.want !== next) return;
+            label.textContent = next;
+            label.animate([{ opacity: 0, transform: 'translateY(35%)' }, { opacity: 1, transform: 'none' }],
+              { duration: 240, easing: 'cubic-bezier(.23,1,.32,1)' });
+            out.cancel();
+          };
+        }
+      }
       if (open && frame && !frame.src) {
+        // a map that never reports back (blocked, offline) is shown anyway rather than kept invisible
+        setTimeout(() => { frame.classList.add('is-loaded'); wrap && wrap.classList.add('is-loaded'); }, 8000);
         frame.src = 'https://www.google.com/maps?q=' + encodeURIComponent(btn.dataset.q) + '&z=16&output=embed';
       }
     });

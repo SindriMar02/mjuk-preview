@@ -1,4 +1,8 @@
 {
+ "js:(choose one)": "(veldu)",
+ "js:See on map": "Sjá á korti",
+ "js:Close map": "Loka korti",
+ "js:Loading map…": "Hleð korti…",
  "js:Watch the video": "Horfa á myndbandið",
  "js:Nothing matches your search.": "Ekkert passar við leitina.",
  "js:Clear search": "Hreinsa leit",
