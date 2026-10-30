@@ -239,7 +239,7 @@
     if (!l || typeof l !== 'object' || typeof l.h !== 'string' || !Number.isInteger(l.q) || l.q < 1) return null;
     const p = byHandle[l.h];
     const storedPoms = l.x && Array.isArray(l.x.pompoms) ? l.x.pompoms : [];
-    const pomLimit = l.x && l.x.n === 1 ? 1 : 2;
+    const pomLimit = l.x && (l.x.n === 1 || l.x.mode === 'swap') ? 1 : 2;   // a swap replaces the one pompom shown: never two (Codex swarm, 30 Oct)
     const pompoms = storedPoms.filter(pm => pm && typeof pm.h === 'string' && byHandle[pm.h]).slice(0, pomLimit)
       .map(pm => { const pom = byHandle[pm.h]; const kind = pom.fam === 'merino-pompoms' || /\bmerino\b/i.test(pom.t) ? 'Merino wool' : /raccoon/i.test(pom.t) ? 'Raccoon' : /polar fox|fox/i.test(pom.t + ' ' + (pom.fam || '')) ? 'Polar fox' : 'Fur';
         return { h: pm.h, name: str(pm.name, 60) || pom.t, kind: str(pm.kind, 40) || kind }; });
@@ -575,6 +575,9 @@
         if (/(s|x|z|ch|sh)es$/.test(w)) a.push(w.slice(0, -2));
         if (/[^s]s$/.test(w)) a.push(w.slice(0, -1));
       }
+      // Icelandic bends the end of a word ("húfa" / "húfur", "trefill" / "treflar"): on Icelandic pages the stem
+      // without its ending also matches where a word starts (Codex swarm, 30 Oct: "húfa" found nothing)
+      if (isIS && w.length > 3) { const st = w.replace(/(ill|ull|ur|ar|ir|ið|in|an|a|i|u)$/, '').replace(/ll$/, 'l'); if (st.length >= 3 && st !== w) a.push(st); }
       return a;
     };
     const words = x => fold(x).replace(/[^\p{L}\p{N}]+/gu, ' ');

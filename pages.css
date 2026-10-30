@@ -89,6 +89,8 @@ body[data-page] .bars{opacity:.18}
 .pdp__grid{padding:0 var(--pad);display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:clamp(24px,4vw,64px);align-items:start}
 .pdp__gal{display:grid;gap:clamp(10px,1.4vw,20px);grid-template-columns:1fr}
 .pdp__gal.two{grid-template-columns:1fr 1fr}
+/* bigger photos (her notes, 23 and 29 Oct): the first shot takes the whole gallery width, the rest pair up, and a last one left alone spans too */
+.pdp__gal.two .pdp__fig:first-child,.pdp__gal.two .pdp__fig:last-child:nth-child(even){grid-column:1/-1}
 .pdp__fig{position:relative;aspect-ratio:4/5;overflow:hidden;background:var(--bg-2);border:1px solid var(--line);margin:0}
 /* the clip lives on the IMAGE, never on the observed figure: Chrome applies a
    target's own clip-path when it measures intersection, so a figure clipped to
@@ -141,7 +143,7 @@ body[data-page] .bars{opacity:.18}
 .pdp__oos{display:grid;gap:8px;padding:16px 18px;border:1px solid var(--line);background:var(--bg-2)}
 .pdp__oos a{color:var(--accent)}
 .pdp__pom{display:grid;gap:10px}
-.pdp__swapseg{grid-template-columns:repeat(2,minmax(0,1fr))}
+.pseg.pdp__swapseg{grid-template-columns:repeat(2,minmax(0,1fr))}   /* two choices, not the three of None/One/Two (.pseg comes later) */
 .pdp__swapseg .pseg__o{min-height:48px;padding:6px;white-space:normal;line-height:1.4}
 .pdp__swapseg .pseg__o.is-selected{color:var(--ink)}
 .pdp__swap .pseg.pdp__swapseg .pseg__ind{width:calc((100% - 6px) / 2);opacity:1;transform:none;transition:transform .28s cubic-bezier(.23,1,.32,1)}
