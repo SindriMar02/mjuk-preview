@@ -112,11 +112,26 @@
     const grid = $('#pgrid'), title = $('#shopTitle'), count = $('#shopCount'), more = $('#more'), empty = $('#pgEmpty');
     /* her groups, then (once a group is chosen) her designs in it, and her materials in her ranking */
     const rows = { type: $('#fType'), family: $('#fFam'), material: $('#fFibre'), colour: $('#fCol') };
+    // one test for "does this piece belong in the view", shared by the grid and the chip counts
+    const passes = (p, s, toks) =>
+      (!s.type || p.tyk === s.type) && (!s.family || p.fam === s.family) && (!s.material || p.mat === s.material || (p.mx || []).includes(s.material)) && (!s.colour || coloursOf(p).includes(s.colour)) &&
+      (!s.sale || p.cp > 0) && (!s.nw || isNew(p)) && (!s.stock || !p.oos) && (!toks.length || SR.hit(p, toks));
+    /* each chip counts what tapping it would show, with the search and every other filter kept
+       (Veronika, 29 Oct: after a search the chips still counted the whole shop, so "Scarves 73"
+       led to nothing). A chip with nothing behind it is left out, unless it is the one chosen. */
+    const tally = (key, v) => {
+      const s = { ...st, [key]: v };
+      if (key === 'type' && s.family && FAM[s.family].group !== v) s.family = '';
+      const toks = st.q.trim() ? SR.toks(st.q.trim()) : [];
+      let n = 0; for (const p of CM.all) if (passes(p, s, toks)) n++;
+      return n;
+    };
+    const counted = (key, L) => L.map(c => ({ ...c, count: tally(key, c.key) })).filter(c => c.count || st[key] === c.key);
     const lists = {
-      type: () => shown(CM.groups),
-      family: () => st.type ? shown(CM.families).filter(f => f.group === st.type) : [],
-      material: () => shown(CM.materials),
-      colour: () => COL.map(c => ({ key: c[0], hex: c[1], name: c[3], count: CM.all.filter(p => !p.oos && coloursOf(p).includes(c[0])).length })).filter(c => c.count),
+      type: () => counted('type', shown(CM.groups)),
+      family: () => st.type ? counted('family', shown(CM.families).filter(f => f.group === st.type)) : [],
+      material: () => counted('material', shown(CM.materials)),
+      colour: () => counted('colour', COL.map(c => ({ key: c[0], hex: c[1], name: c[3] }))),
     };
     const paintChips = key => {
       const L = lists[key](), host = rows[key];
@@ -133,12 +148,10 @@
       const b = e.target.closest('.chip'); if (!b) return;
       st[key] = st[key] === b.dataset.v ? '' : b.dataset.v;
       if (key === 'type' && st.family && FAM[st.family].group !== st.type) st.family = '';
-      Object.keys(rows).forEach(paintChips);
+      apply(true);   // repaints the chips with their new counts
       // the repaint replaced the button that had focus: hand focus to its replacement
       if (document.activeElement === document.body) { const nb = [...rows[key].querySelectorAll('.chip')].find(c => c.dataset.v === b.dataset.v); nb && nb.focus({ preventScroll: true }); }
-      apply(true);
     }));
-    Object.keys(rows).forEach(paintChips);
     const fSale = $('#fSale'), fNew = $('#fNew'), fStock = $('#fStock'), fSort = $('#fSort'), fQ = $('#fQ');
     fSale.checked = st.sale; fNew.checked = st.nw; fStock.checked = st.stock; fSort.value = st.sort; fQ.value = st.q;
     fSale.addEventListener('change', () => { st.sale = fSale.checked; apply(true); });
@@ -154,10 +167,8 @@
     // the same matcher as the site search (app.js CMUI.search): plurals, pompom spellings, her material sentence
     const SR = window.CMUI.search;
     const list = () => {
-      const q = st.q.trim(), toks = SR.toks(q);
-      let L = CM.all.filter(p =>
-        (!st.type || p.tyk === st.type) && (!st.family || p.fam === st.family) && (!st.material || p.mat === st.material || (p.mx || []).includes(st.material)) && (!st.colour || coloursOf(p).includes(st.colour)) &&
-        (!st.sale || p.cp > 0) && (!st.nw || isNew(p)) && (!st.stock || !p.oos) && (!q || SR.hit(p, toks)));
+      const q = st.q.trim(), toks = q ? SR.toks(q) : [];
+      let L = CM.all.filter(p => passes(p, st, toks));
       if (st.sort === 'low') L.sort((a, b) => a.p - b.p);
       else if (st.sort === 'high') L.sort((a, b) => b.p - a.p);
       else if (st.sort === 'new') L.sort((a, b) => (isNew(b) - isNew(a)) || (b.id - a.id));
@@ -168,6 +179,7 @@
       : st.family ? famName(st.family) : st.type ? typeName(st.type) : st.material ? matName(st.material) : t('Everything');
     const apply = (reset, keepCount, viaKey = false) => {
       if (reset && !keepCount) st.n = 24;
+      if (reset) Object.keys(rows).forEach(paintChips);
       const L = list();
       title.textContent = heading();
       document.title = heading() + ' — ' + t('Shop') + ' — MJÚK Iceland';
@@ -196,6 +208,17 @@
           b.textContent = '[ ' + t('Show all') + ' ' + pieces(n) + ' ]';
           b.addEventListener('click', e => { st[k] = false; box.checked = false; apply(true, false, e.detail === 0); });
           empty.replaceChildren(document.createTextNode(t(msg)), document.createElement('br'), b);
+        } else if (st.q && ['type', 'family', 'material', 'colour'].some(k => st[k]) && (() => {
+          const keep = { type: st.type, family: st.family, material: st.material, colour: st.colour };
+          Object.keys(keep).forEach(k => { st[k] = ''; }); const n = list().length; Object.assign(st, keep); return n > 0;
+        })()) {
+          // the words find pieces, a chip rules them all out: offer the search without the chips
+          const keep = { type: st.type, family: st.family, material: st.material, colour: st.colour };
+          Object.keys(keep).forEach(k => { st[k] = ''; }); const n = list().length; Object.assign(st, keep);
+          const b = document.createElement('button'); b.className = 'link'; b.type = 'button';
+          b.textContent = '[ ' + t('Show all') + ' ' + pieces(n) + ' ]';
+          b.addEventListener('click', e => { Object.keys(keep).forEach(k => { st[k] = ''; }); apply(true, false, e.detail === 0); });
+          empty.replaceChildren(document.createTextNode(t('Nothing matches that. Try one fewer filter.')), document.createElement('br'), b);
         } else if (st.q) {
           // a search with no hits is not a filter problem: offer to clear the words instead
           const b = document.createElement('button'); b.className = 'link'; b.type = 'button';
