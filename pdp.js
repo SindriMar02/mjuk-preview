@@ -105,9 +105,15 @@
       const c = copyOf(p);
       const fam = FAM[p.fam] ? null : familyKey(p);   // her family first; outside her sheet, the shop's category
       const imgs = [...new Set((p.img || []).filter(Boolean))];
+      const colours = (FAM[p.fam] ? CM.all.filter(x => x.fam === p.fam)
+        : fam ? CM.all.filter(x => x === p || (x.cats || []).includes(fam)) : []).sort((a, b) => a.oos - b.oos);
       const crumb = `<a href="shop.html">${t('Shop')}</a><i>/</i>${GRP[p.tyk] ? `<a href="shop.html?type=${esc(p.tyk)}">${esc(typeName(p.tyk))}</a><i>/</i>` : ''}${FAM[p.fam] ? `<a href="shop.html?family=${esc(p.fam)}">${esc(famName(p.fam))}</a><i>/</i>` : ''}<span>${esc(p.t)}</span>`;
       const gal = imgs.map((u, i) => `<figure class="pdp__fig rv" tabindex="0" role="button" aria-label="${esc(t('View larger'))}"><img src="${px(u, 1200)}" alt="${esc(p.t)}${i ? ', ' + t('detail') : ''}" ${i ? 'loading="lazy"' : 'fetchpriority="high"'}/></figure>`).join('');
       const plainHat = p.tyk === 'hats' && !/pom ?pom/i.test(p.t);
+      // a colour's name is her title without the words every piece in the family shares ("Lia Scarf. Alpaca and silk. Calm blue" -> "Calm blue"), and a lone leading word ("Beanie. Black" -> "Black")
+      const words = x => x.t.split(/\s+/), common = colours.length > 1 ? colours.map(words).reduce((a, w) => { let n = 0; while (n < a.length && n < w.length - 1 && a[n] === w[n]) n++; return a.slice(0, n); }) : [];
+      const shade = x => { const s = words(x).slice(common.length).join(' ').replace(/^[.,\s]+|[.\s]+$/g, '').replace(/^[^\s.]+\.\s+(?=\S)/, ''); return s ? s[0].toUpperCase() + s.slice(1) : x.t; };
+      const pomHat = p.tyk === 'hats' && /pom ?pom/i.test(p.t);
       const price = p.cp
         ? `<s>${usd(p.cp)}</s><span>${usd(p.p)}</span><span class="pdp__save">${t('Save')} ${Math.round((1 - p.p / p.cp) * 100)}%</span>`
         : `<span>${usd(p.p)}</span>`;
@@ -139,10 +145,16 @@
           <div class="pseg" role="radiogroup" aria-label="${esc(t('Pompoms'))}"><span class="pseg__ind" aria-hidden="true"></span>${[['0', t('None')], ['1', t('One')], ['2', t('Two')]].map(([n, l], i) =>
             `<button type="button" class="pseg__o" role="radio" aria-checked="false" tabindex="${i ? -1 : 0}" data-n="${n}">${dots(+n)}<span>${l}</span></button>`).join('')}</div>
         </div>`;
+      const swapChoice = `<div class="pdp__pom pdp__swap" data-h="${esc(p.h)}"><p class="pdp__pomt mono">${t('Pompom')}</p><div class="pseg pdp__swapseg" role="group" aria-label="${esc(t('Pompom'))}"><span class="pseg__ind" aria-hidden="true"></span><button type="button" class="pseg__o is-selected" aria-pressed="true" data-swap="keep">${t('As shown')}</button><button type="button" class="pseg__o" aria-pressed="false" data-swap="change">${t('Change colour')}</button></div></div>`;
       const info = `
       <div class="pdp__kick mono">${p.mat ? `<span>${esc(matName(p.mat))}</span>` : ''}${FAM[p.fam] ? `<span>${esc(famName(p.fam))}</span>` : GRP[p.tyk] ? `<span>${esc(typeName(p.tyk))}</span>` : ''}${isNew(p) ? `<span class="is-new">${t('New')}</span>` : ''}${p.cp ? `<span class="is-new">${t('Sale')}</span>` : ''}</div>
       <h1 class="pdp__t" id="pdpT">${esc(p.t)}</h1>
       <div class="pdp__price">${price}</div>
+      ${colours.length > 1 ? `<nav class="pdp__colours" aria-label="${esc(t('Colours'))}"><span class="pdp__colourhead mono">${esc(t('Colours'))} <b class="pdp__colourval" data-v="${esc(shade(p))}">${esc(shade(p))}</b></span><div class="pdp__colourlist">${colours.map(x => {
+        const current = x === p, label = `${shade(x)}${x.oos ? ` (${t('Sold out').toLowerCase()})` : ''}`, thumb = (x.img || []).find(Boolean);
+        return `<a class="pdp__colour${current ? ' is-current' : ''}${x.oos ? ' is-oos' : ''}" href="${purl(x)}"${current ? ' aria-current="page"' : ''} aria-label="${esc(label)}" title="${esc(x.t)}" data-shade="${esc(label)}">${thumb ? `<img src="${px(thumb, 120)}" alt="" loading="lazy"/>` : ''}</a>`;
+      }).join('')}</div></nav>` : ''}
+      ${pomHat && !p.oos ? swapChoice : ''}
       ${c.short ? `<div class="pdp__short">${clean(c.short)}</div>` : ''}
       <div class="pdp__add">
         ${p.oos

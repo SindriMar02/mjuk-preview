@@ -238,9 +238,12 @@
   const clean = l => {
     if (!l || typeof l !== 'object' || typeof l.h !== 'string' || !Number.isInteger(l.q) || l.q < 1) return null;
     const p = byHandle[l.h];
-    const pompoms = (l.x && Array.isArray(l.x.pompoms) ? l.x.pompoms : []).filter(pm => pm && typeof pm.h === 'string' && byHandle[pm.h]).slice(0, 2)
-      .map(pm => ({ h: pm.h, name: str(pm.name, 60) || byHandle[pm.h].t }));
-    const x = l.x && typeof l.x === 'object' ? { k: str(l.x.k, 120), label: str(l.x.label, 160), price: +l.x.price > 0 ? +l.x.price : 0, pompoms } : null;
+    const storedPoms = l.x && Array.isArray(l.x.pompoms) ? l.x.pompoms : [];
+    const pomLimit = l.x && l.x.n === 1 ? 1 : 2;
+    const pompoms = storedPoms.filter(pm => pm && typeof pm.h === 'string' && byHandle[pm.h]).slice(0, pomLimit)
+      .map(pm => { const pom = byHandle[pm.h]; const kind = pom.fam === 'merino-pompoms' || /\bmerino\b/i.test(pom.t) ? 'Merino wool' : /raccoon/i.test(pom.t) ? 'Raccoon' : /polar fox|fox/i.test(pom.t + ' ' + (pom.fam || '')) ? 'Polar fox' : 'Fur';
+        return { h: pm.h, name: str(pm.name, 60) || pom.t, kind: str(pm.kind, 40) || kind }; });
+    const x = l.x && typeof l.x === 'object' ? { k: str(l.x.k, 120), label: str(l.x.label, 160), price: pompoms.reduce((n, pm) => n + byHandle[pm.h].p, 0), n: pompoms.length, mode: l.x.mode === 'swap' ? 'swap' : 'attach', pompoms } : null;
     const h = l.h.slice(0, 160);
     return { k: str(l.k, 300) || h + '|' + str(l.s, 40) + (x ? '|' + x.k : ''), h, t: p ? p.t : str(l.t, 160), s: str(l.s, 40),
       p: p ? p.p + (x ? x.price : 0) : +l.p > 0 ? +l.p : 0, img: p ? (p.img && p.img[0]) || '' : str(l.img, 400), q: Math.min(l.q, MAX_EACH), x };
@@ -298,7 +301,7 @@
   const priceOf = l => byHandle[l.h].p + poms(l).reduce((n, pm) => n + byHandle[pm.h].p, 0);
   // the pompom line is written in the page's language when drawn, not in whichever it was added on
   const pomLabel = l => { const ps = poms(l); if (!ps.length) return (l.x && l.x.label) || '';
-    return ps.length === 1 ? fmt('With a {a} pompom', { a: ps[0].name.toLowerCase() }) : fmt('With two pompoms, {a} and {b}', { a: ps[0].name.toLowerCase(), b: ps[1].name.toLowerCase() }); };
+    return ps.map(pm => fmt(l.x.mode === 'swap' ? 'New pompom: {a}, {b} (replaces the one shown)' : '{a}, {b}', { a: pm.name, b: t(pm.kind) })).join('\n'); };
   const itemCount = () => lines.reduce((n, l) => n + 1 + poms(l).length, 0);
   let notices = [];
   { const left = {}, trimmed = [];
@@ -352,7 +355,7 @@
           <div>
             <div class="bag__n">${html(l.t)}</div>
             ${l.s ? `<div class="bag__sz">${html(fmt('Size {s}', { s: l.s }))}</div>` : ''}
-            ${l.x ? `<div class="bag__x2">${html(pomLabel(l))}</div>` : ''}
+            ${l.x ? `<div class="bag__x2">${html(pomLabel(l)).replace(/\n/g, '<br>')}</div>` : ''}
             <div class="bag__qty">
               <button data-q="-1" data-i="${i}" aria-label="${t('Decrease quantity')}">−</button>
               <span>${l.q}</span>
@@ -465,10 +468,14 @@
      load on first hover, not with the page. */
   if (matchMedia('(hover:hover) and (pointer:fine)').matches && !reduced) {
     const byH = new Map(((window.CM && CM.all) || []).map(p => [p.h, p]));
+    const owners = new Map();
+    (window.CM && CM.all || []).forEach(p => [...new Set((p.img || []).filter(Boolean).map(u => u.split('?')[0]))].forEach(u => {
+      if (!owners.has(u)) owners.set(u, new Set()); owners.get(u).add(p.h);
+    }));
     const handleOf = im => { const b = im.querySelector('[data-h]'); if (b) return b.dataset.h; const a = im.querySelector('.prod__go'); return a ? a.pathname.split('/').filter(Boolean).pop() : ''; };
     const setup = im => {
       if (im.dataset.g) return +im.dataset.g;
-      const p = byH.get(handleOf(im)), shots = p ? (p.img || []).filter(Boolean).slice(0, 4) : [];
+      const p = byH.get(handleOf(im)), shots = p ? (p.img || []).filter(Boolean).filter((u, i) => i === 0 || (owners.get(u.split('?')[0]) || new Set()).size === 1).slice(0, 4) : [];
       im.dataset.g = String(shots.length);
       const main = im.querySelector('img.main');
       if (shots.length < 2 || !main) return (im.dataset.g = '1', 1);
@@ -514,7 +521,7 @@
       // p is the price the drawer showed, so checkout can say so if hers has changed since
       items.push({ id: p.id, q: l.q, p: p.p });
       // "for" ties the pompom to its hat: if the hat has gone, the pompom is not bought alone
-      poms(l).forEach(pm => { items.push({ id: byHandle[pm.h].id, q: l.q, p: byHandle[pm.h].p, note: 'Attach to ' + p.t, for: p.id }); });
+      poms(l).forEach(pm => { items.push({ id: byHandle[pm.h].id, q: l.q, p: byHandle[pm.h].p, note: (l.x && l.x.mode === 'swap' ? 'Replace the pompom on ' : 'Attach to ') + p.t, for: p.id }); });
     });
     if (!items.length) return;
     if (bagGo) { bagGo.disabled = true; bagGo.textContent = t('Opening checkout…'); }

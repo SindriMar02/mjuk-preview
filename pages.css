@@ -86,7 +86,7 @@ body[data-page] .bars{opacity:.18}
 
 /* ── product page ────────────────────────────────────────────── */
 .pdp{padding-bottom:clamp(40px,6vw,90px)!important}
-.pdp__grid{padding:0 var(--pad);display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:clamp(28px,5vw,80px);align-items:start}
+.pdp__grid{padding:0 var(--pad);display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:clamp(24px,4vw,64px);align-items:start}
 .pdp__gal{display:grid;gap:clamp(10px,1.4vw,20px);grid-template-columns:1fr}
 .pdp__gal.two{grid-template-columns:1fr 1fr}
 .pdp__fig{position:relative;aspect-ratio:4/5;overflow:hidden;background:var(--bg-2);border:1px solid var(--line);margin:0}
@@ -109,6 +109,21 @@ body[data-page] .bars{opacity:.18}
 .pdp__t{font-family:var(--ff-s);font-weight:500;font-size:clamp(28px,3.2vw,46px);line-height:1.08;letter-spacing:-.01em;text-wrap:balance}
 .pdp__price{font-family:var(--ff-m);font-size:18px;color:var(--accent);display:flex;gap:12px;align-items:baseline}
 .pdp__price s{color:var(--dim);font-size:15px}
+.pdp__colours{display:grid;gap:9px;min-width:0}
+/* the colour's own name sits in the heading, never squeezed under a 44 px thumb; a pointer over another thumb names that one */
+.pdp__colourhead{color:var(--dim);display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}
+.pdp__colourval{font-family:var(--ff-s);font-size:15px;letter-spacing:0;text-transform:none;color:var(--ink);transition:opacity .18s var(--ease)}
+.pdp__colourval.is-peek{color:var(--dim)}
+.pdp__colourlist{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding:4px 3px 6px;scroll-snap-type:x proximity}
+.pdp__colourlist::-webkit-scrollbar{display:none}
+.pdp__colour{position:relative;flex:0 0 44px;width:44px;height:44px;border:1px solid var(--line);border-radius:50%;scroll-snap-align:center;transition:transform .25s var(--ease),border-color .25s var(--ease),opacity .25s var(--ease)}
+.pdp__colour img{display:block;width:100%;height:100%;border-radius:50%;object-fit:cover;background:var(--bg-2)}
+.pdp__colour.is-current{border:2px solid var(--accent);padding:2px}
+.pdp__colour.is-oos{opacity:.48}
+.pdp__colour.is-oos::after{content:"";position:absolute;left:2px;top:50%;width:calc(100% - 4px);height:1px;background:var(--ink);transform:rotate(-45deg);pointer-events:none}
+.pdp__colour:focus-visible{outline:1px solid var(--accent);outline-offset:3px}
+@media(hover:hover) and (pointer:fine){.pdp__colour:hover{transform:scale(1.06);border-color:var(--accent)}}
+.pdp__colour:active{transform:scale(.96);transition-duration:.12s}
 .pdp__save{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
 .pdp__short{font-family:var(--ff-s);font-size:17px;line-height:1.6;max-width:44ch;color:var(--ink)}
 .pdp__short p{margin:0 0 10px}
@@ -126,6 +141,13 @@ body[data-page] .bars{opacity:.18}
 .pdp__oos{display:grid;gap:8px;padding:16px 18px;border:1px solid var(--line);background:var(--bg-2)}
 .pdp__oos a{color:var(--accent)}
 .pdp__pom{display:grid;gap:10px}
+.pdp__swapseg{grid-template-columns:repeat(2,minmax(0,1fr))}
+.pdp__swapseg .pseg__o{min-height:48px;padding:6px;white-space:normal;line-height:1.4}
+.pdp__swapseg .pseg__o.is-selected{color:var(--ink)}
+.pdp__swap .pseg.pdp__swapseg .pseg__ind{width:calc((100% - 6px) / 2);opacity:1;transform:none;transition:transform .28s cubic-bezier(.23,1,.32,1)}
+.pdp__swap .pseg.pdp__swapseg:has([data-swap="change"].is-selected) .pseg__ind{transform:translateX(100%)}
+.pdp__swapseg .pseg__o:active{transform:scale(.96);transition:transform .12s var(--ease)}
+.pdp__swapseg .pseg__o:not(:active){transition:color .2s var(--ease),transform .12s var(--ease)}
 .pdp__pomt{margin:0;color:var(--dim)}
 .pseg__hint{margin-left:.45em;font-size:10px;letter-spacing:.04em;text-transform:none;transition:opacity .2s var(--ease)}
 .pdp__pom:has(.pseg.is-set) .pseg__hint{opacity:0}
@@ -206,14 +228,14 @@ body[data-page] .bars{opacity:.18}
   .pdp-bar__b{flex:0 0 auto;height:46px;padding:0 18px;background:var(--ink);color:var(--bg);border:0;font-family:var(--ff-m);font-size:11px;letter-spacing:.12em;text-transform:uppercase;overflow:hidden;cursor:pointer}
   .pdp-bar__b span{display:inline-block}
 }
-@media(prefers-reduced-motion:reduce){.pseg__ind,.pseg__hint,.pdp-bar,.pzoom,.pzoom__in img,.pg__empty .link,:is(.pdp__body,.pdp__short) .pdp__video,.pdp__video::before{transition:none}.pzoom__in img{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.pseg__ind,.pseg__hint,.pdp-bar,.pzoom,.pzoom__in img,.pg__empty .link,:is(.pdp__body,.pdp__short) .pdp__video,.pdp__video::before,.pdp__colour{transition:none}.pzoom__in img{opacity:1;transform:none}}
 @media(max-width:900px){
   .pdp__grid{grid-template-columns:1fr;gap:28px}
   .pdp__info{position:static}
   .pdp__gal.two{grid-template-columns:1fr}
   .pdp__gal{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;margin:0 calc(-1 * var(--pad));padding:0 var(--pad)}
   .pdp__gal::-webkit-scrollbar{display:none}
-  .pdp__fig{flex:0 0 84%;scroll-snap-align:center}
+  .pdp__fig{flex:0 0 100%;scroll-snap-align:center}
   .pdp__fig:only-child{flex-basis:100%}   /* one photo fills the width; several leave the next one peeking */
 }
 
@@ -243,6 +265,15 @@ body[data-page] .bars{opacity:.18}
 .pdp__facts dd a{color:var(--ink);text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
 @media(hover:hover){.pdp__facts dd a:hover{text-decoration-color:var(--ink)}}
 .filt__row--fam[hidden]{display:none}
+.filt__active{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:0 var(--pad) 18px;min-width:0;}
+.filt__active[hidden]{display:none}
+#shopCount{white-space:normal}
+.filt__tag,.filt__clear,.filt__show-oos{min-height:40px;padding:8px 12px;border:1px solid var(--line);background:transparent;color:var(--ink);font:10px var(--ff-m);letter-spacing:.06em;text-transform:uppercase;cursor:pointer;overflow-wrap:anywhere;animation:filtChipIn .28s var(--ease) both;transition:transform .18s var(--ease),color .25s var(--ease),border-color .25s var(--ease)}
+@keyframes filtChipIn{from{opacity:0;transform:translateY(5px)}}
+.filt__tag span{color:var(--accent);font-size:15px}
+.filt__clear,.filt__show-oos{color:var(--accent);border-color:transparent;text-decoration:underline;text-underline-offset:3px}
+.filt__tag:active,.filt__clear:active,.filt__show-oos:active{transform:scale(.97)}
+@media(prefers-reduced-motion:reduce){.filt__tag,.filt__clear,.filt__show-oos{animation:none;transition:none}}
 /* phones: her groups, designs and materials are one sideways line each, so the pieces start on
    the first screen instead of three screens down; the cut-off chip at the edge says there is more */
 @media(max-width:640px){

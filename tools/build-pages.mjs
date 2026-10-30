@@ -79,6 +79,7 @@ const PAGES = {
         </div>
       </div>
     </div>
+    <div class="filt__active" id="fActive" aria-live="polite" hidden></div>
     <div class="pgrid" id="pgrid"></div>
     <p class="pg__empty" id="pgEmpty" hidden>Nothing matches that. Try one fewer filter.</p>
     <div class="pg__more"><button class="link" id="more" hidden>[ Show more ]</button></div>
@@ -320,6 +321,8 @@ ${[['shawl', 'Shawl'], ['petite-poncho', 'Petite poncho'], ['princess', 'Princes
         <div class="cfg__sum">
           <span class="cfg__price" id="cfgPrice"></span>
           <span class="cfg__note" id="cfgNote"></span>
+          <span class="cfg__trim-price" id="cfgTrimPrice" hidden>+ salmon leather trim, priced by email</span>
+          <p class="cfg__summary" id="cfgSummary" aria-live="polite"></p>
           <button type="submit" class="cfg__go">Request this piece</button>
         </div>
         <div class="cfg__done" id="cfgDone" hidden></div>

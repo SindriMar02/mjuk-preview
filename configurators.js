@@ -54,7 +54,7 @@
     dlg.setAttribute('data-lenis-prevent', ''); dlg.setAttribute('tabindex', '-1');   // the wheel scrolls this dialog, not the page behind it (Lenis would swallow it)
     const grid = $('#pomGrid'), img = $('#pomImg'), name = $('#pomName'), total = $('#pomTotal'),
           add = $('#pomAdd'), slots = $$('.pom__slot', dlg), why = $('#pomWhy');
-    let hat = null, count = 0, active = 0, chosen = [null, null];
+    let hat = null, count = 0, active = 0, chosen = [null, null], swap = false;
     let pMin = 0, pSame = true;   // this hat's pompom price: a slot not yet picked counts at it (24 Oct: "$41, hat and one pompom" undercounted)
 
     grid.innerHTML = POMS.map((s, i) =>
@@ -75,7 +75,7 @@
       });
       $('#pomPick').hidden = count === 0;
       $$('.sw', grid).forEach(b => b.setAttribute('aria-pressed', String(chosen.slice(0, count).some(s => s && s.h === POMS[+b.dataset.i].h))));
-      const nextTotal = `${guess() ? t('from') + ' ' : ''}${usd(price())}<small>${t(count === 0 ? 'hat only' : count === 1 ? 'hat and one pompom' : 'hat and two pompoms')}</small>`;
+      const nextTotal = `${guess() ? t('from') + ' ' : ''}${usd(price())}<small>${t(swap ? 'hat and the new pompom' : count === 0 ? 'hat only' : count === 1 ? 'hat and one pompom' : 'hat and two pompoms')}</small>`;
       if (total.innerHTML !== nextTotal) { total.innerHTML = nextTotal; if (hat) pulse(total); }
       add.disabled = !ready();
       add.textContent = t(count === 0 ? 'Add the hat as it is' : ready() ? 'Add to bag' : 'Pick a colour first');
@@ -93,10 +93,12 @@
       paint();
     });
 
-    const open = (h, viaKey, n = 0) => {
+    const open = (h, viaKey, n = 0, replacing = false) => {
       if (window.CMBag && window.CMBag.room && window.CMBag.room(h.h) < 1) { window.CMBag.add(h.h, '', null, null); return; } // already at the limit: the drawer says so
       dlg.returnValue = '';   // Escape, the X and the Android back button close with nothing, never with last time's "add"
-      hat = h; count = n === 1 || n === 2 ? n : 0; active = 0; chosen = [null, null];
+      hat = h; swap = replacing; count = replacing ? 1 : n === 1 || n === 2 ? n : 0; active = 0; chosen = [null, null];
+      const countControl = dlg.querySelector('fieldset');
+      if (countControl) countControl.hidden = swap;
       $$('.sw', grid).forEach(b => { b.hidden = !fits(POMS[+b.dataset.i], h); });
       // one price if they all cost the same, otherwise the range: the catalogue has $29 pompoms and a $32 one
       const ps = [...new Set(POMS.filter(s => fits(s, h)).map(s => s.price))].sort((a, b) => a - b);
@@ -108,25 +110,29 @@
       const pomPrice = ps.length === 0 ? '' : ps.length === 1 ? usd(ps[0]) : fmt('{a} to {b}', { a: usd(ps[0]), b: usd(ps[ps.length - 1]) });
       $$('input[name="n"]', dlg).forEach(r => (r.checked = r.value === String(count)));
       img.src = px(h.img[0], 300); img.alt = h.t; name.textContent = h.t;
-      if (why) why.innerHTML = none ? escA(t('No pompom colours fit this hat right now.')) : fmt(POMS.some(s => s.merino) && !POMS.every(s => fits(s, h))
+      if (why) why.innerHTML = swap ? `<strong>${escA(t('Replace the pompom shown'))}</strong><br>${escA(t('Choose a new pompom to replace the one shown on this hat.'))}` : none ? escA(t('No pompom colours fit this hat right now.')) : fmt(POMS.some(s => s.merino) && !POMS.every(s => fits(s, h))
         ? 'Any of these goes on this hat; the heavier merino pompoms go on merino beanies only. Here are the ones we have photographed, {price} each, attached before it ships.'
         : 'Any pompom goes on any hat. In the shop you pick from the cabinet of eighty. Here are the ones we have photographed, {price} each, attached before it ships.', { price: `<b>${pomPrice}</b>` });
       paint();
       if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
       /* a pointer opens onto the dialog itself, a keyboard onto its first choice: a script focus() with nothing focused
          before paints :focus-visible's ring on the radio, which looks like a pre-selected, highlighted option */
-      if (viaKey) $(`input[name="n"][value="${count}"]`, dlg).focus(); else dlg.focus({ preventScroll: true });
+      if (viaKey) (swap ? $('.sw:not([hidden])', grid) : $(`input[name="n"][value="${count}"]`, dlg)).focus(); else dlg.focus({ preventScroll: true });
     };
 
     dlg.addEventListener('close', () => {
       const add = dlg.returnValue === 'add'; dlg.returnValue = '';
+      if (!add && swap) {
+        const group = document.querySelector('.pdp__swap[data-h="' + hat.h + '"]');
+        if (group) group.querySelectorAll('[data-swap]').forEach(b => { const selected = b.dataset.swap === 'keep'; b.classList.toggle('is-selected', selected); b.setAttribute('aria-pressed', String(selected)); });
+      }
       if (!add || !hat || !window.CMBag) return;
       const picks = chosen.slice(0, count).filter(Boolean);
       const extra = picks.length ? {
         k: picks.map(s => s.h).join('+'),
-        label: picks.length === 1 ? fmt('With a {a} pompom', { a: picks[0].name.toLowerCase() }) : fmt('With two pompoms, {a} and {b}', { a: picks[0].name.toLowerCase(), b: picks[1].name.toLowerCase() }),
+        label: swap ? fmt('New pompom: {a}, {b} (replaces the one shown)', { a: picks[0].name, b: t(picks[0].kind) }) : picks.length === 1 ? fmt('With a {a} pompom', { a: picks[0].name.toLowerCase() }) : fmt('With two pompoms, {a} and {b}', { a: picks[0].name.toLowerCase(), b: picks[1].name.toLowerCase() }),
         price: picks.reduce((n, s) => n + s.price, 0),
-        pompoms: picks.map(s => ({ h: s.h, name: s.name })),
+        n: count, mode: swap ? 'swap' : 'attach', pompoms: picks.map(s => ({ h: s.h, name: s.name, kind: s.kind })),
       } : null;
       window.CMBag.add(hat.h, '', null, extra);
     });
@@ -135,6 +141,13 @@
     // a plain hat's buttons: "None" adds the hat as it is, "1" / "2" open the chooser on that many (Anna, 23 Oct:
     // the choice shows on the card and the product page, not only after Add to bag); a bare button opens it on none
     document.addEventListener('click', e => {
+      const swapChoice = e.target.closest('[data-swap]');
+      if (swapChoice) {
+        const group = swapChoice.closest('.pdp__swap');
+        group.querySelectorAll('[data-swap]').forEach(b => { const selected = b === swapChoice; b.classList.toggle('is-selected', selected); b.setAttribute('aria-pressed', String(selected)); });
+        if (swapChoice.dataset.swap === 'change') { const h = byHandle[group.dataset.h]; if (h) open(h, e.detail === 0, 1, true); }
+        return;
+      }
       const b = e.target.closest('.sz.pom-ask'); if (!b) return;
       e.preventDefault();
       const h = byHandle[b.dataset.h]; if (!h) return;
@@ -263,10 +276,9 @@
     const paintColours = () => {
       const key = v('fabric'); if (key === shownFabric) return; shownFabric = key;
       const L = blankets(key), many = new Set(L.map(p => p.fam)).size > 1;
-      // the swatch is the photo alone; its name is the input's label and shows beside "Colour" once chosen
       const cname = p => escA((many ? famShort[p.fam] + ' · ' : '') + colourName(p));
-      sw.innerHTML = L.map((p, i) => `<label class="csw" title="${cname(p)}" data-name="${cname(p)}"><input type="radio" name="colour" value="${p.id}" aria-label="${cname(p)}"${i ? '' : ' checked'}>
-        <span class="csw__im"><img src="${px(p.img[0], 160)}" alt="" loading="lazy"/></span></label>`).join('');
+      sw.innerHTML = L.map((p, i) => `<div class="csw"><label class="csw__pick"><input type="radio" name="colour" value="${p.id}" aria-label="${cname(p)}"${i ? '' : ' checked'}>
+        <span class="csw__im"><img src="${px(p.img[0], 480)}" alt="" loading="lazy"/></span><span class="csw__n">${cname(p)}</span></label><a class="csw__shop mono" href="product/${encodeURIComponent(p.h)}/">${escA(t('In the shop'))}</a></div>`).join('');
       sw.hidden = !L.length; ask.hidden = !!L.length;
     };
     /* only her rows: an option with no row for the current choice is switched off, and a choice
@@ -288,9 +300,8 @@
       paintColours();
     };
 
-    const priceEl = $('#cfgPrice'), noteEl = $('#cfgNote'), lenEl = $('#cfgLen'), trimEl = $('#cfgTrim'), done = $('#cfgDone');
-    // salmon leather has no price on the page: choosing it makes the piece a request (Q13)
-    const parts = () => { const r = row(); return [r ? PRICE[r.name] : null, v('trim') === 'yes' ? null : 0]; };
+    const priceEl = $('#cfgPrice'), noteEl = $('#cfgNote'), lenEl = $('#cfgLen'), trimEl = $('#cfgTrim'), done = $('#cfgDone'), sumEl = $('#cfgSummary');
+    const parts = () => { const r = row(); return [r && PRICE[r.name] != null ? PRICE[r.name] : null]; };
     const priced = () => parts().every(n => n != null);
     const total = () => parts().reduce((a, n) => a + n, 0);
     const paint = () => {
@@ -300,6 +311,15 @@
       const adj = v('len') !== 'standard';   // never name a field "length": form.elements.length is the control count
       lenEl.hidden = !adj;
       if (trimEl) trimEl.hidden = v('trim') !== 'yes';
+      const b = chosenBlanket();
+      // only what was chosen, in the shopper's words: "Shawl · Cashmere and merino · Peach · With fur · $476"
+      const summary = [nm(MODEL[mdl()]), nm(FABRIC[v('fabric')]), b ? colourName(b) : '',
+        v('fur') === 'yes' ? t('With fur') : '', v('trim') === 'yes' ? t('Salmon leather trim') : '',
+        adj ? t(v('len') === 'shorter' ? 'Shorter' : 'Longer') : '',
+        priced() ? usd(total()) : t('Price on request')].filter(Boolean).join(' · ');
+      if (sumEl && sumEl.textContent !== summary) { sumEl.textContent = summary; pulse(sumEl); }
+      const trimPrice = $('#cfgTrimPrice');
+      if (trimPrice) { trimPrice.hidden = v('trim') !== 'yes' || !priced(); trimPrice.textContent = t('+ salmon leather trim, priced by email'); }
       noteEl.textContent = t(!priced() ? 'We write back with the price before anything is cut.'
         : adj ? 'Indicative. We confirm the price with the length.' : 'The whole price. We confirm by email before anything is cut.');
     };
@@ -318,10 +338,12 @@
       const blanket = CM.all.find(p => String(p.id) === v('colour'));
       const price = priced() ? usd(total()) + (adj ? t(', to be confirmed') : '') : t('Price on request');
       const rows = [[t('Piece'), r.name], [t('Model'), nm(MODEL[r.model])], [t('Fabric'), nm(FABRIC[r.fabric])],
-        [t('Colour'), blanket ? blanket.t : t('To tell you in this email')],
+        [t('Colour'), blanket ? colourName(blanket) : t('To tell you in this email')],
+        ...(v('model') === 'shawl' ? [[t('Pockets'), t(v('pockets') === 'yes' ? 'With pockets' : 'Without pockets')]] : []),
         [t('Fur'), fur ? t('With fur, colour to tell you in this email') : t('Without fur')],
         [t('Salmon leather'), trim ? t('At the edges, colour to tell you in this email') : t('None')],
         [t('Length'), adj ? fmt('{length}, how much written below', { length: t(v('len') === 'shorter' ? 'Shorter' : 'Longer') }) : t('Standard')], [t('Price'), price]];
+      if (trim && priced()) rows.splice(rows.length - 1, 0, [t('Salmon leather trim'), t('Salmon leather trim, priced by email')]);
       const to = 'customersupport@mjukiceland.com';
       const body = t('Made for you') + '\n\n' + rows.map(x => x[0] + ': ' + x[1]).join('\n') + '\n\n' + (adj ? t('How much shorter or longer:') + '\n\n' : '');
       const mail = `mailto:${to}?subject=${encodeURIComponent(t('Made for you') + ': ' + nm(MODEL[r.model]))}&body=${encodeURIComponent(body)}`;

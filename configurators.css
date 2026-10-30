@@ -129,6 +129,8 @@ fieldset{border:0;padding:0;margin:0;min-width:0}
 @media(hover:hover){.tile input:not(:checked)+.t:hover{border-color:var(--ink)}}
 
 .cfg__sum{display:grid;grid-template-columns:1fr auto;gap:8px 20px;align-items:end;padding-top:22px;border-top:1px solid var(--line)}
+.cfg__summary{grid-column:1/-1;font-size:13px;line-height:1.5;overflow-wrap:anywhere}
+.cfg__trim-price{grid-column:1;font-family:var(--ff-m);font-size:10px;letter-spacing:.04em;color:var(--dim);line-height:1.5}
 .cfg__price{font-family:var(--ff-s);font-size:clamp(30px,3.4vw,44px);line-height:1;letter-spacing:-.01em}
 /* before Anna's prices exist the slot says so, in the same serif, a size down so it holds one line */
 .cfg__price.is-ask{font-size:clamp(22px,2.4vw,30px);line-height:1.1}
@@ -141,20 +143,22 @@ fieldset{border:0;padding:0;margin:0;min-width:0}
 .cfg__go:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 .cfg__len{font-size:13px;line-height:1.55;color:var(--ink);max-width:48ch}
 .cfg__len[hidden]{display:none}
-/* colour: her blankets in the chosen fabric, as round crops like the pompom swatches */
-.cfg__sw{display:grid;grid-template-columns:repeat(auto-fill,minmax(60px,1fr));gap:12px 10px;justify-items:start}
+/* colour: her blanket photos, as cards that read like the shop */
+.cfg__sw{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
 .cfg__sw[hidden]{display:none}
-.csw{position:relative;cursor:pointer;display:grid;gap:6px;justify-items:center}
+.csw{position:relative;cursor:pointer;display:grid;gap:7px;align-content:start;min-width:0}
+.csw__pick{position:relative;display:grid;gap:7px;cursor:pointer;min-width:0}
 .csw input{position:absolute;inset:0;opacity:0;pointer-events:none}
-.csw__im{display:block;width:60px;height:60px;border-radius:50%;overflow:hidden;background:var(--panel);transition:box-shadow .2s var(--ease),transform .16s var(--ease)}
-.csw__im img{display:block;width:100%;height:100%;object-fit:cover;transform:scale(1.8)}
-.csw:active .csw__im{transform:scale(.96)}
+.csw__im{display:block;aspect-ratio:4/3;overflow:hidden;background:var(--panel);border:1px solid var(--line);transition:box-shadow .2s var(--ease),transform .16s var(--ease)}
+.csw__im img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .3s var(--ease)}
+.csw__pick:active .csw__im{transform:scale(.98)}
 /* her colour names can be a sentence long: two lines here, the whole name on hover and in the request */
-.csw__n{font-family:var(--ff-m);font-size:9px;letter-spacing:.04em;text-transform:uppercase;color:var(--dim);text-align:center;line-height:1.25;max-width:84px;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.csw input:checked+.csw__im{box-shadow:0 0 0 2px var(--bg),0 0 0 3.5px var(--ink)}
+.csw__n{font-family:var(--ff-m);font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--dim);line-height:1.35;overflow-wrap:anywhere}
+.csw input:checked~.csw__im{box-shadow:0 0 0 2px var(--bg),0 0 0 3.5px var(--accent)}
 .csw input:checked~.csw__n{color:var(--ink)}
-.csw input:focus-visible+.csw__im{box-shadow:0 0 0 2px var(--bg),0 0 0 3.5px var(--accent)}
+.csw input:focus-visible~.csw__im{outline:2px solid var(--accent);outline-offset:2px}
+.csw__shop{display:inline-flex;align-items:center;min-height:40px;justify-self:start;font-size:10px;color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+@media(max-width:560px){.cfg__sw{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:12px;padding:2px 12px 12px 2px;margin-right:-12px;overscroll-behavior-x:contain}.csw{flex:0 0 min(72vw,230px);scroll-snap-align:start}.cfg__sum{grid-template-columns:1fr}.cfg__go{grid-column:1;grid-row:auto;min-height:48px}.cfg__trim-price{grid-column:1}}
 .cfg__done{border:1px solid var(--ink);padding:22px;display:grid;gap:10px;transition:opacity .3s var(--ease),transform .3s var(--ease)}
 @starting-style{.cfg__done{opacity:0;transform:translateY(10px)}}
 .cfg__done[hidden]{display:none}
@@ -164,7 +168,7 @@ fieldset{border:0;padding:0;margin:0;min-width:0}
 .cfg__done dt{font-family:var(--ff-m);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);padding-top:2px}
 
 /* the bag line for a configured hat */
-.bag__x2{font-family:var(--ff-m);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin-top:3px}
+.bag__x2{font-family:var(--ff-m);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin-top:3px;overflow-wrap:anywhere;white-space:pre-line;line-height:1.6}
 
 /* language switch */
 .nav__lang{font-family:var(--ff-m);font-size:11px;letter-spacing:.1em;text-transform:uppercase;background:transparent;border:0;color:var(--ink);cursor:pointer;padding:6px 8px}
@@ -225,7 +229,7 @@ fieldset{border:0;padding:0;margin:0;min-width:0}
 /* on a phone the model card already shows the piece and the swatches show the blanket: no third copy */
 @media(max-width:900px){.mfy__intro{grid-template-columns:1fr;align-items:start}.mfy__prev{display:none}}
 @media(max-width:560px){.mfy__grid{grid-template-columns:repeat(2,minmax(0,1fr))}.mfy__none em{font-size:20px}}
-@media(prefers-reduced-motion:reduce){.mfy__im img{transition:none}}
+@media(prefers-reduced-motion:reduce){.mfy__im img,.csw__im,.csw__im img{transition:none}}
 
 /* ══ one decision per control (Sindri 2026-10-17) ══
    the label carries the chosen value ("Fur  No"), the control carries one word per segment: a single

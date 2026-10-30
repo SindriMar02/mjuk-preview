@@ -110,6 +110,14 @@
     // same as tools/build-products.mjs rowKey: a short fingerprint of which pieces, in which order
     const rowKey = list => { let h = 0x811c9dc5; for (const c of list.map(purl).join('|')) h = Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0; return h.toString(16); };
     const grid = $('#pgrid'), title = $('#shopTitle'), count = $('#shopCount'), more = $('#more'), empty = $('#pgEmpty');
+    const active = $('#fActive');
+    const scrollKey = () => 'mjuk_shop_scroll:' + location.pathname + location.search;
+    let scrollTimer;
+    const rememberScroll = () => { try { sessionStorage.setItem(scrollKey(), String(scrollY)); } catch (e) {} };
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    addEventListener('scroll', () => { clearTimeout(scrollTimer); scrollTimer = setTimeout(rememberScroll, 100); }, { passive: true });
+    addEventListener('pagehide', rememberScroll);
+    addEventListener('pageshow', e => { if (e.persisted) { try { const saved = sessionStorage.getItem(scrollKey()); if (saved != null) requestAnimationFrame(() => scrollTo(0, Number(saved) || 0)); } catch (err) {} } });
     /* her groups, then (once a group is chosen) her designs in it, and her materials in her ranking */
     const rows = { type: $('#fType'), family: $('#fFam'), material: $('#fFibre'), colour: $('#fCol') };
     // one test for "does this piece belong in the view", shared by the grid and the chip counts
@@ -184,6 +192,25 @@
       title.textContent = heading();
       document.title = heading() + ' — ' + t('Shop') + ' — MJÚK Iceland';
       count.textContent = pieces(L.length) + (st.stock ? '' : ' ' + t('incl. sold out'));
+      const activeItems = [];
+      if (st.q) activeItems.push(['q', st.q]);
+      if (st.type) activeItems.push(['type', nm(GRP[st.type])]);
+      if (st.family) activeItems.push(['family', nm(FAM[st.family])]);
+      if (st.material) activeItems.push(['material', nm(MAT[st.material])]);
+      if (st.colour) activeItems.push(['colour', t((COL.find(c => c[0] === st.colour) || [])[3] || st.colour)]);
+      if (st.nw) activeItems.push(['nw', t('New')]);
+      if (st.sale) activeItems.push(['sale', t('On sale')]);
+      if (!st.stock) activeItems.push(['stock', t('incl. sold out')]);   // the non-default state: removing it goes back to in stock only
+      active.hidden = !activeItems.length;
+      if (activeItems.length) {
+        active.innerHTML = activeItems.map(([key, label]) => `<button type="button" class="filt__tag" data-clear="${key}" aria-label="${esc(t('Remove {x}').replace('{x}', label))}"><span aria-hidden="true">×</span> ${esc(label)}</button>`).join('') + `<button type="button" class="filt__clear">${esc(t('Clear all'))}</button>`;
+      } else active.replaceChildren();
+      if (st.stock) {
+        const allCount = CM.all.filter(p => passes(p, { ...st, stock: false }, st.q.trim() ? SR.toks(st.q.trim()) : [])).length;
+        const sold = allCount - L.length;
+        count.textContent = pieces(L.length) + (sold > 0 ? ` · ${sold} ${t('more sold out')}` : '');
+        if (sold > 0) count.insertAdjacentHTML('beforeend', ` <button type="button" class="filt__show-oos">[ ${esc(t('Show them'))} ]</button>`);
+      }
       const shownL = L.slice(0, st.n), focusIndex = reset ? 0 : grid.children.length;
       const img = { sizes: '(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw', eager: 4 };
       /* the build puts the first 24 cards into the page (tools/build-products.mjs), so they paint without
@@ -233,7 +260,24 @@
       if (!st.stock) u.set('all', '1'); if (st.sort !== 'featured') u.set('sort', st.sort); if (st.q) u.set('q', st.q);
       history.replaceState({ ...(history.state || {}), n: st.n }, '', location.pathname + (u.toString() ? '?' + u : ''));
     };
+    active.addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return;
+      if (b.classList.contains('filt__clear')) {
+        st.type = st.family = st.material = st.colour = st.q = ''; st.sale = st.nw = false; st.stock = true;
+        fQ.value = ''; fSale.checked = fNew.checked = false; fStock.checked = true;
+      } else {
+        const key = b.dataset.clear;
+        if (key === 'q') { st.q = ''; fQ.value = ''; }
+        else if (key === 'nw') { st.nw = false; fNew.checked = false; }
+        else if (key === 'sale') { st.sale = false; fSale.checked = false; }
+        else if (key === 'stock') { st.stock = true; fStock.checked = true; }
+        else { st[key] = ''; }
+      }
+      apply(true);
+    });
+    count.addEventListener('click', e => { if (!e.target.closest('.filt__show-oos')) return; st.stock = false; fStock.checked = false; apply(true); });
     apply(true, true);
+    try { const saved = sessionStorage.getItem(scrollKey()); if (saved != null) requestAnimationFrame(() => scrollTo(0, Number(saved) || 0)); } catch (e) {}
     if (Q.get('focus') === 'q') fQ.focus();
   }
 
@@ -257,6 +301,7 @@
        shop.html (a fresh list at the top) cannot do. The Shop / category crumbs that name the same
        list do the same. Anywhere else (a search engine, a new tab, another piece) they stay links. */
     const from = (() => { try { const u = new URL(document.referrer); return u.origin === location.origin && /\/shop\.html$/.test(u.pathname) ? u : null; } catch { return null; } })();
+    if (from) { const shopCrumb = $('#crumb a'); if (shopCrumb) shopCrumb.href = from.href; }
     if (from && history.length > 1) {
       const crumb = $('#crumb');
       crumb.insertAdjacentHTML('afterbegin', `<button type="button" class="crumb__back">&larr; ${esc(t('Back to results'))}</button>`);
@@ -398,25 +443,38 @@
       z.className = 'pzoom'; z.tabIndex = -1; z.setAttribute('autofocus', ''); z.setAttribute('aria-label', p.t); z.setAttribute('data-lenis-prevent', '');
       z.innerHTML = `<button type="button" class="pzoom__x"><span>${esc(t('Close'))}</span><svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true" focusable="false"><path d="M1 1l10 10M11 1 1 11" stroke="currentColor" stroke-width="1.4" fill="none"/></svg></button>`
         // lazy, all of them: the viewer is closed until a tap, so its big photos never compete with the page's own
-        + `<div class="pzoom__in" data-lenis-prevent>${v.imgs.map((u, i) => `<img src="${px(u, 1800)}" alt="${esc(p.t)}" loading="lazy" decoding="async"/>`).join('')}</div>`;
+        + `<div class="pzoom__in" data-lenis-prevent>${v.imgs.map((u, i) => `<img src="${px(u, 2000)}" alt="${esc(p.t)}" loading="lazy" decoding="async"/>`).join('')}</div>`;
       document.body.appendChild(z);
       const zx = $('.pzoom__x', z), zin = $('.pzoom__in', z);
-      let zt;
+      let zt, opener = null;
       const openZ = (i, viaKey) => {
         clearTimeout(zt);
+        opener = viaKey ? gal.children[i] : null;   // focus goes back only for a keyboard user: a script focus after a tap paints a ring on Safari
         if (!z.open) z.showModal();
         const im = $$('img', zin)[i]; zin.scrollTop = i && im ? im.offsetTop - 64 : 0;   // the tapped photo first, below Close
         z.getBoundingClientRect(); z.classList.add('on');
         (viaKey ? zx : z).focus({ preventScroll: true });   // a tap opens onto the photos, a key onto Close
         document.documentElement.style.overflow = 'hidden';
       };
-      const closeZ = () => { z.classList.remove('on'); document.documentElement.style.overflow = ''; clearTimeout(zt); zt = setTimeout(() => { if (z.open) z.close(); }, reduced ? 0 : 200); };
+      const closeZ = () => { z.classList.remove('on'); document.documentElement.style.overflow = ''; clearTimeout(zt); zt = setTimeout(() => { if (z.open) z.close(); if (opener && opener.isConnected) opener.focus({ preventScroll: true }); }, reduced ? 0 : 200); };
       zx.addEventListener('click', closeZ);
       z.addEventListener('cancel', e => { e.preventDefault(); closeZ(); });
       zin.addEventListener('click', e => { if (e.target === zin) closeZ(); });
       const figAt = el => [...gal.children].indexOf(el);
       gal.addEventListener('click', e => { const f = e.target.closest('.pdp__fig'); if (f) openZ(figAt(f), e.detail === 0); });
       gal.addEventListener('keydown', e => { const f = e.target.closest('.pdp__fig'); if (f && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openZ(figAt(f), true); } });
+      // the colours strip names the thumb under the pointer or focus in its heading, and its own colour again on leaving
+      const cv = $('.pdp__colourval');
+      if (cv) {
+        const name = a => { cv.textContent = a ? a.dataset.shade : cv.dataset.v; cv.classList.toggle('is-peek', !!a && !a.classList.contains('is-current')); };
+        const strip = cv.closest('.pdp__colours');
+        strip.addEventListener('pointerover', e => { const a = e.target.closest('.pdp__colour'); if (a && e.pointerType === 'mouse') name(a); });
+        strip.addEventListener('pointerleave', () => name(null));
+        strip.addEventListener('focusin', e => name(e.target.closest('.pdp__colour')));
+        strip.addEventListener('focusout', e => { if (!strip.contains(e.relatedTarget)) name(null); });
+        // the current colour in view inside its row, without moving the page (scrollIntoView would)
+        const cur = $('.pdp__colour.is-current', strip), row = cur && cur.parentElement; if (row) row.scrollLeft = cur.offsetLeft - row.offsetLeft - (row.clientWidth - cur.offsetWidth) / 2;
+      }
       // on a phone the photos swipe sideways: a slim line of segments says which one is showing
       if (v.imgs.length > 1) {
         gal.insertAdjacentHTML('afterend', `<div class="pdp__dots" aria-hidden="true">${v.imgs.map((_, i) => `<i${i ? '' : ' class="on"'}></i>`).join('')}</div>`);
@@ -485,10 +543,15 @@
       const f = FIBRES[m.key];
       const inMat = (p, k) => p.mat === k || (p.mx || []).includes(k);   // a second material (her XL double-faced scarves, Q25)
       const pool = CM.all.filter(p => inMat(p, m.key) && !p.oos);
-      const im = pool[0] ? px(pool[0].img[0], 900) : '';
+      // Lead with a piece named for this material; avoid trims that can obscure the knit.
+      const cleanName = p => !/fur|raccoon|fox|pompom/i.test(p.t || '');
+      const photoPiece = pool.filter(p => cleanName(p) && p.mat === m.key && p.img && p.img[0])[0]
+        || pool.filter(p => cleanName(p) && p.img && p.img[0])[0]
+        || pool.find(p => p.img && p.img[0]);
+      const im = photoPiece ? px(photoPiece.img[0], 900) : '';
       const designs = shown(CM.families).filter(x => CM.all.some(p => p.fam === x.key && inMat(p, m.key)));
       return `<article class="fib__ch" id="${esc(m.key)}">
-        <div class="fib__im rv"><span class="head__n">0${i + 1}.</span>${im ? `<img src="${im}" alt="${esc(nm(m))}" loading="${i ? 'lazy' : 'eager'}"/>` : ''}</div>
+        <div class="fib__im rv"><span class="head__n">0${i + 1}.</span>${im ? `<img src="${im}" alt="${esc(photoPiece.t)}" loading="${i ? 'lazy' : 'eager'}"/>` : ''}</div>
         <div class="fib__body">
           <h2 class="fib__name tr${nm(m).length > 16 ? ' fib__name--long' : ''}" data-name>${esc(nm(m))}</h2>
           <p class="fib__lead rv">${esc(t(f.lead))}</p>
