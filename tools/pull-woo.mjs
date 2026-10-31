@@ -38,7 +38,7 @@ const CATALOGUE = opt('--catalogue') || path.join(WS, '04-platform/mjuk-shipping
 const readEnv = file => Object.fromEntries(fs.readFileSync(file, 'utf8').split('\n')
   .map(l => l.match(/^\s*([A-Z_]+)\s*=\s*(.*?)\s*$/)).filter(Boolean).map(m => [m[1], m[2].replace(/^["']|["']$/g, '')]));
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-const FIELDS = 'id,name,slug,type,status,catalog_visibility,description,short_description,price,regular_price,sale_price,manage_stock,stock_quantity,stock_status,categories,images,menu_order,sndr_shop';
+const FIELDS = 'id,name,slug,type,status,catalog_visibility,description,short_description,price,regular_price,sale_price,manage_stock,stock_quantity,stock_status,categories,images,menu_order,sold_individually,sndr_shop,sndr_locked';
 const LOCAL = opt('--woo') ? opt('--woo').replace(/\/$/, '') : '';
 if (LOCAL && !/^http:\/\/(127\.0\.0\.1|localhost):\d+$/.test(LOCAL)) { console.error('--woo takes a local stack only, e.g. http://127.0.0.1:9420'); process.exit(2); }
 
@@ -291,6 +291,8 @@ const curation = JSON.parse(fs.readFileSync(path.join(ROOT, 'tools/curation.json
 const offShop = [];
 const why0 = p => {
   if (!['visible', 'catalog'].includes(p.catalog_visibility)) return 'hidden from her catalogue in WordPress';
+  // a password in WordPress means "not for everyone": the shop is public, so it stays off (swarm 31 Oct)
+  if (p.sndr_locked === true) return 'it has a password in WordPress';
   if (p.type !== 'simple') return `a ${p.type} product: the shop sells simple products (one product per size or colour)`;
   if (!String(p.name || '').trim()) return 'it has no name';
   if (p.price === '' || p.price == null || !(+p.price > 0)) return 'it has no price (or a price of 0)';
@@ -343,7 +345,7 @@ const all = listed.map(p => {
   const o = {
     h: p.slug, t: name,
     p: price, cp: p.sale_price !== '' && regular > price ? regular : 0,
-    img: [...new Set((p.images || []).map(i => String(i.src).split('?')[0]))].slice(0, 4),
+    img: [...new Set((p.images || []).map(i => String(i.src).split('?')[0]))],   // every photo she gives it (a cap of 4 dropped photos from 107 pieces, swarm 31 Oct)
     sz: [], comp: (fam && fam.comp) || comp, fam: fam ? fam.key : '', mat, tyk, id: p.id, live: true,
     oos: p.stock_status === 'outofstock', cats,
   };
@@ -351,6 +353,7 @@ const all = listed.map(p => {
   const mx = fam && Array.isArray(fam.alsoMaterials) ? fam.alsoMaterials.filter(k => MAT_KEYS.has(k) && k !== mat) : [];
   if (mx.length) o.mx = mx;
   if (p.manage_stock && Number.isInteger(p.stock_quantity)) o.q = p.stock_quantity;
+  if (p.sold_individually === true) o.si = 1;   // "Sold individually": one per order, as WooCommerce allows
   const mi = prev ? prev.mi : originOf(p, cc, shortText, longText); if (mi) o.mi = mi;
   return o;
 });

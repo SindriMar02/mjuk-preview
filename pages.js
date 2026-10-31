@@ -77,7 +77,7 @@
     ['orange', '#e9965c', /\b(orange|mango|peach|grapefruit|apricot)\b/, 'Orange'],
     ['yellow', '#e8cd58', /\b(yellow|lemon|mustard|marigold|buttercup)\b/, 'Yellow'],
     ['green', '#6e9a69', /\b(green|mint|pine|moss|olive|forest|kelly|emerald)\b/, 'Green'],
-    ['teal', '#4fb1ae', /\b(aqua|turquoise|tutquoise|lagoon)\b/, 'Teal'],
+    ['teal', '#4fb1ae', /\b(teal|aqua|turquoise|tutquoise|lagoon)\b/, 'Teal'],
     ['blue', '#4a6ea8', /\b(blue|navy|jeans|ocean|royal|sapphire|denim|sky)\b/, 'Blue'],
     ['purple', '#9a83c3', /\b(lilac|purple|violet|orchid)\b/, 'Purple'],
   ];

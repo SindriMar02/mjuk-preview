@@ -404,7 +404,7 @@
      carry). Woo's stock is still the final word at checkout, since this is build-time data. */
   const inBag = h => lines.filter(l => l.h === h).reduce((n, l) => n + l.q, 0);
   // never more than functions/bag.js accepts for one line, even when her stock is larger (Codex 2026-09-26)
-  const shelf = p => (p.oos ? 0 : Math.min(p.q > 0 ? p.q : MAX_EACH, MAX_EACH));
+  const shelf = p => (p.oos ? 0 : p.si ? 1 : Math.min(p.q > 0 ? p.q : MAX_EACH, MAX_EACH));   // si: her "Sold individually"
   // a pompom is a piece of its own with its own shelf: count every hat it is chosen for (audit 2026-10-07)
   const pomInBag = h => lines.reduce((n, l) => n + poms(l).filter(pm => pm.h === h).length * l.q, 0);
   const pomRoom = h => (byHandle[h] ? shelf(byHandle[h]) - pomInBag(h) : 0);
