@@ -353,10 +353,22 @@ section{padding:clamp(70px,12vw,180px) 0;position:relative}
 .cats .cat--all .cat__im--all{aspect-ratio:auto;flex:1 1 auto;min-height:clamp(96px,10vw,160px)}
 .cat--all .cat__im--all{display:grid;place-items:center;background:var(--panel);
   border:1px solid var(--line);transition:background .5s var(--ease)}
-.cat--all:hover .cat__im--all{background:var(--accent)}
+@media(hover:hover) and (pointer:fine){.cat--all:hover .cat__im--all{background:var(--accent)}}
 .cat__allmark{font-family:var(--ff-m);font-size:clamp(26px,3vw,44px);color:var(--accent);
   transition:color .5s var(--ease),transform .6s var(--ease)}
-.cat--all:hover .cat__allmark{color:#fff;transform:translateX(6px)}
+@media(hover:hover) and (pointer:fine){.cat--all:hover .cat__allmark{color:#fff;transform:translateX(6px)}}
+/* wider than one tile (Anna added groups, so the last row was already full or half full): a slim link band with
+   its words inside, arrow at the far end; the hover tints it and moves the arrow instead of flooding it with rust */
+.cats .cat--all .cat__im--all{transition:background .5s var(--ease)}
+@media(min-width:821px){
+  .cats .cat--all[data-wide4]{position:relative}
+  .cats .cat--all[data-wide4] .cat__im--all{min-height:clamp(96px,8vw,124px);place-items:center end;padding-right:clamp(20px,2.4vw,36px)}
+  .cats .cat--all[data-wide4] .cat__meta{position:absolute;left:clamp(18px,2vw,30px);top:50%;transform:translateY(-50%);padding:0;pointer-events:none}
+}
+@media(hover:hover) and (pointer:fine) and (min-width:821px){
+  .cats .cat--all[data-wide4]:hover .cat__im--all{background:color-mix(in srgb,var(--accent) 9%,var(--panel))}
+  .cats .cat--all[data-wide4]:hover .cat__allmark{color:var(--accent)}
+}
 
 /* ══ STORES — four real Reykjavík doors, the thing their current site hides ══ */
 .stores__grid{padding:0 var(--pad);display:grid;gap:clamp(10px,1.4vw,20px);grid-template-columns:repeat(4,minmax(0,1fr))}
@@ -557,6 +569,9 @@ section{padding:clamp(70px,12vw,180px) 0;position:relative}
   .stores__grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .cats--types{grid-template-columns:repeat(2,minmax(0,1fr))}
   .cats .cat--all{grid-column:span var(--s2,1)}
+  .cats .cat--all[data-wide2]{position:relative}
+  .cats .cat--all[data-wide2] .cat__im--all{min-height:84px;place-items:center end;padding-right:20px}
+  .cats .cat--all[data-wide2] .cat__meta{position:absolute;left:16px;top:50%;transform:translateY(-50%);padding:0;pointer-events:none}
   .stock__row{grid-template-columns:1fr;gap:4px}
   .budin__row{grid-template-columns:1fr;gap:6px}
   .foot__grid{grid-template-columns:1fr 1fr}

@@ -119,7 +119,7 @@
      groups in WordPress, so the count is not fixed: this tile takes whatever the last row has
      left (4 columns, 2 on a phone), a full-width band when the row is already full. */
   const allTile = (el, href, name, sub) => el && el.children.length && el.insertAdjacentHTML('beforeend',
-    `<a class="cat cat--all rv" href="${href}" style="--s4:${4 - el.children.length % 4};--s2:${2 - el.children.length % 2}">
+    `<a class="cat cat--all rv" href="${href}" style="--s4:${4 - el.children.length % 4};--s2:${2 - el.children.length % 2}"${el.children.length % 4 !== 3 ? ' data-wide4' : ''}${el.children.length % 2 !== 1 ? ' data-wide2' : ''}>
        <div class="cat__im cat__im--all"><span class="cat__allmark" aria-hidden="true">&rarr;</span></div>
        <div class="cat__meta"><span class="cat__name">${name}</span><span class="cat__n mono">${sub}</span></div>
      </a>`);
