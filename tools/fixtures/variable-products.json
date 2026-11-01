@@ -1,0 +1,523 @@
+[
+  {
+    "id": 99001,
+    "name": "Fixture knit",
+    "slug": "fixture-knit",
+    "type": "variable",
+    "status": "publish",
+    "catalog_visibility": "visible",
+    "price": "",
+    "regular_price": "",
+    "sale_price": "",
+    "description": "<p>A <strong>warm</strong> knit.</p><ul><li>Soft</li></ul><a href=\"https://example.test/?a=1&amp;b=2\">Read</a>",
+    "short_description": "First line\n\n\u2022 Soft\n\u2022 Warm",
+    "categories": [],
+    "images": [
+      {
+        "src": "https://example.test/parent.jpg"
+      }
+    ],
+    "menu_order": 0,
+    "attributes": [
+      {
+        "id": 1,
+        "name": "Size",
+        "variation": true,
+        "options": [
+          "S",
+          "M",
+          "L"
+        ]
+      }
+    ],
+    "sndr_variations": [
+      {
+        "id": 99101,
+        "price": "80",
+        "regular_price": "120",
+        "sale_price": "80",
+        "status": "publish",
+        "purchasable": true,
+        "stock_status": "instock",
+        "manage_stock": true,
+        "stock_quantity": 2,
+        "attributes": [
+          {
+            "id": 1,
+            "name": "Size",
+            "option": "S"
+          }
+        ],
+        "image": {
+          "src": "https://example.test/small.jpg"
+        }
+      },
+      {
+        "id": 99102,
+        "price": "100",
+        "regular_price": "120",
+        "sale_price": "",
+        "status": "publish",
+        "purchasable": true,
+        "stock_status": "outofstock",
+        "manage_stock": false,
+        "stock_quantity": null,
+        "attributes": [
+          {
+            "id": 1,
+            "name": "Size",
+            "option": "M"
+          }
+        ]
+      },
+      {
+        "id": 99103,
+        "price": "110",
+        "regular_price": "120",
+        "sale_price": "",
+        "status": "publish",
+        "purchasable": true,
+        "stock_status": "instock",
+        "manage_stock": false,
+        "stock_quantity": null,
+        "attributes": [
+          {
+            "id": 1,
+            "name": "Size",
+            "option": "L"
+          }
+        ]
+      },
+      {
+        "id": 99104,
+        "price": "1",
+        "regular_price": "120",
+        "sale_price": "",
+        "status": "draft",
+        "purchasable": true,
+        "stock_status": "instock",
+        "manage_stock": false,
+        "stock_quantity": null,
+        "attributes": [
+          {
+            "id": 1,
+            "name": "Size",
+            "option": "M"
+          }
+        ]
+      }
+    ],
+    "variations": [
+      99101,
+      99102,
+      99103,
+      99104
+    ]
+  },
+  {
+    "id": 99002,
+    "name": "Fixture knit",
+    "slug": "fixture-any",
+    "type": "variable",
+    "status": "publish",
+    "catalog_visibility": "visible",
+    "price": "",
+    "regular_price": "",
+    "sale_price": "",
+    "description": "<p>A <strong>warm</strong> knit.</p><ul><li>Soft</li></ul><a href=\"https://example.test/?a=1&amp;b=2\">Read</a>",
+    "short_description": "First line\n\n\u2022 Soft\n\u2022 Warm",
+    "categories": [],
+    "images": [
+      {
+        "src": "https://example.test/parent.jpg"
+      }
+    ],
+    "menu_order": 0,
+    "attributes": [
+      {
+        "id": 1,
+        "name": "Size",
+        "variation": true,
+        "options": [
+          "S",
+          "M",
+          "L"
+        ]
+      },
+      {
+        "id": 2,
+        "name": "Colour",
+        "variation": true,
+        "options": [
+          "Navy",
+          "Cream"
+        ]
+      }
+    ],
+    "sndr_variations": [
+      {
+        "id": 99201,
+        "price": "90",
+        "regular_price": "120",
+        "sale_price": "",
+        "status": "publish",
+        "purchasable": true,
+        "stock_status": "instock",
+        "manage_stock": false,
+        "stock_quantity": null,
+        "attributes": []
+      },
+      {
+        "id": 99202,
+        "price": "100",
+        "regular_price": "120",
+        "sale_price": "",
+        "status": "publish",
+        "purchasable": true,
+        "stock_status": "outofstock",
+        "manage_stock": false,
+        "stock_quantity": null,
+        "attributes": [
+          {
+            "id": 1,
+            "name": "Size",
+            "option": "M"
+          }
+        ]
+      }
+    ],
+    "variations": [
+      99101,
+      99102,
+      99103,
+      99104
+    ]
+  },
+  {
+    "id": 99003,
+    "name": "Fixture knit",
+    "slug": "fixture-empty",
+    "type": "variable",
+    "status": "publish",
+    "catalog_visibility": "visible",
+    "price": "",
+    "regular_price": "",
+    "sale_price": "",
+    "description": "<p>A <strong>warm</strong> knit.</p><ul><li>Soft</li></ul><a href=\"https://example.test/?a=1&amp;b=2\">Read</a>",
+    "short_description": "First line\n\n\u2022 Soft\n\u2022 Warm",
+    "categories": [],
+    "images": [
+      {
+        "src": "https://example.test/parent.jpg"
+      }
+    ],
+    "menu_order": 0,
+    "attributes": [
+      {
+        "id": 1,
+        "name": "Size",
+        "variation": true,
+        "options": [
+          "S",
+          "M",
+          "L"
+        ]
+      }
+    ],
+    "sndr_variations": [],
+    "variations": [
+      99101,
+      99102,
+      99103,
+      99104
+    ]
+  },
+  {
+    "id": 99004,
+    "name": "Fixture knit",
+    "slug": "fixture-knit",
+    "type": "grouped",
+    "status": "publish",
+    "catalog_visibility": "visible",
+    "price": "",
+    "regular_price": "",
+    "sale_price": "",
+    "description": "<p>A <strong>warm</strong> knit.</p><ul><li>Soft</li></ul><a href=\"https://example.test/?a=1&amp;b=2\">Read</a>",
+    "short_description": "First line\n\n\u2022 Soft\n\u2022 Warm",
+    "categories": [],
+    "images": [
+      {
+        "src": "https://example.test/parent.jpg"
+      }
+    ],
+    "menu_order": 0,
+    "attributes": [
+      {
+        "id": 1,
+        "name": "Size",
+        "variation": true,
+        "options": [
+          "S",
+          "M",
+          "L"
+        ]
+      }
+    ],
+    "sndr_variations": [
+      {
+        "id": 99101,
+        "price": "80",
+        "regular_price": "120",
+        "sale_price": "80",
+        "status": "publish",
+        "purchasable": true,
+        "stock_status": "instock",
+        "manage_stock": true,
+        "stock_quantity": 2,
+        "attributes": [
+          {
+            "id": 1,
+            "name": "Size",
+            "option": "S"
+          }
+        ],
+        "image": {
+          "src": "https://example.test/small.jpg"
+        }
+      },
+      {
+        "id": 99102,
+        "price": "100",
+        "regular_price": "120",
+        "sale_price": "",
+        "status": "publish",
+        "purchasable": true,
+        "stock_status": "outofstock",
+        "manage_stock": false,
+        "stock_quantity": null,
+        "attributes": [
+          {
+            "id": 1,
+            "name": "Size",
+            "option": "M"
+          }
+        ]
+      },
+      {
+        "id": 99103,
+        "price": "110",
+        "regular_price": "120",
+        "sale_price": "",
+        "status": "publish",
+        "purchasable": true,
+        "stock_status": "instock",
+        "manage_stock": false,
+        "stock_quantity": null,
+        "attributes": [
+          {
+            "id": 1,
+            "name": "Size",
+            "option": "L"
+          }
+        ]
+      },
+      {
+        "id": 99104,
+        "price": "1",
+        "regular_price": "120",
+        "sale_price": "",
+        "status": "draft",
+        "purchasable": true,
+        "stock_status": "instock",
+        "manage_stock": false,
+        "stock_quantity": null,
+        "attributes": [
+          {
+            "id": 1,
+            "name": "Size",
+            "option": "M"
+          }
+        ]
+      }
+    ],
+    "variations": [
+      99101,
+      99102,
+      99103,
+      99104
+    ]
+  },
+  {
+    "id": 99005,
+    "name": "Fixture knit",
+    "slug": "fixture-sold",
+    "type": "variable",
+    "status": "publish",
+    "catalog_visibility": "visible",
+    "price": "",
+    "regular_price": "",
+    "sale_price": "",
+    "description": "<p>A <strong>warm</strong> knit.</p><ul><li>Soft</li></ul><a href=\"https://example.test/?a=1&amp;b=2\">Read</a>",
+    "short_description": "First line\n\n\u2022 Soft\n\u2022 Warm",
+    "categories": [],
+    "images": [
+      {
+        "src": "https://example.test/parent.jpg"
+      }
+    ],
+    "menu_order": 0,
+    "attributes": [
+      {
+        "id": 1,
+        "name": "Size",
+        "variation": true,
+        "options": [
+          "S",
+          "M",
+          "L"
+        ]
+      }
+    ],
+    "sndr_variations": [
+      {
+        "id": 99501,
+        "price": "50",
+        "regular_price": "120",
+        "sale_price": "",
+        "status": "publish",
+        "purchasable": true,
+        "stock_status": "outofstock",
+        "manage_stock": false,
+        "stock_quantity": null,
+        "attributes": [
+          {
+            "id": 1,
+            "name": "Size",
+            "option": "S"
+          }
+        ]
+      }
+    ],
+    "variations": [
+      99101,
+      99102,
+      99103,
+      99104
+    ]
+  },
+  {
+    "id": 99006,
+    "name": "Fixture knit",
+    "slug": "fixture-simple",
+    "type": "simple",
+    "status": "publish",
+    "catalog_visibility": "visible",
+    "price": "70",
+    "regular_price": "",
+    "sale_price": "",
+    "description": "<p>A <strong>warm</strong> knit.</p><ul><li>Soft</li></ul><a href=\"https://example.test/?a=1&amp;b=2\">Read</a>",
+    "short_description": "First line\n\n\u2022 Soft\n\u2022 Warm",
+    "categories": [],
+    "images": [
+      {
+        "src": "https://example.test/parent.jpg"
+      }
+    ],
+    "menu_order": 0,
+    "attributes": [
+      {
+        "id": 1,
+        "name": "Size",
+        "variation": true,
+        "options": [
+          "S",
+          "M",
+          "L"
+        ]
+      }
+    ],
+    "sndr_variations": [
+      {
+        "id": 99101,
+        "price": "80",
+        "regular_price": "120",
+        "sale_price": "80",
+        "status": "publish",
+        "purchasable": true,
+        "stock_status": "instock",
+        "manage_stock": true,
+        "stock_quantity": 2,
+        "attributes": [
+          {
+            "id": 1,
+            "name": "Size",
+            "option": "S"
+          }
+        ],
+        "image": {
+          "src": "https://example.test/small.jpg"
+        }
+      },
+      {
+        "id": 99102,
+        "price": "100",
+        "regular_price": "120",
+        "sale_price": "",
+        "status": "publish",
+        "purchasable": true,
+        "stock_status": "outofstock",
+        "manage_stock": false,
+        "stock_quantity": null,
+        "attributes": [
+          {
+            "id": 1,
+            "name": "Size",
+            "option": "M"
+          }
+        ]
+      },
+      {
+        "id": 99103,
+        "price": "110",
+        "regular_price": "120",
+        "sale_price": "",
+        "status": "publish",
+        "purchasable": true,
+        "stock_status": "instock",
+        "manage_stock": false,
+        "stock_quantity": null,
+        "attributes": [
+          {
+            "id": 1,
+            "name": "Size",
+            "option": "L"
+          }
+        ]
+      },
+      {
+        "id": 99104,
+        "price": "1",
+        "regular_price": "120",
+        "sale_price": "",
+        "status": "draft",
+        "purchasable": true,
+        "stock_status": "instock",
+        "manage_stock": false,
+        "stock_quantity": null,
+        "attributes": [
+          {
+            "id": 1,
+            "name": "Size",
+            "option": "M"
+          }
+        ]
+      }
+    ],
+    "variations": [
+      99101,
+      99102,
+      99103,
+      99104
+    ]
+  }
+]

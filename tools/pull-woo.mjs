@@ -23,11 +23,13 @@
    are Anna's (tools/groups.json, her sheet "Product groups"; tools/groups.mjs joins by name).
    Editorial picks the pull cannot derive live in tools/curation.json. */
 import fs from 'node:fs';
+import { createRequire } from 'node:module';
 import os from 'node:os';
 import path from 'node:path';
 import { G, familyOf, materialOf, groupOfType, MATERIALS } from './groups.mjs';
 import { version as SHEET_VERSION } from './shop-fields-json.mjs';
 
+const { sanitize } = createRequire(import.meta.url)('../pdp.js');
 const ROOT = path.resolve(import.meta.dirname, '..');
 const WS = path.resolve(ROOT, '../..');
 const args = process.argv.slice(2);
@@ -38,7 +40,7 @@ const CATALOGUE = opt('--catalogue') || path.join(WS, '04-platform/mjuk-shipping
 const readEnv = file => Object.fromEntries(fs.readFileSync(file, 'utf8').split('\n')
   .map(l => l.match(/^\s*([A-Z_]+)\s*=\s*(.*?)\s*$/)).filter(Boolean).map(m => [m[1], m[2].replace(/^["']|["']$/g, '')]));
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-const FIELDS = 'id,name,slug,type,status,catalog_visibility,description,short_description,price,regular_price,sale_price,manage_stock,stock_quantity,stock_status,categories,images,menu_order,sold_individually,featured,sndr_shop,sndr_locked';
+const FIELDS = 'id,name,slug,type,status,catalog_visibility,description,short_description,price,regular_price,sale_price,manage_stock,stock_quantity,stock_status,categories,images,menu_order,sold_individually,featured,sndr_shop,sndr_locked,attributes,variations';
 const LOCAL = opt('--woo') ? opt('--woo').replace(/\/$/, '') : '';
 if (LOCAL && !/^http:\/\/(127\.0\.0\.1|localhost):\d+$/.test(LOCAL)) { console.error('--woo takes a local stack only, e.g. http://127.0.0.1:9420'); process.exit(2); }
 
@@ -82,6 +84,14 @@ async function pull() {
     pages = r.pages; products.push(...r.list);
     process.stderr.write(`  page ${page}/${pages}: ${products.length} products\n`);
   }
+  for (const p of products.filter(p => p.type === 'variable')) {
+    p.sndr_variations = [];
+    for (let page = 1, pages = 1; page <= pages; page++) {
+      await sleep(pause);
+      const r = await get(`${base}/wp-json/wc/v3/products/${p.id}/variations?per_page=100&page=${page}`);
+      pages = r.pages; p.sndr_variations.push(...r.list);
+    }
+  }
   // her shipping zones, so every shipping sentence on the site is her settings, not ours
   const zones = [];
   await sleep(pause);
@@ -122,18 +132,13 @@ const ownLink = s => s
   .replace(/https?:\/\/(?:www\.)?mjukiceland\.(?:com|is)\/wp-content\/\S+/gi, '')
   .replace(/https?:\/\/(?:www\.)?mjukiceland\.(?:com|is)\/([a-z0-9-]+)\/?(?=[\s,.;)]|$)/gi,
     (m, slug) => { const t = slug.replace(/-/g, ' '); return t.charAt(0).toUpperCase() + t.slice(1); });
-const strip = h => String(h || '').replace(/<(script|style)[\s\S]*?<\/\1>/gi, ' ').replace(/\[\/?[a-z_]+[^\]]*\]/gi, ' ').replace(/<[^>]+>/g, ' ');
+const strip = h => String(h || '').replace(/<(script|style)[\s\S]*?<\/\1>/gi, ' ').replace(/\[\/?[a-z_]+[^\]]*\]/gi, ' ').replace(/<\/?[a-z!][^>]*>/gi, ' ');   // only "<" + a letter is a tag: "wash at <30°C" stays (swarm 1 Nov)
 // A YouTube link in her text (the Ragnar hats link their video) survives as a marker that pdp.js turns
 // into a "Watch the video" link; stripping it left only its label, "Ragnar hat video" (Anna's test, 23 Oct).
 const video = h => String(h || '').replace(/<a\b[^>]*href="https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{6,20})[^"]*"[^>]*>[\s\S]*?<\/a>/gi, ' ⟦video:$1⟧ ');
 const txt = h => texturize(ownLink(decode(strip(video(h)))).replace(/\s+/g, ' ').trim());
-// What the product page shows keeps her paragraphs and list items as line breaks (pdp.js turns them into
-// <br>); everything read for detection still uses txt(), one flat line (swarm test 28 Oct: Ragnar's five
-// paragraphs ran together as one).
-const lines = h => String(h || '').replace(/<(script|style)[\s\S]*?<\/\1>/gi, ' ')
-  .replace(/<li\b[^>]*>/gi, '\n• ').replace(/<\/(p|div|h[1-6]|li|tr|blockquote)\s*>|<br\s*\/?>/gi, '\n')
-  .split('\n').map(txt).filter(Boolean)
-  .reduce((out, l, i, all) => out + (i ? (l.startsWith('• ') && all[i - 1].startsWith('• ') ? '\n' : '\n\n') : '') + l, '');
+// Her formatting survives; only text gets WordPress wording and own-link rewrites (Sindri, 1 Nov).
+const lines = h => sanitize(video(h), s => texturize(ownLink(decode(s).replace(/\[\/?[a-z_]+[^\]]*\]/gi, ' ')))).trim();
 
 // Anna's docs are plain text: escape them, without WordPress's wording changes.
 const escape = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -161,6 +166,7 @@ const annaOf = (fam, name) => annaDocs.find(d => d.family === (fam && fam.key)
 // about washing or drying. Starts at the label when one sits just before it ("Wash Instructions:").
 const CARE = /(machine|hand)[- ]?wash|dry[- ]clean/i;
 function careOf(long) {
+  long = long.replace(/\s*⟦video:[\w-]+⟧\s*/g, ' ');   // a video link is no care sentence (swarm 1 Nov)
   let i = long.search(CARE); if (i < 0) return '';
   const label = long.slice(Math.max(0, i - 25), i).match(/[:.✓]\s*([A-Za-z][A-Za-z ]*)$/);
   if (label) i -= label[1].length;
@@ -293,17 +299,19 @@ const old = fs.existsSync(dataFile) ? new Function('window', fs.readFileSync(dat
 const oldById = new Map(((old && old.all) || []).map(p => [p.id, p]));
 const curation = JSON.parse(fs.readFileSync(path.join(ROOT, 'tools/curation.json'), 'utf8'));
 
-/* What the shop lists: published, visible in her catalogue, a simple product, with a name and a
+/* What the shop lists: published, visible in her catalogue, a simple or variable product, with a name and a
    price. Anything published that is left out is named in the report with the reason, so nothing
    she publishes can vanish without a word. */
 const offShop = [];
+const variants = p => (p.sndr_variations || []).filter(v => v.status === 'publish' && +v.price > 0);
 const why0 = p => {
   if (!['visible', 'catalog'].includes(p.catalog_visibility)) return 'hidden from her catalogue in WordPress';
   // a password in WordPress means "not for everyone": the shop is public, so it stays off (swarm 31 Oct)
   if (p.sndr_locked === true) return 'it has a password in WordPress';
-  if (p.type !== 'simple') return `a ${p.type} product: the shop sells simple products (one product per size or colour)`;
+  if (!['simple', 'variable'].includes(p.type)) return `a ${p.type} product: the shop sells simple and variable products`;
+  if (p.type === 'variable' && !variants(p).length) return 'it has no published variation with a price above 0';
   if (!String(p.name || '').trim()) return 'it has no name';
-  if (p.price === '' || p.price == null || !(+p.price > 0)) return 'it has no price (or a price of 0)';
+  if (p.type !== 'variable' && (p.price === '' || p.price == null || !(+p.price > 0))) return 'it has no price (or a price of 0)';
   // its page lives at product/<slug>/; WordPress makes Icelandic letters plain, but a hand-typed
   // emoji or other script arrives percent-encoded and cannot be a folder name safely
   if (!/^[a-z0-9_-]+$/i.test(String(p.slug || ''))) return 'its web address (slug) has characters the shop cannot use: give it a plain one in WordPress';
@@ -360,7 +368,23 @@ const all = listed.map(p => {
   // a second material the piece is also listed under (her XL double-faced scarves under Icelandic wool, Q25)
   const mx = fam && Array.isArray(fam.alsoMaterials) ? fam.alsoMaterials.filter(k => MAT_KEYS.has(k) && k !== mat) : [];
   if (mx.length) o.mx = mx;
-  if (p.manage_stock && Number.isInteger(p.stock_quantity)) o.q = p.stock_quantity;
+  if (p.type === 'variable') {
+    // sizes read small to large even when her terms were never dragged into order (Woo gives them A to Z: L, M, S; swarm 1 Nov)
+    const SIZES = ['xxxs', 'xxs', 'xs', 's', 'm', 'l', 'xl', 'xxl', '2xl', 'xxxl', '3xl'], rank = x => SIZES.indexOf(String(x).trim().toLowerCase());
+    const order = os => os.every(x => rank(x) >= 0) ? os.slice().sort((a, b) => rank(a) - rank(b)) : os;
+    o.va = (p.attributes || []).filter(a => a.variation).map(a => ({ n: a.name, o: order(a.options || []) }));
+    o.vr = variants(p).map(v => { const a = Object.fromEntries((v.attributes || []).map(x => { const attr = (p.attributes || []).find(y => x.id ? y.id === x.id : y.name === x.name || y.slug === x.name); return [attr ? attr.name : x.name, x.option]; }));
+      const r = { v: v.id, a, p: +v.price, cp: v.sale_price && +v.regular_price > +v.price ? +v.regular_price : 0, oos: v.stock_status === 'outofstock' || v.purchasable === false || (v.manage_stock && v.stock_quantity === 0) };
+      if (v.manage_stock === true && Number.isInteger(v.stock_quantity)) r.q = v.stock_quantity;
+      else if (v.manage_stock === 'parent' && p.manage_stock && Number.isInteger(p.stock_quantity)) { r.q = p.stock_quantity; r.qp = 1; }   // shared stock: the bag caps each size at it, Woo caps the sum
+      if (v.description) { const d = lines(v.description); if (d) r.d = d; }   // her variation description shows when it is chosen, as on a Woo page
+      if (v.image && v.image.src) { r.img = v.image.src.split('?')[0]; if (!o.img.includes(r.img)) o.img.push(r.img); } return r; });
+    // an option no published, priced variation can make is not on offer at all (WooCommerce shows none either), not "sold out" (swarm 1 Nov)
+    o.va = o.va.map(a => ({ ...a, o: a.o.filter(x => o.vr.some(r => !r.a[a.n] || r.a[a.n] === x)) }));
+    const low = o.vr.reduce((a, b) => a.p <= b.p ? a : b); o.p = low.p; o.cp = low.cp; o.oos = o.vr.every(v => v.oos);
+    if (o.va.length === 1) o.sz = o.va[0].o.map(s => { const matches = o.vr.filter(v => !v.a[o.va[0].n] || v.a[o.va[0].n] === s), v = matches.sort((a, b) => Object.keys(b.a).length - Object.keys(a.a).length)[0]; return { s, a: !!v && !v.oos, v: v ? v.v : 0 }; });
+  }
+  if (p.type !== 'variable' && p.manage_stock && Number.isInteger(p.stock_quantity)) o.q = p.stock_quantity;
   if (p.sold_individually === true) o.si = 1;   // "Sold individually": one per order, as WooCommerce allows
   const mi = prev ? prev.mi : originOf(p, cc, shortText, longText); if (mi) o.mi = mi;
   return o;
@@ -392,7 +416,7 @@ const picks = ids => ids.filter(id => byId.has(id) || (dropped.push(id), false))
    (in her shop order), ahead of our picks; unticking it hands the place back to the picks */
 const starred = listed.filter(p => p.featured === true).map(p => p.id);
 const CM = {
-  all, featuredNew: [...new Set([...starred.filter(id => byId.has(id)).map(id => byId.get(id).h), ...picks(curation.featuredNew)])], own: picks(curation.own), materials, groups, families, bespoke,
+  all, featuredNew: [...new Set([...starred.filter(id => byId.has(id) && byId.get(id).img.length).map(id => byId.get(id).h), ...picks(curation.featuredNew)])], own: picks(curation.own), materials, groups, families, bespoke,
   hero: curation.hero, campaign: curation.campaign, wall: curation.wall,
   totalCount: all.length, saleCount: all.filter(p => p.cp > 0 && !p.oos).length,
   retired: dropped, harvestedAt: new Date().toISOString().slice(0, 10), source, ship,
@@ -401,7 +425,7 @@ const CM = {
 
 /* ── report, against what the pages show today ──────────────────────────── */
 const L = [];
-L.push(`Source: ${source}`, `Products: ${products.length} in WooCommerce, ${all.length} listed (published, visible, simple), ${CM.saleCount} on sale, ${all.filter(p => p.oos).length} sold out`);
+L.push(`Source: ${source}`, `Products: ${products.length} in WooCommerce, ${all.length} listed (published, visible, simple or variable), ${CM.saleCount} on sale, ${all.filter(p => p.oos).length} sold out`);
 L.push(`Composition stated: ${all.filter(p => p.comp).length} · type known: ${all.filter(p => p.tyk).length} · origin stated: ${all.filter(p => p.mi).length} · care text: ${Object.keys(care).length} texts`);
 L.push(`Design from: ${Object.entries(why.src).map(([k, v]) => `${k} ${v}`).join(', ')}${lists ? `; her lists ${lists.version || '?'} (${addedFams.length} design(s) she added)` : `; her lists not read (${listsWhy})`}`);
 L.push(`Her material from: ${Object.entries(why.mat).map(([k, v]) => `${k} ${v}`).join(', ')}`);

@@ -26,7 +26,11 @@ export function readBag(raw) {
     if (!i || !Number.isInteger(i.id) || i.id < 1 || !Number.isInteger(i.q) || i.q < 1 || i.q > MAX_QTY) return null;
     if (i.for !== undefined && (!Number.isInteger(i.for) || i.for < 1)) return null;
     if (i.p !== undefined && !(typeof i.p === 'number' && Number.isFinite(i.p) && i.p >= 0 && i.p < 1e5)) return null;
+    if (i.v !== undefined && (!Number.isInteger(i.v) || i.v < 1)) return null;
+    if (i.a !== undefined && (!i.a || typeof i.a !== 'object' || Array.isArray(i.a) || Object.keys(i.a).length > 4 || Object.entries(i.a).some(([k, v]) => k.length > 60 || typeof v !== 'string' || v.length > 60))) return null;
     const line = { id: i.id, q: i.q };
+    if (i.v !== undefined) line.v = i.v;
+    if (i.a !== undefined) line.a = i.a;
     if (i.p !== undefined) line.p = Math.round(i.p * 100) / 100;
     if (i.note) line.note = String(i.note).replace(/\s+/g, ' ').trim().slice(0, MAX_NOTE);
     if (i.for) line.for = i.for; // a pompom names its hat: no hat, no pompom

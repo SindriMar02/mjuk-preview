@@ -357,7 +357,7 @@
   function wirePdp(p, v) {
     const info = $('#info'); if (!info) return;
     const EASE = 'cubic-bezier(.23,1,.32,1)';   // strong ease-out (review-animations STANDARDS)
-    const cta = $('.pdp__cta', info), pom = $('.pdp__pom', info), seg = $('.pseg', info);
+    const cta = $('.pdp__cta', info), pom = $('.pdp__pom', info), seg = $('.pdp__pom .pseg', info);
     // a label that changes slides out and the new one rises in
     const relabel = (el, txt, instant) => {
       if (!el) return;
@@ -412,6 +412,40 @@
         const os = $$('.pseg__o', seg), i = os.findIndex(o => o.getAttribute('aria-checked') === 'true');
         choose(os[(i + k + os.length) % os.length], true);
       });
+    }
+    if (p.vr) {
+      const values = {}, groups = $$('[data-va]', info);
+      const sync = () => {
+        groups.forEach(g => { const a = p.va[+g.dataset.va], os = $$('.pseg__o', g);
+          os.forEach(b => { const choice = { ...values, [a.n]: b.dataset.option }, ok = p.vr.some(r => !r.oos && Object.keys(choice).every(k => !r.a[k] || r.a[k] === choice[k]));
+            b.disabled = !ok; const on = values[a.n] === b.dataset.option; b.setAttribute('aria-checked', String(on)); b.classList.toggle('is-selected', on); b.tabIndex = -1;
+            b.textContent = b.dataset.option + (ok ? '' : ' (' + t('Sold out').toLowerCase() + ')'); });
+          const tab = os.find(b => !b.disabled && b.getAttribute('aria-checked') === 'true') || os.find(b => !b.disabled); if (tab) tab.tabIndex = 0;
+        });
+        // the most specific variation wins: an "Any colour" one must not take the price of a colour she set on its own (swarm 1 Nov)
+        const spec = r => Object.keys(r.a).length, complete = p.va.every(a => values[a.n]);
+        const r = complete && p.vr.filter(r => p.va.every(a => !r.a[a.n] || r.a[a.n] === values[a.n])).sort((a, b) => spec(b) - spec(a))[0];
+        const live = r && !r.oos ? r : null;
+        const vd = $('.pdp__vdesc', info); if (vd) { const d = live && live.d && window.CMPDP && window.CMPDP.sanitize ? window.CMPDP.sanitize(live.d) : ''; vd.innerHTML = d; vd.hidden = !d; }
+        if (cta) { cta.disabled = !live; cta.dataset.v = live ? live.v : ''; cta._va = { ...values }; }
+        // a partial choice that leaves one price shows it ("M" with any colour is $50, not "From $45"; swarm 1 Nov)
+        const cand = p.vr.filter(r => !r.oos && Object.keys(values).every(k => !r.a[k] || r.a[k] === values[k]));
+        const one = !live && cand.length && cand.every(r => r.p === cand[0].p && r.cp === cand[0].cp) ? cand[0] : null;
+        const price = live || one || p, prefix = !live && !one && !p.oos && p.vr.some(v => v.p !== p.p) ? t('From') + ' ' : '';
+        $('.pdp__price', info).innerHTML = prefix ? `${prefix}<span>${usd(p.p)}</span>` : (price.cp ? `<s>${usd(price.cp)}</s><span>${usd(price.p)}</span><span class="pdp__save">${t('Save')} ${Math.round((1 - price.p / price.cp) * 100)}%</span>` : `<span>${usd(price.p)}</span>`);
+        if (bar) { $('.pdp-bar__p', bar.el).textContent = prefix + usd(price.p); $('.pdp-bar__b', bar.el).disabled = !live; }
+        // its own photo leads the gallery while it is chosen (the address is compared by file name: the copy rewrites hosts)
+        const figs = $$('.pdp__fig img'); figs.forEach(im => { if (!im.dataset.src0) im.dataset.src0 = im.getAttribute('src'); im.setAttribute('src', im.dataset.src0); });
+        const file = u => String(u || '').split('?')[0].split('/').pop(), own = live && live.img && figs.find(im => file(im.dataset.src0) === file(live.img));
+        if (own && own !== figs[0]) { own.setAttribute('src', figs[0].dataset.src0); figs[0].setAttribute('src', own.dataset.src0); }
+      };
+      groups.forEach(g => { const choose = b => { if (!b || b.disabled) return; values[p.va[+g.dataset.va].n] = b.dataset.option; sync(); };
+        g.addEventListener('click', e => choose(e.target.closest('.pseg__o')));
+        g.addEventListener('keydown', e => { const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key]; if (!step && e.key !== 'Home' && e.key !== 'End') return;
+          const os = $$('.pseg__o', g).filter(b => !b.disabled); if (!os.length) return; e.preventDefault();
+          const i = os.indexOf(document.activeElement), b = os[e.key === 'Home' ? 0 : e.key === 'End' ? os.length - 1 : (i + step + os.length) % os.length]; choose(b); b.focus(); });
+      });
+      sync();
     }
     // the details: a native <details> that eases open and shut instead of snapping
     $$('.acc', info).forEach(d => {

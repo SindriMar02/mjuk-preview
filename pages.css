@@ -405,3 +405,10 @@ body[data-page] .bars{opacity:.18}
 #fType,#fFibre{min-height:37px}
 .pgrid[data-wait]{min-height:120vh}
 .fib[data-wait]{min-height:150vh}
+
+/* Variable choices can have any number of options; a selected radio stays visible (1 Nov). */
+.pdp__var .pseg__o.is-selected{background:var(--bg-2);box-shadow:inset 0 0 0 1px var(--ink)}
+.pdp__var .pseg__o:disabled{opacity:.5;cursor:not-allowed}
+/* long or many options: four to a row, a long name breaks inside its box (swarm 1 Nov, 8 options at 375 px) */
+.pdp__var .pseg__o{height:auto;min-height:48px;white-space:normal;overflow-wrap:break-word;hyphens:auto;line-height:1.25;padding:.6em 6px;text-align:center}
+.pdp__var .pseg__ind{display:none}

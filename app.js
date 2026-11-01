@@ -64,23 +64,22 @@
     // the second gallery shot: on her shop that is usually a close-up of the knit, which read as
     // a huge zoom (Sindri, 25 Sep). The photo only eases in a little.
     const main = px(p.img[0], 620);
-    const plain = p.tyk === 'hats' && !/pom ?pom/i.test(p.t);
+    const plain = !p.vr && p.tyk === 'hats' && !/pom ?pom/i.test(p.t);
     // every card opens its piece: the photo and the name are links on every page, the front page's rails too (Sindri,
     // 24 Oct: the front page cards opened nothing, the link was only added by pages.js, which that page does not load)
     const href = 'product/' + encodeURIComponent(p.h) + '/';
-    const price = p.cp ? `<span class="prod__price"><s>${usd(p.cp)}</s>${usd(p.p)}</span>` : `<span class="prod__price">${usd(p.p)}</span>`;
+    const from = p.vr && !p.oos && p.vr.some(v => v.p !== p.p) ? t('From') + ' ' : '';
+    const price = p.cp && !from ? `<span class="prod__price">${from}<s>${usd(p.cp)}</s>${usd(p.p)}</span>` : `<span class="prod__price">${from}${usd(p.p)}</span>`;
     // chip shows just the size token ("S / Navy Blue" → "S"); full variant kept for the bag.
-    // MJÚK's pieces are one-size, so the sized branch is unused here — and the "Add"
-    // rubric only earns its place when it labels a ROW of chips. With a single
-    // button it just printed "Add" twice.
+    // The Add label earns its place only when it labels a row of choices.
     const sizes = (p.sz && p.sz.length)
-      ? `<span class="mono">Add</span>` + p.sz.map(v => {
+      ? `<span class="mono">${t('Add')}</span>` + p.sz.map(v => {
           const label = String(v.s).split('/')[0].trim() || v.s;
-          return `<button class="sz" data-h="${esc(p.h)}" data-s="${esc(label)}" title="${esc(v.s)}${v.a ? '' : ' — sold out'}"${v.a ? '' : ' disabled'}>${esc(label)}</button>`;
+          return `<button class="sz" data-h="${esc(p.h)}" data-s="${esc(v.s)}"${v.v ? ` data-v="${v.v}"` : ''} title="${esc(v.s)}${v.a ? '' : ' — ' + t('Sold out').toLowerCase()}"${v.a ? '' : ' disabled'}>${esc(label)}</button>`;
         }).join('')
       // a plain hat (no pompom in its name): Add to bag opens the pompom chooser (none, one or two), and a small tag on
       // its photo says pompoms can go on it (Sindri, 24 Oct: the None/1/2 chips on the card looked generic)
-      : `<button class="sz sz--solo${plain ? ' pom-ask' : ''}" data-h="${esc(p.h)}" data-s="">${t('Add to bag')}</button>`;
+      : p.vr ? `<a class="sz sz--solo" href="${href}">${t('Choose')}</a>` : `<button class="sz sz--solo${plain ? ' pom-ask' : ''}" data-h="${esc(p.h)}" data-s="">${t('Add to bag')}</button>`;
     return `<article class="prod rv">
       <div class="prod__im">
         <span class="prod__ix">${String(i + 1).padStart(2, '0')}</span>${plain ? `<span class="prod__pom" title="${esc(t('Pompoms can be added to this hat'))}">${POM_ICON}${t('Pompoms')}</span>` : ''}
@@ -237,9 +236,25 @@
      when it is a real piece, and anything else is dropped. A line for a piece no longer in the catalogue
      keeps its stored name and image for the "sold since" row, escaped where it meets HTML. */
   const str = (v, n = 200) => (typeof v === 'string' ? v.slice(0, n) : '');
+  const variant = (p, v) => p && p.vr ? p.vr.find(r => r.v === v) : p;
+  const chosen = (p, v, a) => {
+    const r = variant(p, v); if (!r || !p.va) return null;
+    const out = {};
+    for (const attr of p.va) { const o = r.a[attr.n] || (a && a[attr.n]); if (!attr.o.includes(o)) return null; if (!r.a[attr.n]) Object.defineProperty(out, attr.n, { value: o, enumerable: true }); }
+    return out;
+  };
+  // the bag line names each choice when there is more than one ("Size: M, Garn: Þykkt"); one choice reads as its value
+  const vlabel = (p, r, a) => p.va.map(x => (p.va.length > 1 ? x.n + ': ' : '') + (r.a[x.n] || a[x.n])).join(', ');
+  const stockOf = l => { const p = byHandle[l.h], r = variant(p, l.v); return r && p.vr ? { ...r, h: p.h, si: p.si, t: p.t } : r; };
+  const stockKey = l => { const r = stockOf(l); return l.h + (l.v && !(r && r.qp) ? '|' + l.v : ''); };   // qp: sizes share her parent stock
   const clean = l => {
     if (!l || typeof l !== 'object' || typeof l.h !== 'string' || !Number.isInteger(l.q) || l.q < 1) return null;
     const p = byHandle[l.h];
+    const r = variant(p, l.v), a = p && p.vr ? chosen(p, l.v, l.a) : null;
+    // a choice that no longer exists (its size deleted, the piece made variable or simple since) stays as a "sold since"
+    // row the shopper can see and remove, never vanishing without a word (swarm 1 Nov)
+    if (p && (p.vr ? !r || !a : l.v !== undefined)) return { k: str(l.k, 300) || l.h + '|gone|' + str(l.s, 40), h: l.h.slice(0, 160), t: p.t, s: str(l.s, 80), p: +l.p > 0 ? +l.p : 0, img: (p.img && p.img[0]) || '', q: Math.min(l.q, MAX_EACH), x: null, gone: 1 };
+    const size = p && p.vr ? vlabel(p, r, a) : str(l.s, 40);
     const storedPoms = l.x && Array.isArray(l.x.pompoms) ? l.x.pompoms : [];
     const pomLimit = l.x && (l.x.n === 1 || l.x.mode === 'swap') ? 1 : 2;   // a swap replaces the one pompom shown: never two (Codex swarm, 30 Oct)
     const pompoms = storedPoms.filter(pm => pm && typeof pm.h === 'string' && byHandle[pm.h]).slice(0, pomLimit)
@@ -247,11 +262,13 @@
         return { h: pm.h, name: str(pm.name, 60) || pom.t, kind: str(pm.kind, 40) || kind }; });
     const x = l.x && typeof l.x === 'object' ? { k: str(l.x.k, 120), label: str(l.x.label, 160), price: pompoms.reduce((n, pm) => n + byHandle[pm.h].p, 0), n: pompoms.length, mode: l.x.mode === 'swap' ? 'swap' : 'attach', pompoms } : null;
     const h = l.h.slice(0, 160);
-    return { k: str(l.k, 300) || h + '|' + str(l.s, 40) + (x ? '|' + x.k : ''), h, t: p ? p.t : str(l.t, 160), s: str(l.s, 40),
-      p: p ? p.p + (x ? x.price : 0) : +l.p > 0 ? +l.p : 0, img: p ? (p.img && p.img[0]) || '' : str(l.img, 400), q: Math.min(l.q, MAX_EACH), x };
+    return { k: h + '|' + (l.v || '') + '|' + size + (x ? '|' + x.k : ''), h, t: p ? p.t : str(l.t, 160), s: size, ...(p && p.vr ? { v: l.v, a } : {}),
+      p: p ? (Number.isFinite(l.p) ? l.p : r.p + (x ? x.price : 0)) : +l.p > 0 ? +l.p : 0, img: p ? ((p.vr && r.img) || (p.img && p.img[0])) || '' : str(l.img, 400), q: Math.min(l.q, p && p.si ? 1 : MAX_EACH), x };
   };
   const load = () => { try { const saved = JSON.parse(localStorage.getItem('mjuk_bag') || '[]');
-    return Array.isArray(saved) ? saved.map(clean).filter(Boolean).slice(0, MAX_LINES) : []; } catch (e) { return []; } };
+    // one row per piece and choice: a hand-edited or #bag= copy can hold the same line twice
+    const out = []; (Array.isArray(saved) ? saved.map(clean).filter(Boolean) : []).forEach(l => { const hit = out.find(o => o.k === l.k); if (hit) hit.q = Math.min(hit.q + l.q, MAX_EACH); else out.push(l); });
+    return out.slice(0, MAX_LINES); } catch (e) { return []; } };
   let lines = load();
   const save = () => { try { localStorage.setItem('mjuk_bag', JSON.stringify(lines)); } catch (e) {} };
   const keep = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} };
@@ -297,21 +314,21 @@
      bag holds is trimmed to what is left, and the drawer says so. Prices are today's, not the
      day it went in. */
   const poms = l => (l.x && l.x.pompoms) || [];
-  const pieceLive = l => { const p = byHandle[l.h]; return !!p && !p.oos; };
+  const pieceLive = l => { if (l.gone) return false; const p = stockOf(l); return !!p && !p.oos; };
   const pomsLive = l => poms(l).every(pm => byHandle[pm.h] && !byHandle[pm.h].oos);
   const live = l => pieceLive(l) && pomsLive(l);
-  const priceOf = l => byHandle[l.h].p + poms(l).reduce((n, pm) => n + byHandle[pm.h].p, 0);
+  const priceOf = l => stockOf(l).p + poms(l).reduce((n, pm) => n + byHandle[pm.h].p, 0);
   // the pompom line is written in the page's language when drawn, not in whichever it was added on
   const pomLabel = l => { const ps = poms(l); if (!ps.length) return (l.x && l.x.label) || '';
     return ps.map(pm => fmt(l.x.mode === 'swap' ? 'New pompom: {a}, {b} (replaces the one shown)' : '{a}, {b}', { a: pm.name, b: t(pm.kind) })).join('\n'); };
   const itemCount = () => lines.reduce((n, l) => n + 1 + poms(l).length, 0);
   let notices = [];
   { const left = {}, trimmed = [];
-    lines = lines.filter(l => { const p = byHandle[l.h]; if (!p || !(p.q > 0)) return true;
-      if (!(l.h in left)) left[l.h] = p.q;
-      if (left[l.h] < 1) { trimmed.push(p.t); return false; }
-      if (l.q > left[l.h]) { trimmed.push(p.t); l.q = left[l.h]; }
-      left[l.h] -= l.q; return true; });
+    lines = lines.filter(l => { const p = stockOf(l), k = stockKey(l); if (!p || p.oos || !(p.q > 0)) return true;
+      if (!(k in left)) left[k] = p.q;
+      if (left[k] < 1) { trimmed.push(p.t); return false; }
+      if (l.q > left[k]) { trimmed.push(p.t); l.q = left[k]; }
+      left[k] -= l.q; return true; });
     // then the pompoms: a line whose pompoms are no longer on the shelf in that number is trimmed, or dropped
     lines = lines.filter(l => { const ps = poms(l); if (!ps.length || !pomsLive(l)) return true;
       const need = {}; ps.forEach(pm => { need[pm.h] = (need[pm.h] || 0) + 1; });
@@ -356,7 +373,7 @@
           <div class="bag__im"><img src="${esc(px(l.img, 240))}" alt="${esc(l.t)}"/></div>
           <div>
             <div class="bag__n">${html(l.t)}</div>
-            ${l.s ? `<div class="bag__sz">${html(fmt('Size {s}', { s: l.s }))}</div>` : ''}
+            ${l.s ? `<div class="bag__sz">${html(l.v ? l.s : fmt('Size {s}', { s: l.s }))}</div>` : ''}
             ${l.x ? `<div class="bag__x2">${html(pomLabel(l)).replace(/\n/g, '<br>')}</div>` : ''}
             <div class="bag__qty">
               <button data-q="-1" data-i="${i}" aria-label="${t('Decrease quantity')}">−</button>
@@ -373,7 +390,7 @@
           <div>
             <div class="bag__n">${html(l.t)}</div>
             ${l.x ? `<div class="bag__x2">${html(pomLabel(l))}</div>` : ''}
-            <div class="bag__sz">${pieceLive(l) ? t('Its pompom has sold since. Remove it and choose again') : t('Sold since you added it')}</div>
+            ${l.s ? `<div class="bag__sz">${html(l.s)}</div>` : ''}<div class="bag__sz">${pieceLive(l) ? t('Its pompom has sold since. Remove it and choose again') : t('Sold since you added it')}</div>
           </div>
           <div class="bag__right">
             <button class="bag__x" data-rm="${i}">${t('Remove')}</button>
@@ -404,19 +421,25 @@
   };
   /* one of one: never more of a piece in the bag than she has on the shelf (or than a bag can
      carry). Woo's stock is still the final word at checkout, since this is build-time data. */
-  const inBag = h => lines.filter(l => l.h === h).reduce((n, l) => n + l.q, 0);
+  const inBag = (h, v) => lines.filter(l => l.h === h && (!v || l.v === v)).reduce((n, l) => n + l.q, 0);
   // never more than functions/bag.js accepts for one line, even when her stock is larger (Codex 2026-09-26)
-  const shelf = p => (p.oos ? 0 : p.si ? 1 : Math.min(p.q > 0 ? p.q : MAX_EACH, MAX_EACH));   // si: her "Sold individually"
+  const shelf = p => (p.oos ? 0 : p.si ? 1 : Math.min(Number.isInteger(p.q) ? Math.max(0, p.q) : MAX_EACH, MAX_EACH));   // si: her "Sold individually"
   // a pompom is a piece of its own with its own shelf: count every hat it is chosen for (audit 2026-10-07)
   const pomInBag = h => lines.reduce((n, l) => n + poms(l).filter(pm => pm.h === h).length * l.q, 0);
   const pomRoom = h => (byHandle[h] ? shelf(byHandle[h]) - pomInBag(h) : 0);
-  const roomFor = p => shelf(p) - inBag(p.h);
+  // sizes on her parent stock share it; a size with its own stock is counted on its own (swarm 1 Nov)
+  const inPool = h => lines.filter(l => l.h === h && (stockOf(l) || {}).qp).reduce((n, l) => n + l.q, 0);
+  const roomFor = p => shelf(p) - (p.qp ? inPool(p.h) : inBag(p.h, p.si ? null : p.v));
   // what one more of this line needs: the hat and each of its pompoms (a pompom twice on one hat needs two)
-  const lineRoom = l => { const p = byHandle[l.h]; if (!p) return 0;
+  const lineRoom = l => { const p = stockOf(l); if (!p) return 0;
     const need = {}; poms(l).forEach(pm => { need[pm.h] = (need[pm.h] || 0) + 1; });
     return Math.min(roomFor(p), ...Object.keys(need).map(h => Math.floor(pomRoom(h) / need[h]))); };
   function addToBag(handle, size, btn, extra) {
-    const p = byHandle[handle]; if (!p) return;
+    const parent = byHandle[handle]; if (!parent) return;
+    const v = parent.vr ? +(btn && btn.dataset.v) : undefined, a = parent.vr ? chosen(parent, v, btn && (btn._va || (parent.va.length === 1 ? { [parent.va[0].n]: size } : null))) : null, r = variant(parent, v);
+    if (!r || (parent.vr && !a)) return;
+    const p = parent.vr ? { ...parent, ...r, img: r.img ? [r.img] : parent.img } : parent;
+    if (parent.vr) size = vlabel(parent, r, a);
     // the chosen pompoms must be on the shelf too (the same colour twice needs two)
     const need = {}; ((extra && extra.pompoms) || []).forEach(pm => { need[pm.h] = (need[pm.h] || 0) + 1; });
     const short = Object.keys(need).find(h => pomRoom(h) < need[h]);
@@ -430,14 +453,14 @@
       say(fmt('{name} is already in your bag, as many as can be ordered online.', { name: p.t }));
       openBag(true); return;
     }
-    const key = handle + '|' + size + (extra ? '|' + extra.k : '');
+    const key = handle + '|' + (v || '') + '|' + size + (extra ? '|' + extra.k : '');
     const hit = lines.find(l => l.k === key);
     if (!hit && itemCount() + 1 + ((extra && extra.pompoms) || []).length > MAX_LINES) {
       notices = [fmt('A bag carries up to {n} pieces at once. Check out these first, then start a second bag.', { n: MAX_LINES })];
       renderBag(); openBag(true); say(notices[0]); return;
     }
     notices = [];
-    if (hit) hit.q++; else lines.push({ k: key, h: handle, t: p.t, s: size, p: p.p + (extra ? extra.price : 0), img: p.img[0], q: 1, x: extra || null });
+    if (hit) hit.q++; else lines.push({ k: key, h: handle, t: p.t, s: size, ...(v ? { v, a } : {}), p: p.p + (extra ? extra.price : 0), img: p.img[0], q: 1, x: extra || null });
     save(); renderBag(); openBag(true); say(fmt('Added to your bag: {name}.', { name: p.t + (extra ? ', ' + extra.label.toLowerCase() : '') }));
     if (btn) {
       // a card's bar says so in words for a moment; the drawer opening says the rest
@@ -449,7 +472,7 @@
     }
   }
   document.addEventListener('click', e => {
-    const sz = e.target.closest('.sz');
+    const sz = e.target.closest('button.sz');
     if (sz && !sz.disabled && !sz.classList.contains('pom-ask')) { e.preventDefault(); addToBag(sz.dataset.h, sz.dataset.s || '', sz); return; }
     // a plain hat without the chooser (no pompom for sale, or configurators.js did not run): None still adds the hat,
     // 1 or 2 never adds it bare, as the customer asked for pompoms (Codex audit 2, 23 Oct)
@@ -521,7 +544,7 @@
     lines.filter(live).forEach(l => {
       const p = byHandle[l.h];
       // p is the price the drawer showed, so checkout can say so if hers has changed since
-      items.push({ id: p.id, q: l.q, p: p.p });
+      items.push({ id: p.id, q: l.q, p: stockOf(l).p, ...(l.v ? { v: l.v, a: l.a } : {}) });
       // "for" ties the pompom to its hat: if the hat has gone, the pompom is not bought alone
       poms(l).forEach(pm => { items.push({ id: byHandle[pm.h].id, q: l.q, p: byHandle[pm.h].p, note: (l.x && l.x.mode === 'swap' ? 'Replace the pompom on ' : 'Attach to ') + p.t, for: p.id }); });
     });
