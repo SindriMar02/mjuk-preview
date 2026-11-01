@@ -115,9 +115,11 @@
   grid($('#types'), CM.groups, c => 'shop.html?type=' + encodeURIComponent(c.key));
   /* Seven materials and seven piece groups leave a hole in a four-column grid. Rather than
      stretching one tile to hide it, the eighth cell earns its place as the way out: the
-     materials page for the first, a plain "show me everything" for the second. */
+     materials page for the first, a plain "show me everything" for the second. Anna can add
+     groups in WordPress, so the count is not fixed: this tile takes whatever the last row has
+     left (4 columns, 2 on a phone), a full-width band when the row is already full. */
   const allTile = (el, href, name, sub) => el && el.children.length && el.insertAdjacentHTML('beforeend',
-    `<a class="cat cat--all rv" href="${href}">
+    `<a class="cat cat--all rv" href="${href}" style="--s4:${4 - el.children.length % 4};--s2:${2 - el.children.length % 2}">
        <div class="cat__im cat__im--all"><span class="cat__allmark" aria-hidden="true">&rarr;</span></div>
        <div class="cat__meta"><span class="cat__name">${name}</span><span class="cat__n mono">${sub}</span></div>
      </a>`);

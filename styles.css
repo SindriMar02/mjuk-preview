@@ -348,6 +348,9 @@ section{padding:clamp(70px,12vw,180px) 0;position:relative}
 .cats--types{grid-template-columns:repeat(4,minmax(0,1fr))}
 .cats--types .cat__im{aspect-ratio:1/1}
 .cats--types .cat__name{font-size:clamp(17px,1.6vw,25px)}
+/* the Everything tile fills what the last row leaves (app.js sets --s4/--s2), its box as tall as its row */
+.cats .cat--all{display:flex;flex-direction:column;grid-column:span var(--s4,1)}
+.cats .cat--all .cat__im--all{aspect-ratio:auto;flex:1 1 auto;min-height:clamp(96px,10vw,160px)}
 .cat--all .cat__im--all{display:grid;place-items:center;background:var(--panel);
   border:1px solid var(--line);transition:background .5s var(--ease)}
 .cat--all:hover .cat__im--all{background:var(--accent)}
@@ -553,6 +556,7 @@ section{padding:clamp(70px,12vw,180px) 0;position:relative}
   .cats{grid-template-columns:repeat(2,minmax(0,1fr))}
   .stores__grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .cats--types{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cats .cat--all{grid-column:span var(--s2,1)}
   .stock__row{grid-template-columns:1fr;gap:4px}
   .budin__row{grid-template-columns:1fr;gap:6px}
   .foot__grid{grid-template-columns:1fr 1fr}

@@ -38,7 +38,7 @@ const CATALOGUE = opt('--catalogue') || path.join(WS, '04-platform/mjuk-shipping
 const readEnv = file => Object.fromEntries(fs.readFileSync(file, 'utf8').split('\n')
   .map(l => l.match(/^\s*([A-Z_]+)\s*=\s*(.*?)\s*$/)).filter(Boolean).map(m => [m[1], m[2].replace(/^["']|["']$/g, '')]));
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-const FIELDS = 'id,name,slug,type,status,catalog_visibility,description,short_description,price,regular_price,sale_price,manage_stock,stock_quantity,stock_status,categories,images,menu_order,sold_individually,sndr_shop,sndr_locked';
+const FIELDS = 'id,name,slug,type,status,catalog_visibility,description,short_description,price,regular_price,sale_price,manage_stock,stock_quantity,stock_status,categories,images,menu_order,sold_individually,featured,sndr_shop,sndr_locked';
 const LOCAL = opt('--woo') ? opt('--woo').replace(/\/$/, '') : '';
 if (LOCAL && !/^http:\/\/(127\.0\.0\.1|localhost):\d+$/.test(LOCAL)) { console.error('--woo takes a local stack only, e.g. http://127.0.0.1:9420'); process.exit(2); }
 
@@ -205,9 +205,18 @@ function compositionOf(p, cc) {
 /* ── build ──────────────────────────────────────────────────────────────── */
 const { source, products, zones = null, lists = null, listsWhy = '' } = await pull();
 
-/* her designs: the sheet's, plus any she added in WordPress (Products → Shop designs) */
-const GROUP_KEYS = new Set(G.groups.map(g => g.key)), MAT_KEYS = new Set(MATERIALS.map(m => m.key));
 const str = v => typeof v === 'string' ? v : '';
+const prevData = fs.existsSync(path.join(ROOT, 'assets/data.js')) ? new Function('window', fs.readFileSync(path.join(ROOT, 'assets/data.js'), 'utf8') + ';return window.CM;')({}) : null;
+/* her groups: the sheet's, plus any she added in WordPress (Products → Shop designs, "Add a group").
+   The lists show one only once a published product is in it; unreadable lists keep the last good read. */
+const SHEET_GROUPS = new Set(G.groups.map(g => g.key));
+const goodGroup = g => g && typeof g === 'object' && g.added === true && /^[a-z0-9-]{1,40}$/.test(str(g.key)) && !/^other(-|$)|^none$/.test(g.key)
+  && !SHEET_GROUPS.has(g.key) && str(g.name).trim();
+const addedGroups = (lists ? (Array.isArray(lists.groups) ? lists.groups : []).filter(goodGroup).map(g => ({ key: g.key, name: str(g.name).trim(), is: str(g.is).trim() || str(g.name).trim(), added: true }))
+  : ((prevData && prevData.groups) || []).filter(g => g.added && !SHEET_GROUPS.has(g.key)).map(g => ({ key: g.key, name: g.name, is: g.is, added: true })));
+const ALL_GROUPS = [...G.groups, ...addedGroups];
+/* her designs: the sheet's, plus any she added in WordPress (Products → Shop designs) */
+const GROUP_KEYS = new Set(ALL_GROUPS.map(g => g.key)), MAT_KEYS = new Set(MATERIALS.map(m => m.key));
 // a design she added: a real entry, a key that is not one of the sheet's and not a reserved
 // "other-<group>" or "none" choice, a name, and one of her groups
 const goodAdded = d => d && typeof d === 'object' && d.added === true && /^[a-z0-9-]{1,80}$/.test(str(d.key)) && !/^other-|^none$/.test(d.key)
@@ -216,7 +225,6 @@ const toFam = d => ({ key: d.key, name: str(d.name).trim(), is: str(d.is).trim()
 let addedFams = (lists ? lists.designs : []).filter(goodAdded).map(toFam);
 // her lists unreadable this time: the designs she added keep what the last good read gave them,
 // so a passing outage never moves a piece (a design added since then is reported, not guessed)
-const prevData = fs.existsSync(path.join(ROOT, 'assets/data.js')) ? new Function('window', fs.readFileSync(path.join(ROOT, 'assets/data.js'), 'utf8') + ';return window.CM;')({}) : null;
 const prevAdded = ((prevData && prevData.families) || []).filter(f => f.added && GROUP_KEYS.has(f.group))
   .map(f => ({ key: f.key, name: f.name, is: f.is, isMissing: false, group: f.group, material: f.mat || '', goes: [], added: true }));
 const keptFromLast = [];
@@ -372,7 +380,7 @@ function pool(items, n = 24) {
 // her nine materials in her ranking, her groups and families in her sheet's order; the ones with
 // nothing listed yet stay in, with a count of 0, for the pages to leave out
 const materials = MATERIALS.map(({ key, name, is }) => { const items = all.filter(p => p.mat === key || (p.mx || []).includes(key)); return { key, name, is, count: items.length, pool: pool(items) }; });
-const groups = G.groups.map(({ key, name, is }) => { const items = all.filter(p => p.tyk === key); return { key, name, is, count: items.length, pool: pool(items) }; });
+const groups = ALL_GROUPS.map(({ key, name, is, added }) => { const items = all.filter(p => p.tyk === key); return { key, name, is, ...(added ? { added: true } : {}), count: items.length, pool: pool(items) }; });
 const families = [...G.families, ...addedFams].map(f => ({ key: f.key, name: f.name, is: f.is, group: f.group, mat: f.material || '', ...(f.said ? { said: f.said, saidIs: f.saidIs } : {}),
   ...(f.sizes ? { sizes: f.sizes } : {}), goes: f.goes || [], ...(f.added ? { added: true } : {}), count: all.filter(p => p.fam === f.key).length }));
 const { _about, ...bespoke } = G.bespoke;
@@ -380,8 +388,11 @@ const { _about, ...bespoke } = G.bespoke;
 const byId = new Map(all.map(p => [p.id, p]));
 const dropped = [];
 const picks = ids => ids.filter(id => byId.has(id) || (dropped.push(id), false)).map(id => byId.get(id).h);
+/* her "Featured" star in WooCommerce: those pieces lead the featured row and the shop's default order
+   (in her shop order), ahead of our picks; unticking it hands the place back to the picks */
+const starred = listed.filter(p => p.featured === true).map(p => p.id);
 const CM = {
-  all, featuredNew: picks(curation.featuredNew), own: picks(curation.own), materials, groups, families, bespoke,
+  all, featuredNew: [...new Set([...starred.filter(id => byId.has(id)).map(id => byId.get(id).h), ...picks(curation.featuredNew)])], own: picks(curation.own), materials, groups, families, bespoke,
   hero: curation.hero, campaign: curation.campaign, wall: curation.wall,
   totalCount: all.length, saleCount: all.filter(p => p.cp > 0 && !p.oos).length,
   retired: dropped, harvestedAt: new Date().toISOString().slice(0, 10), source, ship,
@@ -394,7 +405,8 @@ L.push(`Source: ${source}`, `Products: ${products.length} in WooCommerce, ${all.
 L.push(`Composition stated: ${all.filter(p => p.comp).length} · type known: ${all.filter(p => p.tyk).length} · origin stated: ${all.filter(p => p.mi).length} · care text: ${Object.keys(care).length} texts`);
 L.push(`Design from: ${Object.entries(why.src).map(([k, v]) => `${k} ${v}`).join(', ')}${lists ? `; her lists ${lists.version || '?'} (${addedFams.length} design(s) she added)` : `; her lists not read (${listsWhy})`}`);
 L.push(`Her material from: ${Object.entries(why.mat).map(([k, v]) => `${k} ${v}`).join(', ')}`);
-L.push(`Her groups: ${groups.map(t => `${t.key} ${t.count}`).join(', ')}; none ${all.filter(p => !p.tyk).length}`);
+L.push(`Her groups: ${groups.map(t => `${t.key}${t.added ? ' (she added)' : ''} ${t.count}`).join(', ')}; none ${all.filter(p => !p.tyk).length}`);
+L.push(`Her Featured star: ${starred.length} piece(s)${starred.length ? ' (' + starred.join(', ') + ')' : ''}, ahead of the ${curation.featuredNew.length} picks`);
 L.push(`Her materials: ${materials.map(m => `${m.key} ${m.count}`).join(', ')}`);
 L.push(`Her families: ${families.filter(f => f.count).length} of ${families.length} have listed pieces; ${all.filter(p => p.fam).length} of ${all.length} pieces joined`);
 L.push(`  nothing listed yet: ${families.filter(f => !f.count).map(f => f.name).join(', ')}`);
