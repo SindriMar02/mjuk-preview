@@ -10,7 +10,7 @@ const p = { id: 1, h: 'knit', t: 'Knit', p: 80, cp: 100, img: [], cats: [], va: 
 const env = { CM: { all: [p] }, COPY: { map: {}, texts: [], care: {} }, px: x => x, usd: n => '$' + n };
 const pdp = make(env), view = pdp.view(p);
 check('static variable choices and disabled sold-out option', /role="radiogroup"/.test(view.info) && /data-option="S"/.test(view.info) && /data-option="M" disabled>M \(sold out\)/.test(view.info));
-check('From price and disabled add until selection', view.info.includes('From <span>') && !/From <s>/.test(view.info) && /data-s="" disabled/.test(view.info));
+check('one buyable price shows without From, add disabled until selection', !/From /.test(view.info) && view.info.includes('<s>$100</s>') && /data-s="" disabled/.test(view.info));
 check('all sold out uses existing block', pdp.view({ ...p, oos: true }).info.includes('Sold out online'));
 check('multiple attributes appear in her order', pdp.view({ ...p, va: [...p.va, { n: 'Colour', o: ['Navy', 'Cream'] }] }).info.indexOf('data-va="0"') < pdp.view({ ...p, va: [...p.va, { n: 'Colour', o: ['Navy', 'Cream'] }] }).info.indexOf('data-va="1"'));
 const cases = [

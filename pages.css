@@ -412,3 +412,21 @@ body[data-page] .bars{opacity:.18}
 /* long or many options: four to a row, a long name breaks inside its box (swarm 1 Nov, 8 options at 375 px) */
 .pdp__var .pseg__o{height:auto;min-height:48px;white-space:normal;overflow-wrap:break-word;hyphens:auto;line-height:1.25;padding:.6em 6px;text-align:center}
 .pdp__var .pseg__ind{display:none}
+/* "Add to bag" waits for a choice: dimmed, not struck through like a sold-out size; long option names keep inside their box */
+.pdp__cta:disabled{text-decoration:none;opacity:.45}
+.pdp__var .pseg__o{letter-spacing:.04em}
+/* her own size charts and numbered lists, as she wrote them (swarm 1 Nov) */
+.pdp__body table,.pdp__short table,.pdp__vdesc table{border-collapse:collapse;margin:.6em 0 1em;font-size:.92em}
+.pdp__body :is(td,th),.pdp__short :is(td,th),.pdp__vdesc :is(td,th){padding:.35em .9em .35em 0;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.pdp__body ol,.pdp__short ol,.pdp__vdesc ol{list-style:decimal;padding-left:1.4em}
+.pdp__body table+p,.pdp__vdesc table+p{margin-top:.8em}
+.pdp__body ol>li::before,.pdp__short ol>li::before,.pdp__vdesc ol>li::before{content:none}
+.pdp__body ol>li,.pdp__short ol>li,.pdp__vdesc ol>li{list-style:decimal}
+.pdp__body table,.pdp__short table,.pdp__vdesc table{display:block;max-width:100%;overflow-x:auto}
+/* a wide size chart scrolls inside its own box at phone width; it never widens the page (swarm 2 Nov) */
+.acc__b,.acc__in,.pdp__body,.pdp__short,.pdp__vdesc{min-width:0;max-width:100%}
+.pdp__body :is(td,th),.pdp__short :is(td,th),.pdp__vdesc :is(td,th){overflow-wrap:anywhere}
+/* the buying column never grows to fit her widest content (a size chart, a 90-letter word): the column stays the column (swarm 2 Nov) */
+.pdp__grid>*,.pdp__info>*{min-width:0}
+.pdp__info{grid-template-columns:minmax(0,1fr)}
+.pdp__short,.pdp__body,.pdp__vdesc,.acc__in{overflow-wrap:anywhere}

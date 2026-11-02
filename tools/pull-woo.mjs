@@ -376,12 +376,13 @@ const all = listed.map(p => {
     o.vr = variants(p).map(v => { const a = Object.fromEntries((v.attributes || []).map(x => { const attr = (p.attributes || []).find(y => x.id ? y.id === x.id : y.name === x.name || y.slug === x.name); return [attr ? attr.name : x.name, x.option]; }));
       const r = { v: v.id, a, p: +v.price, cp: v.sale_price && +v.regular_price > +v.price ? +v.regular_price : 0, oos: v.stock_status === 'outofstock' || v.purchasable === false || (v.manage_stock && v.stock_quantity === 0) };
       if (v.manage_stock === true && Number.isInteger(v.stock_quantity)) r.q = v.stock_quantity;
-      else if (v.manage_stock === 'parent' && p.manage_stock && Number.isInteger(p.stock_quantity)) { r.q = p.stock_quantity; r.qp = 1; }   // shared stock: the bag caps each size at it, Woo caps the sum
+      else if (v.manage_stock === 'parent' && p.manage_stock && Number.isInteger(p.stock_quantity)) { r.q = p.stock_quantity; r.qp = 1; }   // shared stock: sizes on her parent stock share it in the bag, as in Woo
       if (v.description) { const d = lines(v.description); if (d) r.d = d; }   // her variation description shows when it is chosen, as on a Woo page
       if (v.image && v.image.src) { r.img = v.image.src.split('?')[0]; if (!o.img.includes(r.img)) o.img.push(r.img); } return r; });
     // an option no published, priced variation can make is not on offer at all (WooCommerce shows none either), not "sold out" (swarm 1 Nov)
     o.va = o.va.map(a => ({ ...a, o: a.o.filter(x => o.vr.some(r => !r.a[a.n] || r.a[a.n] === x)) }));
-    const low = o.vr.reduce((a, b) => a.p <= b.p ? a : b); o.p = low.p; o.cp = low.cp; o.oos = o.vr.every(v => v.oos);
+    // "From" is what she can sell today (swarm 1 Nov)
+    const buy = o.vr.filter(v => !v.oos), low = (buy.length ? buy : o.vr).reduce((a, b) => a.p <= b.p ? a : b); o.p = low.p; o.cp = low.cp; o.oos = o.vr.every(v => v.oos);
     if (o.va.length === 1) o.sz = o.va[0].o.map(s => { const matches = o.vr.filter(v => !v.a[o.va[0].n] || v.a[o.va[0].n] === s), v = matches.sort((a, b) => Object.keys(b.a).length - Object.keys(a.a).length)[0]; return { s, a: !!v && !v.oos, v: v ? v.v : 0 }; });
   }
   if (p.type !== 'variable' && p.manage_stock && Number.isInteger(p.stock_quantity)) o.q = p.stock_quantity;

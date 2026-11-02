@@ -68,7 +68,7 @@
     // every card opens its piece: the photo and the name are links on every page, the front page's rails too (Sindri,
     // 24 Oct: the front page cards opened nothing, the link was only added by pages.js, which that page does not load)
     const href = 'product/' + encodeURIComponent(p.h) + '/';
-    const from = p.vr && !p.oos && p.vr.some(v => v.p !== p.p) ? t('From') + ' ' : '';
+    const from = p.vr && !p.oos && p.vr.some(v => !v.oos && v.p !== p.p) ? t('From') + ' ' : '';
     const price = p.cp && !from ? `<span class="prod__price">${from}<s>${usd(p.cp)}</s>${usd(p.p)}</span>` : `<span class="prod__price">${from}${usd(p.p)}</span>`;
     // chip shows just the size token ("S / Navy Blue" → "S"); full variant kept for the bag.
     // The Add label earns its place only when it labels a row of choices.
@@ -83,7 +83,7 @@
     return `<article class="prod rv">
       <div class="prod__im">
         <span class="prod__ix">${String(i + 1).padStart(2, '0')}</span>${plain ? `<span class="prod__pom" title="${esc(t('Pompoms can be added to this hat'))}">${POM_ICON}${t('Pompoms')}</span>` : ''}
-        <img class="main" src="${main}"${o.sizes && p.img[0] ? ` srcset="${px(p.img[0], 380)} 380w, ${px(p.img[0], 620)} 620w, ${px(p.img[0], 940)} 940w" sizes="${o.sizes}"` : ''} alt="${esc(p.t)}" loading="${o.eager ? 'eager' : 'lazy'}"${o.eager ? ' fetchpriority="high"' : ''} decoding="async"/>
+        ${p.img[0] ? `<img class="main" src="${main}"${o.sizes && p.img[0] ? ` srcset="${px(p.img[0], 380)} 380w, ${px(p.img[0], 620)} 620w, ${px(p.img[0], 940)} 940w" sizes="${o.sizes}"` : ''} alt="${esc(p.t)}" loading="${o.eager ? 'eager' : 'lazy'}"${o.eager ? ' fetchpriority="high"' : ''} decoding="async"/>` : ''}
         <a class="prod__go" href="${href}" aria-label="${esc(p.t)}"></a>
         <div class="prod__sizes">${sizes}</div>
       </div>
@@ -370,7 +370,7 @@
     bagItems.innerHTML = top + (!lines.length
       ? `<p class="bag__empty">${t('Your bag is empty.')}<br>${t('Add any piece to it.')}</p>`
       : lines.map((l, i) => live(l) ? `<div class="bag__it">
-          <div class="bag__im"><img src="${esc(px(l.img, 240))}" alt="${esc(l.t)}"/></div>
+          <div class="bag__im">${l.img ? `<img src="${esc(px(l.img, 240))}" alt="${esc(l.t)}"/>` : ''}</div>
           <div>
             <div class="bag__n">${html(l.t)}</div>
             ${l.s ? `<div class="bag__sz">${html(l.v ? l.s : fmt('Size {s}', { s: l.s }))}</div>` : ''}
@@ -386,11 +386,11 @@
             <button class="bag__x" data-rm="${i}">${t('Remove')}</button>
           </div>
         </div>` : `<div class="bag__it bag__it--gone">
-          <div class="bag__im"><img src="${esc(px(l.img, 240))}" alt="${esc(l.t)}"/></div>
+          <div class="bag__im">${l.img ? `<img src="${esc(px(l.img, 240))}" alt="${esc(l.t)}"/>` : ''}</div>
           <div>
             <div class="bag__n">${html(l.t)}</div>
             ${l.x ? `<div class="bag__x2">${html(pomLabel(l))}</div>` : ''}
-            ${l.s ? `<div class="bag__sz">${html(l.s)}</div>` : ''}<div class="bag__sz">${pieceLive(l) ? t('Its pompom has sold since. Remove it and choose again') : t('Sold since you added it')}</div>
+            ${l.s ? `<div class="bag__sz">${html(l.s)}</div>` : ''}<div class="bag__sz">${pieceLive(l) ? t('Its pompom has sold since. Remove it and choose again') : l.gone ? t('This choice is no longer offered. Remove it and choose again') : !byHandle[l.h] ? t('No longer in the shop') : t('Sold since you added it')}</div>
           </div>
           <div class="bag__right">
             <button class="bag__x" data-rm="${i}">${t('Remove')}</button>
@@ -429,7 +429,7 @@
   const pomRoom = h => (byHandle[h] ? shelf(byHandle[h]) - pomInBag(h) : 0);
   // sizes on her parent stock share it; a size with its own stock is counted on its own (swarm 1 Nov)
   const inPool = h => lines.filter(l => l.h === h && (stockOf(l) || {}).qp).reduce((n, l) => n + l.q, 0);
-  const roomFor = p => shelf(p) - (p.qp ? inPool(p.h) : inBag(p.h, p.si ? null : p.v));
+  const roomFor = p => shelf(p) - (p.qp && !p.si ? inPool(p.h) : inBag(p.h, p.v));   // Sold individually: one of each size, as WooCommerce counts it
   // what one more of this line needs: the hat and each of its pompoms (a pompom twice on one hat needs two)
   const lineRoom = l => { const p = stockOf(l); if (!p) return 0;
     const need = {}; poms(l).forEach(pm => { need[pm.h] = (need[pm.h] || 0) + 1; });

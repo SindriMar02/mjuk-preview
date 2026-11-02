@@ -22,7 +22,7 @@
      <30°C" stays text; every tag it keeps is closed in order, so an unclosed <b> cannot bold the next paragraph (swarm 1 Nov). */
   const sanitize = (html, prose = s => s) => {
     let out = ''; const open = [];
-    const close = i => { while (open.length > i) { const tg = open.pop(); out += tg === 'h' ? '</strong></p>' : '</' + tg + '>'; } };
+    const close = i => { while (open.length > i) { const tg = open.pop(); out += tg === 'h' ? '</strong></p>' : tg === 'q' ? '</p>' : '</' + tg + '>'; } };
     const at = tag => open.lastIndexOf(tag);
     String(html || '').replace(/<!--[\s\S]*?(?:-->|$)/g, '').replace(/<\s*(script|style|iframe|noscript|template|svg|math)\b[^>]*>[\s\S]*?(?:<\s*\/\s*\1\s*>|$)/gi, '').split(/(<\/?[a-z][^>]*>)/gi).forEach(tok => {
       if (!tok) return;
@@ -31,22 +31,29 @@
       const end = !!m[1], tag = m[2].toLowerCase(), hd = /^h[1-6]$/.test(tag), top = open[open.length - 1];
       if (tag === 'br') { if (top !== 'ul' && top !== 'ol') out += '<br>'; return; }
       // her headings read as a bold line of their own; her other blocks end a line instead of running into the next words
-      const key = hd ? 'h' : tag;
-      if (/^(p|strong|b|em|i|ul|ol|li|a)$/.test(tag) || hd) {
+      const key = hd ? 'h' : tag === 'blockquote' ? 'q' : tag;
+      if (/^(table|thead|tbody|tr|td|th)$/.test(tag)) { if (end) { const i = at(tag); if (i >= 0) close(i); } else { if (/^(td|th)$/.test(tag)) { const i = Math.max(at('td'), at('th')); if (i > at('tr')) close(i); } out += '<' + tag + '>'; open.push(tag); } return; }
+      if (/^(p|strong|b|em|i|ul|ol|li|a|blockquote)$/.test(tag) || hd) {
         if (end) { const i = at(key); if (i >= 0) close(i); return; }
         if (/^(p|li)$/.test(tag) || hd) { const list = Math.max(at('ul'), at('ol')), li = at('li'), i = Math.max(at('p'), at('h'), tag === 'li' && li > list ? li : -1); if (i > list || (tag !== 'li' && i >= 0)) close(i); }
         if (tag === 'a') {
           const h = tok.match(/\s+href\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i), href = h ? decode(h[1] ?? h[2] ?? h[3]).trim() : '';
           if (!(/^(https?:|mailto:)/i.test(href) && !/[\u0000- \u007f]/.test(href)) || at('a') >= 0) return;
           out += '<a href="' + escaped(href) + '" rel="noopener"' + (/^https?:/i.test(href) ? ' target="_blank"' : '') + '>';
-        } else out += hd ? '<p><strong>' : '<' + tag + '>';
+        } else out += hd ? '<p><strong>' : key === 'q' ? '<p>' : '<' + tag + '>';
         open.push(key); return;
       }
-      if (end && /^(div|blockquote|tr|td|th|dt|dd|figcaption|section|article)$/.test(tag) || tag === 'hr') out += '<br>';
+      if (end && /^(div|dt|dd|figcaption|section|article)$/.test(tag) || tag === 'hr') out += '<br>';
     });
     close(0);
     return out;
   };
+  /* the variation a full choice buys is the most specific one (an "Any" one only where she set nothing more exact),
+     and an option is offered only if some full choice through it ends on one she can sell (swarm 2 Nov) */
+  const pick = (p, ch) => p.vr.filter(r => p.va.every(a => !r.a[a.n] || r.a[a.n] === ch[a.n])).sort((x, y) => Object.keys(y.a).length - Object.keys(x.a).length)[0];
+  const canMake = (p, ch) => { const rest = p.va.filter(a => !ch[a.n]);
+    const go = (i, c) => { if (i === rest.length) { const r = pick(p, c); return !!r && !r.oos; } return rest[i].o.some(o => go(i + 1, { ...c, [rest[i].n]: o })); };
+    return go(0, ch); };
   function make(env) {
     const { CM, COPY, isIS, px, usd } = env;
     const t = env.t || (s => s);
@@ -88,8 +95,8 @@
     const acc = (key, icon, title, body, open) => body ? `<details class="acc" data-acc="${key}"${open ? ' open' : ''}><summary>${ic(icon)}<span>${title}</span><i class="acc__pm" aria-hidden="true"></i></summary><div class="acc__b"><div class="acc__in">${body}</div></div></details>` : '';
 
     /* ── her copy: whitelist the tags WordPress wrote, drop everything else ── */
-    const clean = html => listed(sanitize(html).replace(/\s*\n\s*(?=<\/?(?:p|ul|ol|li|br)\b)/g, '').replace(/(<\/?(?:p|ul|ol|li)>|<br>)\s*\n\s*/g, '$1')
-      .replace(/<p>(?:\s|<br>)*<\/p>/g, '').replace(/(?:<br>)+(?=<(?:p|ul|ol)>)/g, '').replace(/(<\/(?:p|ul|ol)>)(?:<br>)+/g, '$1').replace(/<(ul|ol)>(?:\s|<br>)*<\/\1>/g, '')
+    const clean = html => listed(sanitize(html).replace(/\s*\n\s*(?=<\/?(?:p|ul|ol|li|br|table|thead|tbody|tr|td|th)\b)/g, '').replace(/(<\/?(?:p|ul|ol|li|table|thead|tbody|tr|td|th)>|<br>)\s*\n\s*/g, '$1')
+      .replace(/<p>(?:\s|<br>)*<\/p>/g, '').replace(/(?:<br>)+(?=<(?:p|ul|ol|table)>)/g, '').replace(/(<\/(?:p|ul|ol|table)>)(?:<br>)+/g, '$1').replace(/<(ul|ol)>(?:\s|<br>)*<\/\1>/g, '')
       .replace(/(<br\s*\/?>\s*){3,}/gi, '<br><br>')
       .replace(/\r?\n\s*\r?\n/g, '<br><br>').replace(/\r?\n/g, '<br>')   // WordPress keeps her line breaks as raw newlines
       .split(/(<[^>]*>)/g).map(tok => tok[0] === '<' ? tok : tok.replace(/⟦video:([\w-]{6,20})⟧/g, (m, id) => `<a class="pdp__video link" href="https://www.youtube.com/watch?v=${id}" target="_blank" rel="noopener">${t('Watch the video')}</a>`)).join('')
@@ -151,7 +158,7 @@
       const words = x => x.t.split(/\s+/), common = colours.length > 1 ? colours.map(words).reduce((a, w) => { let n = 0; while (n < a.length && n < w.length - 1 && a[n] === w[n]) n++; return a.slice(0, n); }) : [];
       const shade = x => { const s = words(x).slice(common.length).join(' ').replace(/^[.,\s]+|[.\s]+$/g, '').replace(/^[^\s.]+\.\s+(?=\S)/, ''); return s ? s[0].toUpperCase() + s.slice(1) : x.t; };
       const pomHat = !p.vr && p.tyk === 'hats' && /pom ?pom/i.test(p.t);
-      const from = p.vr && !p.oos && p.vr.some(v => v.p !== p.p) ? t('From') + ' ' : '';
+      const from = p.vr && !p.oos && p.vr.some(v => !v.oos && v.p !== p.p) ? t('From') + ' ' : '';
       const price = from ? `${from}<span>${usd(p.p)}</span>` : (p.cp
         ? `<s>${usd(p.cp)}</s><span>${usd(p.p)}</span><span class="pdp__save">${t('Save')} ${Math.round((1 - p.p / p.cp) * 100)}%</span>`
         : `<span>${usd(p.p)}</span>`);
@@ -184,7 +191,7 @@
             `<button type="button" class="pseg__o" role="radio" aria-checked="false" tabindex="${i ? -1 : 0}" data-n="${n}">${dots(+n)}<span>${l}</span></button>`).join('')}</div>
         </div>`;
       const swapChoice = `<div class="pdp__pom pdp__swap" data-h="${esc(p.h)}"><p class="pdp__pomt mono">${t('Pompom')}</p><div class="pseg pdp__swapseg" role="group" aria-label="${esc(t('Pompom'))}"><span class="pseg__ind" aria-hidden="true"></span><button type="button" class="pseg__o is-selected" aria-pressed="true" data-swap="keep">${t('As shown')}</button><button type="button" class="pseg__o" aria-pressed="false" data-swap="change">${t('Change colour')}</button></div></div>`;
-      const choices = (p.va || []).map((a, i) => `<div class="pdp__var"><p class="pdp__pomt mono">${esc(t(a.n))} <span class="pseg__hint">${t('(choose one)')}</span></p><div class="pseg" role="radiogroup" aria-label="${esc(t(a.n))}" data-va="${i}" style="grid-template-columns:repeat(${Math.min(a.o.length, 4)},minmax(0,1fr))">${a.o.map((o, j) => { const ok = p.vr.some(v => !v.oos && (!v.a[a.n] || v.a[a.n] === o)); return `<button type="button" class="pseg__o" role="radio" aria-checked="false" tabindex="${j === a.o.findIndex(o => p.vr.some(v => !v.oos && (!v.a[a.n] || v.a[a.n] === o))) ? 0 : -1}" data-option="${esc(o)}"${ok ? '' : ' disabled'}>${esc(o)}${ok ? '' : ' (' + t('Sold out').toLowerCase() + ')'}</button>`; }).join('')}</div></div>`).join('');
+      const choices = (p.va || []).map((a, i) => `<div class="pdp__var"><p class="pdp__pomt mono">${esc(t(a.n))} <span class="pseg__hint">${t('(choose one)')}</span></p><div class="pseg" role="radiogroup" aria-label="${esc(t(a.n))}" data-va="${i}" style="grid-template-columns:repeat(${Math.min(a.o.length, 4)},minmax(0,1fr))">${a.o.map((o, j) => { const ok = canMake(p, { [a.n]: o }); return `<button type="button" class="pseg__o" role="radio" aria-checked="false" tabindex="${j === a.o.findIndex(o => p.vr.some(v => !v.oos && (!v.a[a.n] || v.a[a.n] === o))) ? 0 : -1}" data-option="${esc(o)}"${ok ? '' : ' disabled'}>${esc(o)}${ok ? '' : ' (' + t('Sold out').toLowerCase() + ')'}</button>`; }).join('')}</div></div>`).join('');
       const info = `
       <div class="pdp__kick mono">${p.mat ? `<span>${esc(matName(p.mat))}</span>` : ''}${FAM[p.fam] ? `<span>${esc(famName(p.fam))}</span>` : GRP[p.tyk] ? `<span>${esc(typeName(p.tyk))}</span>` : ''}${isNew(p) ? `<span class="is-new">${t('New')}</span>` : ''}${p.cp ? `<span class="is-new">${t('Sale')}</span>` : ''}</div>
       <h1 class="pdp__t" id="pdpT">${esc(p.t)}</h1>
@@ -220,17 +227,19 @@
       const byTarget = goes.map(tg => CM.all.filter(x => x !== p && !x.oos && x.fam !== p.fam && hits(tg, x)));
       const paired = []; for (let r = 0; paired.length < 12 && byTarget.some(l => l.length > r); r++) for (const l of byTarget) if (l[r] && paired.length < 12 && !paired.includes(l[r])) paired.push(l[r]);
       const withL = paired.length ? paired : p.mat ? CM.all.filter(x => x !== p && !x.oos && x.mat === p.mat && x.tyk && x.tyk !== p.tyk).sort((a, b) => (isNew(b) - isNew(a))).slice(0, 12) : [];
+      // a rail tile is a photo: a piece without one stays off the rails, as off the shop cards (swarm 1 Nov)
+      const shot = x => x.img && x.img[0];
       return {
         c, imgs, crumb, gal, info, goes,
-        sib: sib.slice(0, 12), famTitle,
-        withL, withTitle: paired.length ? t('Matching pieces') : matName(p.mat),
+        sib: sib.filter(shot).slice(0, 12), famTitle,
+        withL: withL.filter(shot), withTitle: paired.length ? t('Matching pieces') : matName(p.mat),
         withNote: paired.length ? t('Paired by Anna') : t('Another piece, same material'),
       };
     };
 
     return { esc, purl, nm, GRP, FAM, MAT, typeName, famName, matName, matWords, hits, goesFor, tgName, tgHref, isNew, clean, text, copyOf, familyKey, familyName, view };
   }
-  make.sanitize = sanitize;
+  make.sanitize = sanitize; make.pick = pick; make.canMake = canMake;
   if (typeof module === 'object' && module.exports) module.exports = make;
   else root.CMPDP = make;
 })(typeof window !== 'undefined' ? window : globalThis);

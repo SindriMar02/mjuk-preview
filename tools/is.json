@@ -1,5 +1,7 @@
 {
  "js:From": "Frá",
+ "js:No longer in the shop": "Ekki lengur í versluninni",
+ "js:This choice is no longer offered. Remove it and choose again": "Þessi valkostur er ekki lengur í boði. Fjarlægðu hann og veldu aftur",
  "js:Choose": "Veldu",
  "js:Add": "Bæta við",
  "js:Choose every option to add to bag.": "Veldu alla valkosti til að setja í körfu.",
@@ -343,7 +345,7 @@
  "js:Size": "Stærð",
  "js:Sold out": "Uppselt",
  "js:Sold out online": "Uppselt í vefverslun",
- "js:Sold since you added it": "Seldist eftir að þú settir hana í körfuna",
+ "js:Sold since you added it": "Seldist eftir að þú settir þetta í körfuna",
  "js:Sound off": "Hljóð af",
  "js:Sound on": "Hljóð á",
  "js:Standard": "Venjuleg",
