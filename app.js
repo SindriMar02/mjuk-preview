@@ -244,7 +244,7 @@
     return out;
   };
   // the bag line names each choice when there is more than one ("Size: M, Garn: Þykkt"); one choice reads as its value
-  const vlabel = (p, r, a) => p.va.map(x => (p.va.length > 1 ? x.n + ': ' : '') + (r.a[x.n] || a[x.n])).join(', ');
+  const vlabel = (p, r, a) => p.va.map(x => (p.va.length > 1 ? t(x.n) + ': ' : '') + (r.a[x.n] || a[x.n])).join(', ');
   const stockOf = l => { const p = byHandle[l.h], r = variant(p, l.v); return r && p.vr ? { ...r, h: p.h, si: p.si, t: p.t } : r; };
   const stockKey = l => { const r = stockOf(l); return l.h + (l.v && !(r && r.qp) ? '|' + l.v : ''); };   // qp: sizes share her parent stock
   const clean = l => {

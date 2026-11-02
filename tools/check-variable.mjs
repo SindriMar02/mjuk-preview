@@ -43,7 +43,7 @@ check('6000-character signed payload cap remains enforced', largeResponse.status
 // These helpers are exercised with real catalogue-shaped lines, without booting the storefront DOM.
 const source = fs.readFileSync(new URL('../app.js', import.meta.url), 'utf8');
 const helpers = source.slice(source.indexOf('  const variant ='), source.indexOf('  const load ='));
-const ctx = { byHandle: { knit: p }, MAX_EACH: 20, str: (v, n = 200) => typeof v === 'string' ? v.slice(0, n) : '' };
+const ctx = { byHandle: { knit: p }, MAX_EACH: 20, t: s => s, str: (v, n = 200) => typeof v === 'string' ? v.slice(0, n) : '' };
 vm.createContext(ctx); vm.runInContext(helpers + ';globalThis.read = clean;globalThis.stock = stockOf;', ctx);
 check('stored unknown variation kept as a sold-since row', ctx.read({ h: 'knit', q: 1, v: 999 }).gone === 1);
 check('stored variation price and label', ctx.read({ h: 'knit', q: 1, v: 11 }).p === 80 && ctx.read({ h: 'knit', q: 1, v: 11 }).s === 'S');

@@ -24,9 +24,9 @@
     let out = ''; const open = [];
     const close = i => { while (open.length > i) { const tg = open.pop(); out += tg === 'h' ? '</strong></p>' : tg === 'q' ? '</p>' : '</' + tg + '>'; } };
     const at = tag => open.lastIndexOf(tag);
-    String(html || '').replace(/<!--[\s\S]*?(?:-->|$)/g, '').replace(/<\s*(script|style|iframe|noscript|template|svg|math)\b[^>]*>[\s\S]*?(?:<\s*\/\s*\1\s*>|$)/gi, '').split(/(<\/?[a-z][^>]*>)/gi).forEach(tok => {
+    String(html || '').replace(/<!--[\s\S]*?(?:-->|$)/g, '').replace(/<\s*(script|style|iframe|noscript|template|svg|math)\b[^>]*>[\s\S]*?(?:<\s*\/\s*\1\s*>|$)/gi, '').split(/(<\/?[a-z](?:[^>"']|"[^"]*"|'[^']*')*>|<\/?[a-z][^>]*>)/gi).forEach(tok => {   // a ">" inside a quoted attribute does not end the tag; a broken quote ends it at the first ">"
       if (!tok) return;
-      const m = tok.match(/^<(\/?)([a-z][a-z0-9]*)\b[^>]*>$/i);
+      const m = tok.match(/^<(\/?)([a-z][a-z0-9]*)\b(?:(?:[^>"']|"[^"]*"|'[^']*')*|[^>]*)>$/i);   // an unclosed quote (WordPress curls them) falls back to the first ">"
       if (!m) { out += escaped(prose(decode(tok))); return; }
       const end = !!m[1], tag = m[2].toLowerCase(), hd = /^h[1-6]$/.test(tag), top = open[open.length - 1];
       if (tag === 'br') { if (top !== 'ul' && top !== 'ol') out += '<br>'; return; }

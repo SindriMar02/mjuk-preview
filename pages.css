@@ -430,3 +430,6 @@ body[data-page] .bars{opacity:.18}
 .pdp__grid>*,.pdp__info>*{min-width:0}
 .pdp__info{grid-template-columns:minmax(0,1fr)}
 .pdp__short,.pdp__body,.pdp__vdesc,.acc__in{overflow-wrap:anywhere}
+/* a size chart keeps its cells on one line and scrolls sideways inside its own box; letters never stack one per line (swarm 2 Nov) */
+.pdp__body :is(td,th),.pdp__short :is(td,th),.pdp__vdesc :is(td,th){white-space:nowrap;overflow-wrap:normal;word-break:normal}
+.pdp__body table,.pdp__short table,.pdp__vdesc table{-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
