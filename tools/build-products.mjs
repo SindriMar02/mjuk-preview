@@ -67,7 +67,7 @@ function page(p, lang) {
   const canon = url(lang, p);
   // her short text is lines without full stops ("Superfunctional / The softest hat in Iceland"): each line ends as a
   // sentence, so a description reads "Superfunctional. The softest hat in Iceland." (SEO audit 24 Oct)
-  const prose = html => V.clean(html).replace(/<a class="pdp__video[\s\S]*?<\/a>/g, '').replace(/<(?:br|\/p|\/li|\/ul|\/ol|\/h\d)\b[^>]*>/gi, '\n').replace(/<[^>]+>/g, ' ')
+  const prose = html => V.clean(html).replace(/<a class="pdp__video[\s\S]*?<\/a>/g, '').replace(/<(?:br|\/p|\/li|\/ul|\/ol|\/h\d|\/t[dhr])\b[^>]*>/gi, '\n').replace(/<[^>]+>/g, ' ')
     // her text arrives as clean HTML: plain text for the meta tags, so "&" is not escaped twice ("&amp;amp;", swarm 2 Nov)
     .replace(/&(amp|lt|gt|quot);/g, (m, e) => ({ amp: '&', lt: '<', gt: '>', quot: '"' })[e])
     .split('\n').map(x => x.replace(/^\s*•\s*/, '').replace(/\s+/g, ' ').trim()).filter(Boolean).map(x => (/[.!?…:;,)\]"”’]$/.test(x) ? x : x + '.')).join(' ');
