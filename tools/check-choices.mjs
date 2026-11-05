@@ -324,7 +324,8 @@ check('one and two replacement slots, restored bag, EN/IS labels and checkout it
 });
 check('Sailor composition follows family rule; absent source Size/Care/Description stay absent', () => {
   const sailor=CM.all.find(p=>p.fam==='sailor'); assert.equal(sailor.comp,'100% merino wool');
-  assert(groups.families.find(f=>f.key==='sailor').compWhy.includes('Pending Anna'));
+  assert(groups.families.find(f=>f.key==='sailor').compWhy.includes('3542'));   // Anna 5 Nov: same yarn as Ragnar
+  assert(CM.all.filter(p=>p.fam==='tenderness').every(p=>p.comp==='50% angora · 25% nylon · 15% viscose · 10% superfine merino wool'))   // her care label, 3544;
   for(const is of [false,true]) { const v=pdp(is).view(sailor); assert(!v.info.includes('data-acc="care"')); assert(!v.info.includes('data-acc="desc"')); }
 });
 
