@@ -24,7 +24,7 @@ Statuses: OPEN · FIXED LOCALLY (not on her link) · ON HER LINK (scenario passe
 | 16 | 23 Oct 3387, 5 Nov 3543, 3547 | A | All pompoms $29 | DONE in her live WordPress 5 Nov (#11052 $32 -> $29, Quick Edit, read back); her link shows $29 | | C |
 | 17 | 23 Oct 3346, answer 5 Nov 3544 | A | One collection one composition: Tenderness label = 50% angora, 25% PA (nylon), 15% viscose, 10% superfine merino | ON HER LINK (family rule) | check-choices | |
 | 18 | 23 Oct video | A | Ragnar Black night shows the white hat | HERS (her photos) | | |
-| 23 | 5 Nov 3560 | A | Test order offered free shipping under $150 | Iceland zone was $100 (her 25 Sep Q17); her page + 3560 say $150. TEST COPY set to $150. LIVE: needs Sindri's go (blocked by permission check) | | |
+| 23 | 5 Nov 3560 | A | Test order offered free shipping under $150 | Iceland zone was $100 (her 25 Sep Q17); her page + 3560 say $150. TEST COPY set to $150. LIVE: set at the switch to the new shop (Sindri 5 Nov), step in LAUNCH-CHECK-BRIEF | | |
 | 24 | 5 Nov 3570, Sindri | A | Shipping page looks like code, wall of text | ON HER LINK: reading type + price table from her zones (mjuk-woo-sandbox theme, committed) | | |
 | 25 | 5 Nov 3565, 3567 | A | See customer NAMES (they sort parcels by name, not order number) | OPEN: DHL label tool parcel cards say "Order 15898 · Iceland"; needs name first. Separate repo 04-platform/mjuk-shipping, live deploy: Sindri's go | | |
 | 22 | 5 Nov 3548 | A | "Let's launch the website" | ASKED her to test an order first (Test payment on the test link), then a refunded real order after launch; Sindri's full launch check after her test. Brief: _docs/mjuk-2026-11-05/LAUNCH-CHECK-BRIEF.md | | |
