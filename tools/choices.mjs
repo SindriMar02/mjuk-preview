@@ -45,6 +45,7 @@ export function applyChoices(input, groups, copy = {}) {
     const family = (CM.families || []).find(f => f.key === rule.key);
     if (family) family.goes = [...(rule.goes || [])];
     if (rule.comp) CM.all.filter(p => p.fam === rule.key).forEach(p => { p.comp = rule.comp; });
+
     if (rule.hide) CM.all = CM.all.filter(p => {
       if (p.fam !== rule.key || (rule.hide.name && !new RegExp(rule.hide.name, 'i').test(p.t))) return true;
       findings.push(`- Hidden #${p.id}: ${p.t} — off the web shop: ${rule.hide.why}.`); return false;
@@ -87,6 +88,9 @@ export function applyChoices(input, groups, copy = {}) {
       findings.push(`- ${primary.title}: ${options.map(o => `${o.label} #${winners.find(m => m.p.h === o.h).p.id}${o.oos ? ' (sold out)' : ''}`).join('; ')}. Primary #${primary.p.id}.`);
     }
   }
+  // her own words for a fibre, per material (Anna 5 Nov 3546: "25% PA, not nylon in all smooth angora collections")
+  for (const m of groups.materials || []) for (const [find, to] of m.compTerms || [])
+    CM.all.filter(p => p.mat === m.key && p.comp).forEach(p => { p.comp = p.comp.replace(new RegExp(find, 'gi'), to); });
   // These material names are supported by the product's title/family, never inferred percentages.
   for (const p of CM.all) if (/pompoms$/.test(p.fam || '')) {
     const words = p.t + ' ' + p.fam;

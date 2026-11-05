@@ -24,6 +24,7 @@ Statuses: OPEN · FIXED LOCALLY (not on her link) · ON HER LINK (scenario passe
 | 16 | 23 Oct 3387, 5 Nov 3543 | A | All pompoms $29 ("Please put all pompoms at 29$") | ASKED 5 Nov evening: change Cream fox pompom #11052 ($32, in stock, Uncategorised) to $29? (#12532 is $29 but sold out). On her yes: Quick Edit only, never the full editor | | C |
 | 17 | 23 Oct 3346, answer 5 Nov 3544 | A | One collection one composition: Tenderness label = 50% angora, 25% PA (nylon), 15% viscose, 10% superfine merino | ON HER LINK (family rule) | check-choices | |
 | 18 | 23 Oct video | A | Ragnar Black night shows the white hat | HERS (her photos) | | |
+| 21 | 5 Nov 3546 | A | "25% PA, not nylon" in all smooth angora collections | ON HER LINK (material rule) | check-choices | |
 | 20 | 5 Nov 3540, 3541 | A | Never more than 2 pompoms per hat; extra pompoms bought separately | ON HER LINK (already so) | check-choices | F, G |
 | 19 | 23 to 30 Oct | A, V | Earlier notes (basket, bigger photo, Roots 60%, one pompom, rails, search, filters, New, In stock, Show more, alpaca line, map, pompom chooser, swap, Made for you prices + picker, Lookbook) | FIXED earlier, rechecked 5 Nov | e2e + check-choices | B, C, D, E |
 

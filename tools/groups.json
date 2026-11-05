@@ -4,7 +4,7 @@
  "naming": "Her advice in the sheet: \"Hats\" in the menu, \"Beanies\" in product names.",
  "materials": [
   { "key": "alpaca-silk", "name": "Alpaca and silk", "is": "Alpakka og silki", "sheet": "Alpaca and Silk", "prestige": 10, "popularity": 8 },
-  { "key": "smooth-angora-merino", "name": "Smooth angora and merino wool", "is": "Slétt angóruull og merínóull", "sheet": "Smooth Angora and Merino Wool", "prestige": 5, "popularity": 9 },
+  { "key": "smooth-angora-merino", "compTerms": [["\\b(?:nylon|acrylic|polyacrylic|polyamide)\\b", "PA"]], "compTermsWhy": "Anna, Telegram 5 Nov 3546: It's 25% PA, not nylon in all smooth angora collections", "name": "Smooth angora and merino wool", "is": "Slétt angóruull og merínóull", "sheet": "Smooth Angora and Merino Wool", "prestige": 5, "popularity": 9 },
   { "key": "fluffy-angora", "name": "Fluffy angora", "is": "Loðin angóruull", "sheet": "Fluffy Angora", "prestige": 5, "popularity": 10 },
   { "key": "cashmere", "name": "Cashmere", "is": "Kasmír", "sheet": "Cashmere", "prestige": 10, "popularity": 8 },
   { "key": "cashmere-merino", "name": "Cashmere and merino wool", "is": "Kasmír og merínóull", "sheet": "Cashmere and Merino Wool", "prestige": 8, "popularity": 10 },
@@ -46,7 +46,7 @@
   { "key": "fluffy-kitty", "group": "hats", "name": "Fluffy Kitty hats", "is": "Fluffy Kitty-húfur", "sheet": ["Fluffy Kitty hats"], "material": "fluffy-angora", "match": { "name": "^fluffy kitty" } },
   { "key": "smooth-kitty", "group": "hats", "name": "Smooth Kitty beanies", "is": "Smooth Kitty-húfur", "sheet": ["Smooth Kitty beanies"], "material": "smooth-angora-merino",
     "match": { "name": "^(tender|smooth) kitty" }, "note": "On the shop as \"Tender Kitty hat\": these are her Smooth Kitty beanies (Anna, questions file 2026-09-25, Q19: \"Smooth sounds better\")." },
-  { "key": "tenderness", "comp": "50% angora · 25% nylon · 15% viscose · 10% superfine merino wool", "compWhy": "Anna, Telegram 5 Nov 3544: photo of the Tenderness care label (50% Angora, 15% Viscose, 10% Superfine merino wool, 25% PA); PA = polyamide = nylon. Answers the 23 Oct nylon or acrylic question.", "group": "hats", "name": "Tenderness beanies", "is": "Tenderness-húfur", "sheet": ["Tenderness beanies"], "material": "smooth-angora-merino", "match": { "name": "^tenderness angora hat" } },
+  { "key": "tenderness", "comp": "50% angora · 25% PA · 15% viscose · 10% superfine merino wool", "compWhy": "Anna, Telegram 5 Nov 3544: photo of the Tenderness care label (50% Angora, 15% Viscose, 10% Superfine merino wool, 25% PA); PA = polyamide = nylon. Answers the 23 Oct nylon or acrylic question.", "group": "hats", "name": "Tenderness beanies", "is": "Tenderness-húfur", "sheet": ["Tenderness beanies"], "material": "smooth-angora-merino", "match": { "name": "^tenderness angora hat" } },
   { "key": "new-tenderness", "group": "hats", "name": "New Tenderness beanies", "is": "Nýjar Tenderness-húfur", "sheet": ["New Tenderness beanies"], "material": "smooth-angora-merino", "match": { "name": "^new tenderness" } },
   { "key": "reversible", "group": "hats", "name": "Reversible beanies", "is": "Tvíhliða húfur", "sheet": ["Reversible beanies"], "material": "smooth-angora-merino",
     "match": { "name": "^4 in 1\\b|\\breversible\\b.*\\bbeanie" }, "note": "On the shop as \"4 in 1. Reversible soft slouchy beanie\"." },
