@@ -315,7 +315,10 @@ check('one and two replacement slots, restored bag, EN/IS labels and checkout it
     const code=app.slice(app.indexOf('    const items =',app.indexOf('  function checkout()')),app.indexOf('    const bagGo',app.indexOf('  function checkout()')));
     // Checkout's actual item construction is evaluated without its request/navigation phase.
     const itemEnd=code.indexOf('    });');
-    const items=new Function('lines','byHandle','poms','stockOf','live',code.slice(0,itemEnd+7)+';return items;')([line],{...rawByH,[hat.h]:hat},l=>l.x.pompoms,()=>hat,()=>true);
+    // the chooser hands over the colour word in the shopper's language (launch check 5 Nov): the note must still name her product
+    const shown={...line,x:{...line.x,pompoms:line.x.pompoms.map(pm=>({...pm,name:is?'appelsínugulur':'Orange'}))}};
+    const items=new Function('lines','byHandle','poms','stockOf','live',code.slice(0,itemEnd+7)+';return items;')([shown],{...rawByH,[hat.h]:hat},l=>l.x.pompoms,()=>hat,()=>true);
+    assert(!items[0].note.includes('appelsínugulur'));
     // Anna 5 Nov (3538): a colour change is free, so it is ONE hat line with the new colours as its note, no paid pompom lines
     assert.equal(items.length,1); assert.equal(items[0].id,hat.id);
     assert(items[0].note.startsWith('Pompom colour change (free): ')); for(const p of ps.slice(0,count)) assert(items[0].note.includes(p.t));
@@ -361,4 +364,14 @@ console.log(`${checks} choices checks passed (fixture + ${CM.all.length} real re
   const some = w.CM.all.filter(p => p.mat === 'smooth-angora-merino' && /\bPA\b/.test(p.comp || '')).length;
   console.log((bad.length || !some ? 'FAIL' : 'PASS') + ` smooth angora compositions say PA (${some} pieces, ${bad.length} still nylon/acrylic)`);
   if (bad.length || !some) process.exitCode = 1;
+}
+
+// launch check 5 Nov: a tapped filter chip must not be handed focus by script (iOS draws a box around it);
+// the repaint may refocus the chip only after a keyboard press. Browser proof: _docs/mjuk-launch-check-2026-11/tools/ui.mjs
+{
+  const pagesJs = read('pages.js');
+  const m = pagesJs.match(/if \(([^\n]*?)document\.activeElement === document\.body\) \{ const nb = \[\.\.\.rows\[key\]/);
+  const ok = !!m && /e\.detail === 0/.test(m[1]);
+  console.log((ok ? 'PASS' : 'FAIL') + ' filter chips: focus goes back to a repainted chip only after a keyboard press, never after a tap');
+  if (!ok) process.exitCode = 1;
 }

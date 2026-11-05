@@ -158,8 +158,9 @@
       st[key] = st[key] === b.dataset.v ? '' : b.dataset.v;
       if (key === 'type' && st.family && FAM[st.family].group !== st.type) st.family = '';
       apply(true);   // repaints the chips with their new counts
-      // the repaint replaced the button that had focus: hand focus to its replacement
-      if (document.activeElement === document.body) { const nb = [...rows[key].querySelectorAll('.chip')].find(c => c.dataset.v === b.dataset.v); nb && nb.focus({ preventScroll: true }); }
+      // the repaint replaced the button that had focus: hand focus to its replacement, for a keyboard press only
+      // (e.detail 0). A tap on iOS/Safari never focused the chip, and a scripted focus() would box it (launch check 5 Nov)
+      if (e.detail === 0 && document.activeElement === document.body) { const nb = [...rows[key].querySelectorAll('.chip')].find(c => c.dataset.v === b.dataset.v); nb && nb.focus({ preventScroll: true }); }
     }));
     const fSale = $('#fSale'), fNew = $('#fNew'), fStock = $('#fStock'), fSort = $('#fSort'), fQ = $('#fQ');
     fSale.checked = st.sale; fNew.checked = st.nw; fStock.checked = st.stock; fSort.value = st.sort; fQ.value = st.q;

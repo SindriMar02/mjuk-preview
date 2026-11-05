@@ -551,8 +551,10 @@
       // p is the price the drawer showed, so checkout can say so if hers has changed since
       // a colour change on a hat sold with its pompoms is free (Anna, 5 Nov 3538): it rides as a note on the hat line,
       // never as a paid pompom line, so WordPress charges the hat's own price
+      // the note names her product as she lists it ("Polar fox fur pompom. Orange"), never the shopper's language: from the
+      // Icelandic shop it read "appelsínugulur" on her order (launch check 5 Nov)
       const swapped = l.x && l.x.mode === 'swap' ? poms(l) : [];
-      items.push({ id: p.id, q: l.q, p: stockOf(l).p, ...(l.v ? { v: l.v, a: l.a } : {}), ...(swapped.length ? { note: 'Pompom colour change (free): ' + swapped.map(pm => pm.name).join(', ') } : {}) });
+      items.push({ id: p.id, q: l.q, p: stockOf(l).p, ...(l.v ? { v: l.v, a: l.a } : {}), ...(swapped.length ? { note: 'Pompom colour change (free): ' + swapped.map(pm => (byHandle[pm.h] && byHandle[pm.h].t) || pm.name).join(', ') } : {}) });
       // "for" ties the pompom to its hat: if the hat has gone, the pompom is not bought alone
       if (!swapped.length) poms(l).forEach(pm => { items.push({ id: byHandle[pm.h].id, q: l.q, p: byHandle[pm.h].p, note: (l.x && l.x.mode === 'swap' ? (poms(l).length === 2 ? 'Replace the pompoms on ' : 'Replace the pompom on ') : 'Attach to ') + p.t, for: p.id }); });
     });
