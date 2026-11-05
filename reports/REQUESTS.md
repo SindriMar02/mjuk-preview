@@ -21,7 +21,7 @@ Statuses: OPEN · FIXED LOCALLY (not on her link) · ON HER LINK (scenario passe
 | 13 | 25 Sep Q24 | A | Explorer hats + scarves off the web shop | ON HER LINK (came back 2 Nov, fixed 5 Nov) | check-choices | B |
 | 14 | 25 Sep Q26 | A | Delete the 7 private listings | ON HER LINK (2 came back 2 Nov, fixed 5 Nov) | check-choices | B |
 | 15 | 23 Oct 3351 | A | No Akureyri blankets anywhere | ON HER LINK | check-choices | B |
-| 16 | 23 Oct 3387, 5 Nov 3543 | A | All pompoms $29 ("Please put all pompoms at 29$") | ASKED 5 Nov evening: change Cream fox pompom #11052 ($32, in stock, Uncategorised) to $29? (#12532 is $29 but sold out). On her yes: Quick Edit only, never the full editor | | C |
+| 16 | 23 Oct 3387, 5 Nov 3543, 3547 | A | All pompoms $29 | DONE in her live WordPress 5 Nov (#11052 $32 -> $29, Quick Edit, read back); her link shows $29 | | C |
 | 17 | 23 Oct 3346, answer 5 Nov 3544 | A | One collection one composition: Tenderness label = 50% angora, 25% PA (nylon), 15% viscose, 10% superfine merino | ON HER LINK (family rule) | check-choices | |
 | 18 | 23 Oct video | A | Ragnar Black night shows the white hat | HERS (her photos) | | |
 | 21 | 5 Nov 3546 | A | "25% PA, not nylon" in all smooth angora collections | ON HER LINK (material rule) | check-choices | |
