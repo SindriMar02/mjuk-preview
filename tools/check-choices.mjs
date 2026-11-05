@@ -341,3 +341,16 @@ console.log(`${checks} choices checks passed (fixture + ${CM.all.length} real re
   console.log((ok ? 'PASS' : 'FAIL') + ' pompom colour change on a hat sold with pompoms is free (chooser, bag, checkout note)');
   if (!ok) process.exitCode = 1;
 }
+// Scenario H (5 Nov) caught the drawer still adding pompom prices to a swap ($131 hat shown as $189): priceOf drives the
+// drawer line, the total and the "price has changed" check, so it must charge nothing for a swap
+{
+  const a = fs.readFileSync(new URL('../app.js', import.meta.url), 'utf8');
+  const code = a.slice(a.indexOf('  const priceOf ='), a.indexOf('\n', a.indexOf('  const priceOf =')));
+  const byHandle = { hat: { p: 131 }, pom: { p: 29 } };
+  const priceOf = new Function('stockOf', 'poms', 'byHandle', code + ';return priceOf;')(() => ({ p: 131 }), l => l.x.pompoms, byHandle);
+  const swap = priceOf({ x: { mode: 'swap', pompoms: [{ h: 'pom' }, { h: 'pom' }] } });
+  const attach = priceOf({ x: { mode: 'attach', pompoms: [{ h: 'pom' }, { h: 'pom' }] } });
+  const ok = swap === 131 && attach === 189;
+  console.log((ok ? 'PASS' : 'FAIL') + ` bag drawer price: swap ${swap} (want 131), attach ${attach} (want 189)`);
+  if (!ok) process.exitCode = 1;
+}

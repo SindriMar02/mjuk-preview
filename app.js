@@ -319,7 +319,8 @@
   const pieceLive = l => { if (l.gone) return false; const p = stockOf(l); return !!p && !p.oos; };
   const pomsLive = l => poms(l).every(pm => byHandle[pm.h] && !byHandle[pm.h].oos);
   const live = l => pieceLive(l) && pomsLive(l);
-  const priceOf = l => stockOf(l).p + poms(l).reduce((n, pm) => n + byHandle[pm.h].p, 0);
+  // a colour change on a hat sold with its pompoms is free (Anna, 5 Nov 3538): only an added pompom costs its price
+  const priceOf = l => stockOf(l).p + (l.x && l.x.mode === 'swap' ? 0 : poms(l).reduce((n, pm) => n + byHandle[pm.h].p, 0));
   // the pompom line is written in the page's language when drawn, not in whichever it was added on
   const pomLabel = l => { const ps = poms(l); if (!ps.length) return (l.x && l.x.label) || '';
     if (l.x.mode === 'swap' && ps.length === 2) return fmt('New pompoms: {a}, {b} (replace the ones shown)', { a: ps[0].name, b: ps[1].name });
