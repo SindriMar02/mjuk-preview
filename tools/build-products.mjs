@@ -44,6 +44,7 @@ const APP = read('app.js');
 const line = name => { const m = APP.match(new RegExp(`const ${name} = (.+);\\n`)); if (!m) throw new Error(`app.js: const ${name} not found`); return new Function(`return ${m[1]}`)(); };
 const px = line('px'), usd = line('usd');
 const make = require(path.join(ROOT, 'pdp.js'));
+const CAT = require(path.join(ROOT, 'catalogue.js')), LIST = CAT.listed(CM);
 const LANG = {
   en: { V: make({ CM, COPY, t: s => s, isIS: false, px, usd }), tpl: read('product.html'), dir: 'product/', locale: 'en_US' },
   is: { V: make({ CM, COPY, t: s => (s && I18N[s]) || s, isIS: true, px, usd }), tpl: read('is/product.html'), dir: 'is/product/', locale: 'is_IS' },
@@ -60,11 +61,13 @@ const url = (lang, p) => SITE[lang] + 'product/' + p.h + '/';
 for (const p of CM.all) if (!/^[a-z0-9_-]+$/i.test(p.h)) throw new Error('slug is not path-safe: ' + p.h);
 
 /* the rails, as plain cards; pages.js replaces them with the full cards */
-const mini = (lang, list) => list.map(x => `<article class="prod"><div class="prod__im"><a class="prod__go" href="product/${x.h}/" aria-label="${esc(x.t)}"></a>${x.img && x.img[0] ? `<img class="main" src="${px(x.img[0], 620)}" alt="${esc(x.t)}" loading="lazy"/>` : ''}</div><div class="prod__meta"><div><div class="prod__name"><a href="product/${x.h}/">${esc(x.t)}</a></div></div><span class="prod__price">${x.cp ? `<s>${usd(x.cp)}</s>` : ''}${usd(x.p)}</span></div></article>`).join('');
+const mini = (lang, list) => list.map(x => `<article class="prod"><div class="prod__im"><a class="prod__go" href="product/${x.h}/" aria-label="${esc(x.t)}"></a>${x.img && x.img[0] ? `<img class="main" src="${px(x.img[0], 620)}" alt="${esc(x.t)}" loading="lazy"/>` : ''}</div><div class="prod__meta"><div><div class="prod__name"><a href="product/${x.h}/">${esc(x.t)}</a></div></div><span class="prod__price">${x.choiceFrom ? T(lang, 'From') + ' ' : ''}${x.cp ? `<s>${usd(x.cp)}</s>` : ''}${usd(x.p)}</span></div></article>`).join('');
 
 function page(p, lang) {
   const L = LANG[lang], V = L.V, v = V.view(p);
-  const canon = url(lang, p);
+  p = CAT.display(p);
+  const canonicalProduct = CM.all.find(x => x.h === p.choiceOf) || p;
+  const canon = url(lang, canonicalProduct);
   // her short text is lines without full stops ("Superfunctional / The softest hat in Iceland"): each line ends as a
   // sentence, so a description reads "Superfunctional. The softest hat in Iceland." (SEO audit 24 Oct)
   const prose = html => V.clean(html).replace(/<a class="pdp__video[\s\S]*?<\/a>/g, '').replace(/<(?:br|\/p|\/li|\/ul|\/ol|\/h\d|\/t[dhr])\b[^>]*>/gi, '\n').replace(/<[^>]+>/g, ' ')
@@ -90,9 +93,9 @@ function page(p, lang) {
   };
   const bread = { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: crumbs.map((c, i) => ({ '@type': 'ListItem', position: i + 1, name: c[0], item: c[1] })) };
   const head = `<link rel="canonical" href="${canon}" />
-<link rel="alternate" hreflang="en" href="${url('en', p)}" />
-<link rel="alternate" hreflang="is" href="${url('is', p)}" />
-<link rel="alternate" hreflang="x-default" href="${url('en', p)}" />
+<link rel="alternate" hreflang="en" href="${url('en', canonicalProduct)}" />
+<link rel="alternate" hreflang="is" href="${url('is', canonicalProduct)}" />
+<link rel="alternate" hreflang="x-default" href="${url('en', canonicalProduct)}" />
 <meta property="og:type" content="product" />
 <meta property="og:site_name" content="MJÚK Iceland" />
 <meta property="og:locale" content="${L.locale}" />
@@ -143,14 +146,14 @@ for (const lang of ['en', 'is']) {
 /* ── the shop's plain catalogue: every page linked, grouped as she groups them ── */
 function catalogue(lang) {
   const V = LANG[lang].V;
-  const groups = (CM.groups || []).map(g => ({ key: g.key, name: V.nm(g), list: CM.all.filter(p => p.tyk === g.key) }));
-  const rest = CM.all.filter(p => !V.GRP[p.tyk]);
+  const groups = (CM.groups || []).map(g => ({ key: g.key, name: V.nm(g), list: LIST.filter(p => p.tyk === g.key) }));
+  const rest = LIST.filter(p => !V.GRP[p.tyk]);
   if (rest.length) groups.push({ key: 'other', name: T(lang, 'Other pieces'), list: rest });
   const byName = (a, b) => a.t.localeCompare(b.t, lang === 'is' ? 'is' : 'en');
   const soldOut = T(lang, 'sold out');
   return `<!-- CATALOGUE -->
     <details class="idx" id="every">
-      <summary class="idx__s"><span class="mono">${lang === 'is' ? 'Allar flíkurnar, A til Ö' : 'Every piece, A to Z'}</span><span class="mono idx__n">${CM.all.length}</span></summary>
+      <summary class="idx__s"><span class="mono">${lang === 'is' ? 'Allar flíkurnar, A til Ö' : 'Every piece, A to Z'}</span><span class="mono idx__n">${LIST.length}</span></summary>
 ${groups.filter(g => g.list.length).map(g => `      <section class="idx__g"><h3 class="mono">${esc(g.name)} <small>${g.list.length}</small></h3><ul>${g.list.sort(byName).map(p => `<li${p.oos ? ' class="oos"' : ''}><a href="product/${p.h}/">${esc(p.t)}</a>${p.oos ? ` <small>${soldOut}</small>` : ''}</li>`).join('')}</ul></section>`).join('\n')}
     </details>
     <!-- /CATALOGUE -->`;
@@ -163,7 +166,7 @@ ${groups.filter(g => g.list.length).map(g => `      <section class="idx__g"><h3 
    an inline script placed after them waits for them. */
 const firstRow = (() => {
   const rank = {}; (CM.featuredNew || []).concat(CM.own || []).forEach((h, i) => { if (!(h in rank)) rank[h] = i; });
-  return CM.all.filter(p => !p.oos && p.img && p.img[0])
+  return LIST.filter(p => !p.oos && p.img && p.img[0])
     .sort((a, b) => ((a.h in rank ? rank[a.h] : 1e6) - (b.h in rank ? rank[b.h] : 1e6))).slice(0, 4).map(p => p.img[0]);
 })();
 const PRELOAD = `<!-- PRELOAD -->
@@ -179,7 +182,19 @@ const PRELOAD = `<!-- PRELOAD -->
 const GRID_RE = /<div class="pgrid" id="pgrid"[^>]*>(?:<!-- GRID -->[\s\S]*?<!-- \/GRID -->)?<\/div>/;
 const EMPTY_GRID = '<div class="pgrid" id="pgrid" data-wait></div>';
 const rowKey = hrefs => { let h = 0x811c9dc5; for (const c of hrefs.join('|')) h = Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0; return h.toString(16); };   // same as pages.js rowKey
+// Offline builds execute the very same card template, with no browser, server or requests.
+const offlineProd = lang => {
+  const V = LANG[lang].V, t = s => T(lang, s);
+  const catLabel = new Function('nm', 'MATS', 'GRPS', 't', 'return ' + APP.match(/const catLabel = (.+);\n/)[1])(V.nm, V.MAT, V.GRP, t);
+  return new Function('CAT', 'px', 'usd', 't', 'catLabel', APP.slice(APP.indexOf('  const esc ='), APP.indexOf('  const railT =')) + ';return prod;')(CAT, px, usd, t, catLabel);
+};
+const offlinePicks = hs => [...new Set((hs || []).map(h => CM.all.find(p => p.h === h)?.choiceOf || h))].map(h => LIST.find(p => p.h === h)).filter(Boolean);
 async function snapshotGrids(files) {
+  if (process.env.MJUK_OFFLINE === '1') {
+    const rank = {}; (CM.featuredNew || []).concat(CM.own || []).forEach((h, i) => { if (!(h in rank)) rank[h] = i; });
+    const pieces = LIST.filter(p => !p.oos && p.img && p.img[0]).sort((a,b) => (rank[a.h] ?? 1e6) - (rank[b.h] ?? 1e6)).slice(0,24);
+    return Object.fromEntries(files.map(f => { const prod = offlineProd(f.startsWith('is/') ? 'is' : 'en'); return [f, {html: pieces.map((p,i) => prod(p,i,{eager:true,sizes:'(max-width:640px) 46vw, (max-width:1024px) 31vw, 24vw'}).replace('prod rv', 'prod rv in')).join(''), hrefs: pieces.map(p => 'product/' + encodeURIComponent(p.h) + '/')}]; }));
+  }
   const chrome = process.env.CHROME_BIN || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
   let puppeteer; try { puppeteer = (await import('puppeteer-core')).default; } catch { return { why: 'puppeteer-core is not installed' }; }
   if (!fs.existsSync(chrome)) return { why: 'no Chrome at ' + chrome + ' (set CHROME_BIN)' };
@@ -218,6 +233,7 @@ async function snapshotGrids(files) {
    front page reel opens on, its largest image, so it starts before the scripts have run. ── */
 const RAIL_RE = id => new RegExp(`(<div class="rail__t" id="${id}">)(?:<!-- RAIL -->[\\s\\S]*?<!-- \\/RAIL -->)?(<\\/div>)`);
 async function snapshotRails(files) {
+  if (process.env.MJUK_OFFLINE === '1') return Object.fromEntries(files.map(f => { const prod = offlineProd(f.startsWith('is/') ? 'is' : 'en'); return [f, {railT: offlinePicks(CM.featuredNew).map(prod).join(''), railST: offlinePicks(CM.own).map(prod).join('')}]; }));
   const chrome = process.env.CHROME_BIN || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
   let puppeteer; try { puppeteer = (await import('puppeteer-core')).default; } catch { return { why: 'puppeteer-core is not installed' }; }
   if (!fs.existsSync(chrome)) return { why: 'no Chrome at ' + chrome };
@@ -302,7 +318,7 @@ for (const [file, lang] of [['shop.html', 'en'], ['is/shop.html', 'is']]) {
 
 /* ── sitemaps, one per host, each page with its twin ── */
 const PAGES = ['', 'shop.html', 'fibres.html', 'store.html', 'story.html', 'made.html'];
-const pairs = [...PAGES.map(f => [SITE.en + f, SITE.is + f]), ...CM.all.map(p => [url('en', p), url('is', p)])];
+const pairs = [...PAGES.map(f => [SITE.en + f, SITE.is + f]), ...LIST.map(p => [url('en', p), url('is', p)])];
 const sitemap = lang => `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
 ${pairs.map(([en, is]) => `  <url><loc>${lang === 'en' ? en : is}</loc><xhtml:link rel="alternate" hreflang="en" href="${en}"/><xhtml:link rel="alternate" hreflang="is" href="${is}"/><xhtml:link rel="alternate" hreflang="x-default" href="${en}"/></url>`).join('\n')}
@@ -327,7 +343,7 @@ if (fs.existsSync(CATS)) {
   const map = {};
   for (const c of cats) {
     const slugs = new Set([c.slug, ...kids(c.id)]);
-    const list = CM.all.filter(p => (p.cats || []).some(s => slugs.has(s)));
+    const list = LIST.filter(p => (p.cats || []).some(s => slugs.has(s)));
     let to = 'shop.html', why;
     if (c.slug === 'sales') { to = 'shop.html?sale=1'; why = 'her sale category'; }
     else if (c.slug === 'new') { to = 'shop.html?new=1'; why = 'her new-in category'; }
@@ -347,7 +363,7 @@ if (fs.existsSync(CATS)) {
         mat && ['shop.html?material=' + mat, p => p.mat === mat, mat],
         tyk && ['shop.html?type=' + tyk, p => p.tyk === tyk, tyk],
       ].filter(Boolean);
-      const score = keep => { const n = shows(keep), all = CM.all.filter(keep).length, rec = n / list.length, prec = all ? n / all : 0; return rec + prec ? 2 * rec * prec / (rec + prec) : 0; };
+      const score = keep => { const n = shows(keep), all = LIST.filter(keep).length, rec = n / list.length, prec = all ? n / all : 0; return rec + prec ? 2 * rec * prec / (rec + prec) : 0; };
       const best = cands.map((c, i) => ({ c, i, n: shows(c[1]), f: score(c[1]) })).filter(x => enough(x.n)).sort((x, y) => y.f - x.f || x.i - y.i)[0];
       const hit = best && enough(best.n) ? best.c : null;
       if (hit) { to = hit[0]; why = `${shows(hit[1])} of its ${list.length} pieces are ${hit[2]}`; }

@@ -27,6 +27,7 @@ import { createRequire } from 'node:module';
 import os from 'node:os';
 import path from 'node:path';
 import { G, familyOf, materialOf, groupOfType, MATERIALS } from './groups.mjs';
+import { answerProduct, applyChoices, applyFamilyVideos, choicesReport } from './choices.mjs';
 import { version as SHEET_VERSION } from './shop-fields-json.mjs';
 
 const { sanitize } = createRequire(import.meta.url)('../pdp.js');
@@ -317,8 +318,15 @@ const why0 = p => {
   if (!/^[a-z0-9_-]+$/i.test(String(p.slug || ''))) return 'its web address (slug) has characters the shop cannot use: give it a plain one in WordPress';
   return '';
 };
+const answerRemovals = [];
 const listed = products
-  .filter(p => { if (p.status !== 'publish') return false; const w = why0(p); if (w) offShop.push({ id: p.id, name: decode(p.name || '').trim() || '(no name)', why: w }); return !w; })
+  .filter(p => p.status === 'publish')
+  .flatMap(p => {
+    const a = answerProduct({ id: p.id, t: texturize(decode(p.name || '').replace(/\s+/g, ' ').trim()) }, txt(p.short_description) + ' ' + txt(p.description));
+    if (a.removal) { answerRemovals.push(a.removal); offShop.push({ id: p.id, why: a.removal.replace(/^- Hidden #\d+: /, '') }); return []; }
+    return [{ ...p, name: a.product.t, wt: a.product.wt, answerDesign: a.product.fam }];
+  })
+  .filter(p => { const w = why0(p); if (w) offShop.push({ id: p.id, why: w }); return !w; })
   .sort((a, b) => (a.menu_order - b.menu_order) || (a.id - b.id));
 
 const texts = [], textIdx = new Map(), map = {}, care = {};
@@ -345,6 +353,7 @@ const all = listed.map(p => {
     else why.unknownDesign.push(`${p.id} ${name} (a design that does not exist)`);
   }
   if (from === 'name rules') { fam = familyOf(name, shortText + ' ' + longText); if (!sel || !sel.design) why.notChosen.push(`${p.id} ${name}`); }
+  if (p.answerDesign) { fam = FAM.get(p.answerDesign); from = 'Anna 25 Sep'; }
   why.src[from] = (why.src[from] || 0) + 1;
   const chosenMat = sel && sel.material && MAT_KEYS.has(sel.material) ? sel.material : '';
   if (sel && sel.material && !chosenMat) why.unknownDesign.push(`${p.id} ${name} (a material that does not exist)`);
@@ -359,7 +368,7 @@ const all = listed.map(p => {
   map[p.id] = { s, l };
   if (l >= 0 && !(l in care)) { const c = careOf(doc ? txt(doc.long) : longText); if (c) care[l] = c; }
   const o = {
-    h: p.slug, t: name,
+    h: p.slug, t: name, ...(p.wt ? { wt: p.wt } : {}),
     p: price, cp: p.sale_price !== '' && regular > price ? regular : 0,
     img: [...new Set((p.images || []).map(i => String(i.src).split('?')[0]))],   // every photo she gives it (a cap of 4 dropped photos from 107 pieces, swarm 31 Oct)
     sz: [], comp: (fam && fam.comp) || comp, fam: fam ? fam.key : '', mat, tyk, id: p.id, live: true,
@@ -475,6 +484,10 @@ if (H.length === 4) H.push('Nothing needs attention.', '');
 if (flag('--dry')) { console.log('\n' + H.join('\n') + '\n--dry: nothing written'); process.exit(0); }
 fs.mkdirSync(path.join(ROOT, 'reports'), { recursive: true });
 fs.writeFileSync(path.join(ROOT, 'reports/shop-health.md'), H.join('\n'));
-fs.writeFileSync(dataFile, 'window.CM = ' + JSON.stringify(CM) + ';\n');
+CM.choiceRemovals = answerRemovals;
+const choices = applyChoices(CM, G, { texts, map, care });
+applyFamilyVideos(choices.CM, { texts, map, care });
+fs.writeFileSync(path.join(ROOT, 'reports/choices.md'), choicesReport(choices.findings, choices.CM));
+fs.writeFileSync(dataFile, 'window.CM = ' + JSON.stringify(choices.CM) + ';\n');
 fs.writeFileSync(path.join(ROOT, 'assets/copy.js'), 'window.CMCOPY = ' + JSON.stringify({ texts, map, care }) + ';\n');
 console.log(`\nWrote assets/data.js (${(fs.statSync(dataFile).size / 1024).toFixed(0)} KB) and assets/copy.js`);

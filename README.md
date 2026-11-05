@@ -141,3 +141,30 @@ The checkout (one host) is English for now.
   them, and then the page shows no number and "Request this piece" opens an email to customer
   support with every choice written out, her row name first. With a row priced, its total shows.
 
+
+## Offline catalogue checks (run after every catalogue or page change)
+
+`node tools/choices.mjs` re-applies `tools/groups.json` choice/hide/pairing rules to
+the current snapshot without requests. The pull calls the same pure `applyChoices`
+module before writing data. `reports/choices.md` lists removals, duplicate decisions
+and each merged colour for Anna. Raw choice members retain their real Woo records;
+`catalogue.js` supplies the shared visible list and card projection.
+
+Run in order, without a server or network:
+
+```sh
+node tools/choices.mjs
+node tools/build-pages.mjs && node tools/build-is.mjs && MJUK_OFFLINE=1 node tools/build-products.mjs
+node tools/check-choices.mjs
+node tools/check-variable.mjs
+node tools/check-pompom-clean.mjs
+node tools/check-seo.mjs
+```
+
+The lining segments navigate to the real option URL, so changing lining updates the
+whole product view and retains native link/keyboard behavior without JavaScript.
+Option aliases canonicalize to the primary and are excluded from the catalogue and
+sitemaps. Family video consensus is derived separately from the copy snapshot.
+
+`MJUK_OFFLINE=1` embeds the same app.js card template directly and makes no requests;
+it starts no browser or server. Use it for strictly offline builds.

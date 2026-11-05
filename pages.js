@@ -8,6 +8,7 @@
    ══════════════════════════════════════════════════════════════ */
 (() => {
   const CM = window.CM || { all: [] }, U = window.CMUI, COPY = window.CMCOPY || { texts: [], map: {}, care: {} };
+  const LIST = window.CMCatalogue.listed(CM);
   const page = document.body.dataset.page;
   if (!U || !page) return;
   if (window.gsap) gsap.config({ nullTargetWarn: false });   // the shell's hero choreography has no targets here
@@ -101,7 +102,7 @@
        entry (not in the address), so Back rebuilds the same list at the same height and the browser
        can put them back on the exact spot; before, Back rebuilt 24 pieces and the place was lost. */
     const kept = history.state && Number.isInteger(history.state.n) ? history.state.n : 0;
-    if (kept > 24) st.n = Math.min(kept, Math.ceil(CM.all.length / 24) * 24);
+    if (kept > 24) st.n = Math.min(kept, Math.ceil(LIST.length / 24) * 24);
     if (!GRP[st.type]) st.type = '';
     if (!FAM[st.family]) st.family = '';
     if (!MAT[st.material]) st.material = '';
@@ -131,7 +132,7 @@
       const s = { ...st, [key]: v };
       if (key === 'type' && s.family && FAM[s.family].group !== v) s.family = '';
       const toks = st.q.trim() ? SR.toks(st.q.trim()) : [];
-      let n = 0; for (const p of CM.all) if (passes(p, s, toks)) n++;
+      let n = 0; for (const p of LIST) if (passes(p, s, toks)) n++;
       return n;
     };
     const counted = (key, L) => L.map(c => ({ ...c, count: tally(key, c.key) })).filter(c => c.count || st[key] === c.key);
@@ -176,7 +177,7 @@
     const SR = window.CMUI.search;
     const list = () => {
       const q = st.q.trim(), toks = q ? SR.toks(q) : [];
-      let L = CM.all.filter(p => passes(p, st, toks));
+      let L = LIST.filter(p => passes(p, st, toks));
       if (st.sort === 'low') L.sort((a, b) => a.p - b.p);
       else if (st.sort === 'high') L.sort((a, b) => b.p - a.p);
       else if (st.sort === 'new') L.sort((a, b) => (isNew(b) - isNew(a)) || (b.id - a.id));
@@ -206,7 +207,7 @@
         active.innerHTML = activeItems.map(([key, label]) => `<button type="button" class="filt__tag" data-clear="${key}" aria-label="${esc(t('Remove {x}').replace('{x}', label))}"><span aria-hidden="true">×</span> ${esc(label)}</button>`).join('') + `<button type="button" class="filt__clear">${esc(t('Clear all'))}</button>`;
       } else active.replaceChildren();
       if (st.stock) {
-        const allCount = CM.all.filter(p => passes(p, { ...st, stock: false }, st.q.trim() ? SR.toks(st.q.trim()) : [])).length;
+        const allCount = LIST.filter(p => passes(p, { ...st, stock: false }, st.q.trim() ? SR.toks(st.q.trim()) : [])).length;
         const sold = allCount - L.length;
         count.textContent = pieces(L.length) + (sold > 0 ? ` · ${sold} ${t('more sold out')}` : '');
         if (sold > 0) count.insertAdjacentHTML('beforeend', ` <button type="button" class="filt__show-oos">[ ${esc(t('Show them'))} ]</button>`);
@@ -287,7 +288,7 @@
     // address, so old links and bag links keep working and there is one address per piece
     const pre = document.body.dataset.p, h = pre || Q.get('p');
     if (!pre && h && byHandle[h]) { location.replace(purl(byHandle[h]) + location.hash); return; }
-    const p = byHandle[h];
+    const p = window.CMCatalogue.display(byHandle[h]);
     if (!p) { // unpublished since this page was built, or a mistyped address: say so, never show another piece
       document.title = t('This piece is no longer here') + ' — MJÚK Iceland';
       const main = document.querySelector('#pdp') || document.querySelector('main') || document.body, root = document.documentElement.dataset.root || '';
@@ -578,14 +579,14 @@
     host.innerHTML = mats.map((m, i) => {
       const f = FIBRES[m.key];
       const inMat = (p, k) => p.mat === k || (p.mx || []).includes(k);   // a second material (her XL double-faced scarves, Q25)
-      const pool = CM.all.filter(p => inMat(p, m.key) && !p.oos);
+      const pool = LIST.filter(p => inMat(p, m.key) && !p.oos);
       // Lead with a piece named for this material; avoid trims that can obscure the knit.
       const cleanName = p => !/fur|raccoon|fox|pompom/i.test(p.t || '');
       const photoPiece = pool.filter(p => cleanName(p) && p.mat === m.key && p.img && p.img[0])[0]
         || pool.filter(p => cleanName(p) && p.img && p.img[0])[0]
         || pool.find(p => p.img && p.img[0]);
       const im = photoPiece ? px(photoPiece.img[0], 900) : '';
-      const designs = shown(CM.families).filter(x => CM.all.some(p => p.fam === x.key && inMat(p, m.key)));
+      const designs = shown(CM.families).filter(x => LIST.some(p => p.fam === x.key && inMat(p, m.key)));
       return `<article class="fib__ch" id="${esc(m.key)}">
         <div class="fib__im rv"><span class="head__n">0${i + 1}.</span>${im ? `<img src="${im}" alt="${esc(photoPiece.t)}" loading="${i ? 'lazy' : 'eager'}"/>` : ''}</div>
         <div class="fib__body">
@@ -601,7 +602,7 @@
     }).join('');
     host.removeAttribute('data-wait');
     $$('[data-name]', host).forEach(splitWords);
-    $$('.fib__ch', host).forEach(ch => { const key = ch.id; fill($('[data-mini]', ch), CM.all.filter(p => (p.mat === key || (p.mx || []).includes(key)) && !p.oos).slice(0, 3), { index: false }); });
+    $$('.fib__ch', host).forEach(ch => { const key = ch.id; fill($('[data-mini]', ch), LIST.filter(p => (p.mat === key || (p.mx || []).includes(key)) && !p.oos).slice(0, 3), { index: false }); });
     reveal(host);
     if (location.hash && freshVisit()) { const t = $(location.hash); if (t) setTimeout(() => t.scrollIntoView({ block: 'start', behavior: reduced ? 'auto' : 'smooth' }), 250); }
   }
@@ -651,7 +652,7 @@
       clearTimeout(armT); arm = null;                    // tap two: do it
       local[id] = !oos(p); try { localStorage.setItem(KEY, JSON.stringify(local)); } catch (e) {}
       row.classList.toggle('is-oos', local[id]); b.classList.remove('is-arm'); b.textContent = local[id] ? t('Back in stock') : t('Sold out');
-      cnt.textContent = `${CM.all.filter(p => { const s = q.value.trim().toLowerCase(); return !s || p.t.toLowerCase().includes(s) || String(p.id) === s; }).length} ${t('products')} · ${CM.all.filter(oos).length} ${t('sold out')}`;
+      cnt.textContent = `${LIST.filter(p => { const s = q.value.trim().toLowerCase(); return !s || p.t.toLowerCase().includes(s) || String(p.id) === s; }).length} ${t('products')} · ${LIST.filter(oos).length} ${t('sold out')}`;
       say(local[id] ? t('Marked sold out') : t('Back in stock'));
     });
     let qt; q.addEventListener('input', () => { clearTimeout(qt); qt = setTimeout(() => { n = 40; rows(); }, 150); });
@@ -665,7 +666,7 @@
   /* made.html: the capes already made, in the shop now; the made-to-order form is configurators.js */
   const madePage = () => {
     const host = $('#readyT'); if (!host) return;
-    const L = CM.all.filter(p => p.tyk === 'clothing' && !p.oos);
+    const L = LIST.filter(p => p.tyk === 'clothing' && !p.oos);
     if (!L.length) { $('#ready').remove(); return; }
     fill(host, L, { index: false });
     rails();

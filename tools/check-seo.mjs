@@ -11,9 +11,16 @@
    exist, each once. The shop's plain catalogue links every product page. */
 import fs from 'node:fs';
 import path from 'node:path';
+import vm from 'node:vm';
+import { createRequire } from 'node:module';
 
 const DIST = process.argv.includes('dist');
 const ROOT = path.resolve(import.meta.dirname, '..', DIST ? 'dist' : '');
+const data = { window: {} };
+vm.runInNewContext(fs.readFileSync(path.join(ROOT, 'assets/data.js'), 'utf8'), data);
+const catalogue = data.window.CM, CAT = createRequire(import.meta.url)('../catalogue.js');
+const aliases = new Map(catalogue.all.filter(p => p.choiceOf).map(p => [p.h, p.choiceOf]));
+const expectedUrl = rel => { const h = rel.match(/(?:^|\/)product\/([^/]+)\/index.html$/)?.[1]; return h && aliases.has(h) ? prodUrl(rel).replace('/product/' + h + '/', '/product/' + aliases.get(h) + '/') : prodUrl(rel); };
 const SITE = { en: 'https://mjukiceland.com/', is: 'https://mjukiceland.is/' };
 const bad = [], warn = [];
 const fail = (f, m) => bad.push(`${f}: ${m}`);
@@ -57,8 +64,8 @@ for (const rel of pages) {
   const hidden = /name="robots" content="noindex/.test(h) && DIST;
   if (isProduct) {
     products++;
-    if (canon.length !== 1 || canon[0] !== prodUrl(rel)) fail(rel, `canonical ${canon.join(' ') || 'missing'}, expected ${prodUrl(rel)}`);
-  } else if (!/(^|\/)(staff|product)\.html$/.test(rel) && (canon.length !== 1 || canon[0] !== prodUrl(rel))) {
+    if (canon.length !== 1 || canon[0] !== expectedUrl(rel)) fail(rel, `canonical ${canon.join(' ') || 'missing'}, expected ${prodUrl(rel)}`);
+  } else if (!/(^|\/)(staff|product)\.html$/.test(rel) && (canon.length !== 1 || canon[0] !== expectedUrl(rel))) {
     // every indexable page names itself on its production host (the staff tool and the forwarder are noindex)
     fail(rel, `canonical ${canon.join(' ') || 'missing'}, expected ${prodUrl(rel)}`);
   } else if (canon.length > 1) fail(rel, 'more than one canonical');
@@ -72,10 +79,10 @@ for (const rel of pages) {
     if (!alt.en || !alt.is || !alt['x-default']) fail(rel, 'hreflang en/is/x-default incomplete');
     else if (isProduct) {
       const mine = rel.startsWith('is/') ? alt.is : alt.en;
-      if (mine !== prodUrl(rel)) fail(rel, `hreflang for its own language is ${mine}`);
+      if (mine !== expectedUrl(rel)) fail(rel, `hreflang for its own language is ${mine}`);
       const twin = rel.startsWith('is/') ? rel.slice(3) : 'is/' + rel;
       if (!exists.has(twin)) fail(rel, 'no twin page ' + twin);
-      else { const t = fs.readFileSync(path.join(ROOT, twin), 'utf8'); if (!t.includes(`hreflang="${rel.startsWith('is/') ? 'is' : 'en'}" href="${prodUrl(rel)}"`)) fail(rel, 'twin does not point back'); }
+      else { const t = fs.readFileSync(path.join(ROOT, twin), 'utf8'); if (!t.includes(`hreflang="${rel.startsWith('is/') ? 'is' : 'en'}" href="${expectedUrl(rel)}"`)) fail(rel, 'twin does not point back'); }
     }
   }
   // 3. JSON-LD
@@ -84,7 +91,7 @@ for (const rel of pages) {
     const P = blocks.find(b => b['@type'] === 'Product'), B = blocks.find(b => b['@type'] === 'BreadcrumbList');
     if (!P) fail(rel, 'no Product JSON-LD');
     else {
-      if (!P.name || P.url !== prodUrl(rel)) fail(rel, 'Product name/url wrong');
+      if (!P.name || P.url !== expectedUrl(rel)) fail(rel, 'Product name/url wrong');
       if (P.offers) {
         const o = P.offers;
         if (o.priceCurrency !== 'USD' || !/^\d+\.\d{2}$/.test(o.price) || !['https://schema.org/InStock', 'https://schema.org/OutOfStock'].includes(o.availability)) fail(rel, 'Offer incomplete: ' + JSON.stringify(o));
@@ -108,7 +115,7 @@ for (const rel of pages) {
       const ours = unent(h.replace(/<div class="pdp__short">[\s\S]*?<\/div>|<details class="pdp__desc"[\s\S]*?<\/details>|<div class="prod__name">[\s\S]*?<\/div>|<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ')).split(P.name).join(' ');
       if (/\b\d+\s+(?:left|in stock|available)\b/i.test(ours)) fail(rel, 'a stock count is shown');
     }
-    if (!B || !B.itemListElement || B.itemListElement.at(-1).item !== prodUrl(rel) || B.itemListElement.some((x, i) => x.position !== i + 1 || !x.name || !/^https:\/\//.test(x.item))) fail(rel, 'BreadcrumbList incomplete');
+    if (!B || !B.itemListElement || B.itemListElement.at(-1).item !== expectedUrl(rel) || B.itemListElement.some((x, i) => x.position !== i + 1 || !x.name || !/^https:\/\//.test(x.item))) fail(rel, 'BreadcrumbList incomplete');
     const og = (h.match(/<meta property="og:image" content="([^"]+)"/) || [])[1];
     if (og && !/^https:\/\//.test(og)) fail(rel, 'og:image not absolute');
     if (!/<body data-page="product" data-p="[^"]+">/.test(h)) fail(rel, 'body does not name its piece');
@@ -128,14 +135,14 @@ for (const [sm, host] of [['sitemap.xml', SITE.en], ['is/sitemap.xml', SITE.is]]
     if (!onDisk(f.endsWith('/') || f === '' || f === 'is/' ? f + 'index.html' : f)) fail(sm, 'lists a page that does not exist: ' + l);
   }
   const prodCount = locs.filter(l => l.includes('/product/')).length;
-  if (prodCount !== products / 2) fail(sm, `${prodCount} product addresses, ${products / 2} product pages per language`);
+  if (prodCount !== CAT.listed(catalogue).length) fail(sm, `${prodCount} product addresses, ${CAT.listed(catalogue).length} listed products per language`);
 }
 // 5. the shop's catalogue reaches every product page without JavaScript
 for (const [shop, dir] of [['shop.html', 'product/'], ['is/shop.html', 'is/product/']]) {
   const h = fs.readFileSync(path.join(ROOT, shop), 'utf8');
   const linked = new Set([...h.matchAll(/href="product\/([^"/]+)\/"/g)].map(m => m[1]));
   const have = fs.readdirSync(path.join(ROOT, dir));
-  const missing = have.filter(x => !linked.has(x));
+  const missing = have.filter(x => !aliases.has(x) && !linked.has(x));
   if (missing.length) fail(shop, `${missing.length} product pages not linked from the catalogue`);
 }
 

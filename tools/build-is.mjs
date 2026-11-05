@@ -114,7 +114,7 @@ for (const file of PAGES) {
     // the site name (Google's WebSite node) is the Icelandic host's own on the Icelandic homepage
     .replace('"url":"https://mjukiceland.com/","inLanguage":"en"}', '"url":"https://mjukiceland.is/","inLanguage":"is"}')
     // one level down: shared files come from the site root
-    .replace(/(src|href)="(?!https?:|mailto:|tel:|#|\.\.\/|data:|is\/)((?:assets\/|styles\.css|pages\.css|configurators\.css|app\.js|pages\.js|pdp\.js|configurators\.js)[^"]*)"/g, '$1="../$2"')
+    .replace(/(src|href)="(?!https?:|mailto:|tel:|#|\.\.\/|data:|is\/)((?:assets\/|styles\.css|pages\.css|configurators\.css|app\.js|catalogue\.js|pages\.js|pdp\.js|configurators\.js)[^"]*)"/g, '$1="../$2"')
     // the same for every candidate in a srcset and for inline url(), so no asset resolves under is/
     .replace(/srcset="([^"]*)"/g, (m, v) => `srcset="${v.replace(/(^|,\s*)(assets\/)/g, '$1../$2')}"`)
     .replace(/url\((['"]?)(assets\/)/g, 'url($1../$2')

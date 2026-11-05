@@ -651,5 +651,13 @@
  "js:Show": "Sýna",
  "js:Design": "Hönnun",
  "js:On sale": "Á útsölu",
- "js:Remove {x}": "Fjarlægja {x}"
+ "js:Remove {x}": "Fjarlægja {x}",
+ "js:Lining": "Fóður",
+ "js:Lined": "Með fóðri",
+ "js:Not lined": "Án fóðurs",
+ "js:Polar fox fur": "Heimskautarefur",
+ "js:Raccoon fur": "Þvottabjarnarfeldur",
+ "en_US": "is_IS",
+ "summary_large_image": "summary_large_image",
+ "+ salmon leather trim, priced by email": "+ laxaleður í köntum, verð staðfest með tölvupósti"
 }

@@ -1,0 +1,146 @@
+# Catalogue choices — Anna / Veronika, 5 November 2026
+
+- Hidden #11140: Merino Aviator hat. White — Anna 25 Sep Q22: only the lined ones online; sell unlined in the outlet.
+- Hidden #11186: Merino Aviator hat. Turquoise — Anna 25 Sep Q22: only the lined ones online; sell unlined in the outlet.
+- Hidden #11187: Merino Aviator hat. Purple — Anna 25 Sep Q22: only the lined ones online; sell unlined in the outlet.
+- Hidden #11188: Merino Aviator hat. Orchid — Anna 25 Sep Q22: only the lined ones online; sell unlined in the outlet.
+- Hidden #11189: Merino Aviator hat. Oatmeal — Anna 25 Sep Q22: only the lined ones online; sell unlined in the outlet.
+- Hidden #11190: Merino Aviator hat. Green moss — Anna 25 Sep Q22: only the lined ones online; sell unlined in the outlet.
+- Hidden #11191: Merino Aviator hat. Mango — Anna 25 Sep Q22: only the lined ones online; sell unlined in the outlet.
+- Hidden #11192: Merino Aviator hat. Light grey — Anna 25 Sep Q22: only the lined ones online; sell unlined in the outlet.
+- Hidden #11193: Merino Aviator hat. Dark grey — Anna 25 Sep Q22: only the lined ones online; sell unlined in the outlet.
+- Hidden #11194: Merino Aviator hat. Deep blue — Anna 25 Sep Q22: only the lined ones online; sell unlined in the outlet.
+- Hidden #11195: Merino Aviator hat. Burgundy — Anna 25 Sep Q22: only the lined ones online; sell unlined in the outlet.
+- Hidden #11196: Merino Aviator hat. Ice pink — Anna 25 Sep Q22: only the lined ones online; sell unlined in the outlet.
+- Hidden #11197: Merino Aviator hat. Brown — Anna 25 Sep Q22: only the lined ones online; sell unlined in the outlet.
+- Hidden #11198: Merino Aviator hat. Black — Anna 25 Sep Q22: only the lined ones online; sell unlined in the outlet.
+- Hidden #11464: Explorer scarf. Black — off the web shop: Anna Q24 ("we will remove them from the webstore, since they are almost sold out and we won't produce them again").
+- Hidden #11465: Explorer scarf. Cream. — off the web shop: Anna Q24 ("we will remove them from the webstore, since they are almost sold out and we won't produce them again").
+- Hidden #11466: Explorer scarf. Kelly Green. — off the web shop: Anna Q24 ("we will remove them from the webstore, since they are almost sold out and we won't produce them again").
+- Hidden #11468: Explorer scarf. Charcoal — off the web shop: Anna Q24 ("we will remove them from the webstore, since they are almost sold out and we won't produce them again").
+- Hidden #13837: off the web shop: Anna Q26 ("delete them" (moved to WooCommerce's bin, which can be undone; the bin is never emptied by us)).
+- Hidden #13867: Explorer Hat. Kelly green — off the web shop: Anna Q24 ("we will remove them from the webstore, since they are almost sold out and we won't produce them again").
+- Hidden #14273: off the web shop: Anna Q26 ("delete them" (moved to WooCommerce's bin, which can be undone; the bin is never emptied by us)).
+- Hidden #190: Akureyri cashmere blanket. Sky blue — off the web shop: Anna 23 Oct: We won't publish Akureyri blankets or anything made of them ... we discontinue this line.
+- Hidden #191: Akureyri cashmere blanket. Light grey — off the web shop: Anna 23 Oct: We won't publish Akureyri blankets or anything made of them ... we discontinue this line.
+- Hidden #192: Akureyri cashmere blanket. Dark grey — off the web shop: Anna 23 Oct: We won't publish Akureyri blankets or anything made of them ... we discontinue this line.
+- Hidden #2403: Akureyri cashmere blanket. Light grey with white and charcoal grey stripes — off the web shop: Anna 23 Oct: We won't publish Akureyri blankets or anything made of them ... we discontinue this line.
+- Hidden #2406: Akureyri cashmere blanket. Sky blue with white and navy blue stripes — off the web shop: Anna 23 Oct: We won't publish Akureyri blankets or anything made of them ... we discontinue this line.
+- Hidden #2407: Akureyri cashmere blanket. Light Pink with white and light grey stripes — off the web shop: Anna 23 Oct: We won't publish Akureyri blankets or anything made of them ... we discontinue this line.
+- Hidden #6056: Explorer Hat. Cashmere/ merino with arctic fox pompom. Black. — off the web shop: Anna Q24 ("we will remove them from the webstore, since they are almost sold out and we won't produce them again").
+- Hidden #6064: Explorer Hat. Cashmere/ merino with raccoon pompom. Cream — off the web shop: Anna Q24 ("we will remove them from the webstore, since they are almost sold out and we won't produce them again").
+- Hidden #6246: Akureyri cashmere blanket. Cream Oatmeal Chocolate. — off the web shop: Anna 23 Oct: We won't publish Akureyri blankets or anything made of them ... we discontinue this line.
+- Hidden #6255: Akureyri cashmere blanket. Cream/Grey/ Dark grey. — off the web shop: Anna 23 Oct: We won't publish Akureyri blankets or anything made of them ... we discontinue this line.
+- Renamed #7630: Logo scarf. Double-sided.100%Icelandic Wool/Angora+Super fine merino wool. Ocean blue/Marigold → XL double-faced scarf. 100%Icelandic Wool/Angora+Super fine merino wool. Ocean blue/Marigold — Anna 25 Sep.
+- Renamed #7671: Logo scarf. Double-sided.100%Icelandic Wool/Angora+Super fine merino wool. Spring green/ pink tulip → XL double-faced scarf. 100%Icelandic Wool/Angora+Super fine merino wool. Spring green/ pink tulip — Anna 25 Sep.
+- Renamed #3657: Unicorn blanket. Fishbone pattern. Moss green. 100% wool → Icelandic wool blanket. Fishbone pattern. Moss green. 100% wool — Anna 25 Sep.
+- Renamed #3683: Unicorn blanket. Rainbow pattern. Aurora Borealis colors. 100% wool → Icelandic wool blanket. Rainbow pattern. Aurora Borealis colors. 100% wool — Anna 25 Sep.
+- Renamed #6321: Unicorn blanket. 100% wool. Striped. Cream/ Oatmeal/ Beige. → Icelandic wool blanket. 100% wool. Striped. Cream/ Oatmeal/ Beige. — Anna 25 Sep.
+- Renamed #6352: Unicorn blanket. 100% wool. Striped. Light grey/ Grey/ Cream. → Icelandic wool blanket. 100% wool. Striped. Light grey/ Grey/ Cream. — Anna 25 Sep.
+- Renamed #6353: Unicorn blanket. 100% wool. Striped. Mint/ Cream/ Oatmeal. → Icelandic wool blanket. 100% wool. Striped. Mint/ Cream/ Oatmeal. — Anna 25 Sep.
+- Renamed #6308: Unicorn blanket. Fishbone pattern. 100% wool. Mint. → Icelandic wool blanket. Fishbone pattern. 100% wool. Mint. — Anna 25 Sep.
+- Renamed #6292: Unicorn blanket. Fishbone pattern. 100% wool. Sky blue. → Icelandic wool blanket. Fishbone pattern. 100% wool. Sky blue. — Anna 25 Sep.
+- Renamed #3681: Unicorn blanket. Fishbone pattern. Dark grey. 100% wool → Icelandic wool blanket. Fishbone pattern. Dark grey. 100% wool — Anna 25 Sep.
+- Renamed #5488: Unicorn blanket. Aurora Borealis. Shades of grey. → Icelandic wool blanket. Aurora Borealis. Shades of grey. — Anna 25 Sep.
+- Renamed #6243: Unicorn blanket. Aurora. Icy Sunset. → Icelandic wool blanket. Aurora. Icy Sunset. — Anna 25 Sep.
+- Renamed #6241: Unicorn blanket. Aurora. Snowy forest. → Icelandic wool blanket. Aurora. Snowy forest. — Anna 25 Sep.
+- Renamed #5843: Unicorn blanket. Puffin. Dark Grey. → Icelandic wool blanket. Puffin. Dark Grey. — Anna 25 Sep.
+- Renamed #5481: Unicorn blanket. Christmas Aurora Borealis. → Icelandic wool blanket. Christmas Aurora Borealis. — Anna 25 Sep.
+- Renamed #4477: “Sustainable statement/ logomania” scarf. Pure Icelandic wool. Extra large. Kelly green/ black → XL double-faced scarf. Kelly green/ black — Anna 25 Sep.
+- Renamed #6217: Logo scarf. Double-sided.100%Icelandic Wool/Angora+Super fine merino wool. Kelly green/ Fuchsia → XL double-faced scarf. 100%Icelandic Wool/Angora+Super fine merino wool. Kelly green/ Fuchsia — Anna 25 Sep.
+- Renamed #5761: Logo scarf. Double-sided.100%Icelandic Wool/Angora+Super fine merino wool. White/ Sky blue. → XL double-faced scarf. 100%Icelandic Wool/Angora+Super fine merino wool. White/ Sky blue. — Anna 25 Sep.
+- Renamed #4475: “Sustainable statement/ logomania” scarf. Pure Icelandic wool. Extra large. White/Grey → XL double-faced scarf. White/Grey — Anna 25 Sep.
+- Renamed #6306: Unicorn blanket. Fishbone pattern. 100% wool. Chocolate. → Icelandic wool blanket. Fishbone pattern. 100% wool. Chocolate. — Anna 25 Sep.
+- Renamed #12931: Alpaca Hat Boucle. Camel → Lía beanie. Boucle Alpaca. Camel — Anna 25 Sep.
+- Renamed #12929: Alpaca Hat Boucle. Cream → Lía beanie. Boucle Alpaca. Cream — Anna 25 Sep.
+- Renamed #12932: Alpaca Hat Boucle. Light grey → Lía beanie. Boucle Alpaca. Light grey — Anna 25 Sep.
+- Renamed #12930: Alpaca Hat Boucle. Lilac → Lía beanie. Boucle Alpaca. Lilac — Anna 25 Sep.
+- Renamed #12935: Alpaca Hat Boucle. Pine green → Lía beanie. Boucle Alpaca. Pine green — Anna 25 Sep.
+- Renamed #12928: Alpaca Hat Boucle. White → Lía beanie. Boucle Alpaca. White — Anna 25 Sep.
+- Renamed #12933: Alpaca Hat Boucle.Calm Blue → Lía beanie. Boucle Alpaca. Calm Blue — Anna 25 Sep.
+- Renamed #12934: Alpaca Hat Boucle.Jeans → Lía beanie. Boucle Alpaca. Jeans — Anna 25 Sep.
+- Renamed #12925: Alpaca Hat Brushed. Calm Blue → Lía beanie. Brushed Alpaca. Calm Blue — Anna 25 Sep.
+- Renamed #12917: Alpaca Hat Brushed. Cream → Lía beanie. Brushed Alpaca. Cream — Anna 25 Sep.
+- Renamed #12920: Alpaca Hat Brushed. Deep navy → Lía beanie. Brushed Alpaca. Deep navy — Anna 25 Sep.
+- Renamed #12923: Alpaca Hat Brushed. Ice Blue → Lía beanie. Brushed Alpaca. Ice Blue — Anna 25 Sep.
+- Renamed #12926: Alpaca Hat Brushed. Jeans → Lía beanie. Brushed Alpaca. Jeans — Anna 25 Sep.
+- Renamed #12919: Alpaca Hat Brushed. Lilac → Lía beanie. Brushed Alpaca. Lilac — Anna 25 Sep.
+- Renamed #12927: Alpaca Hat Brushed. Mint → Lía beanie. Brushed Alpaca. Mint — Anna 25 Sep.
+- Renamed #12918: Alpaca Hat Brushed. Peach → Lía beanie. Brushed Alpaca. Peach — Anna 25 Sep.
+- Renamed #12921: Alpaca Hat Brushed. Violet → Lía beanie. Brushed Alpaca. Violet — Anna 25 Sep.
+- Renamed #12846: Alpaca Hat Brushed. White. → Lía beanie. Brushed Alpaca. White. — Anna 25 Sep.
+- Renamed #12922: Alpaca Hat Brushed.Orchid → Lía beanie. Brushed Alpaca. Orchid — Anna 25 Sep.
+- Renamed #3889: Angora+merino wool headband. Nude → Tenderness headband. Nude — Anna 25 Sep.
+- Renamed #6274: Gradient Unicorn blanket. 100% wool. Black/ Grey/ Light grey. → Icelandic wool blanket. Gradient. 100% wool. Black/ Grey/ Light grey. — Anna 25 Sep.
+- Renamed #6279: Gradient Unicorn blanket. 100% wool. Cream/ Mint/ Oatmeal. → Icelandic wool blanket. Gradient. 100% wool. Cream/ Mint/ Oatmeal. — Anna 25 Sep.
+- Renamed #6283: Gradient Unicorn blanket. 100% wool. Sky blue/ Sapphire/ Dark grey. → Icelandic wool blanket. Gradient. 100% wool. Sky blue/ Sapphire/ Dark grey. — Anna 25 Sep.
+- Renamed #6269: Leaves blanket. 100% wool. Iced coffee → Icelandic wool blanket. Leaves. 100% wool. Iced coffee — Anna 25 Sep.
+- Renamed #6256: Leaves blanket. 100% wool. Mint. → Icelandic wool blanket. Leaves. 100% wool. Mint. — Anna 25 Sep.
+- Renamed #4504: Leaves blanket. Moss green. 100% wool. → Icelandic wool blanket. Leaves. Moss green. 100% wool. — Anna 25 Sep.
+- Renamed #3690: Unicorn blanket. Fishbone pattern. Light Grey. 100% wool → Icelandic wool blanket. Fishbone pattern. Light Grey. 100% wool — Anna 25 Sep.
+- Renamed #12789: Angora+merino wool headband. Cold beige → Tenderness headband. Cold beige — Anna 25 Sep.
+- Renamed #12786: Angora+merino wool headband. Cold Pink → Tenderness headband. Cold Pink — Anna 25 Sep.
+- Renamed #13073: Angora+merino wool headband. Grey → Tenderness headband. Grey — Anna 25 Sep.
+- Renamed #12788: Angora+merino wool headband. Lilac → Tenderness headband. Lilac — Anna 25 Sep.
+- Renamed #12791: Angora+merino wool headband. Lilac Blush → Tenderness headband. Lilac Blush — Anna 25 Sep.
+- Renamed #14969: Angora+merino wool headband. Niagara → Tenderness headband. Niagara — Anna 25 Sep.
+- Renamed #14970: Angora+merino wool headband. Pine green → Tenderness headband. Pine green — Anna 25 Sep.
+- Renamed #14971: Angora+merino wool headband. Black → Tenderness headband. Black — Anna 25 Sep.
+- Renamed #14972: Angora+merino wool headband. Ocean → Tenderness headband. Ocean — Anna 25 Sep.
+- Renamed #14973: Angora+merino wool headband. Mustard → Tenderness headband. Mustard — Anna 25 Sep.
+- Renamed #14974: Angora+merino wool headband. Deep blue → Tenderness headband. Deep blue — Anna 25 Sep.
+- Renamed #14976: Angora+merino wool headband. Burgundy → Tenderness headband. Burgundy — Anna 25 Sep.
+- Renamed #14977: Angora+merino wool headband. Purple/burgundy → Tenderness headband. Purple/burgundy — Anna 25 Sep.
+- Renamed #14985: Angora+merino wool headband. Sky Blue → Tenderness headband. Sky Blue — Anna 25 Sep.
+- Renamed #12787: Angora+merino wool headband. Nude. → Tenderness headband. Nude. — Anna 25 Sep.
+- Renamed #12790: Angora+merino wool headband. Peach → Tenderness headband. Peach — Anna 25 Sep.
+- Renamed #2661: Angora+merino wool headband. White → Tenderness headband. White — Anna 25 Sep.
+- Renamed #13072: Angora+merino wool headband.Light Grey → Tenderness headband. Light Grey — Anna 25 Sep.
+- Renamed #14729: Tender Kitty hat.Peach → Smooth Kitty beanie. Peach — Anna 25 Sep.
+- Renamed #14730: Tender Kitty hat.Nude → Smooth Kitty beanie. Nude — Anna 25 Sep.
+- Renamed #14732: Tender Kitty hat. White → Smooth Kitty beanie. White — Anna 25 Sep.
+- Renamed #14735: Tender Kitty hat. Lilac → Smooth Kitty beanie. Lilac — Anna 25 Sep.
+- Renamed #14736: Tender Kitty hat. Pine green → Smooth Kitty beanie. Pine green — Anna 25 Sep.
+- Renamed #14737: Tender Kitty hat. Brown/black melange → Smooth Kitty beanie. Brown/black melange — Anna 25 Sep.
+- Renamed #14738: Tender Kitty hat. Salt and pepper → Smooth Kitty beanie. Salt and pepper — Anna 25 Sep.
+- Renamed #14739: Tender Kitty hat. Lilac melange → Smooth Kitty beanie. Lilac melange — Anna 25 Sep.
+- Renamed #14751: Tender Kitty hat. Deep blue → Smooth Kitty beanie. Deep blue — Anna 25 Sep.
+- Renamed #14754: Tender Kitty hat. Cold pink melange → Smooth Kitty beanie. Cold pink melange — Anna 25 Sep.
+- Renamed #14875: Tender Kitty hat. Cold pink → Smooth Kitty beanie. Cold pink — Anna 25 Sep.
+- Category mismatch #11225: Ragnar hat with fleece. Rose — title says Lined, but ragnar-with-fleece is missing; title used.
+- Category mismatch #14556: Ragnar hat with fleece. Dark purple with purple pom pom — title says Lined, but ragnar-with-fleece is missing; title used.
+- Category mismatch #14566: Ragnar hat with fleece. Light grey with matching fur pom pom — title says Lined, but ragnar-with-fleece is missing; title used.
+- Ragnar hat. Dark Grey: Lined #11222; Not lined #1686. Primary #11222.
+- Ragnar hat. Black: Lined #11220 (sold out); Not lined #1684. Primary #1684.
+- Ragnar hat. Burgundy: Lined #11213; Not lined #1677. Primary #11213.
+- Ragnar hat. Mango: Lined #11216; Not lined #1678. Primary #11216.
+- Duplicate hidden #1681: Ragnar hat without fleece. Turquoise — Not lined; kept #7345 (stock, photos, then lowest id).
+- Ragnar hat. Turquoise: Lined #14797; Not lined #7345. Primary #14797.
+- Ragnar hat. Rose: Lined #11225; Not lined #1689. Primary #11225.
+- Duplicate hidden #14808: Ragnar hat with fleece.Deep blue — Lined; kept #11215 (stock, photos, then lowest id).
+- Ragnar hat. Deep blue: Lined #11215; Not lined #7332. Primary #11215.
+- Ragnar hat. Oatmeal: Lined #11211; Not lined #7347. Primary #11211.
+- Ragnar hat. Salt and Pepper: Lined #11221; Not lined #1685. Primary #11221.
+- Ragnar hat. Ice pink: Lined #11224; Not lined #1688. Primary #11224.
+- Ragnar hat. Peach: Lined #14796 (sold out). Primary #14796.
+- Duplicate hidden #14804: Ragnar hat with fleece.Beige melange — Lined; kept #14799 (stock, photos, then lowest id).
+- Ragnar hat. Beige melange: Lined #14799. Primary #14799.
+- Ragnar hat. Lilac: Lined #14801 (sold out). Primary #14801.
+- Duplicate hidden #11223: Ragnar hat with fleece. Light grey — Lined; kept #14802 (stock, photos, then lowest id).
+- Ragnar hat. Light grey: Lined #14802; Not lined #1687. Primary #14802.
+- Ragnar hat. Green moss: Lined #14807. Primary #14807.
+- Ragnar hat. White: Lined #14809. Primary #14809.
+- Ragnar hat. Dark purple: Lined #15446; Not lined #15448. Primary #15446.
+- Ragnar hat. Dark purple with purple pom pom: Lined #14556. Primary #14556.
+- Ragnar hat. Black with black pom pom: Lined #14561. Primary #14561.
+- Ragnar hat. Jeans with navy fur pom pom: Lined #14562. Primary #14562.
+- Ragnar hat. Deep blue with navy pom pom: Lined #14563. Primary #14563.
+- Ragnar hat. Chocolate with chocolate pom pom: Lined #14564. Primary #14564.
+- Ragnar hat. Oatmeal with cream pom pom: Lined #14565. Primary #14565.
+- Ragnar hat. Light grey with matching fur pom pom: Lined #14566. Primary #14566.
+- Ragnar hat. White with matching fur pom pom: Lined #14567. Primary #14567.
+- Ragnar hat. Orchid with blue lilac pom pom: Lined #14568. Primary #14568.
+- Ragnar hat. Rose with pine green pom pom: Lined #14569. Primary #14569.
+- Ragnar hat. Ligh peach with matching pom pom: Lined #14570. Primary #14570.
+- Ragnar hat. Jeans: Lined #11219; Not lined #1682. Primary #11219.
+- Family video: Ragnar beanies — ghDdEDTz2nI; shown when a product has no video of its own.

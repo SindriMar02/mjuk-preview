@@ -83,7 +83,9 @@ function refresh(label) {
   check(build && build.ok, `${label}: product pages build${build && !build.ok ? ' ' + build.out.slice(-300) : ''}`);
   const seo = build && build.ok && run(['tools/check-seo.mjs']);
   check(seo && seo.ok, `${label}: SEO check, 0 problems (${seo ? (seo.out.match(/\d+ problems[^\n]*/) || [seo.out.slice(-300)])[0] : 'not run'})${seo && !seo.ok ? '\n' + seo.out.split('\n').filter(l => /FAIL/.test(l)).slice(0, 8).join('\n') : ''}`);
-  return { CM: readCM(), report: fs.existsSync(path.join(COPY, 'reports/shop-health.md')) ? fs.readFileSync(path.join(COPY, 'reports/shop-health.md'), 'utf8') : '' };
+  const choices = build && build.ok && run(['tools/check-choices.mjs']);
+  check(choices && choices.ok, `${label}: offline choices contracts${choices && !choices.ok ? ' ' + choices.out.slice(-500) : ''}`);
+  return { CM: readCM(), report: fs.existsSync(path.join(COPY, 'reports/shop-health.md')) ? fs.readFileSync(path.join(COPY, 'reports/shop-health.md'), 'utf8') + (fs.existsSync(path.join(COPY, 'reports/choices.md')) ? '\n' + fs.readFileSync(path.join(COPY, 'reports/choices.md'), 'utf8') : '') : '' };
 }
 const pageOf = (h, lang = 'en') => path.join(COPY, lang === 'en' ? 'product' : 'is/product', h, 'index.html');
 
@@ -365,7 +367,7 @@ try {
   check(famIs && famIs.includes(`Dagtreflar ${RUN}`), `and on the Icelandic shop in Icelandic ("${famIs}")`);
   await sp.goto(`${STORE}/shop.html?all=1`, { waitUntil: 'load' }); await sleep(300);
   const everything = await sp.evaluate(() => document.querySelector('#shopCount')?.textContent || '');
-  check(everything.includes(String(CM.all.length)), `Everything counts every listed piece (${everything.trim()})`);
+  check(everything.includes(String(CM.totalCount)), `Everything counts every listed piece (${everything.trim()})`);
   // the new piece goes in the bag and reaches her checkout
   await sp.goto(`${STORE}/product/${n1.h}/`, { waitUntil: 'load' });
   await sp.evaluate(h => window.CMBag.add(h, ''), n1.h); await sleep(300);
@@ -389,7 +391,7 @@ try {
   for (const p of all) if (p.id in junk) p.sndr_shop = junk[p.id];
   fs.writeFileSync(path.join(TMP, 'junk.json'), JSON.stringify(all));
   let off; try { off = { ok: true, out: execFileSync('node', ['--no-warnings', 'tools/pull-woo.mjs', '--file', path.join(TMP, 'junk.json'), '--catalogue', path.join(TMP, 'none.json')], { cwd: COPY, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }) }; } catch (e) { off = { ok: false, out: String(e.stdout || '') + String(e.stderr || '') }; }
-  const offCM = off.ok ? readCM() : null, offRep = off.ok ? fs.readFileSync(path.join(COPY, 'reports/shop-health.md'), 'utf8') : '';
+  const offCM = off.ok ? readCM() : null, offRep = off.ok ? fs.readFileSync(path.join(COPY, 'reports/shop-health.md'), 'utf8') + (fs.existsSync(path.join(COPY, 'reports/choices.md')) ? '\n' + fs.readFileSync(path.join(COPY, 'reports/choices.md'), 'utf8') : '') : '';
   check(off.ok, `junk values and no lists: the pull still runs${off.ok ? '' : ' ' + off.out.slice(-300)}`);
   check(off.ok && offCM.all.find(p => p.id === NEW2)?.fam === D1.key && offCM.families.some(f => f.key === D1.key), 'lists out of reach: her added design is kept from the last good read, its piece does not move');
   check(off.ok && [A, C, E, G, M].every(p => offCM.all.some(x => x.id === p.id)) && /not text/.test(offRep) && offRep.includes(`${G.id} `) && /a design that does not exist/.test(offRep)

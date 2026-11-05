@@ -13,6 +13,7 @@
    ══════════════════════════════════════════════════════════════ */
 (() => {
   const CM = window.CM || { all: [] };
+  const LIST = window.CMCatalogue.listed(CM);
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const px = (u, w) => (u ? u + '?w=' + w + '&ssl=1' : '');
@@ -34,13 +35,13 @@
   // a pompom with no price in her shop is not offered: the chooser shows her price, never a stand-in (Codex 2026-09-26)
   // merino pompoms are heavier and go on merino beanies only; every other pompom suits every hat
   // (Anna, questions file 2026-09-25, Q7)
-  const POMS = CM.all
+  const POMS = LIST
     .filter(p => (p.tyk === 'pompoms' || /pompoms$/.test(p.fam || '') || /\bpom ?pom\b/i.test(p.t)) && !/beanie|hat|aviator|cap\b/i.test(p.t) && p.img && p.img[0] && p.p > 0 && !p.oos)
     .map(p => { const raw = p.t.replace(/^.*?pom ?pom\.?\s*/i, '').replace(/\.$/, '').trim() || 'Raccoon';
       const merino = p.fam === 'merino-pompoms' || /\bmerino\b/i.test(p.t);
       // the colour in the page's language (tools/is.json "colour:…"); her English where there is none
       const name = t(COLOUR + (FIX[raw] || raw)).replace(COLOUR, '');
-      return { h: p.h, name, kind: merino ? 'Merino wool' : /raccoon/i.test(p.t) ? 'Raccoon' : /polar fox|fox/i.test(p.t + ' ' + (p.fam || '')) ? 'Polar fox' : 'Fur', merino, price: p.p, img: p.img[0] }; })
+      return { h: p.h, name, material: p.pomMaterial || '', kind: merino ? 'Merino wool' : /raccoon/i.test(p.t) ? 'Raccoon' : /polar fox|fox/i.test(p.t + ' ' + (p.fam || '')) ? 'Polar fox' : 'Fur', merino, price: p.p, img: p.img[0] }; })
     .sort((a, b) => a.merino - b.merino || a.name.localeCompare(b.name));
   const BEANIE = new Set((CM.families || []).filter(f => /beanies?\b/i.test(f.name)).map(f => f.key));
   const fits = (s, hat) => !s.merino || (!!hat && hat.mat === 'merino' && BEANIE.has(hat.fam));   // beanies, never the aviators (Codex 2026-10-03)
@@ -59,7 +60,7 @@
 
     grid.innerHTML = POMS.map((s, i) =>
       `<button type="button" class="sw" data-i="${i}" style="--i:${i}" aria-pressed="false" title="${t(s.kind)}, ${escA(s.name)}, ${usd(s.price)}">
-         <img src="${px(s.img, 160)}" alt="" loading="lazy"/><span>${escA(s.name)}</span></button>`).join('');
+         <img src="${px(s.img, 160)}" alt="" loading="lazy"/><span>${escA(s.name)}<small class="pom__material">${escA(t(s.material))}</small></span></button>`).join('');
 
     const price = () => (hat ? hat.p : 0) + chosen.slice(0, count).reduce((n, s) => n + (s ? s.price : pMin), 0);
     const guess = () => !pSame && chosen.slice(0, count).some(s => !s);   // a price still depends on the colour
@@ -70,7 +71,7 @@
         el.classList.toggle('is-active', i === active && count > 0);
         el.classList.toggle('is-set', !!chosen[i]);
         const dot = $('.dot', el), lab = $('.pom__slotname', el);
-        if (chosen[i]) { dot.style.backgroundImage = `url("${px(chosen[i].img, 80)}")`; lab.textContent = chosen[i].name; }
+        if (chosen[i]) { dot.style.backgroundImage = `url("${px(chosen[i].img, 80)}")`; lab.innerHTML = escA(chosen[i].name) + '<small class="pom__material">' + escA(t(chosen[i].material)) + '</small>'; }
         else { dot.style.backgroundImage = ''; lab.textContent = count === 2 ? fmt('Pompom {n}', { n: i + 1 }) : t('Pick a colour'); }
       });
       $('#pomPick').hidden = count === 0;
@@ -109,7 +110,7 @@
       $$('input[name="n"]', dlg).forEach(r => { r.disabled = none && r.value !== '0'; const l = r.closest('label'); if (l) l.classList.toggle('is-off', r.disabled); });
       const pomPrice = ps.length === 0 ? '' : ps.length === 1 ? usd(ps[0]) : fmt('{a} to {b}', { a: usd(ps[0]), b: usd(ps[ps.length - 1]) });
       $$('input[name="n"]', dlg).forEach(r => (r.checked = r.value === String(count)));
-      img.src = px(h.img[0], 300); img.alt = h.t; name.textContent = h.t;
+      img.src = px(h.img[0], 300); img.alt = h.choiceTitle || h.t; name.textContent = h.choiceTitle || h.t;
       if (why) why.innerHTML = swap ? `<strong>${escA(t('Replace the pompom shown'))}</strong><br>${escA(t('Choose a new pompom to replace the one shown on this hat.'))}` : none ? escA(t('No pompom colours fit this hat right now.')) : fmt(POMS.some(s => s.merino) && !POMS.every(s => fits(s, h))
         ? 'Any of these goes on this hat; the heavier merino pompoms go on merino beanies only. Here are the ones we have photographed, {price} each, attached before it ships.'
         : 'Any pompom goes on any hat. In the shop you pick from the cabinet of eighty. Here are the ones we have photographed, {price} each, attached before it ships.', { price: `<b>${pomPrice}</b>` });
@@ -181,7 +182,7 @@
     const row = () => ROWS.find(r => r.model === mdl() && r.fabric === v('fabric') && r.fur === (v('fur') === 'yes')) || null;
 
     /* the fabric's colours are her blankets in it, in stock and photographed: the one it is cut from */
-    const blankets = key => CM.all.filter(p => FABRIC[key] && FABRIC[key].blankets.includes(p.fam) && !p.oos && p.img && p.img[0]);
+    const blankets = key => LIST.filter(p => FABRIC[key] && FABRIC[key].blankets.includes(p.fam) && !p.oos && p.img && p.img[0]);
     const famShort = { konungur: 'Konungur', unicorn: 'Icelandic wool' };
     /* the colour from her product name, colour first and pattern after ("Camel, Fishbone"), so
        a short label still says the colour; a design inside the family ("Leaves") comes last */
@@ -195,14 +196,14 @@
     };
     // fabric tiles: one of her blankets in that fabric, cropped close so the texture reads
     $$('.tile[data-fabric]', cfg).forEach(tile => {
-      const p = blankets(tile.dataset.fabric)[0] || CM.all.find(x => x.mat === tile.dataset.fabric && x.img && x.img[0]), im = $('img', tile);
+      const p = blankets(tile.dataset.fabric)[0] || LIST.find(x => x.mat === tile.dataset.fabric && x.img && x.img[0]), im = $('img', tile);
       if (p && im) { im.src = px(p.img[0], 480); im.alt = p.t; }
     });
     /* The model cards (made.html): her finished pieces of that model, from the shop, give the photo and
        the "in the shop now" link; a model with none shows its name only, never a stand-in photo. Under each
        name, what her rows allow: the fabrics, and fur. */
     // in-stock pieces first, so a photo never sits beside "in the shop now" while showing a sold-out one (Codex 2026-10-17)
-    const madeOf = key => CM.all.filter(p => p.tyk === 'clothing' && p.fam === key && p.img && p.img[0]).sort((a, b) => a.oos - b.oos);
+    const madeOf = key => LIST.filter(p => p.tyk === 'clothing' && p.fam === key && p.img && p.img[0]).sort((a, b) => a.oos - b.oos);
     $$('.mfy__m[data-model]', cfg).forEach(card => {
       const key = card.dataset.model, L = madeOf(key), live = L.filter(p => !p.oos);
       if (L[0]) {
@@ -223,8 +224,8 @@
       if (!heroIm) return;
       // with fur chosen, a piece with fur in her name first (and without, one without): the closest example she has
       const fur = v('fur') === 'yes', L = madeOf(mdl());
-      const piece = L.find(p => /\bfur\b/i.test(p.t) === fur) || L[0], blanket = CM.all.find(p => String(p.id) === v('colour'));
-      const src = piece || blanket || CM.all.find(p => p.tyk === 'clothing' && p.img && p.img[0]);
+      const piece = L.find(p => /\bfur\b/i.test(p.t) === fur) || L[0], blanket = LIST.find(p => String(p.id) === v('colour'));
+      const src = piece || blanket || LIST.find(p => p.tyk === 'clothing' && p.img && p.img[0]);
       if (!src) return;
       const next = px(src.img[0], 1100);
       if (heroIm.getAttribute('src') !== next) { heroIm.src = next; heroIm.alt = src.t; pulse(heroIm); }
@@ -244,7 +245,7 @@
       zoom.innerHTML = `<div class="zoom__in" id="cfgZoomIn" data-lenis-prevent></div><button type="button" class="zoom__x" id="cfgZoomX">${escA(t('Close'))}</button>`;
       document.body.appendChild(zoom); zoomIn = zoom.querySelector('#cfgZoomIn');
     }
-    const chosenBlanket = () => CM.all.find(p => String(p.id) === v('colour'));
+    const chosenBlanket = () => LIST.find(p => String(p.id) === v('colour'));
     const paintBig = () => {
       if (!big) return;
       const b = chosenBlanket();
@@ -335,7 +336,7 @@
       e.preventDefault();
       const r = row(); if (!r) return;
       const adj = v('len') !== 'standard', fur = v('fur') === 'yes', trim = v('trim') === 'yes';
-      const blanket = CM.all.find(p => String(p.id) === v('colour'));
+      const blanket = LIST.find(p => String(p.id) === v('colour'));
       const price = priced() ? usd(total()) + (adj ? t(', to be confirmed') : '') : t('Price on request');
       const rows = [[t('Piece'), r.name], [t('Model'), nm(MODEL[r.model])], [t('Fabric'), nm(FABRIC[r.fabric])],
         [t('Colour'), blanket ? colourName(blanket) : t('To tell you in this email')],

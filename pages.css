@@ -433,3 +433,10 @@ body[data-page] .bars{opacity:.18}
 /* a size chart keeps its cells on one line and scrolls sideways inside its own box; letters never stack one per line (swarm 2 Nov) */
 .pdp__body :is(td,th),.pdp__short :is(td,th),.pdp__vdesc :is(td,th){white-space:nowrap;overflow-wrap:normal;word-break:normal}
 .pdp__body table,.pdp__short table,.pdp__vdesc table{-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+
+/* Real-product lining options retain native link navigation, including without JavaScript. */
+.pdp__lining{margin:20px 0}
+.pdp__lining .pseg{grid-template-columns:repeat(2,minmax(0,1fr))}
+.pdp__lining .pseg__o{height:auto;min-height:48px;padding:10px 6px;white-space:normal;text-align:center;line-height:1.4;text-decoration:none}
+.pdp__lining .pseg__o.is-selected{color:var(--ink);background:var(--bg-2);box-shadow:inset 0 0 0 1px var(--ink)}
+.pdp__lining .pseg__o:disabled{opacity:.5;cursor:not-allowed}

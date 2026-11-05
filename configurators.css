@@ -273,3 +273,5 @@ fieldset{border:0;padding:0;margin:0;min-width:0}
 .mfy__prev .made__im.is-zoom:focus-visible{outline:1px solid var(--accent);outline-offset:3px}
 /* the close button stays above the animated hat panel (on a phone the panel slid over it and a tap on × did nothing; swarm 2 Nov) */
 .pom__x{z-index:3}
+
+.pom__material{display:block;margin-top:4px;font-size:10px;line-height:1.4;font-weight:normal}

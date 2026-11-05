@@ -45,6 +45,7 @@ jobs:
           node tools/pull-woo.mjs --live
           # the shop report (what needs Anna, what is not on the shop and why) on the run's page
           if [ -f reports/shop-health.md ]; then cat reports/shop-health.md >> "$GITHUB_STEP_SUMMARY"; fi
+          if [ -f reports/choices.md ]; then cat reports/choices.md >> "$GITHUB_STEP_SUMMARY"; fi
       # every product page carries its price and availability in the HTML, so they are rewritten with
       # the data (pieces that left the shop lose their page; tools/check-seo.mjs must pass)
       - name: Product pages, catalogue and sitemaps
@@ -53,6 +54,7 @@ jobs:
           # a failure here is ours, never her content: tools/e2e-daily.mjs proves the build takes
           # anything she can enter; GitHub emails the repository owner when a run fails
           node tools/build-products.mjs
+          node tools/check-choices.mjs
           node tools/check-seo.mjs
       # The live site is the Worker's copy of dist/, not this repository: a pull that only commits
       # leaves mjukiceland.com showing yesterday's prices and "in stock" on a sold piece. So every
@@ -69,6 +71,7 @@ jobs:
           if [ "$MJUK_DEPLOY" != "1" ]; then echo "::notice::Not deployed: MJUK_DEPLOY is not 1 (before launch)."; exit 0; fi
           if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then echo "::error::MJUK_DEPLOY is 1 but the Cloudflare token or account id is missing: the live site was NOT refreshed."; exit 1; fi
           node tools/build-pages.mjs && node tools/build-is.mjs && node tools/build-products.mjs
+          node tools/check-choices.mjs
           node tools/check-seo.mjs
           node tools/build-production.mjs
           npx -y wrangler@4 deploy
@@ -76,7 +79,7 @@ jobs:
       - name: Publish if anything changed
         run: |
           # staged first, so a report that is new (not yet in the repository) counts as a change too
-          git add -A assets/data.js assets/copy.js product is/product shop.html is/shop.html sitemap.xml is/sitemap.xml reports/shop-health.md
+          git add -A assets/data.js assets/copy.js product is/product shop.html is/shop.html sitemap.xml is/sitemap.xml reports/shop-health.md reports/choices.md
           if git diff --cached --quiet; then echo "Nothing changed."; exit 0; fi
           git config user.name "mjuk-stock"
           git config user.email "actions@users.noreply.github.com"

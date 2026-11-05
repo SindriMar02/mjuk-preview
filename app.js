@@ -4,6 +4,7 @@
    ══════════════════════════════════════════════════════════════ */
 (() => {
   const CM = window.CM || { all: [] };
+  const CAT = window.CMCatalogue, LIST = CAT.listed(CM);
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const fine = matchMedia('(hover:hover) and (pointer:fine)').matches;
   const $ = (s, r = document) => r.querySelector(s);
@@ -35,7 +36,7 @@
   addEventListener('orientationchange', syncVP, { passive: true });
 
   const byHandle = {}; CM.all.forEach(p => (byHandle[p.h] = p));
-  const pick = hs => (hs || []).map(h => byHandle[h]).filter(Boolean);
+  const pick = hs => [...new Set((hs || []).map(h => byHandle[h]?.choiceOf || h))].map(h => LIST.find(p => p.h === h)).filter(Boolean);
   /* MJÚK serves its media through Jetpack Photon (i*.wp.com), which sizes on
      `w=`, not Shopify's `width=`. Stored URLs are kept bare so this is the one
      place that decides a resolution. */
@@ -50,7 +51,7 @@
   // one format under the pictures, the composition was exact on some cards and general on others)
   // two-sided designs have no single material (Anna: the XL double-faced scarves sit under Icelandic wool too), so their
   // card takes the material she listed them under before falling back to the piece type
-  const catLabel = p => (nm(MATS[p.mat]) || nm(MATS[(p.mx || [])[0]]) || nm(GRPS[p.tyk]) || '');
+  const catLabel = p => (p.pomMaterial ? t(p.pomMaterial) : nm(MATS[p.mat]) || nm(MATS[(p.mx || [])[0]]) || nm(GRPS[p.tyk]) || '');
   const editorial = (CM.campaign || []);
 
   /* ── designed product card, with real size chips that add to bag ── */
@@ -60,6 +61,7 @@
   // a pompom, drawn small: a soft dotted rim around a solid ball
   const POM_ICON = '<svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="2.6" stroke-dasharray="1.1 1.3"/><circle cx="8" cy="8" r="4.2" fill="currentColor"/></svg>';
   const prod = (p, i, o = {}) => {
+    p = CAT.card(p);
     // cards render at most 380px wide, so 620 still covers 2x screens. Hover no longer swaps to
     // the second gallery shot: on her shop that is usually a close-up of the knit, which read as
     // a huge zoom (Sindri, 25 Sep). The photo only eases in a little.
@@ -68,19 +70,19 @@
     // every card opens its piece: the photo and the name are links on every page, the front page's rails too (Sindri,
     // 24 Oct: the front page cards opened nothing, the link was only added by pages.js, which that page does not load)
     const href = 'product/' + encodeURIComponent(p.h) + '/';
-    const from = p.vr && !p.oos && p.vr.some(v => !v.oos && v.p !== p.p) ? t('From') + ' ' : '';
+    const from = p.choiceFrom ? t('From') + ' ' : p.vr && !p.oos && p.vr.some(v => !v.oos && v.p !== p.p) ? t('From') + ' ' : '';
     const price = p.cp && !from ? `<span class="prod__price">${from}<s>${usd(p.cp)}</s>${usd(p.p)}</span>` : `<span class="prod__price">${from}${usd(p.p)}</span>`;
     // chip shows just the size token ("S / Navy Blue" → "S"); full variant kept for the bag.
     // The Add label earns its place only when it labels a row of choices.
-    const sizes = (p.sz && p.sz.length)
+    const sizes = p.oos ? `<span class="mono">${t('Sold out')}</span>` : (p.sz && p.sz.length)
       ? `<span class="mono">${t('Add')}</span>` + p.sz.map(v => {
           const label = String(v.s).split('/')[0].trim() || v.s;
           return `<button class="sz" data-h="${esc(p.h)}" data-s="${esc(v.s)}"${v.v ? ` data-v="${v.v}"` : ''} title="${esc(v.s)}${v.a ? '' : ' — ' + t('Sold out').toLowerCase()}"${v.a ? '' : ' disabled'}>${esc(label)}</button>`;
         }).join('')
       // a plain hat (no pompom in its name): Add to bag opens the pompom chooser (none, one or two), and a small tag on
       // its photo says pompoms can go on it (Sindri, 24 Oct: the None/1/2 chips on the card looked generic)
-      : p.vr ? `<a class="sz sz--solo" href="${href}">${t('Choose')}</a>` : `<button class="sz sz--solo${plain ? ' pom-ask' : ''}" data-h="${esc(p.h)}" data-s="">${t('Add to bag')}</button>`;
-    return `<article class="prod rv">
+      : p.vr || p.choices ? `<a class="sz sz--solo" href="${href}">${t('Choose')}</a>` : `<button class="sz sz--solo${plain ? ' pom-ask' : ''}" data-h="${esc(p.h)}" data-s="">${t('Add to bag')}</button>`;
+    return `<article class="prod rv${p.oos ? ' prod--oos' : ''}">
       <div class="prod__im">
         <span class="prod__ix">${String(i + 1).padStart(2, '0')}</span>${plain ? `<span class="prod__pom" title="${esc(t('Pompoms can be added to this hat'))}">${POM_ICON}${t('Pompoms')}</span>` : ''}
         ${p.img[0] ? `<img class="main" src="${main}"${o.sizes && p.img[0] ? ` srcset="${px(p.img[0], 380)} 380w, ${px(p.img[0], 620)} 620w, ${px(p.img[0], 940)} 940w" sizes="${o.sizes}"` : ''} alt="${esc(p.t)}" loading="${o.eager ? 'eager' : 'lazy'}"${o.eager ? ' fetchpriority="high"' : ''} decoding="async"/>` : ''}
@@ -254,7 +256,7 @@
     // a choice that no longer exists (its size deleted, the piece made variable or simple since) stays as a "sold since"
     // row the shopper can see and remove, never vanishing without a word (swarm 1 Nov)
     if (p && (p.vr ? !r || !a : l.v !== undefined)) return { k: str(l.k, 300) || l.h + '|gone|' + str(l.s, 40), h: l.h.slice(0, 160), t: p.t, s: str(l.s, 80), p: +l.p > 0 ? +l.p : 0, img: (p.img && p.img[0]) || '', q: Math.min(l.q, MAX_EACH), x: null, gone: 1 };
-    const size = p && p.vr ? vlabel(p, r, a) : str(l.s, 40);
+    const size = p && p.choiceLabel ? t(p.choiceLabel) : p && p.vr ? vlabel(p, r, a) : str(l.s, 40);
     const storedPoms = l.x && Array.isArray(l.x.pompoms) ? l.x.pompoms : [];
     const pomLimit = l.x && (l.x.n === 1 || l.x.mode === 'swap') ? 1 : 2;   // a swap replaces the one pompom shown: never two (Codex swarm, 30 Oct)
     const pompoms = storedPoms.filter(pm => pm && typeof pm.h === 'string' && byHandle[pm.h]).slice(0, pomLimit)
@@ -262,7 +264,7 @@
         return { h: pm.h, name: str(pm.name, 60) || pom.t, kind: str(pm.kind, 40) || kind }; });
     const x = l.x && typeof l.x === 'object' ? { k: str(l.x.k, 120), label: str(l.x.label, 160), price: pompoms.reduce((n, pm) => n + byHandle[pm.h].p, 0), n: pompoms.length, mode: l.x.mode === 'swap' ? 'swap' : 'attach', pompoms } : null;
     const h = l.h.slice(0, 160);
-    return { k: h + '|' + (l.v || '') + '|' + size + (x ? '|' + x.k : ''), h, t: p ? p.t : str(l.t, 160), s: size, ...(p && p.vr ? { v: l.v, a } : {}),
+    return { k: h + '|' + (l.v || '') + '|' + size + (x ? '|' + x.k : ''), h, t: p ? (p.choiceTitle || p.t) : str(l.t, 160), s: size, ...(p && p.vr ? { v: l.v, a } : {}),
       p: p ? (Number.isFinite(l.p) ? l.p : r.p + (x ? x.price : 0)) : +l.p > 0 ? +l.p : 0, img: p ? ((p.vr && r.img) || (p.img && p.img[0])) || '' : str(l.img, 400), q: Math.min(l.q, p && p.si ? 1 : MAX_EACH), x };
   };
   const load = () => { try { const saved = JSON.parse(localStorage.getItem('mjuk_bag') || '[]');
@@ -373,7 +375,7 @@
           <div class="bag__im">${l.img ? `<img src="${esc(px(l.img, 240))}" alt="${esc(l.t)}"/>` : ''}</div>
           <div>
             <div class="bag__n">${html(l.t)}</div>
-            ${l.s ? `<div class="bag__sz">${html(l.v ? l.s : fmt('Size {s}', { s: l.s }))}</div>` : ''}
+            ${l.s ? `<div class="bag__sz">${html(l.v ? l.s : byHandle[l.h] && byHandle[l.h].choiceLabel ? t('Lining') + ': ' + l.s : fmt('Size {s}', { s: l.s }))}</div>` : ''}
             ${l.x ? `<div class="bag__x2">${html(pomLabel(l)).replace(/\n/g, '<br>')}</div>` : ''}
             <div class="bag__qty">
               <button data-q="-1" data-i="${i}" aria-label="${t('Decrease quantity')}">−</button>
@@ -440,6 +442,7 @@
     if (!r || (parent.vr && !a)) return;
     const p = parent.vr ? { ...parent, ...r, img: r.img ? [r.img] : parent.img } : parent;
     if (parent.vr) size = vlabel(parent, r, a);
+    if (parent.choiceLabel) size = t(parent.choiceLabel);
     // the chosen pompoms must be on the shelf too (the same colour twice needs two)
     const need = {}; ((extra && extra.pompoms) || []).forEach(pm => { need[pm.h] = (need[pm.h] || 0) + 1; });
     const short = Object.keys(need).find(h => pomRoom(h) < need[h]);
@@ -460,8 +463,8 @@
       renderBag(); openBag(true); say(notices[0]); return;
     }
     notices = [];
-    if (hit) hit.q++; else lines.push({ k: key, h: handle, t: p.t, s: size, ...(v ? { v, a } : {}), p: p.p + (extra ? extra.price : 0), img: p.img[0], q: 1, x: extra || null });
-    save(); renderBag(); openBag(true); say(fmt('Added to your bag: {name}.', { name: p.t + (extra ? ', ' + extra.label.toLowerCase() : '') }));
+    if (hit) hit.q++; else lines.push({ k: key, h: handle, t: p.choiceTitle || p.t, s: size, ...(v ? { v, a } : {}), p: p.p + (extra ? extra.price : 0), img: p.img[0], q: 1, x: extra || null });
+    save(); renderBag(); openBag(true); say(fmt('Added to your bag: {name}.', { name: (p.choiceTitle || p.t) + (extra ? ', ' + extra.label.toLowerCase() : '') }));
     if (btn) {
       // a card's bar says so in words for a moment; the drawer opening says the rest
       const bar = btn.closest('.prod__sizes'), was = bar && !btn.dataset.was ? btn.textContent : null;
@@ -610,7 +613,7 @@
     const FAMS = Object.fromEntries((CM.families || []).map(f => [f.key, f]));
     const said = f => (f && f.said ? (isIS && f.saidIs) || f.said : '');
     const hay = new Map();
-    const text = p => { let w = hay.get(p); if (w == null) { w = ' ' + words([p.t, p.comp, nm(MATS[p.mat]), nm(GRPS[p.tyk]), nm(FAMS[p.fam]), p.mat ? '' : said(FAMS[p.fam])].join(' ')); hay.set(p, w); } return w; };
+    const text = p => { let w = hay.get(p); if (w == null) { w = ' ' + words([p.t, p.wt, p.comp, nm(MATS[p.mat]), nm(GRPS[p.tyk]), nm(FAMS[p.fam]), p.mat ? '' : said(FAMS[p.fam])].join(' ')); hay.set(p, w); } return w; };
     // the word as typed matches anywhere; a singular made from it only where a word starts (Codex audit 2, 23 Oct)
     const hit = (p, tk) => { const w = text(p); return tk.every(a => a.some((k, i) => w.includes(i ? ' ' + k : k))); };
     return { fold, toks, text, hit };
@@ -676,7 +679,7 @@
       }
       const pages = PAGES.filter(([, , kw]) => toks.some(alts => fold(kw).split(' ').some(w => alts.some(k => w.startsWith(k) || k.startsWith(w) && w.length > 3))));
       const inName = p => toks.every(alts => alts.some(k => fold(p.t).includes(k)));
-      const all = CM.all.filter(p => hit(p, toks)).sort((a, b) => (a.oos - b.oos) || (inName(b) - inName(a)));
+      const all = LIST.filter(p => hit(p, toks)).sort((a, b) => (a.oos - b.oos) || (inName(b) - inName(a)));
       // one calm row of six on a wide screen, two rows of four in between, three rows of two on a phone
       const cap = matchMedia('(min-width: 1100px)').matches ? 6 : matchMedia('(min-width: 721px)').matches ? 8 : 6;
       const inStock = all.filter(p => !p.oos).length, top = all.slice(0, cap);
@@ -692,7 +695,7 @@
     q.addEventListener('keydown', e => {
       const v = q.value.trim(); if (e.key !== 'Enter' || !v) return;
       // only sold-out pieces match: the shop opens with them shown, as "See all" does (Codex audit 2, 23 Oct)
-      const found = CM.all.filter(p => hit(p, toksOf(v)));
+      const found = LIST.filter(p => hit(p, toksOf(v)));
       location.href = shopUrl(v, found.length > 0 && found.every(p => p.oos));
     });
     res.addEventListener('click', e => {

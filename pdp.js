@@ -54,8 +54,10 @@
   const canMake = (p, ch) => { const rest = p.va.filter(a => !ch[a.n]);
     const go = (i, c) => { if (i === rest.length) { const r = pick(p, c); return !!r && !r.oos; } return rest[i].o.some(o => go(i + 1, { ...c, [rest[i].n]: o })); };
     return go(0, ch); };
+  const CAT = typeof module === 'object' && module.exports ? require('./catalogue.js') : root.CMCatalogue;
   function make(env) {
     const { CM, COPY, isIS, px, usd } = env;
+    const LIST = CAT.listed(CM);
     const t = env.t || (s => s);
     const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
     // her own address for a piece (mjukiceland.com/product/<slug>/), relative to the site root
@@ -67,7 +69,7 @@
     const GRP = byKey(CM.groups), FAM = byKey(CM.families), MAT = byKey(CM.materials);
     const typeName = k => nm(GRP[k]), famName = k => nm(FAM[k]), matName = k => nm(MAT[k]);
     // what a piece is made of, in her words: one of her nine, or her sentence for a two-sided piece
-    const matWords = p => p.mat ? matName(p.mat) : FAM[p.fam] && FAM[p.fam].said ? (isIS && FAM[p.fam].saidIs) || FAM[p.fam].said : '';
+    const matWords = p => p.pomMaterial ? t(p.pomMaterial) : p.mat ? matName(p.mat) : FAM[p.fam] && FAM[p.fam].said ? (isIS && FAM[p.fam].saidIs) || FAM[p.fam].said : '';
     /* her "Matching products", read both ways. A target is a family key, "@group" (every piece in
        that group) or "@group/material". */
     const hits = (tg, x) => { if (tg[0] !== '@') return x.fam === tg; const [g, m] = tg.slice(1).split('/'); return x.tyk === g && (!m || x.mat === m); };
@@ -119,7 +121,7 @@
           seasonal tags are excluded so siblings are the same design, not the
           same shade. ── */
     const GENERIC = new Set(['hats', 'unisexhats', 'pompomhats', 'our-collections', 'sales', 'new', 'uncategorised', 'colors', 'black', 'blue', 'green', 'orange', 'purple', 'grey', 'pinkhats', 'neutralcolors', 'rainbow', 'stripes', 'gradient', 'leaves', 'puffins', 'pompom', 'scarves', 'headbands', 'blankets', 'neckwarmers', 'alpaca', 'cashmere', 'merino-wool', 'angora-wool', 'icelandic-wool', 'alpaca-and-silk', 'angora-and-merino-wool', 'clothesmadeinreykjavik', 'interiortrends2023', 'divashittheroads5', 'akureyri', 'colorful-blankets', 'neutral-blankets', 'unicorn', 'fishbone', 'konungur']);
-    const catCount = {}; CM.all.forEach(p => (p.cats || []).forEach(c => { catCount[c] = (catCount[c] || 0) + 1; }));
+    const catCount = {}; LIST.forEach(p => (p.cats || []).forEach(c => { catCount[c] = (catCount[c] || 0) + 1; }));
     const familyKey = p => (p.cats || []).filter(c => !GENERIC.has(c)).sort((a, b) => catCount[b] - catCount[a])[0] || null;
     const familyName = k => k.replace(/marsmallow/, 'marshmallow').replace(/-/g, ' ').replace(/^\w/, c => c.toUpperCase());
 
@@ -145,12 +147,16 @@
       "Only Dry cleaning.": "Dry clean only."
     };
     /* ── one piece: the breadcrumb, the gallery, the buying column and what the two rails hold ── */
-    const view = p => {
+    const view = raw => {
+      const p = CAT.display(raw);
+      const primary = p.choiceOf ? CM.all.find(x => x.h === p.choiceOf) : p;
       const c = copyOf(p);
+      const familyVideo = FAM[p.fam] && FAM[p.fam].video;
+      if (familyVideo && !/⟦video:/.test(c.short + c.long)) c.short += ' ⟦video:' + familyVideo + '⟧';
       const fam = FAM[p.fam] ? null : familyKey(p);   // her family first; outside her sheet, the shop's category
-      const imgs = [...new Set((p.img || []).filter(Boolean))];
-      const colours = (FAM[p.fam] ? CM.all.filter(x => x.fam === p.fam)
-        : fam ? CM.all.filter(x => x === p || (x.cats || []).includes(fam)) : []).sort((a, b) => a.oos - b.oos);
+      const imgs = [...new Set(((p.img || []).some(Boolean) ? p.img : primary.img || []).filter(Boolean))];
+      const colours = (FAM[p.fam] ? LIST.filter(x => x.fam === p.fam)
+        : fam ? LIST.filter(x => x.h === p.h || (x.cats || []).includes(fam)) : []).sort((a, b) => a.oos - b.oos);
       const crumb = `<a href="shop.html">${t('Shop')}</a><i>/</i>${GRP[p.tyk] ? `<a href="shop.html?type=${esc(p.tyk)}">${esc(typeName(p.tyk))}</a><i>/</i>` : ''}${FAM[p.fam] ? `<a href="shop.html?family=${esc(p.fam)}">${esc(famName(p.fam))}</a><i>/</i>` : ''}<span>${esc(p.t)}</span>`;
       const gal = imgs.map((u, i) => `<figure class="pdp__fig rv" tabindex="0" role="button" aria-label="${esc(t('View larger'))}"><img src="${px(u, 1200)}" alt="${esc(p.t)}${i ? ', ' + t('detail') : ''}" ${i ? 'loading="lazy"' : 'fetchpriority="high"'}/></figure>`).join('');
       const plainHat = !p.vr && p.tyk === 'hats' && !/pom ?pom/i.test(p.t);
@@ -163,7 +169,7 @@
         ? `<s>${usd(p.cp)}</s><span>${usd(p.p)}</span><span class="pdp__save">${t('Save')} ${Math.round((1 - p.p / p.cp) * 100)}%</span>`
         : `<span>${usd(p.p)}</span>`);
       // her matching pieces that are in the shop today, as links to them
-      const goes = goesFor(p).filter(tg => CM.all.some(x => x !== p && hits(tg, x)));
+      const goes = goesFor(p).filter(tg => LIST.some(x => x.h !== primary.h && hits(tg, x)));
       /* the buying column (Sindri, 24 Oct: premium, clear sections, icons): what it is, the price, her short line;
          the pompom choice as one control with the button saying what happens next; three facts from her own data;
          then the details in sections that open and close */
@@ -186,23 +192,24 @@
       const cta = `<button class="sz sz--solo pdp__cta${plainHat ? ' pom-ask' : ''}" data-h="${esc(p.h)}" data-s=""${p.vr ? ' disabled' : ''}><span class="pdp__ctal">${t('Add to bag')}</span>${arrow}</button>`;
       const dots = n => `<span class="pseg__dots" aria-hidden="true">${n ? '<i></i>'.repeat(n) : '<i class="o"></i>'}</span>`;
       const pomChoice = `<div class="pdp__pom" data-l0="${esc(t('Add to bag'))}" data-l1="${esc(t('Choose colours'))}">
-          <p class="pdp__pomt mono">${t('Pompoms')} <span class="pseg__hint">${t('(choose one)')}</span></p>
+          <p class="pdp__pomt mono">${t('Pompoms')}</p>
           <div class="pseg" role="radiogroup" aria-label="${esc(t('Pompoms'))}"><span class="pseg__ind" aria-hidden="true"></span>${[['0', t('None')], ['1', t('One')], ['2', t('Two')]].map(([n, l], i) =>
             `<button type="button" class="pseg__o" role="radio" aria-checked="false" tabindex="${i ? -1 : 0}" data-n="${n}">${dots(+n)}<span>${l}</span></button>`).join('')}</div>
         </div>`;
       const swapChoice = `<div class="pdp__pom pdp__swap" data-h="${esc(p.h)}"><p class="pdp__pomt mono">${t('Pompom')}</p><div class="pseg pdp__swapseg" role="group" aria-label="${esc(t('Pompom'))}"><span class="pseg__ind" aria-hidden="true"></span><button type="button" class="pseg__o is-selected" aria-pressed="true" data-swap="keep">${t('As shown')}</button><button type="button" class="pseg__o" aria-pressed="false" data-swap="change">${t('Change colour')}</button></div></div>`;
-      const choices = (p.va || []).map((a, i) => `<div class="pdp__var"><p class="pdp__pomt mono">${esc(t(a.n))} <span class="pseg__hint">${t('(choose one)')}</span></p><div class="pseg" role="radiogroup" aria-label="${esc(t(a.n))}" data-va="${i}" style="grid-template-columns:repeat(${Math.min(a.o.length, 4)},minmax(0,1fr))">${a.o.map((o, j) => { const ok = canMake(p, { [a.n]: o }); return `<button type="button" class="pseg__o" role="radio" aria-checked="false" tabindex="${j === a.o.findIndex(o => p.vr.some(v => !v.oos && (!v.a[a.n] || v.a[a.n] === o))) ? 0 : -1}" data-option="${esc(o)}"${ok ? '' : ' disabled'}>${esc(o)}${ok ? '' : ' (' + t('Sold out').toLowerCase() + ')'}</button>`; }).join('')}</div></div>`).join('');
+      const choices = (p.va || []).map((a, i) => `<div class="pdp__var"><p class="pdp__pomt mono">${esc(t(a.n))}</p><div class="pseg" role="radiogroup" aria-label="${esc(t(a.n))}" data-va="${i}" style="grid-template-columns:repeat(${Math.min(a.o.length, 4)},minmax(0,1fr))">${a.o.map((o, j) => { const ok = canMake(p, { [a.n]: o }); return `<button type="button" class="pseg__o" role="radio" aria-checked="false" tabindex="${j === a.o.findIndex(o => p.vr.some(v => !v.oos && (!v.a[a.n] || v.a[a.n] === o))) ? 0 : -1}" data-option="${esc(o)}"${ok ? '' : ' disabled'}>${esc(o)}${ok ? '' : ' (' + t('Sold out').toLowerCase() + ')'}</button>`; }).join('')}</div></div>`).join('');
+      const lining = primary.choices ? `<div class="pdp__lining"><p class="pdp__pomt mono" id="liningLabel">${esc(isIS ? primary.choiceNameIs : primary.choiceName)}</p><div class="pseg" role="group" aria-labelledby="liningLabel" style="grid-template-columns:repeat(${primary.choices.length},minmax(0,1fr))">${primary.choices.map(o => { const label = esc(isIS ? o.is : o.label), on = o.label === p.choiceLabel; return o.oos ? `<button type="button" class="pseg__o${on ? ' is-selected' : ''}" disabled>${label} (${t('Sold out').toLowerCase()})</button>` : `<a class="pseg__o${on ? ' is-selected' : ''}" href="product/${esc(o.h)}/"${on ? ' aria-current="true"' : ''}>${label}</a>`; }).join('')}</div></div>` : '';
       const info = `
       <div class="pdp__kick mono">${p.mat ? `<span>${esc(matName(p.mat))}</span>` : ''}${FAM[p.fam] ? `<span>${esc(famName(p.fam))}</span>` : GRP[p.tyk] ? `<span>${esc(typeName(p.tyk))}</span>` : ''}${isNew(p) ? `<span class="is-new">${t('New')}</span>` : ''}${p.cp ? `<span class="is-new">${t('Sale')}</span>` : ''}</div>
       <h1 class="pdp__t" id="pdpT">${esc(p.t)}</h1>
       <div class="pdp__price" aria-live="polite">${price}</div>
       ${colours.length > 1 ? `<nav class="pdp__colours" aria-label="${esc(t('Colours'))}"><span class="pdp__colourhead mono">${esc(t('Colours'))} <b class="pdp__colourval" data-v="${esc(shade(p))}">${esc(shade(p))}</b></span><div class="pdp__colourlist">${colours.map(x => {
-        const current = x === p, label = `${shade(x)}${x.oos ? ` (${t('Sold out').toLowerCase()})` : ''}`, thumb = (x.img || []).find(Boolean);
+        const current = x.h === primary.h, label = `${shade(x)}${x.oos ? ` (${t('Sold out').toLowerCase()})` : ''}`, thumb = (x.img || []).find(Boolean);
         return `<a class="pdp__colour${current ? ' is-current' : ''}${x.oos ? ' is-oos' : ''}" href="${purl(x)}"${current ? ' aria-current="page"' : ''} aria-label="${esc(label)}" title="${esc(x.t)}" data-shade="${esc(label)}">${thumb ? `<img src="${px(thumb, 120)}" alt="" loading="lazy"/>` : ''}</a>`;
       }).join('')}</div></nav>` : ''}
       ${pomHat && !p.oos ? swapChoice : ''}
       ${c.short ? `<div class="pdp__short">${clean(c.short)}</div>` : ''}
-      ${choices}${p.vr ? '<div class="pdp__short pdp__vdesc" hidden></div>' : ''}${p.vr && !p.oos ? `<p class="mono">${t('Choose every option to add to bag.')}</p>` : ''}
+      ${lining}${choices}${p.vr ? '<div class="pdp__short pdp__vdesc" hidden></div>' : ''}${p.vr && !p.oos ? `<p class="mono">${t('Choose every option to add to bag.')}</p>` : ''}
       <div class="pdp__add">
         ${p.oos
           ? `<div class="pdp__oos"><span class="mono">${t('Sold out online')}</span><span>${t('Every colourway is a limited edition.')} <a href="mailto:customersupport@mjukiceland.com?subject=${encodeURIComponent(p.t)}">${t('Ask the store')}</a> ${t('whether one is left on a shelf in Reykjavík.')}</span></div>`
@@ -219,14 +226,14 @@
 
       /* rails: the same design in other colours (her family), then what she pairs it with (her
          Matching products), or, where she has not paired it, another piece in the same material */
-      const sib = FAM[p.fam] ? CM.all.filter(x => x !== p && x.fam === p.fam)
-        : fam ? CM.all.filter(x => x !== p && (x.cats || []).includes(fam)) : CM.all.filter(x => x !== p && x.tyk === p.tyk && x.mat === p.mat);
+      const sib = FAM[p.fam] ? LIST.filter(x => x.h !== primary.h && x.fam === p.fam)
+        : fam ? LIST.filter(x => x.h !== primary.h && (x.cats || []).includes(fam)) : LIST.filter(x => x.h !== primary.h && x.tyk === p.tyk && x.mat === p.mat);
       sib.sort((a, b) => a.oos - b.oos);
       const famTitle = FAM[p.fam] ? famName(p.fam) : fam ? familyName(fam) : (typeName(p.tyk) || t('this piece'));
       // one piece from each paired design in turn, so a long pairing list is not all one design
-      const byTarget = goes.map(tg => CM.all.filter(x => x !== p && !x.oos && x.fam !== p.fam && hits(tg, x)));
+      const byTarget = goes.map(tg => LIST.filter(x => x.h !== primary.h && !x.oos && x.fam !== p.fam && hits(tg, x)));
       const paired = []; for (let r = 0; paired.length < 12 && byTarget.some(l => l.length > r); r++) for (const l of byTarget) if (l[r] && paired.length < 12 && !paired.includes(l[r])) paired.push(l[r]);
-      const withL = paired.length ? paired : p.mat ? CM.all.filter(x => x !== p && !x.oos && x.mat === p.mat && x.tyk && x.tyk !== p.tyk).sort((a, b) => (isNew(b) - isNew(a))).slice(0, 12) : [];
+      const withL = paired.length ? paired : p.mat ? LIST.filter(x => x.h !== primary.h && !x.oos && x.mat === p.mat && x.tyk && x.tyk !== p.tyk).sort((a, b) => (isNew(b) - isNew(a))).slice(0, 12) : [];
       // a rail tile is a photo: a piece without one stays off the rails, as off the shop cards (swarm 1 Nov)
       const shot = x => x.img && x.img[0];
       return {
