@@ -381,7 +381,10 @@ for (const [slug, c] of Object.entries(catmap)) {
   const up = '../'.repeat(dir.split('/').filter(Boolean).length);
   write(dir + 'index.html', `<!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8" /><meta name="robots" content="noindex" /><title>MJ&Uacute;K Iceland</title>
-<link rel="canonical" href="${SITE.en}${c.to}" /><meta http-equiv="refresh" content="0; url=${up}${esc(c.to)}" /></head>
+<link rel="canonical" href="${SITE.en}${c.to}" /><meta http-equiv="refresh" content="0; url=${up}${esc(c.to)}" /><link rel="icon" type="image/png" sizes="32x32" href="${up}icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="48x48" href="${up}icons/favicon-48.png">
+<link rel="apple-touch-icon" sizes="180x180" href="${up}icons/apple-touch-icon.png">
+</head>
 <body><p><a href="${up}${esc(c.to)}">MJ&Uacute;K Iceland &mdash; Shop</a></p></body></html>
 `);
   redirects++;
