@@ -15,13 +15,13 @@ Statuses: OPEN · FIXED LOCALLY (not on her link) · ON HER LINK (scenario passe
 | 7 | 5 Nov 3518 | V | Tenderness neckwarmers in "Goes with" on Tenderness collections | ON HER LINK | check-choices | D |
 | 8 | 5 Nov 3526 | V | Sailor: same sections as Ragnar | ON HER LINK: Goes with, composition 100% merino (confirmed 3542: same yarn as Ragnar). Description, care: HERS | check-choices | D |
 | 9 | 5 Nov 3512, 3513 | V | Change pompom colour on a 2-pompom hat replaces only one | ON HER LINK | check-choices | F |
-| 10 | 5 Nov 3511 to 3513, answer 3538 | V, A | Changing the pompom colour on a hat sold with its pompoms is FREE (Anna 3538); extra pompoms on such a hat are bought separately (3539) | FIXED LOCALLY: swap costs nothing, sent as a note on the hat line | check-choices | |
+| 10 | 5 Nov 3511 to 3513, answer 3538 | V, A | Changing the pompom colour on a hat sold with its pompoms is FREE (Anna 3538); extra pompoms on such a hat are bought separately (3539) | ON HER LINK, told her 5 Nov; scenario H pending | check-choices | |
 | 11 | 25 Sep Q22 | A | Merino Aviator: only lined online | ON HER LINK (came back 2 Nov, fixed 5 Nov) | check-choices | A, B |
 | 12 | 25 Sep Q18 to Q25 | A | Her names: Lía beanie, Smooth Kitty, Tenderness headband, Icelandic wool blanket, XL double-faced scarf | ON HER LINK (came back 2 Nov, fixed 5 Nov) | check-choices | B |
 | 13 | 25 Sep Q24 | A | Explorer hats + scarves off the web shop | ON HER LINK (came back 2 Nov, fixed 5 Nov) | check-choices | B |
 | 14 | 25 Sep Q26 | A | Delete the 7 private listings | ON HER LINK (2 came back 2 Nov, fixed 5 Nov) | check-choices | B |
 | 15 | 23 Oct 3351 | A | No Akureyri blankets anywhere | ON HER LINK | check-choices | B |
-| 16 | 23 Oct 3387, 5 Nov 3543 | A | All pompoms $29 ("Please put all pompoms at 29$") | OPEN: Cream fox pompom #11052 is $32 in her WordPress; needs a price edit there (live write, Sindri's go) | | C |
+| 16 | 23 Oct 3387, 5 Nov 3543 | A | All pompoms $29 ("Please put all pompoms at 29$") | ASKED 5 Nov evening: change Cream fox pompom #11052 ($32, in stock, Uncategorised) to $29? (#12532 is $29 but sold out). On her yes: Quick Edit only, never the full editor | | C |
 | 17 | 23 Oct 3346, answer 5 Nov 3544 | A | One collection one composition: Tenderness label = 50% angora, 25% PA (nylon), 15% viscose, 10% superfine merino | ON HER LINK (family rule) | check-choices | |
 | 18 | 23 Oct video | A | Ragnar Black night shows the white hat | HERS (her photos) | | |
 | 20 | 5 Nov 3540, 3541 | A | Never more than 2 pompoms per hat; extra pompoms bought separately | ON HER LINK (already so) | check-choices | F, G |
