@@ -62,7 +62,7 @@
       `<button type="button" class="sw" data-i="${i}" style="--i:${i}" aria-pressed="false" title="${t(s.kind)}, ${escA(s.name)}, ${usd(s.price)}">
          <img src="${px(s.img, 160)}" alt="" loading="lazy"/><span>${escA(s.name)}<small class="pom__material">${escA(t(s.material))}</small></span></button>`).join('');
 
-    const price = () => (hat ? hat.p : 0) + chosen.slice(0, count).reduce((n, s) => n + (s ? s.price : pMin), 0);
+    const price = () => (hat ? hat.p : 0) + (swap ? 0 : 1) * chosen.slice(0, count).reduce((n, s) => n + (s ? s.price : pMin), 0);
     const guess = () => !pSame && chosen.slice(0, count).some(s => !s);   // a price still depends on the colour
     const ready = () => count === 0 || chosen.slice(0, count).every(Boolean);
     const paint = () => {
@@ -132,7 +132,7 @@
       const extra = picks.length ? {
         k: picks.map(s => s.h).join('+'),
         label: swap ? picks.length === 2 ? fmt('New pompoms: {a}, {b} (replace the ones shown)', { a: picks[0].name, b: picks[1].name }) : fmt('New pompom: {a}, {b} (replaces the one shown)', { a: picks[0].name, b: t(picks[0].kind) }) : picks.length === 1 ? fmt('With a {a} pompom', { a: picks[0].name.toLowerCase() }) : fmt('With two pompoms, {a} and {b}', { a: picks[0].name.toLowerCase(), b: picks[1].name.toLowerCase() }),
-        price: picks.reduce((n, s) => n + s.price, 0),
+        price: swap ? 0 : picks.reduce((n, s) => n + s.price, 0),   // a colour change is free (Anna, 5 Nov 3538)
         n: count, mode: swap ? 'swap' : 'attach', pompoms: picks.map(s => ({ h: s.h, name: s.name, kind: s.kind })),
       } : null;
       window.CMBag.add(hat.h, '', null, extra);

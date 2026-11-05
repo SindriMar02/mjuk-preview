@@ -15,7 +15,7 @@ Statuses: OPEN · FIXED LOCALLY (not on her link) · ON HER LINK (scenario passe
 | 7 | 5 Nov 3518 | V | Tenderness neckwarmers in "Goes with" on Tenderness collections | ON HER LINK | check-choices | D |
 | 8 | 5 Nov 3526 | V | Sailor: same sections as Ragnar | ON HER LINK: Goes with, composition (100% merino, ASKED to confirm). Description, care: HERS | check-choices | D |
 | 9 | 5 Nov 3512, 3513 | V | Change pompom colour on a 2-pompom hat replaces only one | ON HER LINK | check-choices | F |
-| 10 | 5 Nov 3511 to 3513 | V | Changing the pompom colour adds the price of a new pompom | ASKED: free or charged? | | |
+| 10 | 5 Nov 3511 to 3513, answer 3538 | V, A | Changing the pompom colour on a hat sold with its pompoms is FREE (Anna 3538); extra pompoms on such a hat are bought separately (3539) | FIXED LOCALLY: swap costs nothing, sent as a note on the hat line | check-choices | |
 | 11 | 25 Sep Q22 | A | Merino Aviator: only lined online | ON HER LINK (came back 2 Nov, fixed 5 Nov) | check-choices | A, B |
 | 12 | 25 Sep Q18 to Q25 | A | Her names: Lía beanie, Smooth Kitty, Tenderness headband, Icelandic wool blanket, XL double-faced scarf | ON HER LINK (came back 2 Nov, fixed 5 Nov) | check-choices | B |
 | 13 | 25 Sep Q24 | A | Explorer hats + scarves off the web shop | ON HER LINK (came back 2 Nov, fixed 5 Nov) | check-choices | B |

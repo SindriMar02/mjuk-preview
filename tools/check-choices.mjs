@@ -316,7 +316,10 @@ check('one and two replacement slots, restored bag, EN/IS labels and checkout it
     // Checkout's actual item construction is evaluated without its request/navigation phase.
     const itemEnd=code.indexOf('    });');
     const items=new Function('lines','byHandle','poms','stockOf','live',code.slice(0,itemEnd+7)+';return items;')([line],{...rawByH,[hat.h]:hat},l=>l.x.pompoms,()=>hat,()=>true);
-    assert.equal(items.length,1+count); assert(items.slice(1).every(i=>i.for===hat.id));
+    // Anna 5 Nov (3538): a colour change is free, so it is ONE hat line with the new colours as its note, no paid pompom lines
+    assert.equal(items.length,1); assert.equal(items[0].id,hat.id);
+    assert(items[0].note.startsWith('Pompom colour change (free): ')); for(const p of ps.slice(0,count)) assert(items[0].note.includes(p.t));
+    assert.equal(line.p,hat.p); assert.equal(extra.price,0);
   }
 });
 check('Sailor composition follows family rule; absent source Size/Care/Description stay absent', () => {
@@ -326,3 +329,14 @@ check('Sailor composition follows family rule; absent source Size/Care/Descripti
 });
 
 console.log(`${checks} choices checks passed (fixture + ${CM.all.length} real records; ${LIST.length} listed).`);
+// Anna 5 Nov (Telegram 3538): changing the colour of the pompoms a hat is sold with is free. The swap costs nothing in the
+// chooser and the bag, and checkout sends it as a note on the hat line, never as a paid pompom line.
+{
+  const src = f => fs.readFileSync(new URL('../' + f, import.meta.url), 'utf8');
+  const a = src('app.js'), c = src('configurators.js');
+  const ok = /\(swap \? 0 : 1\) \* chosen/.test(c) && /price: swap \? 0 :/.test(c)
+    && /price: l\.x\.mode === 'swap' \? 0 :/.test(a) && /x && x\.mode === 'swap' \? r\.p :/.test(a)
+    && /Pompom colour change \(free\): /.test(a) && /if \(!swapped\.length\) poms\(l\)/.test(a);
+  console.log((ok ? 'PASS' : 'FAIL') + ' pompom colour change on a hat sold with pompoms is free (chooser, bag, checkout note)');
+  if (!ok) process.exitCode = 1;
+}

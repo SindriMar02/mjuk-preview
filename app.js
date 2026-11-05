@@ -262,10 +262,10 @@
     const pompoms = storedPoms.filter(pm => pm && typeof pm.h === 'string' && byHandle[pm.h]).slice(0, pomLimit)
       .map(pm => { const pom = byHandle[pm.h]; const kind = pom.fam === 'merino-pompoms' || /\bmerino\b/i.test(pom.t) ? 'Merino wool' : /raccoon/i.test(pom.t) ? 'Raccoon' : /polar fox|fox/i.test(pom.t + ' ' + (pom.fam || '')) ? 'Polar fox' : 'Fur';
         return { h: pm.h, name: str(pm.name, 60) || pom.t, kind: str(pm.kind, 40) || kind }; });
-    const x = l.x && typeof l.x === 'object' ? { k: str(l.x.k, 120), label: str(l.x.label, 160), price: pompoms.reduce((n, pm) => n + byHandle[pm.h].p, 0), n: pompoms.length, mode: l.x.mode === 'swap' ? 'swap' : 'attach', pompoms } : null;
+    const x = l.x && typeof l.x === 'object' ? { k: str(l.x.k, 120), label: str(l.x.label, 160), price: l.x.mode === 'swap' ? 0 : pompoms.reduce((n, pm) => n + byHandle[pm.h].p, 0), n: pompoms.length, mode: l.x.mode === 'swap' ? 'swap' : 'attach', pompoms } : null;
     const h = l.h.slice(0, 160);
     return { k: h + '|' + (l.v || '') + '|' + size + (x ? '|' + x.k : ''), h, t: p ? (p.choiceTitle || p.t) : str(l.t, 160), s: size, ...(p && p.vr ? { v: l.v, a } : {}),
-      p: p ? (Number.isFinite(l.p) ? l.p : r.p + (x ? x.price : 0)) : +l.p > 0 ? +l.p : 0, img: p ? ((p.vr && r.img) || (p.img && p.img[0])) || '' : str(l.img, 400), q: Math.min(l.q, p && p.si ? 1 : MAX_EACH), x };
+      p: p ? (x && x.mode === 'swap' ? r.p : Number.isFinite(l.p) ? l.p : r.p + (x ? x.price : 0)) : +l.p > 0 ? +l.p : 0, img: p ? ((p.vr && r.img) || (p.img && p.img[0])) || '' : str(l.img, 400), q: Math.min(l.q, p && p.si ? 1 : MAX_EACH), x };
   };
   const load = () => { try { const saved = JSON.parse(localStorage.getItem('mjuk_bag') || '[]');
     // one row per piece and choice: a hand-edited or #bag= copy can hold the same line twice
@@ -548,9 +548,12 @@
     lines.filter(live).forEach(l => {
       const p = byHandle[l.h];
       // p is the price the drawer showed, so checkout can say so if hers has changed since
-      items.push({ id: p.id, q: l.q, p: stockOf(l).p, ...(l.v ? { v: l.v, a: l.a } : {}) });
+      // a colour change on a hat sold with its pompoms is free (Anna, 5 Nov 3538): it rides as a note on the hat line,
+      // never as a paid pompom line, so WordPress charges the hat's own price
+      const swapped = l.x && l.x.mode === 'swap' ? poms(l) : [];
+      items.push({ id: p.id, q: l.q, p: stockOf(l).p, ...(l.v ? { v: l.v, a: l.a } : {}), ...(swapped.length ? { note: 'Pompom colour change (free): ' + swapped.map(pm => pm.name).join(', ') } : {}) });
       // "for" ties the pompom to its hat: if the hat has gone, the pompom is not bought alone
-      poms(l).forEach(pm => { items.push({ id: byHandle[pm.h].id, q: l.q, p: byHandle[pm.h].p, note: (l.x && l.x.mode === 'swap' ? (poms(l).length === 2 ? 'Replace the pompoms on ' : 'Replace the pompom on ') : 'Attach to ') + p.t, for: p.id }); });
+      if (!swapped.length) poms(l).forEach(pm => { items.push({ id: byHandle[pm.h].id, q: l.q, p: byHandle[pm.h].p, note: (l.x && l.x.mode === 'swap' ? (poms(l).length === 2 ? 'Replace the pompoms on ' : 'Replace the pompom on ') : 'Attach to ') + p.t, for: p.id }); });
     });
     if (!items.length) return;
     if (bagGo) { bagGo.disabled = true; bagGo.textContent = t('Opening checkout…'); }
