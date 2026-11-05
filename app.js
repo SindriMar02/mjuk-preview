@@ -258,7 +258,7 @@
     if (p && (p.vr ? !r || !a : l.v !== undefined)) return { k: str(l.k, 300) || l.h + '|gone|' + str(l.s, 40), h: l.h.slice(0, 160), t: p.t, s: str(l.s, 80), p: +l.p > 0 ? +l.p : 0, img: (p.img && p.img[0]) || '', q: Math.min(l.q, MAX_EACH), x: null, gone: 1 };
     const size = p && p.choiceLabel ? t(p.choiceLabel) : p && p.vr ? vlabel(p, r, a) : str(l.s, 40);
     const storedPoms = l.x && Array.isArray(l.x.pompoms) ? l.x.pompoms : [];
-    const pomLimit = l.x && (l.x.n === 1 || l.x.mode === 'swap') ? 1 : 2;   // a swap replaces the one pompom shown: never two (Codex swarm, 30 Oct)
+    const pomLimit = l.x && l.x.mode === 'swap' ? CAT.pomCount(p) : l.x && l.x.n === 1 ? 1 : 2;
     const pompoms = storedPoms.filter(pm => pm && typeof pm.h === 'string' && byHandle[pm.h]).slice(0, pomLimit)
       .map(pm => { const pom = byHandle[pm.h]; const kind = pom.fam === 'merino-pompoms' || /\bmerino\b/i.test(pom.t) ? 'Merino wool' : /raccoon/i.test(pom.t) ? 'Raccoon' : /polar fox|fox/i.test(pom.t + ' ' + (pom.fam || '')) ? 'Polar fox' : 'Fur';
         return { h: pm.h, name: str(pm.name, 60) || pom.t, kind: str(pm.kind, 40) || kind }; });
@@ -322,6 +322,7 @@
   const priceOf = l => stockOf(l).p + poms(l).reduce((n, pm) => n + byHandle[pm.h].p, 0);
   // the pompom line is written in the page's language when drawn, not in whichever it was added on
   const pomLabel = l => { const ps = poms(l); if (!ps.length) return (l.x && l.x.label) || '';
+    if (l.x.mode === 'swap' && ps.length === 2) return fmt('New pompoms: {a}, {b} (replace the ones shown)', { a: ps[0].name, b: ps[1].name });
     return ps.map(pm => fmt(l.x.mode === 'swap' ? 'New pompom: {a}, {b} (replaces the one shown)' : '{a}, {b}', { a: pm.name, b: t(pm.kind) })).join('\n'); };
   const itemCount = () => lines.reduce((n, l) => n + 1 + poms(l).length, 0);
   let notices = [];
@@ -549,7 +550,7 @@
       // p is the price the drawer showed, so checkout can say so if hers has changed since
       items.push({ id: p.id, q: l.q, p: stockOf(l).p, ...(l.v ? { v: l.v, a: l.a } : {}) });
       // "for" ties the pompom to its hat: if the hat has gone, the pompom is not bought alone
-      poms(l).forEach(pm => { items.push({ id: byHandle[pm.h].id, q: l.q, p: byHandle[pm.h].p, note: (l.x && l.x.mode === 'swap' ? 'Replace the pompom on ' : 'Attach to ') + p.t, for: p.id }); });
+      poms(l).forEach(pm => { items.push({ id: byHandle[pm.h].id, q: l.q, p: byHandle[pm.h].p, note: (l.x && l.x.mode === 'swap' ? (poms(l).length === 2 ? 'Replace the pompoms on ' : 'Replace the pompom on ') : 'Attach to ') + p.t, for: p.id }); });
     });
     if (!items.length) return;
     if (bagGo) { bagGo.disabled = true; bagGo.textContent = t('Opening checkout…'); }

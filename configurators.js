@@ -76,7 +76,7 @@
       });
       $('#pomPick').hidden = count === 0;
       $$('.sw', grid).forEach(b => b.setAttribute('aria-pressed', String(chosen.slice(0, count).some(s => s && s.h === POMS[+b.dataset.i].h))));
-      const nextTotal = `${guess() ? t('from') + ' ' : ''}${usd(price())}<small>${t(swap ? 'hat and the new pompom' : count === 0 ? 'hat only' : count === 1 ? 'hat and one pompom' : 'hat and two pompoms')}</small>`;
+      const nextTotal = `${guess() ? t('from') + ' ' : ''}${usd(price())}<small>${t(swap ? (count === 2 ? 'hat and the new pompoms' : 'hat and the new pompom') : count === 0 ? 'hat only' : count === 1 ? 'hat and one pompom' : 'hat and two pompoms')}</small>`;
       if (total.innerHTML !== nextTotal) { total.innerHTML = nextTotal; if (hat) pulse(total); }
       add.disabled = !ready();
       add.textContent = t(count === 0 ? 'Add the hat as it is' : ready() ? 'Add to bag' : 'Pick a colour first');
@@ -97,7 +97,7 @@
     const open = (h, viaKey, n = 0, replacing = false) => {
       if (window.CMBag && window.CMBag.room && window.CMBag.room(h.h) < 1) { window.CMBag.add(h.h, '', null, null); return; } // already at the limit: the drawer says so
       dlg.returnValue = '';   // Escape, the X and the Android back button close with nothing, never with last time's "add"
-      hat = h; swap = replacing; count = replacing ? 1 : n === 1 || n === 2 ? n : 0; active = 0; chosen = [null, null];
+      hat = h; swap = replacing; count = replacing ? window.CMCatalogue.pomCount(h) : n === 1 || n === 2 ? n : 0; active = 0; chosen = [null, null];
       const countControl = dlg.querySelector('fieldset');
       if (countControl) countControl.hidden = swap;
       $$('.sw', grid).forEach(b => { b.hidden = !fits(POMS[+b.dataset.i], h); });
@@ -111,7 +111,7 @@
       const pomPrice = ps.length === 0 ? '' : ps.length === 1 ? usd(ps[0]) : fmt('{a} to {b}', { a: usd(ps[0]), b: usd(ps[ps.length - 1]) });
       $$('input[name="n"]', dlg).forEach(r => (r.checked = r.value === String(count)));
       img.src = px(h.img[0], 300); img.alt = h.choiceTitle || h.t; name.textContent = h.choiceTitle || h.t;
-      if (why) why.innerHTML = swap ? `<strong>${escA(t('Replace the pompom shown'))}</strong><br>${escA(t('Choose a new pompom to replace the one shown on this hat.'))}` : none ? escA(t('No pompom colours fit this hat right now.')) : fmt(POMS.some(s => s.merino) && !POMS.every(s => fits(s, h))
+      if (why) why.innerHTML = swap ? `<strong>${escA(t(count === 2 ? 'Replace the pompoms shown' : 'Replace the pompom shown'))}</strong><br>${escA(t(count === 2 ? 'Choose two new pompoms to replace the ones shown on this hat.' : 'Choose a new pompom to replace the one shown on this hat.'))}` : none ? escA(t('No pompom colours fit this hat right now.')) : fmt(POMS.some(s => s.merino) && !POMS.every(s => fits(s, h))
         ? 'Any of these goes on this hat; the heavier merino pompoms go on merino beanies only. Here are the ones we have photographed, {price} each, attached before it ships.'
         : 'Any pompom goes on any hat. In the shop you pick from the cabinet of eighty. Here are the ones we have photographed, {price} each, attached before it ships.', { price: `<b>${pomPrice}</b>` });
       paint();
@@ -131,7 +131,7 @@
       const picks = chosen.slice(0, count).filter(Boolean);
       const extra = picks.length ? {
         k: picks.map(s => s.h).join('+'),
-        label: swap ? fmt('New pompom: {a}, {b} (replaces the one shown)', { a: picks[0].name, b: t(picks[0].kind) }) : picks.length === 1 ? fmt('With a {a} pompom', { a: picks[0].name.toLowerCase() }) : fmt('With two pompoms, {a} and {b}', { a: picks[0].name.toLowerCase(), b: picks[1].name.toLowerCase() }),
+        label: swap ? picks.length === 2 ? fmt('New pompoms: {a}, {b} (replace the ones shown)', { a: picks[0].name, b: picks[1].name }) : fmt('New pompom: {a}, {b} (replaces the one shown)', { a: picks[0].name, b: t(picks[0].kind) }) : picks.length === 1 ? fmt('With a {a} pompom', { a: picks[0].name.toLowerCase() }) : fmt('With two pompoms, {a} and {b}', { a: picks[0].name.toLowerCase(), b: picks[1].name.toLowerCase() }),
         price: picks.reduce((n, s) => n + s.price, 0),
         n: count, mode: swap ? 'swap' : 'attach', pompoms: picks.map(s => ({ h: s.h, name: s.name, kind: s.kind })),
       } : null;

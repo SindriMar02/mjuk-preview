@@ -25,7 +25,7 @@
   /* the catalogue helpers and the product page itself live in pdp.js, shared with the build that
      writes every product page's text into its HTML (tools/build-products.mjs) */
   const V = window.CMPDP({ CM, COPY, t, isIS, px, usd });
-  const { esc, purl, nm, GRP, FAM, MAT, typeName, famName, matName, matWords, isNew, text, copyOf } = V;
+  const { shopMaterials, hasMaterial, esc, purl, nm, GRP, FAM, MAT, typeName, famName, matName, matWords, isNew, text, copyOf } = V;
 
   /* ── reveal: same .rv grammar as the shell, observed here because app.js
         ran before these nodes existed ── */
@@ -123,7 +123,7 @@
     const rows = { type: $('#fType'), family: $('#fFam'), material: $('#fFibre'), colour: $('#fCol') };
     // one test for "does this piece belong in the view", shared by the grid and the chip counts
     const passes = (p, s, toks) =>
-      (!s.type || p.tyk === s.type) && (!s.family || p.fam === s.family) && (!s.material || p.mat === s.material || (p.mx || []).includes(s.material)) && (!s.colour || coloursOf(p).includes(s.colour)) &&
+      (!s.type || p.tyk === s.type) && (!s.family || p.fam === s.family) && (!s.material || hasMaterial(p, s.material)) && (!s.colour || coloursOf(p).includes(s.colour)) &&
       (!s.sale || p.cp > 0) && (!s.nw || isNew(p)) && (!s.stock || !p.oos) && (!toks.length || SR.hit(p, toks));
     /* each chip counts what tapping it would show, with the search and every other filter kept
        (Veronika, 29 Oct: after a search the chips still counted the whole shop, so "Scarves 73"
@@ -135,11 +135,11 @@
       let n = 0; for (const p of LIST) if (passes(p, s, toks)) n++;
       return n;
     };
-    const counted = (key, L) => L.map(c => ({ ...c, count: tally(key, c.key) })).filter(c => c.count || st[key] === c.key);
+    const counted = (key, L) => L.map(c => ({ ...c, count: tally(key, c.key) })).filter(c => c.count || st[key] === c.key || (key === 'material' && st.type === 'pompoms' && LIST.some(p => p.tyk === st.type && p.pomMaterial && hasMaterial(p, c.key))));
     const lists = {
       type: () => counted('type', shown(CM.groups)),
       family: () => st.type ? counted('family', shown(CM.families).filter(f => f.group === st.type)) : [],
-      material: () => counted('material', shown(CM.materials)),
+      material: () => counted('material', shopMaterials),
       colour: () => counted('colour', COL.map(c => ({ key: c[0], hex: c[1], name: c[3] }))),
     };
     const paintChips = key => {

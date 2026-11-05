@@ -8,7 +8,9 @@
     return { ...p, p: Math.min(...prices), cp: 0, oos: p.choices.every(o => o.oos), choiceFrom: new Set(prices).size > 1 };
   };
   const listed = CM => (CM.all || []).filter(p => !p.choiceOf).map(card);
-  const api = { display, card, listed };
+  // Replacement count comes from her title; an unnumbered pompom hat carries one.
+  const pomCount = p => /\bwith\s+2\b|\b(?:2|two)\s+(?:[^.]*?\s+)?pom\s*poms?\b/i.test(p?.t || '') ? 2 : 1;
+  const api = { display, card, listed, pomCount };
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.CMCatalogue = api;
 })(typeof window !== 'undefined' ? window : globalThis);

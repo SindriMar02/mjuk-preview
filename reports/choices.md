@@ -110,6 +110,7 @@
 - Category mismatch #11225: Ragnar hat with fleece. Rose — title says Lined, but ragnar-with-fleece is missing; title used.
 - Category mismatch #14556: Ragnar hat with fleece. Dark purple with purple pom pom — title says Lined, but ragnar-with-fleece is missing; title used.
 - Category mismatch #14566: Ragnar hat with fleece. Light grey with matching fur pom pom — title says Lined, but ragnar-with-fleece is missing; title used.
+- Assigned #1645: Ragnar hat. White — Not lined; Veronika 5 Nov 3529: unmarked Ragnar hat. White is Not lined.
 - Ragnar hat. Dark Grey: Lined #11222; Not lined #1686. Primary #11222.
 - Ragnar hat. Black: Lined #11220 (sold out); Not lined #1684. Primary #1684.
 - Ragnar hat. Burgundy: Lined #11213; Not lined #1677. Primary #11213.
@@ -122,25 +123,25 @@
 - Ragnar hat. Oatmeal: Lined #11211; Not lined #7347. Primary #11211.
 - Ragnar hat. Salt and Pepper: Lined #11221; Not lined #1685. Primary #11221.
 - Ragnar hat. Ice pink: Lined #11224; Not lined #1688. Primary #11224.
-- Ragnar hat. Peach: Lined #14796 (sold out). Primary #14796.
+- Ragnar hat with fleece. Peach: only Lined in her shop, name kept. #14796.
 - Duplicate hidden #14804: Ragnar hat with fleece.Beige melange — Lined; kept #14799 (stock, photos, then lowest id).
-- Ragnar hat. Beige melange: Lined #14799. Primary #14799.
-- Ragnar hat. Lilac: Lined #14801 (sold out). Primary #14801.
+- Ragnar hat with fleece. Beige melange: only Lined in her shop, name kept. #14799.
+- Ragnar hat with fleece. Lilac: only Lined in her shop, name kept. #14801.
 - Duplicate hidden #11223: Ragnar hat with fleece. Light grey — Lined; kept #14802 (stock, photos, then lowest id).
 - Ragnar hat. Light grey: Lined #14802; Not lined #1687. Primary #14802.
-- Ragnar hat. Green moss: Lined #14807. Primary #14807.
-- Ragnar hat. White: Lined #14809. Primary #14809.
+- Ragnar hat with fleece. Green moss: only Lined in her shop, name kept. #14807.
+- Ragnar hat. White: Lined #14809; Not lined #1645. Primary #14809.
 - Ragnar hat. Dark purple: Lined #15446; Not lined #15448. Primary #15446.
-- Ragnar hat. Dark purple with purple pom pom: Lined #14556. Primary #14556.
-- Ragnar hat. Black with black pom pom: Lined #14561. Primary #14561.
-- Ragnar hat. Jeans with navy fur pom pom: Lined #14562. Primary #14562.
-- Ragnar hat. Deep blue with navy pom pom: Lined #14563. Primary #14563.
-- Ragnar hat. Chocolate with chocolate pom pom: Lined #14564. Primary #14564.
-- Ragnar hat. Oatmeal with cream pom pom: Lined #14565. Primary #14565.
-- Ragnar hat. Light grey with matching fur pom pom: Lined #14566. Primary #14566.
-- Ragnar hat. White with matching fur pom pom: Lined #14567. Primary #14567.
-- Ragnar hat. Orchid with blue lilac pom pom: Lined #14568. Primary #14568.
-- Ragnar hat. Rose with pine green pom pom: Lined #14569. Primary #14569.
-- Ragnar hat. Ligh peach with matching pom pom: Lined #14570. Primary #14570.
+- Ragnar hat with fleece. Dark purple with purple pom pom: only Lined in her shop, name kept. #14556.
+- Ragnar hat with fleece. Black with black pom pom: only Lined in her shop, name kept. #14561.
+- Ragnar hat with fleece. Jeans with navy fur pom pom: only Lined in her shop, name kept. #14562.
+- Ragnar hat with fleece. Deep blue with navy pom pom: only Lined in her shop, name kept. #14563.
+- Ragnar hat with fleece. Chocolate with chocolate pom pom: only Lined in her shop, name kept. #14564.
+- Ragnar hat with fleece. Oatmeal with cream pom pom: only Lined in her shop, name kept. #14565.
+- Ragnar hat with fleece. Light grey with matching fur pom pom: only Lined in her shop, name kept. #14566.
+- Ragnar hat with fleece. White with matching fur pom pom: only Lined in her shop, name kept. #14567.
+- Ragnar hat with fleece. Orchid with blue lilac pom pom: only Lined in her shop, name kept. #14568.
+- Ragnar hat with fleece. Rose with pine green pom pom: only Lined in her shop, name kept. #14569.
+- Ragnar hat with fleece. Ligh peach with matching pom pom: only Lined in her shop, name kept. #14570.
 - Ragnar hat. Jeans: Lined #11219; Not lined #1682. Primary #11219.
 - Family video: Ragnar beanies — ghDdEDTz2nI; shown when a product has no video of its own.

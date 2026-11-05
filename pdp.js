@@ -66,7 +66,9 @@
        her families and her nine materials, each with its Icelandic name beside it */
     const nm = x => (x ? (isIS && x.is) || x.name : '');
     const byKey = list => Object.fromEntries((list || []).map(x => [x.key, x]));
-    const GRP = byKey(CM.groups), FAM = byKey(CM.families), MAT = byKey(CM.materials);
+    const shopMaterials = [...(CM.materials || []), ...['Polar fox fur', 'Raccoon fur'].filter(name => LIST.some(p => p.pomMaterial === name)).map(name => ({ key: name === 'Polar fox fur' ? 'polar-fox-fur' : 'raccoon-fur', name, is: t(name) }))];
+    const GRP = byKey(CM.groups), FAM = byKey(CM.families), MAT = byKey(shopMaterials);
+    const hasMaterial = (p, key) => p.mat === key || (p.mx || []).includes(key) || !!p.pomMaterial && MAT[key]?.name === p.pomMaterial;
     const typeName = k => nm(GRP[k]), famName = k => nm(FAM[k]), matName = k => nm(MAT[k]);
     // what a piece is made of, in her words: one of her nine, or her sentence for a two-sided piece
     const matWords = p => p.pomMaterial ? t(p.pomMaterial) : p.mat ? matName(p.mat) : FAM[p.fam] && FAM[p.fam].said ? (isIS && FAM[p.fam].saidIs) || FAM[p.fam].said : '';
@@ -244,7 +246,7 @@
       };
     };
 
-    return { esc, purl, nm, GRP, FAM, MAT, typeName, famName, matName, matWords, hits, goesFor, tgName, tgHref, isNew, clean, text, copyOf, familyKey, familyName, view };
+    return { shopMaterials, hasMaterial, esc, purl, nm, GRP, FAM, MAT, typeName, famName, matName, matWords, hits, goesFor, tgName, tgHref, isNew, clean, text, copyOf, familyKey, familyName, view };
   }
   make.sanitize = sanitize; make.pick = pick; make.canMake = canMake;
   if (typeof module === 'object' && module.exports) module.exports = make;

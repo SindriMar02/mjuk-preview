@@ -44,6 +44,7 @@ export function applyChoices(input, groups, copy = {}) {
   for (const rule of groups.families || []) {
     const family = (CM.families || []).find(f => f.key === rule.key);
     if (family) family.goes = [...(rule.goes || [])];
+    if (rule.comp) CM.all.filter(p => p.fam === rule.key).forEach(p => { p.comp = rule.comp; });
     if (rule.hide) CM.all = CM.all.filter(p => {
       if (p.fam !== rule.key || (rule.hide.name && !new RegExp(rule.hide.name, 'i').test(p.t))) return true;
       findings.push(`- Hidden #${p.id}: ${p.t} — off the web shop: ${rule.hide.why}.`); return false;
@@ -51,10 +52,12 @@ export function applyChoices(input, groups, copy = {}) {
     if (!rule.choice) continue;
     const c = rule.choice, colours = new Map();
     for (const p of CM.all.filter(p => p.fam === rule.key)) {
-      // A category alone must never swallow the unmarked pompom hats.
-      const option = c.options.findIndex(o => o.name ? new RegExp(o.name, 'i').test(p.t) : (p.cats || []).includes(o.cat));
+      // Explicit ids can assign an unmarked member; categories alone must not swallow pompom hats.
+      const option = c.options.findIndex(o => (o.ids || []).includes(p.id) || (o.name ? new RegExp(o.name, 'i').test(p.t) : (p.cats || []).includes(o.cat)));
       if (option < 0) continue;
-      if (c.options[option].cat && !(p.cats || []).includes(c.options[option].cat)) findings.push(`- Category mismatch #${p.id}: ${p.t} — title says ${c.options[option].label}, but ${c.options[option].cat} is missing; title used.`);
+      const assigned = (c.options[option].ids || []).includes(p.id);
+      if (assigned) findings.push(`- Assigned #${p.id}: ${p.t} — ${c.options[option].label}; ${c.options[option].why}.`);
+      if (!assigned && c.options[option].cat && !(p.cats || []).includes(c.options[option].cat)) findings.push(`- Category mismatch #${p.id}: ${p.t} — title says ${c.options[option].label}, but ${c.options[option].cat} is missing; title used.`);
       const title = cleanTitle(p.t.replace(new RegExp(c.strip, 'gi'), ''));
       const key = colourKey(title);
       if (!colours.has(key)) colours.set(key, []);
@@ -64,6 +67,17 @@ export function applyChoices(input, groups, copy = {}) {
       const winners = c.options.map((_, i) => members.filter(m => m.option === i).sort((a, b) => Number(!!a.p.oos) - Number(!!b.p.oos) || (b.p.img || []).filter(Boolean).length - (a.p.img || []).filter(Boolean).length || a.p.id - b.p.id)[0]).filter(Boolean);
       const primary = winners.find(m => !m.p.oos) || winners[0];
       const options = winners.map(m => ({ label: c.options[m.option].label, is: c.options[m.option].is, h: m.p.h, p: m.p.p, oos: !!m.p.oos }));
+      // Only a colour sold in BOTH linings becomes one item with a choice. A colour in one lining keeps her own name
+      // ("Ragnar hat with fleece. White"): stripping the marker hid the lining and made it look like her unmarked
+      // "Ragnar hat. White" twice (Claude scenario run A, 5 Nov). Same-lining duplicates are still kept off the shop.
+      if (winners.length < 2) {
+        for (const m of members) if (m !== primary) {
+          m.p.choiceOf = primary.p.h;
+          findings.push(`- Duplicate hidden #${m.p.id}: ${m.p.t} — ${c.options[m.option].label}; kept #${primary.p.id} (stock, photos, then lowest id).`);
+        }
+        findings.push(`- ${primary.p.t}: only ${c.options[primary.option].label} in her shop, name kept. #${primary.p.id}.`);
+        continue;
+      }
       for (const m of members) {
         Object.assign(m.p, { choiceTitle: primary.title, choiceLabel: c.options[m.option].label, choiceLabelIs: c.options[m.option].is });
         if (m !== primary) m.p.choiceOf = primary.p.h;

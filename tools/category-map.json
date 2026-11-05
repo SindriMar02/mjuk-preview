@@ -442,8 +442,8 @@
   "uncategorised": {
    "path": "uncategorised",
    "to": "shop.html",
-   "why": "its 32 pieces share no single design, group or material",
-   "n": 32
+   "why": "its 31 pieces share no single design, group or material",
+   "n": 31
   },
   "blankets": {
    "path": "blankets",

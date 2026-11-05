@@ -19,7 +19,9 @@ const fixture = { all: [
   product(2, 'Ragnar hat without fleece. Oatmeal', 1, { p: 60, img: ['unlined.jpg'] }),
   product(3, 'Ragnar hat with fleece. Oatmeal', 0, { img: ['lined.jpg'] }),
   product(4, 'Ragnar hat with fleece. Oatmeal.', 0, { img: ['lined.jpg'] }),
-  product(5, 'Ragnar hat. White', -1),
+  product(5, 'Ragnar hat. Unmarked', -1),
+  product(1645, 'Ragnar hat. White', -1),
+  product(12, 'Ragnar hat with fleece. White', 0),
   product(6, 'Ragnar hat with fleece. Black', 0, { oos: true }),
   product(7, 'Ragnar hat without fleece.Black', 1),
   product(8, 'Ragnar hat with fleece. Rose', 0, { oos: true }),
@@ -59,18 +61,23 @@ check('real data reapply equals saved bytes and remains idempotent', () => {
 });
 check('every marked Ragnar colour has one listed card with real option handles', () => {
   const keys = new Map();
-  for (const p of CM.all.filter(p => p.fam === r.key && /\b(?:with|without) fleece\b/i.test(p.t))) {
+  for (const p of CM.all.filter(p => p.fam === r.key && (/\b(?:with|without) fleece\b/i.test(p.t) || r.choice.options.some(o => o.ids?.includes(p.id))))) {
     const key = p.t.replace(new RegExp(r.choice.strip,'gi'),'').toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim();
     if (!keys.has(key)) keys.set(key,[]); keys.get(key).push(p);
   }
   for (const members of keys.values()) {
     const primary = members.filter(p => !p.choiceOf); assert.equal(primary.length,1);
+    const labels = new Set(members.map(p => (/\bwithout fleece\b/i.test(p.t) || r.choice.options[1].ids?.includes(p.id)) ? 'Not lined' : 'Lined'));
+    if (labels.size < 2) {   // one lining only: her own name stays, so the lining is never hidden (scenario run A, 5 Nov)
+      assert(/\b(?:with|without) fleece\b/i.test(CAT.card(primary[0]).t)); assert(!primary[0].choices); continue;
+    }
     assert(!/\b(?:with|without) fleece\b/i.test(CAT.card(primary[0]).t));
-    const labels = new Set(members.map(p => /\bwithout fleece\b/i.test(p.t) ? 'Not lined' : 'Lined'));
     assert.equal(primary[0].choices.length,labels.size);
     for (const o of primary[0].choices) { assert(rawByH[o.h]); assert.equal(rawByH[o.h].p,o.p); }
   }
-  assert(!LIST.some(p => p.fam === r.key && /\b(?:with|without) fleece\b/i.test(p.t)));
+  // no two listed Ragnar cards share a name (her unmarked "Ragnar hat. White" next to a stripped lined White, 5 Nov)
+  const names = LIST.filter(p => p.fam === r.key).map(p => p.t.toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim());
+  assert.equal(new Set(names).size, names.length);
   assert(!CM.all.some(p => p.fam === 'unisex-aviator' && /^merino aviator hat\.(?!.*fleece)/i.test(p.t)));
 });
 const pdp = (isIS=false, catalogue=CM, copy=W.CMCOPY) => make({CM:catalogue,COPY:copy,t:s=>isIS ? W.CMI18N[s] || s : s,isIS,px:x=>x,usd:n=>'$'+n});
@@ -188,7 +195,7 @@ check('bag uses real option stock/id/handle with localized display title and cho
   const code=app.slice(app.indexOf('  const variant ='),app.indexOf('  const load ='));
   for (const is of [false,true]) {
     const t=s=>is ? W.CMI18N[s]||s:s;
-    const clean=new Function('byHandle','str','MAX_EACH','t',code+';return clean;')(rawByH,(v,n=200)=>typeof v==='string'?v.slice(0,n):'',20,t);
+    const clean=new Function('CAT','byHandle','str','MAX_EACH','t',code+';return clean;')(CAT,rawByH,(v,n=200)=>typeof v==='string'?v.slice(0,n):'',20,t);
     for (const p of CM.all.filter(p=>p.choiceLabel)) {
       const line=clean({h:p.h,q:1}); assert.equal(line.h,p.h); assert.equal(line.p,p.p); assert.equal(line.t,p.choiceTitle); assert.equal(line.s,t(p.choiceLabel));
     }
@@ -203,7 +210,7 @@ check('actual card template shows From only for differing prices and aggregate s
 });
 check('actual Add to bag keeps each real option with stock, title and localized lining', () => {
   for (const is of [false,true]) {
-    const ctx={byHandle:rawByH,MAX_EACH:20,MAX_LINES:40,lines:[],notices:[],t:s=>is?W.CMI18N[s]||s:s,str:(v,n=200)=>typeof v==='string'?v.slice(0,n):'',poms:()=>[],save:()=>{},renderBag:()=>{},openBag:()=>{},say:()=>{},fmt:s=>s,setTimeout:()=>0,clearTimeout:()=>{}};
+    const ctx={CAT,byHandle:rawByH,MAX_EACH:20,MAX_LINES:40,lines:[],notices:[],t:s=>is?W.CMI18N[s]||s:s,str:(v,n=200)=>typeof v==='string'?v.slice(0,n):'',poms:()=>[],save:()=>{},renderBag:()=>{},openBag:()=>{},say:()=>{},fmt:s=>s,setTimeout:()=>0,clearTimeout:()=>{}};
     ctx.itemCount=()=>ctx.lines.length;
     vm.createContext(ctx);
     vm.runInContext(app.slice(app.indexOf('  const variant ='),app.indexOf('  const load =')),ctx);
@@ -235,7 +242,7 @@ check('alias pages canonicalize to primary, select their option, and stay out of
   }
   for (const x of [...CM.groups,...CM.materials]) for (const h of x.pool||[]) assert(!rawByH[h].choiceOf);
 });
-console.log(`${checks} choices checks passed (fixture + ${CM.all.length} real records; ${LIST.length} listed).`);
+
 // Claude review 5 Nov: a lining line in the bag reads "Lining: Not lined", never "Size Not lined"; the pompom chooser and the
 // "Added to your bag" message name the merged piece, not her WordPress title with "with fleece"
 {
@@ -246,3 +253,76 @@ console.log(`${checks} choices checks passed (fixture + ${CM.all.length} real re
   console.log((ok1 && ok2 && ok3 ? 'PASS' : 'FAIL') + ' bag lining label, chooser and bag message use the merged name');
   if (!(ok1 && ok2 && ok3)) process.exitCode = 1;
 }
+
+check('explicit ids assign unmarked White to Not lined on fixtures and raw pull fields', () => {
+  for (const catalogue of [F, CM]) {
+    const white = catalogue.all.find(p => p.id === 1645);
+    const primary = catalogue.all.find(p => p.h === (white.choiceOf || white.h));
+    assert.equal(white.choiceLabel, 'Not lined'); assert.equal(primary.choices.length, 2);
+    assert.equal(CAT.listed(catalogue).filter(p => p.t === 'Ragnar hat. White').length, 1);
+    assert(primary.choices.some(o => o.h === white.h && o.label === 'Not lined'));
+  }
+  const raw = { all: [product(1645,'Ragnar hat. White',-1), product(90001,'Ragnar hat with fleece. White',0)] };
+  assert.equal(applyChoices(raw,groups).CM.all.find(p=>p.id===1645).choiceLabel,'Not lined');
+  const generic = {families:[{key:'other',choice:{...r.choice,options:r.choice.options.map((o,i)=>({...o,ids:i===1?[91000]:[]}))}}]};
+  const input={all:[product(91000,'Other. White',-1,{fam:'other'}),product(91001,'Other with fleece. White',0,{fam:'other'})]};
+  assert.equal(applyChoices(input,generic).CM.all[0].choiceLabel,'Not lined');
+});
+check('pompom fur chips use title-derived materials, counts, filtering and Icelandic names', () => {
+  const pages=read('pages.js');
+  const passesCode=pages.slice(pages.indexOf('    const passes ='),pages.indexOf('    /* each chip'));
+  for (const is of [false,true]) {
+    const v=pdp(is), passes=new Function('hasMaterial','coloursOf','isNew','SR',passesCode+';return passes;')(v.hasMaterial,()=>[],()=>false,{});
+    const fur=v.shopMaterials.filter(m=>/fur$/.test(m.key)); assert.equal(fur.length,2);
+    for (const m of fur) {
+      const want=LIST.filter(p=>p.tyk==='pompoms' && p.pomMaterial===m.name);
+      const got=LIST.filter(p=>passes(p,{type:'pompoms',material:m.key,stock:false},[]));
+      assert(want.length); assert.deepEqual(got,want);
+      assert.equal(v.nm(m),is ? W.CMI18N[m.name] : m.name);
+    }
+  }
+  assert(pages.includes("counted('material', shopMaterials)"));
+  assert(pages.includes("if (!MAT[st.material])"));
+  const raw=CM.all.filter(p=>p.tyk==='pompoms').map(p=>({id:p.id,h:p.h,t:p.wt||p.t,fam:p.fam,tyk:p.tyk,cats:p.cats,p:p.p,img:p.img,oos:p.oos}));
+  const pulled=applyChoices({all:raw},groups).CM;
+  for (const p of pulled.all) assert.equal(p.pomMaterial,rawByH[p.h].pomMaterial);
+});
+check('one and two replacement slots, restored bag, EN/IS labels and checkout items', () => {
+  const src=read('configurators.js');
+  for (const title of ['Hat. With 2 purple pom poms','Hat with two pompoms','Hat with 2']) assert.equal(CAT.pomCount({t:title}),2);
+  for (const title of ['Hat with purple pompom','Hat with one pom pom']) assert.equal(CAT.pomCount({t:title}),1);
+  const countCode=src.slice(src.indexOf('      hat = h;'),src.indexOf('      const countControl'));
+  const ps=LIST.filter(p=>p.tyk==='pompoms' && !p.oos).slice(0,2); assert.equal(ps.length,2);
+  const cleanCode=app.slice(app.indexOf('  const variant ='),app.indexOf('  const load ='));
+  for (const count of [1,2]) for (const is of [false,true]) {
+    const hat={...CM.all.find(p=>p.tyk==='hats'),h:'swap-test',t:count===2?'Hat with 2 purple pom poms':'Hat with purple pompom'};
+    const opened=new Function('window','h','replacing','n','let hat,swap,count,active,chosen;'+countCode+';return {count,chosen};')({CMCatalogue:CAT},hat,true,1);
+    assert.equal(opened.count,count); assert.equal(opened.chosen.slice(0,count).filter(Boolean).length,0);
+    const readyCode=src.slice(src.indexOf('    const ready ='),src.indexOf('    const paint ='));
+    const chosen=opened.chosen, ready=new Function('count','chosen',readyCode+';return ready;')(count,chosen);
+    assert(!ready()); chosen[0]={}; assert.equal(ready(),count===1); chosen[1]={}; assert(ready());
+    const t=s=>is?W.CMI18N[s]||s:s, fmt=(s,v)=>t(s).replace(/\{(\w+)\}/g,(_,k)=>v[k]);
+    const clean=new Function('CAT','byHandle','str','MAX_EACH','t',cleanCode+';return clean;')(CAT,{...rawByH,[hat.h]:hat},(v,n=200)=>typeof v==='string'?v.slice(0,n):'',20,t);
+    const line=clean({h:hat.h,q:1,x:{mode:'swap',n:1,pompoms:ps.map(p=>({h:p.h,name:p.t,kind:'Polar fox'}))}});
+    assert.equal(line.x.n,count); assert.equal(line.x.pompoms.length,count);
+    const labels=app.slice(app.indexOf('  const pomLabel ='),app.indexOf('  const itemCount ='));
+    const label=new Function('poms','fmt','t',labels+';return pomLabel;')(l=>l.x.pompoms,fmt,t)(line);
+    assert(label.includes(count===2?(is?'Nýir dúskar:':'New pompoms:'):(is?'Nýr dúskur:':'New pompom:')));
+    if(count===2) for(const p of ps) assert(label.includes(p.t));
+    const extraCode=src.slice(src.indexOf('      const extra = picks.length'),src.indexOf('      window.CMBag.add(hat.h'));
+    const extra=new Function('picks','count','swap','fmt','t',extraCode+';return extra;')(ps.slice(0,count).map(p=>({h:p.h,name:p.t,kind:'Polar fox',price:p.p})),count,true,fmt,t);
+    assert.equal(extra.n,count); assert.equal(extra.pompoms.length,count); assert.equal(extra.label,label);
+    const code=app.slice(app.indexOf('    const items =',app.indexOf('  function checkout()')),app.indexOf('    const bagGo',app.indexOf('  function checkout()')));
+    // Checkout's actual item construction is evaluated without its request/navigation phase.
+    const itemEnd=code.indexOf('    });');
+    const items=new Function('lines','byHandle','poms','stockOf','live',code.slice(0,itemEnd+7)+';return items;')([line],{...rawByH,[hat.h]:hat},l=>l.x.pompoms,()=>hat,()=>true);
+    assert.equal(items.length,1+count); assert(items.slice(1).every(i=>i.for===hat.id));
+  }
+});
+check('Sailor composition follows family rule; absent source Size/Care/Description stay absent', () => {
+  const sailor=CM.all.find(p=>p.fam==='sailor'); assert.equal(sailor.comp,'100% merino wool');
+  assert(groups.families.find(f=>f.key==='sailor').compWhy.includes('Pending Anna'));
+  for(const is of [false,true]) { const v=pdp(is).view(sailor); assert(!v.info.includes('data-acc="care"')); assert(!v.info.includes('data-acc="desc"')); }
+});
+
+console.log(`${checks} choices checks passed (fixture + ${CM.all.length} real records; ${LIST.length} listed).`);
