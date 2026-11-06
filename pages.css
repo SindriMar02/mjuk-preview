@@ -210,7 +210,7 @@ body[data-page] .bars{opacity:.18}
 .pzoom::backdrop{background:transparent}
 .pzoom:focus,.pzoom:focus-visible{outline:none}
 .pzoom__in{height:100%;overflow:auto;overscroll-behavior:contain;display:grid;gap:12px;justify-items:center;align-content:start;padding:clamp(60px,9vh,84px) var(--pad) 48px;cursor:zoom-out}
-.pzoom__in img{display:block;width:auto;max-width:100%;height:calc(100dvh - 140px);object-fit:contain;background:var(--bg-2);cursor:default;opacity:0;transform:translateY(16px);transition:opacity .3s var(--ease),transform .45s var(--ease)}
+.pzoom__in img{display:block;width:auto;max-width:100%;height:auto;max-height:calc(100dvh - 140px);object-fit:contain;background:var(--bg-2);cursor:default;opacity:0;transform:translateY(16px);transition:opacity .3s var(--ease),transform .45s var(--ease)}
 .pzoom.on .pzoom__in img{opacity:1;transform:none}
 .pzoom__x{position:fixed;top:14px;right:var(--pad);z-index:2;display:inline-flex;align-items:center;gap:9px;padding:12px 0 12px 14px;background:var(--bg);border:0;font-family:var(--ff-m);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);cursor:pointer;transition:color .3s var(--ease)}
 .pzoom__x svg{transition:transform .3s var(--ease)}

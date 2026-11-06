@@ -375,3 +375,30 @@ console.log(`${checks} choices checks passed (fixture + ${CM.all.length} real re
   console.log((ok ? 'PASS' : 'FAIL') + ' filter chips: focus goes back to a repainted chip only after a keyboard press, never after a tap');
   if (!ok) process.exitCode = 1;
 }
+
+// Anna 6 Nov 17:33: puffin and gradient blankets are never offered for a made-for-you piece (not symmetrical, cannot be sewn)
+{
+  const W = {}; new Function('window', read('assets/data.js'))(W);
+  const B = W.CM.bespoke, rule = B.notForSewing && new RegExp(B.notForSewing.match, 'i');
+  const offered = key => W.CM.all.filter(p => B.fabrics.find(f => f.key === key).blankets.includes(p.fam) && !p.oos && p.img && p.img[0] && !(rule && rule.test(p.t)));
+  const wool = offered('icelandic-wool');
+  const src = read('configurators.js');
+  const ok = !!rule && wool.length > 0 && !wool.some(p => /puffin|gradient/i.test(p.t)) && /unsewable/.test(src) && /B\.notForSewing/.test(src);
+  console.log((ok ? 'PASS' : 'FAIL') + ` made for you: no puffin or gradient blanket offered (${wool.length} Icelandic wool blankets left: ${wool.map(p => p.t.replace(/^Icelandic wool blanket\. /, '')).join(' | ').slice(0, 160)})`);
+  if (!ok) process.exitCode = 1;
+}
+
+// Veronika 6 Nov: the phone photo viewer must show the whole photo at its own proportions (no fixed-height box, contain)
+{
+  const css = read('pages.css'); const rule = (css.match(/\.pzoom__in img\{[^}]*\}/) || [''])[0];
+  const ok = /height:auto/.test(rule) && /max-height:/.test(rule) && /max-width:100%/.test(rule) && /object-fit:contain/.test(rule);
+  console.log((ok ? 'PASS' : 'FAIL') + ' photo viewer: whole photo, own proportions (height auto, capped by max-height and max-width)');
+  if (!ok) process.exitCode = 1;
+}
+// Aleksandra's video 6 Nov: sideways wheel/trackpad swipes over a sideways-scrolling row belong to the row, not to Lenis
+{
+  const app = read('app.js');
+  const ok = /addEventListener\('wheel'[\s\S]{0,200}stopImmediatePropagation[\s\S]{0,80}capture: true, passive: true/.test(app) && app.indexOf("addEventListener('wheel'") < app.indexOf('lenis = new Lenis(');
+  console.log((ok ? 'PASS' : 'FAIL') + ' rails: a sideways swipe scrolls the row (capture listener before Lenis); browser proof tools/check-rail-wheel.mjs in the launch-check folder');
+  if (!ok) process.exitCode = 1;
+}

@@ -304,6 +304,35 @@
       }
       lang.href = to.href;
     }); }
+  /* ── The Iceland note (Anna 6 Nov 3582, 3587): thousands of bags carry mjukiceland.com, so an Icelander typing it
+     lands on the English shop. A visitor in Iceland (Cloudflare's country, from the router's /sndr/cc) gets a clear
+     note in BOTH languages, so a tourist on Laugavegur knows it is not a cookie banner and can stay in English. Never
+     a forced redirect. "Já" goes to the same page in Icelandic through the language switch (the bag travels with it);
+     either answer is remembered on this device. ?cc=IS shows it anywhere, for a preview. ── */
+  if (!isIS && $('#langBtn')) (async () => {
+    const KEY = 'mjuk_is_note', force = (new URLSearchParams(location.search).get('cc') || '').toUpperCase();
+    if (kept(KEY) && !force) return;
+    let cc = force;
+    if (!cc) { try { const r = await fetch(ROOT + 'sndr/cc', { cache: 'no-store' }); if (r.ok) cc = String((await r.json()).c || '').toUpperCase(); } catch (e) {} }
+    if (cc !== 'IS') return;
+    const lang = $('#langBtn'), el = document.createElement('aside');
+    el.className = 'isnote'; el.setAttribute('role', 'region'); el.setAttribute('aria-label', 'Íslensk verslun / Icelandic shop'); el.lang = 'is';
+    el.innerHTML = '<button type="button" class="isnote__x" aria-label="Loka / Close"><span aria-hidden="true">&times;</span></button>'
+      + '<p class="isnote__k">Á íslensku · In Icelandic</p>'
+      + '<p class="isnote__t">Verslunin er líka á íslensku.</p>'
+      + '<p class="isnote__s" lang="en">This shop is also in Icelandic. Visiting Iceland? Just stay in English.</p>'
+      + '<div class="isnote__b"><a class="isnote__go" href="">Já, á íslensku <span aria-hidden="true">&rarr;</span></a>'
+      + '<button type="button" class="isnote__no" lang="en">No thanks, English</button></div>';
+    el.querySelector('.isnote__go').setAttribute('href', lang.href);
+    const close = v => { keep(KEY, v); el.classList.remove('on'); setTimeout(() => el.remove(), 450); };
+    el.addEventListener('click', e => {
+      if (e.target.closest('.isnote__go')) { e.preventDefault(); keep(KEY, 'is'); lang.click(); return; }
+      if (e.target.closest('.isnote__no, .isnote__x')) close('en');
+    });
+    addEventListener('keydown', e => { if (e.key === 'Escape' && el.isConnected && el.classList.contains('on')) close('en'); });
+    // after the opening animation, never on top of it; it does not take focus (nothing highlighted on open)
+    setTimeout(() => { document.body.appendChild(el); requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('on'))); }, 1600);
+  })();
   // screen readers hear what the drawer shows: added, already in the bag, sold since
   const say = (() => { const el = document.createElement('p'); el.setAttribute('aria-live', 'polite');
     el.style.cssText = 'position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap';
@@ -1264,6 +1293,16 @@ void main() {
   const hasGsap = window.gsap && window.ScrollTrigger;
   if (hasGsap) gsap.registerPlugin(ScrollTrigger);
   if (!reduced && window.Lenis) {
+    /* A sideways swipe (trackpad, Magic Mouse) or shift+wheel over anything that scrolls sideways belongs to THAT row,
+       never to Lenis: Lenis cancels every wheel event it sees, so the row did not move and the up/down part of the
+       swipe threw the page to the next section (Aleksandra's video, Anna 6 Nov 17:32 "it jumps to the other line").
+       Registered in the capture phase on window, before Lenis's own listener, and passive: the browser scrolls natively. */
+    const sideways = el => { for (; el && el !== document.documentElement; el = el.parentElement) {
+      if (el.scrollWidth > el.clientWidth + 1 && /auto|scroll/.test(getComputedStyle(el).overflowX)) return el; } return null; };
+    addEventListener('wheel', e => {
+      if (!(Math.abs(e.deltaX) > Math.abs(e.deltaY) || (e.shiftKey && e.deltaY))) return;
+      if (sideways(e.target)) e.stopImmediatePropagation();
+    }, { capture: true, passive: true });
     lenis = new Lenis({
       duration: 1.1,
       // exponential ease-out: fast pickup, long clean settle. Without an explicit

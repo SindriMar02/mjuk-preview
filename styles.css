@@ -760,3 +760,21 @@ section{padding:clamp(70px,12vw,180px) 0;position:relative}
 #bagBtn{white-space:nowrap}
 @media(max-width:820px){ .nav__end .nav__search{padding:12px 3px} }
 @media(max-width:360px){ .nav__end{gap:2px} #bagBtn{padding-left:2px;padding-right:2px} .nav__end .nav__lang{padding:6px 2px} }
+
+/* the Iceland note (Anna 6 Nov): big, clear, in both languages; a card under the nav, never a bar at the bottom like a cookie notice */
+.isnote{position:fixed;z-index:120;top:84px;left:50%;width:min(560px,calc(100% - 32px));transform:translate(-50%,-14px);opacity:0;
+  background:var(--bg);color:var(--ink);border:1px solid var(--ink);padding:22px 24px 20px;box-shadow:0 18px 50px rgba(23,18,26,.14);
+  transition:opacity .45s var(--ease),transform .6s var(--ease)}
+.isnote.on{opacity:1;transform:translate(-50%,0)}
+.isnote__k{margin:0 0 10px;font:11px/1 var(--ff-m);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.isnote__t{margin:0 0 8px;padding-right:28px;font-family:var(--ff-s);font-size:clamp(25px,3vw,34px);line-height:1.12}
+.isnote__s{margin:0 0 18px;font-size:13px;line-height:1.5;color:var(--dim)}
+.isnote__b{display:flex;flex-wrap:wrap;gap:10px}
+.isnote__go,.isnote__no{display:inline-flex;align-items:center;gap:10px;min-height:44px;padding:0 18px;font:11px/1 var(--ff-m);letter-spacing:.1em;text-transform:uppercase;cursor:pointer;text-decoration:none}
+.isnote__go{background:var(--ink);color:var(--bg);border:1px solid var(--ink)}
+.isnote__no{background:none;color:var(--ink);border:1px solid var(--faint)}
+.isnote__x{position:absolute;top:10px;right:10px;width:40px;height:40px;background:none;border:0;font-size:24px;line-height:1;color:var(--ink);cursor:pointer}
+@media(hover:hover) and (pointer:fine){.isnote__go:hover{background:var(--accent);border-color:var(--accent)}.isnote__no:hover{border-color:var(--ink)}}
+.isnote__go:focus-visible,.isnote__no:focus-visible,.isnote__x:focus-visible{outline:1px solid var(--accent);outline-offset:3px}
+@media(max-width:520px){.isnote{top:76px;padding:20px 18px 18px}.isnote__go,.isnote__no{flex:1 1 100%;justify-content:center}}
+@media(prefers-reduced-motion:reduce){.isnote,.isnote.on{transform:translate(-50%,0);transition:opacity .2s}}

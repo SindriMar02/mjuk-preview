@@ -138,6 +138,8 @@ async function english(request, env, url) {
   const p = url.pathname, get = request.method === 'GET' || request.method === 'HEAD';
   if (p === '/bag') return bag(request, env);
   if (p === '/sndr/refresh') return refresh(request, env);
+  // the visitor's country, for the Iceland note on the English pages (Anna 6 Nov); Cloudflare sets request.cf
+  if (p === '/sndr/cc') return new Response(JSON.stringify({ c: (request.cf && request.cf.country) || '' }), { headers: { 'Content-Type': 'application/json', 'Cache-Control': 'private, no-store' } });
   if (HERS.test(p)) return hers(request, env, url, 'path');
   if (!get) return hers(request, env, url, 'method');
   if (wooAction(url)) return hers(request, env, url, 'action');

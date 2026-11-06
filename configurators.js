@@ -182,7 +182,9 @@
     const row = () => ROWS.find(r => r.model === mdl() && r.fabric === v('fabric') && r.fur === (v('fur') === 'yes')) || null;
 
     /* the fabric's colours are her blankets in it, in stock and photographed: the one it is cut from */
-    const blankets = key => LIST.filter(p => FABRIC[key] && FABRIC[key].blankets.includes(p.fam) && !p.oos && p.img && p.img[0]);
+    // never a blanket she cannot cut a piece from (B.notForSewing, tools/groups.json: puffins and gradients, Anna 6 Nov)
+    const unsewable = B.notForSewing && B.notForSewing.match ? new RegExp(B.notForSewing.match, 'i') : null;
+    const blankets = key => LIST.filter(p => FABRIC[key] && FABRIC[key].blankets.includes(p.fam) && !p.oos && p.img && p.img[0] && !(unsewable && unsewable.test(p.t)));
     const famShort = { konungur: 'Konungur', unicorn: 'Icelandic wool' };
     /* the colour from her product name, colour first and pattern after ("Camel, Fishbone"), so
        a short label still says the colour; a design inside the family ("Leaves") comes last */

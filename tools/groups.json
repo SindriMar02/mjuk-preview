@@ -146,6 +146,7 @@
    { "key": "grace", "name": "Grace cape", "is": "Grace-slá" },
    { "key": "empress", "name": "Empress cape", "is": "Empress-slá" }
   ],
+  "notForSewing": { "match": "\\b(puffins?|gradient)\\b", "why": "Anna, Telegram 6 Nov 17:33: puffin and gradient blankets are not suitable for sewing, the pattern is not symmetrical. Never offered as the blanket a piece is cut from." },
   "fabrics": [
    { "key": "cashmere-merino", "name": "Cashmere and merino", "is": "Kasmír og merínó", "blankets": ["konungur"] },
    { "key": "icelandic-wool", "name": "Icelandic wool", "is": "Íslensk ull", "blankets": ["unicorn"] }
