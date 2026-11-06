@@ -160,7 +160,8 @@
       const colours = (FAM[p.fam] ? LIST.filter(x => x.fam === p.fam)
         : fam ? LIST.filter(x => x.h === p.h || (x.cats || []).includes(fam)) : []).sort((a, b) => a.oos - b.oos);
       const crumb = `<a href="shop.html">${t('Shop')}</a><i>/</i>${GRP[p.tyk] ? `<a href="shop.html?type=${esc(p.tyk)}">${esc(typeName(p.tyk))}</a><i>/</i>` : ''}${FAM[p.fam] ? `<a href="shop.html?family=${esc(p.fam)}">${esc(famName(p.fam))}</a><i>/</i>` : ''}<span>${esc(p.t)}</span>`;
-      const gal = imgs.map((u, i) => `<figure class="pdp__fig rv" tabindex="0" role="button" aria-label="${esc(t('View larger'))}"><img src="${px(u, 1200)}" alt="${esc(p.t)}${i ? ', ' + t('detail') : ''}" ${i ? 'loading="lazy"' : 'fetchpriority="high"'}/></figure>`).join('');
+      const gal = imgs.map((u, i) => `<figure class="pdp__fig rv" tabindex="0" role="button" aria-label="${esc(t('View larger'))}"><img src="${px(u, 1200)}" alt="${esc(p.t)}${i ? ', ' + t('detail') : ''}" ${i ? 'loading="lazy"' : 'fetchpriority="high"'}/></figure>`).join('')
+        || `<figure class="pdp__fig pdp__fig--none"><span class="noimg"><b>MJÚK</b><small>${esc(t('Photo coming soon'))}</small></span></figure>`;
       const plainHat = !p.vr && p.tyk === 'hats' && !/pom ?pom/i.test(p.t);
       // a colour's name is her title without the words every piece in the family shares ("Lia Scarf. Alpaca and silk. Calm blue" -> "Calm blue"), and a lone leading word ("Beanie. Black" -> "Black")
       const words = x => x.t.split(/\s+/), common = colours.length > 1 ? colours.map(words).reduce((a, w) => { let n = 0; while (n < a.length && n < w.length - 1 && a[n] === w[n]) n++; return a.slice(0, n); }) : [];

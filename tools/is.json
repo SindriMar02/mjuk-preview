@@ -663,5 +663,6 @@
  "js:Replace the pompoms shown": "Skipta út dúskunum á myndinni",
  "js:Choose two new pompoms to replace the ones shown on this hat.": "Veldu tvo nýja dúska í stað þeirra sem eru á þessari húfu.",
  "js:New pompoms: {a}, {b} (replace the ones shown)": "Nýir dúskar: {a}, {b} (koma í stað þeirra sem eru á myndinni)",
- "js:hat and the new pompoms": "húfa og nýju dúskarnir"
+ "js:hat and the new pompoms": "húfa og nýju dúskarnir",
+ "js:Photo coming soon": "Mynd væntanleg"
 }

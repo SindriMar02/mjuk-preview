@@ -776,5 +776,11 @@ section{padding:clamp(70px,12vw,180px) 0;position:relative}
 .isnote__x{position:absolute;top:10px;right:10px;width:40px;height:40px;background:none;border:0;font-size:24px;line-height:1;color:var(--ink);cursor:pointer}
 @media(hover:hover) and (pointer:fine){.isnote__go:hover{background:var(--accent);border-color:var(--accent)}.isnote__no:hover{border-color:var(--ink)}}
 .isnote__go:focus-visible,.isnote__no:focus-visible,.isnote__x:focus-visible{outline:1px solid var(--accent);outline-offset:3px}
-@media(max-width:520px){.isnote{top:76px;padding:20px 18px 18px}.isnote__go,.isnote__no{flex:1 1 100%;justify-content:center}}
+@media(max-width:520px){.isnote{position:absolute;top:76px;padding:20px 18px 18px}  /* on a phone it scrolls away with the page instead of covering a third of every screen */.isnote__go,.isnote__no{flex:1 1 100%;justify-content:center}}
 @media(prefers-reduced-motion:reduce){.isnote,.isnote.on{transform:translate(-50%,0);transition:opacity .2s}}
+/* a piece with no photo yet (Ragnar Gloves, 6 Nov audit): a quiet card, never an empty half page */
+.noimg{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:var(--bg-2);color:var(--faint);pointer-events:none}
+.noimg b{font-family:var(--ff-s);font-weight:400;font-size:clamp(28px,4vw,56px);letter-spacing:.04em;color:var(--faint)}
+.noimg small{font-family:var(--ff-m);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.prod__im .noimg b{font-size:clamp(22px,2.4vw,34px)}
+.pdp__fig--none{cursor:default}

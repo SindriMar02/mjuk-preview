@@ -85,7 +85,7 @@
     return `<article class="prod rv${p.oos ? ' prod--oos' : ''}">
       <div class="prod__im">
         <span class="prod__ix">${String(i + 1).padStart(2, '0')}</span>${plain ? `<span class="prod__pom" title="${esc(t('Pompoms can be added to this hat'))}">${POM_ICON}${t('Pompoms')}</span>` : ''}
-        ${p.img[0] ? `<img class="main" src="${main}"${o.sizes && p.img[0] ? ` srcset="${px(p.img[0], 380)} 380w, ${px(p.img[0], 620)} 620w, ${px(p.img[0], 940)} 940w" sizes="${o.sizes}"` : ''} alt="${esc(p.t)}" loading="${o.eager ? 'eager' : 'lazy'}"${o.eager ? ' fetchpriority="high"' : ''} decoding="async"/>` : ''}
+        ${p.img[0] ? `<img class="main" src="${main}"${o.sizes && p.img[0] ? ` srcset="${px(p.img[0], 380)} 380w, ${px(p.img[0], 620)} 620w, ${px(p.img[0], 940)} 940w" sizes="${o.sizes}"` : ''} alt="${esc(p.t)}" loading="${o.eager ? 'eager' : 'lazy'}"${o.eager ? ' fetchpriority="high"' : ''} decoding="async"/>` : `<span class="noimg" aria-hidden="true"><b>MJÚK</b><small>${esc(t('Photo coming soon'))}</small></span>`}
         <a class="prod__go" href="${href}" aria-label="${esc(p.t)}"></a>
         <div class="prod__sizes">${sizes}</div>
       </div>
@@ -311,7 +311,7 @@
      either answer is remembered on this device. ?cc=IS shows it anywhere, for a preview. ── */
   if (!isIS && $('#langBtn')) (async () => {
     const KEY = 'mjuk_is_note', force = (new URLSearchParams(location.search).get('cc') || '').toUpperCase();
-    if (kept(KEY) && !force) return;
+    if (kept(KEY)) return; // an answer given on this device always wins, the ?cc=IS preview included (independent check N, 6 Nov)
     let cc = force;
     if (!cc) { try { const r = await fetch(ROOT + 'sndr/cc', { cache: 'no-store' }); if (r.ok) cc = String((await r.json()).c || '').toUpperCase(); } catch (e) {} }
     if (cc !== 'IS') return;

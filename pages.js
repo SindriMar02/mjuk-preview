@@ -333,7 +333,7 @@
     // a built page already holds these photos: keep them, so the first one is not painted twice and does not replay
     // its entrance once the script arrives (SEO audit 24 Oct); rebuilt only when the photos changed since the build
     const built = [...gal.querySelectorAll('img')].map(i => i.getAttribute('src'));
-    if (!pre || built.length !== v.imgs.length || built.some((s, i) => s !== px(v.imgs[i], 1200))) gal.innerHTML = v.gal;
+    if (!pre || !v.imgs.length || built.length !== v.imgs.length || built.some((s, i) => s !== px(v.imgs[i], 1200))) gal.innerHTML = v.gal;
     $('#info').innerHTML = v.info;
     wirePdp(p, v);
     splitWords($('#pdpT'));
