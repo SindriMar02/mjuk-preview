@@ -666,8 +666,6 @@
  "js:hat and the new pompoms": "húfa og nýju dúskarnir",
  "js:Photo coming soon": "Mynd væntanleg",
  "Newsletter": "Fréttabréf",
- "New colours, first.": "Nýir litir, fyrst til þín.",
- "One email when something new is on the shelf. Leave any time.": "Einn póstur þegar eitthvað nýtt kemur í hilluna. Þú getur hætt hvenær sem er.",
  "Your email": "Netfangið þitt",
  "Email address": "Netfang",
  "Sign up": "Skrá mig",
@@ -676,5 +674,7 @@
  "js:Thank you, you are on the list.": "Takk, þú ert á listanum.",
  "js:Too many tries. Please try again in a little while.": "Of margar tilraunir. Reyndu aftur eftir smástund.",
  "js:That did not go through. Please try again in a moment.": "Þetta fór ekki í gegn. Reyndu aftur eftir augnablik.",
- "js:Sign-up is not connected in this preview.": "Skráning er ekki tengd í þessari forskoðun."
+ "js:Sign-up is not connected in this preview.": "Skráning er ekki tengd í þessari forskoðun.",
+ "Never miss out.": "Misstu ekki af neinu.",
+ "New pieces and sales, first to you.": "Nýjar vörur og útsölur, fyrst til þín."
 }
