@@ -784,3 +784,24 @@ section{padding:clamp(70px,12vw,180px) 0;position:relative}
 .noimg small{font-family:var(--ff-m);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
 .prod__im .noimg b{font-size:clamp(22px,2.4vw,34px)}
 .pdp__fig--none{cursor:default}
+/* the newsletter sign-up in every footer (6 Nov): one quiet row above the link grid, the shop's own type */
+.foot__news{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(24px,5vw,80px);align-items:end;margin-top:40px;padding-top:36px;border-top:1px solid var(--line)}
+.foot__newsCopy .mono{display:block;margin-bottom:12px}
+.foot__newsT{font-family:var(--ff-s);font-size:clamp(26px,2.6vw,38px);line-height:1.1;color:var(--ink)}
+.foot__newsSub{margin-top:10px;font-size:14px;line-height:1.55;color:var(--dim);max-width:44ch}
+.foot__newsRow{display:flex;align-items:stretch;border-bottom:1px solid var(--ink)}
+.foot__newsRow input{flex:1;min-width:0;background:none;border:0;padding:14px 0;font:inherit;font-family:var(--ff-m);font-size:15px;color:var(--ink);border-radius:0;-webkit-appearance:none;appearance:none}
+.foot__newsRow input::placeholder{color:var(--dim)}
+.foot__newsRow input:focus{outline:none}
+.foot__newsRow:focus-within{border-bottom-color:var(--accent)}
+.foot__newsGo{flex:none;background:none;border:0;padding:14px 0 14px 18px;font-family:var(--ff-m);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);cursor:pointer;transition:color .3s}
+.foot__newsGo:hover{color:var(--accent)}
+.foot__newsGo:focus-visible{outline:1px solid var(--ink);outline-offset:4px}
+.foot__newsGo[disabled]{color:var(--dim);cursor:default}
+.foot__newsTrap{position:absolute!important;left:-9999px;width:1px;height:1px;opacity:0}
+.foot__newsMsg{min-height:1.5em;margin-top:12px;font-size:14px;line-height:1.5;color:var(--ink)}
+.foot__newsMsg.is-err{color:var(--accent)}
+.foot__newsFine{margin-top:6px;font-size:12px;color:var(--dim)}
+.foot__newsFine a{color:var(--dim);text-decoration:underline;text-underline-offset:3px}
+.foot__newsFine a:hover{color:var(--ink)}
+@media(max-width:760px){.foot__news{grid-template-columns:1fr;gap:20px}}

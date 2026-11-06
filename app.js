@@ -799,8 +799,34 @@
   // every deferred script has run by now: without the pompom chooser, the 1 and 2 buttons go (styles.css .no-poms)
   document.addEventListener('DOMContentLoaded', () => { if (!window.CMPomReady) document.documentElement.classList.add('no-poms'); });
 
+  // the footer's newsletter sign-up: posted to this host's /newsletter (functions/newsletter.js), which signs it and
+  // hands it to her WordPress (saved there, and to her Mailchimp with a confirmation email when it is connected)
   const nf = $('#newsForm');
-  if (nf) nf.addEventListener('submit', e => { e.preventDefault(); const v = $('#newsEmail').value.trim(), m = $('#newsMsg'); const ok = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v); m.textContent = ok ? t('You’re in. New colours reach you first.') : t('Enter a valid email.'); if (ok) nf.reset(); });
+  if (nf) {
+    const email = $('#newsEmail'), msg = $('#newsMsg'), go = $('#newsGo');
+    const say = (text, err) => { msg.textContent = text; msg.classList.toggle('is-err', !!err); };
+    let busy = false;
+    nf.addEventListener('submit', async e => {
+      e.preventDefault();
+      if (busy) return;
+      const v = email.value.trim();
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(v) || v.length > 190) { say(t('Enter a valid email.'), true); email.focus(); return; }
+      busy = true; go.disabled = true; say(t('Signing you up…'));
+      let r = null, d = {};
+      try {
+        r = await fetch(ROOT + 'newsletter', { method: 'POST', headers: { 'Content-Type': 'application/json' }, cache: 'no-store',
+          body: JSON.stringify({ email: v, lang: document.documentElement.lang === 'is' ? 'is' : 'en', from: location.pathname.slice(0, 40), website: nf.elements.website.value }) });
+        try { d = await r.json(); } catch (x) {}
+      } catch (x) {}
+      busy = false; go.disabled = false;
+      if (r && r.ok && d.ok) { nf.reset(); say(d.confirm ? t('Thank you. Check your inbox and confirm, then you are on the list.') : t('Thank you, you are on the list.')); return; }
+      // the GitHub preview has no /newsletter at all: say so instead of an error
+      if (r && (r.status === 404 || r.status === 405)) { say(t('Sign-up is not connected in this preview.'), true); return; }
+      if (d.why === 'invalid') say(t('Enter a valid email.'), true);
+      else if (d.why === 'busy') say(t('Too many tries. Please try again in a little while.'), true);
+      else say(t('That did not go through. Please try again in a moment.'), true);
+    });
+  }
   /* ══ MOBILE MENU + the sndr-studio toggle animation ══ */
   const burger = $('#burger'), menu = $('#menu');
   let closeMenu = () => {};   // the logo sits above the open menu: a tap on it must shut the panel too (anchor navigation, below)

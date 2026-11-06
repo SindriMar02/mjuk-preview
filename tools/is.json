@@ -664,5 +664,17 @@
  "js:Choose two new pompoms to replace the ones shown on this hat.": "Veldu tvo nýja dúska í stað þeirra sem eru á þessari húfu.",
  "js:New pompoms: {a}, {b} (replace the ones shown)": "Nýir dúskar: {a}, {b} (koma í stað þeirra sem eru á myndinni)",
  "js:hat and the new pompoms": "húfa og nýju dúskarnir",
- "js:Photo coming soon": "Mynd væntanleg"
+ "js:Photo coming soon": "Mynd væntanleg",
+ "Newsletter": "Fréttabréf",
+ "New colours, first.": "Nýir litir, fyrst til þín.",
+ "One email when something new is on the shelf. Leave any time.": "Einn póstur þegar eitthvað nýtt kemur í hilluna. Þú getur hætt hvenær sem er.",
+ "Your email": "Netfangið þitt",
+ "Email address": "Netfang",
+ "Sign up": "Skrá mig",
+ "js:Signing you up…": "Skrái þig…",
+ "js:Thank you. Check your inbox and confirm, then you are on the list.": "Takk. Kíktu í pósthólfið og staðfestu, þá ertu á listanum.",
+ "js:Thank you, you are on the list.": "Takk, þú ert á listanum.",
+ "js:Too many tries. Please try again in a little while.": "Of margar tilraunir. Reyndu aftur eftir smástund.",
+ "js:That did not go through. Please try again in a moment.": "Þetta fór ekki í gegn. Reyndu aftur eftir augnablik.",
+ "js:Sign-up is not connected in this preview.": "Skráning er ekki tengd í þessari forskoðun."
 }

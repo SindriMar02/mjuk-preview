@@ -9,7 +9,8 @@
 
    Order of decisions, for mjukiceland.com:
      1. www. → the bare host (301)
-     2. /bag → functions/bag.js (signs the bag, sends the shopper to /?sndr_bag=…)
+     2. /bag → functions/bag.js (signs the bag, sends the shopper to /?sndr_bag=…);
+        /newsletter → functions/newsletter.js (signs a sign-up, posts it to her /wp-json/sndr/v1/newsletter)
      3. hers, always: /basket /checkout /my-account /wp-admin /wp-content /wp-includes /wp-json
         /wp-login.php /wc-api /.well-known …, any POST that is not /bag, and / with any query
         other than tracking tags (?add-to-cart, ?wc-ajax, ?wc-api for PayPal, ?sndr_bag, ?p=, ?s=),
@@ -29,6 +30,7 @@
    the shopper used travels as X-SNDR-Rehearsal-Host (the local test glue makes WordPress answer
    as that host); EN_HOST / IS_HOST name the two hosts. Live, none of these are set. */
 import { onRequestGet as bagGet, onRequestPost as bagPost } from '../functions/bag.js';
+import { onRequestGet as newsGet, onRequestPost as newsPost } from '../functions/newsletter.js';
 import CATS from '../tools/category-map.json';
 
 const HERS = /^\/(?:basket|checkout|my-account|wp-admin|wp-content|wp-includes|wp-json|wc-api|wc-auth|\.well-known|feed|comments\/feed)(?:\/|$)|^\/(?:wp-login|wp-cron|wp-signup|wp-activate|wp-trackback|wp-comments-post|xmlrpc)\.php$|^\/wp-sitemap[^/]*\.xml$|^\/wp-sitemap\.xsl$/;
@@ -134,9 +136,17 @@ async function bag(request, env) {
   return new Response('Method not allowed', { status: 405, headers: { Allow: 'GET, POST' } });
 }
 
+// the footer's newsletter sign-up (functions/newsletter.js): signed here, saved by her WordPress
+async function newsletter(request, env) {
+  if (request.method === 'GET' || request.method === 'HEAD') return newsGet({ request, env });
+  if (request.method === 'POST') return newsPost({ request, env });
+  return new Response('Method not allowed', { status: 405, headers: { Allow: 'GET, POST' } });
+}
+
 async function english(request, env, url) {
   const p = url.pathname, get = request.method === 'GET' || request.method === 'HEAD';
   if (p === '/bag') return bag(request, env);
+  if (p === '/newsletter') return newsletter(request, env);
   if (p === '/sndr/refresh') return refresh(request, env);
   // the visitor's country, for the Iceland note on the English pages (Anna 6 Nov); Cloudflare sets request.cf
   if (p === '/sndr/cc') return new Response(JSON.stringify({ c: (request.cf && request.cf.country) || '' }), { headers: { 'Content-Type': 'application/json', 'Cache-Control': 'private, no-store' } });
@@ -175,6 +185,7 @@ async function english(request, env, url) {
 async function icelandic(request, env, url) {
   const p = url.pathname;
   if (p === '/bag') return bag(request, env);
+  if (p === '/newsletter') return newsletter(request, env);
   if (request.method !== 'GET' && request.method !== 'HEAD') return new Response('Method not allowed', { status: 405 });
   if (p === '/index.html') return moved('/');
   if (/^\/product\/[^/]+$/.test(p) && await ours(request, env, '/is' + p + '/')) return moved(p + '/' + url.search);
