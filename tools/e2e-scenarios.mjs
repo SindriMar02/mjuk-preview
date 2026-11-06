@@ -204,7 +204,9 @@ try {
     check(lines(D2.cart) === `${one.id}×1`, `one of her drafts never goes in either (${lines(D2.cart)})`); }
   { const P = await handoff([{ ...w(one), q: 5 }, { ...w(pom), q: 3, note: 'Attach to ' + one.t, for: one.id }]);
     check(lines(P.cart) === `${one.id}×1, ${pom.id}×1`, `pompoms never outnumber the hats that went in (${lines(P.cart)})`); }
-  { const O = await handoff([{ id: gone.id, q: 1, p: gone.p }]);
+  { // the stack's own stock may differ from the pull (a replica seeded in September has this piece in stock): make it sold out here
+    await setProduct(gone.id, { stock: 0, stock_status: 'outofstock' });
+    const O = await handoff([{ id: gone.id, q: 1, p: gone.p }]); await restore.pop()();
     check(O.landed === CART && !O.cart.items.length && /no longer available/i.test(notices(O.page)), `a bag of only sold-out pieces opens the basket, empty, with the reason (${O.landed})`); }
 
   /* ════════════════════════════════════════════════════════════════════════ */
@@ -244,9 +246,9 @@ try {
     const H = await handoff([{ id: spare.id, q: qty, p: price }]); return { H, r: await review(H.b, H.page, { country }) }; };
   await setProduct(spare.id, {});
   const cases = [
-    // her answers, 2026-09-25: Iceland free from $100 (Q17), Norway on the European terms (Q2), free shipping
+    // her answers, 2026-09-25, and 5 Nov (Telegram 3560, her Shipping page): Iceland free from $150 (was $100, Q17), Norway on the European terms (Q2), free shipping
     // ticked for her once the order qualifies (Q1)
-    ['IS', 99.99, 'flat_rate', 15, 'Iceland under $100: flat $15 (pickup offered too)'], ['IS', 100, 'free_shipping', 0, 'Iceland from $100: free, chosen for her'],
+    ['IS', 149.99, 'flat_rate', 15, 'Iceland under $150: flat $15 (pickup offered too)'], ['IS', 150, 'free_shipping', 0, 'Iceland from $150: free, chosen for her'],
     ['DE', 149.99, 'flat_rate', 50, 'Germany under $150: $50'], ['DE', 150, 'free_shipping', 0, 'Germany from $150: free'],
     ['GB', 150, 'free_shipping', 0, 'UK from $150: free'], ['CH', 150, 'free_shipping', 0, 'Switzerland from $150: free'],
     ['NO', 149.99, 'flat_rate', 50, 'Norway under $150: $50, on the European terms'], ['NO', 150, 'free_shipping', 0, 'Norway from $150: free, on the European terms'],
@@ -262,12 +264,12 @@ try {
     const pick = r2.values.length ? (await review(H.b, H.page, { country: 'IS' })).values.find(v => v.startsWith('local_pickup')) : '';
     const r3 = await review(H.b, H.page, { country: 'IS', method: pick }); const r4 = await review(H.b, H.page, { country: 'IS' });
     check(!!pick && r3.chosen === pick && r4.chosen === pick, `a shopper who picks pickup in Iceland keeps it when the form updates (${r3.chosen}, then ${r4.chosen})`); }
-  { const { H, r } = await ship(60, 'IS');
+  { const { H, r } = await ship(80, 'IS');
     const basket = (await H.b.follow(WOO + CART)).html; const key = (basket.match(/name="cart\[([a-f0-9]+)\]\[qty\]"/) || [])[1];
     await H.b.follow(WOO + CART, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({ [`cart[${key}][qty]`]: '2', update_cart: 'Update basket', 'woocommerce-cart-nonce': form(basket, 'woocommerce-cart-nonce'), _wp_http_referer: CART }) });
     const co = (await H.b.follow(WOO + '/checkout/')).html; const r2 = await review(H.b, co, { country: 'IS' });
-    check(r.chosen.startsWith('flat_rate') && r2.chosen.startsWith('free_shipping') && Math.abs(r2.total - 120) < 0.01, `raising the quantity in the basket past $100 switches Iceland to free shipping (${r.chosen} → ${r2.chosen}, $${r2.total})`); }
+    check(r.chosen.startsWith('flat_rate') && r2.chosen.startsWith('free_shipping') && Math.abs(r2.total - 160) < 0.01, `raising the quantity in the basket past $150 switches Iceland to free shipping (${r.chosen} → ${r2.chosen}, $${r2.total})`); }
   await restore.pop()();
 
   /* ════════════════════════════════════════════════════════════════════════ */
