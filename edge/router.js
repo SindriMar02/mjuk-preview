@@ -148,6 +148,17 @@ async function english(request, env, url) {
     // product without its closing slash, resolve here rather than 404 or redirect again (Codex 2026-09-26)
     const rest = new URL(url); rest.pathname = p.replace(/^\/is\/?/, '/').replace(/\/index\.html$/, '/');
     const old = oldAddress(rest);
+    // ONE HOST (IS_ON_COM = "1", built with MJUK_IS_ON_COM=1): until mjukiceland.is is delegated, the Icelandic
+    // pages are served here at /is/ (dist/is/), the same files the .is host serves at its root.
+    if (env.IS_ON_COM === '1') {
+      if (old) return moved('/is' + old);
+      if (p === '/is' || /\/index\.html$/.test(p)) return moved(rest.pathname === '/' ? '/is/' : '/is' + rest.pathname + url.search);
+      if (/^\/is\/product\/[^/]+$/.test(p) && await ours(request, env, p + '/')) return moved(p + '/' + url.search);
+      const mine = get && await ours(request, env, p);
+      if (mine) return mine;
+      return new Response('<!DOCTYPE html><html lang="is"><head><meta charset="UTF-8"><meta name="robots" content="noindex"><title>MJÚK Iceland</title></head><body><p>Þessi síða fannst ekki. <a href="/is/">MJÚK Iceland</a></p></body></html>',
+        { status: 404, headers: { 'Content-Type': 'text/html; charset=utf-8', 'X-MJUK-Route': 'storefront:404' } });
+    }
     const to = old || (/^\/product\/[^/]+$/.test(rest.pathname) ? rest.pathname + '/' + url.search : rest.pathname + url.search);
     return moved(`https://${env.IS_HOST || 'mjukiceland.is'}${to}`);
   }

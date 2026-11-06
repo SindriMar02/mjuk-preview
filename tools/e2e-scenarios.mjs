@@ -163,6 +163,8 @@ try {
   check(A.cart.items.find(i => i.id === pom.id).note === 'Attach to ' + hat.t && A.page.includes('Attach to ' + hat.t), 'the pompom carries "Attach to …" into the cart and the checkout page');
   check(!/price has changed/i.test(notices(A.page)) && !notices(A.page), `no notice when nothing changed (${notices(A.page) || 'none'})`);
   check(!phpNoise(A.page), 'the checkout page prints no PHP warning');
+  // Anna 6 Nov (3585/3586): the theme's 66ch reading column for her info pages had swallowed the checkout on laptops
+  check(!/class="co-prose"/.test(A.page), 'the checkout is never inside the reading column of her info pages (full-width two columns)');
   { const t = await handoff(bag); const b = browser(); const f = await b.follow(t.to); // the same link a second time
     check(new URL(f.at).pathname === CART && /already been opened/i.test(notices(f.html)) && !(await b.cart()).items.length, 'a used link fills nothing and says so'); }
   { // the same fresh link opened in two browsers at the same moment fills exactly one cart (Codex 2026-09-26)

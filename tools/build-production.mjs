@@ -140,6 +140,26 @@ for (const f of ['sitemap.xml', 'is/sitemap.xml']) if (!fs.existsSync(path.join(
   llms('en'); llms('is');
 }
 
+/* ONE HOST (MJUK_IS_ON_COM=1): until mjukiceland.is is delegated, the Icelandic pages live at mjukiceland.com/is/.
+   Every absolute address of the .is host becomes https://mjukiceland.com/is/ (canonicals, hreflang pairs, the language
+   switch, sitemaps, llms.txt, schema), the .is robots.txt goes (the .com one names both sitemaps), and the router
+   needs IS_ON_COM = "1" to serve /is/ instead of sending it to the .is host. Off by default: two hosts. */
+const ONE_HOST = process.env.MJUK_IS_ON_COM === '1';
+if (ONE_HOST) {
+  let changed = 0;
+  const walk = d => { for (const f of fs.readdirSync(d)) { const q = path.join(d, f); if (fs.statSync(q).isDirectory()) walk(q); else if (/\.(html|xml|txt)$/.test(f)) {
+    const h = fs.readFileSync(q, 'utf8'); const n = h.split('https://mjukiceland.is/').join('https://mjukiceland.com/is/').split('https://mjukiceland.is"').join('https://mjukiceland.com/is/"');
+    if (n !== h) { fs.writeFileSync(q, n); changed++; } } } };
+  walk(OUT);
+  fs.rmSync(path.join(OUT, 'is/robots.txt'));
+  fs.appendFileSync(path.join(OUT, 'robots.txt'), 'Sitemap: https://mjukiceland.com/is/sitemap.xml\n');
+  const left = []; const scan = d => { for (const f of fs.readdirSync(d)) { const q = path.join(d, f); if (fs.statSync(q).isDirectory()) scan(q); else if (/\.(html|xml|txt)$/.test(f) && /mjukiceland\.is(?![a-z])/.test(fs.readFileSync(q, 'utf8').replace(/https:\/\/mjukiceland\.com\/is\//g, ''))) left.push(path.relative(OUT, q)); } };
+  scan(OUT);
+  // the store's own words may name the domain in text (llms.txt "Á íslensku"): only addresses had to move
+  if (left.filter(f => !/llms\.txt$/.test(f)).length) bad.push('one host: mjukiceland.is still named in ' + left.slice(0, 5).join(', '));
+  console.log(`one host: ${changed} files moved from mjukiceland.is to mjukiceland.com/is/`);
+}
+
 /* A release is built from her live catalogue, pulled at most two days ago, and from pages generated
    after that pull: the file checks above compare pages only with each other, so stale or sandbox
    data would otherwise ship clean (Codex 2026-09-26). --rehearsal lets a local test build through. */
@@ -154,4 +174,4 @@ if (!process.argv.includes('--rehearsal')) {
 }
 
 if (bad.length) { console.error('production build FAILED:\n  ' + bad.slice(0, 20).join('\n  ') + (bad.length > 20 ? `\n  … ${bad.length - 20} more` : '')); process.exit(1); }
-console.log(`dist/: ${pages} pages (${indexable} indexable, ${pages - indexable} noindex: staff and the product.html forwarder), robots.txt + sitemap.xml for mjukiceland.com and mjukiceland.is`);
+console.log(`dist/: ${pages} pages (${indexable} indexable, ${pages - indexable} noindex: staff and the product.html forwarder), robots.txt + sitemap.xml for ${ONE_HOST ? 'mjukiceland.com (Icelandic at /is/)' : 'mjukiceland.com and mjukiceland.is'}`);
