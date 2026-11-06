@@ -38,7 +38,10 @@
     if (!el || el.dataset.split) return;
     el.dataset.split = '1';
     const words = el.textContent.trim().split(/\s+/);
-    el.innerHTML = words.map((w, i) => `<span class="w"><i style="--i:${i}">${esc(w)}</i></span>`).join(' ');
+    // a word joined by a slash ("neckwarmer/transformer.") may break after the slash: one long piece overran the
+    // column on laptops (launch audit 6 Nov, 36 Tenderness neckwarmer pages)
+    let n = 0;
+    el.innerHTML = words.map(w => w.split(/(?<=\/)(?=.)/).map(part => `<span class="w"><i style="--i:${n++}">${esc(part)}</i></span>`).join('<wbr>')).join(' ');
     el.classList.add('tr');
   };
 

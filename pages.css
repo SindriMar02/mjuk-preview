@@ -108,7 +108,7 @@ body[data-page] .bars{opacity:.18}
 .pdp__info{position:sticky;top:96px;display:grid;gap:22px}
 .pdp__kick{display:flex;gap:12px;flex-wrap:wrap}
 .pdp__kick .is-new{color:var(--accent)}
-.pdp__t{font-family:var(--ff-s);font-weight:500;font-size:clamp(28px,3.2vw,46px);line-height:1.08;letter-spacing:-.01em;text-wrap:balance}
+.pdp__t{font-family:var(--ff-s);font-weight:500;font-size:clamp(28px,3.2vw,46px);line-height:1.08;letter-spacing:-.01em;text-wrap:balance;overflow-wrap:break-word}
 .pdp__price{font-family:var(--ff-m);font-size:18px;color:var(--accent);display:flex;gap:12px;align-items:baseline}
 .pdp__price s{color:var(--dim);font-size:15px}
 .pdp__colours{display:grid;gap:9px;min-width:0}

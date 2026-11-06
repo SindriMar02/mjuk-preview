@@ -204,7 +204,7 @@
       const lining = primary.choices ? `<div class="pdp__lining"><p class="pdp__pomt mono" id="liningLabel">${esc(isIS ? primary.choiceNameIs : primary.choiceName)}</p><div class="pseg" role="group" aria-labelledby="liningLabel" style="grid-template-columns:repeat(${primary.choices.length},minmax(0,1fr))">${primary.choices.map(o => { const label = esc(isIS ? o.is : o.label), on = o.label === p.choiceLabel; return o.oos ? `<button type="button" class="pseg__o${on ? ' is-selected' : ''}" disabled>${label} (${t('Sold out').toLowerCase()})</button>` : `<a class="pseg__o${on ? ' is-selected' : ''}" href="product/${esc(o.h)}/"${on ? ' aria-current="true"' : ''}>${label}</a>`; }).join('')}</div></div>` : '';
       const info = `
       <div class="pdp__kick mono">${p.mat ? `<span>${esc(matName(p.mat))}</span>` : ''}${FAM[p.fam] ? `<span>${esc(famName(p.fam))}</span>` : GRP[p.tyk] ? `<span>${esc(typeName(p.tyk))}</span>` : ''}${isNew(p) ? `<span class="is-new">${t('New')}</span>` : ''}${p.cp ? `<span class="is-new">${t('Sale')}</span>` : ''}</div>
-      <h1 class="pdp__t" id="pdpT">${esc(p.t)}</h1>
+      <h1 class="pdp__t" id="pdpT">${esc(p.t).replace(/\/(?=.)/g, '/<wbr>')}</h1>
       <div class="pdp__price" aria-live="polite">${price}</div>
       ${colours.length > 1 ? `<nav class="pdp__colours" aria-label="${esc(t('Colours'))}"><span class="pdp__colourhead mono">${esc(t('Colours'))} <b class="pdp__colourval" data-v="${esc(shade(p))}">${esc(shade(p))}</b></span><div class="pdp__colourlist">${colours.map(x => {
         const current = x.h === primary.h, label = `${shade(x)}${x.oos ? ` (${t('Sold out').toLowerCase()})` : ''}`, thumb = (x.img || []).find(Boolean);
