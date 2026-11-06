@@ -1,19 +1,20 @@
 # Catalogue choices — Anna / Veronika, 5 November 2026
 
-- Hidden #11140: Merino Aviator hat. White — Anna 25 Sep Q22: only the lined ones online; sell unlined in the outlet.
-- Hidden #11186: Merino Aviator hat. Turquoise — Anna 25 Sep Q22: only the lined ones online; sell unlined in the outlet.
-- Hidden #11187: Merino Aviator hat. Purple — Anna 25 Sep Q22: only the lined ones online; sell unlined in the outlet.
-- Hidden #11188: Merino Aviator hat. Orchid — Anna 25 Sep Q22: only the lined ones online; sell unlined in the outlet.
-- Hidden #11189: Merino Aviator hat. Oatmeal — Anna 25 Sep Q22: only the lined ones online; sell unlined in the outlet.
-- Hidden #11190: Merino Aviator hat. Green moss — Anna 25 Sep Q22: only the lined ones online; sell unlined in the outlet.
-- Hidden #11191: Merino Aviator hat. Mango — Anna 25 Sep Q22: only the lined ones online; sell unlined in the outlet.
-- Hidden #11192: Merino Aviator hat. Light grey — Anna 25 Sep Q22: only the lined ones online; sell unlined in the outlet.
-- Hidden #11193: Merino Aviator hat. Dark grey — Anna 25 Sep Q22: only the lined ones online; sell unlined in the outlet.
-- Hidden #11194: Merino Aviator hat. Deep blue — Anna 25 Sep Q22: only the lined ones online; sell unlined in the outlet.
-- Hidden #11195: Merino Aviator hat. Burgundy — Anna 25 Sep Q22: only the lined ones online; sell unlined in the outlet.
-- Hidden #11196: Merino Aviator hat. Ice pink — Anna 25 Sep Q22: only the lined ones online; sell unlined in the outlet.
-- Hidden #11197: Merino Aviator hat. Brown — Anna 25 Sep Q22: only the lined ones online; sell unlined in the outlet.
-- Hidden #11198: Merino Aviator hat. Black — Anna 25 Sep Q22: only the lined ones online; sell unlined in the outlet.
+- Hidden #1018: Explorer Hat. Cashmere/ merino. Light Gray. — off the web shop: Anna Q24 ("we will remove them from the webstore, since they are almost sold out and we won't produce them again").
+- Hidden #11140: Merino Aviator hat. White — off the web shop: Anna Q22 ("We will discontinue those without fleece and sell them out in the outlet").
+- Hidden #11186: Merino Aviator hat. Turquoise — off the web shop: Anna Q22 ("We will discontinue those without fleece and sell them out in the outlet").
+- Hidden #11187: Merino Aviator hat. Purple — off the web shop: Anna Q22 ("We will discontinue those without fleece and sell them out in the outlet").
+- Hidden #11188: Merino Aviator hat. Orchid — off the web shop: Anna Q22 ("We will discontinue those without fleece and sell them out in the outlet").
+- Hidden #11189: Merino Aviator hat. Oatmeal — off the web shop: Anna Q22 ("We will discontinue those without fleece and sell them out in the outlet").
+- Hidden #11190: Merino Aviator hat. Green moss — off the web shop: Anna Q22 ("We will discontinue those without fleece and sell them out in the outlet").
+- Hidden #11191: Merino Aviator hat. Mango — off the web shop: Anna Q22 ("We will discontinue those without fleece and sell them out in the outlet").
+- Hidden #11192: Merino Aviator hat. Light grey — off the web shop: Anna Q22 ("We will discontinue those without fleece and sell them out in the outlet").
+- Hidden #11193: Merino Aviator hat. Dark grey — off the web shop: Anna Q22 ("We will discontinue those without fleece and sell them out in the outlet").
+- Hidden #11194: Merino Aviator hat. Deep blue — off the web shop: Anna Q22 ("We will discontinue those without fleece and sell them out in the outlet").
+- Hidden #11195: Merino Aviator hat. Burgundy — off the web shop: Anna Q22 ("We will discontinue those without fleece and sell them out in the outlet").
+- Hidden #11196: Merino Aviator hat. Ice pink — off the web shop: Anna Q22 ("We will discontinue those without fleece and sell them out in the outlet").
+- Hidden #11197: Merino Aviator hat. Brown — off the web shop: Anna Q22 ("We will discontinue those without fleece and sell them out in the outlet").
+- Hidden #11198: Merino Aviator hat. Black — off the web shop: Anna Q22 ("We will discontinue those without fleece and sell them out in the outlet").
 - Hidden #11464: Explorer scarf. Black — off the web shop: Anna Q24 ("we will remove them from the webstore, since they are almost sold out and we won't produce them again").
 - Hidden #11465: Explorer scarf. Cream. — off the web shop: Anna Q24 ("we will remove them from the webstore, since they are almost sold out and we won't produce them again").
 - Hidden #11466: Explorer scarf. Kelly Green. — off the web shop: Anna Q24 ("we will remove them from the webstore, since they are almost sold out and we won't produce them again").
@@ -27,6 +28,8 @@
 - Hidden #2403: Akureyri cashmere blanket. Light grey with white and charcoal grey stripes — off the web shop: Anna 23 Oct: We won't publish Akureyri blankets or anything made of them ... we discontinue this line.
 - Hidden #2406: Akureyri cashmere blanket. Sky blue with white and navy blue stripes — off the web shop: Anna 23 Oct: We won't publish Akureyri blankets or anything made of them ... we discontinue this line.
 - Hidden #2407: Akureyri cashmere blanket. Light Pink with white and light grey stripes — off the web shop: Anna 23 Oct: We won't publish Akureyri blankets or anything made of them ... we discontinue this line.
+- Hidden #6047: Explorer Hat. Cashmere/ merino. Dark grey. — off the web shop: Anna Q24 ("we will remove them from the webstore, since they are almost sold out and we won't produce them again").
+- Hidden #6048: Explorer Hat. Cashmere/ merino. Black. — off the web shop: Anna Q24 ("we will remove them from the webstore, since they are almost sold out and we won't produce them again").
 - Hidden #6056: Explorer Hat. Cashmere/ merino with arctic fox pompom. Black. — off the web shop: Anna Q24 ("we will remove them from the webstore, since they are almost sold out and we won't produce them again").
 - Hidden #6064: Explorer Hat. Cashmere/ merino with raccoon pompom. Cream — off the web shop: Anna Q24 ("we will remove them from the webstore, since they are almost sold out and we won't produce them again").
 - Hidden #6246: Akureyri cashmere blanket. Cream Oatmeal Chocolate. — off the web shop: Anna 23 Oct: We won't publish Akureyri blankets or anything made of them ... we discontinue this line.
